@@ -1,5 +1,7 @@
 # Sylva
 
+All rights reserved © 2026 Sylva
+
 > A high-performance, local-first hierarchical thought and tree management engine.
 
 Sylva is a modern Progressive Web App (PWA) designed for deep spatial thinking, multi-tree project modeling, and frictionless thought organization with zero cloud bloat and strict local-first data ownership.
