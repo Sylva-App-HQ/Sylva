@@ -1,5 +1,0 @@
-# This directory is a Syncthing folder marker.
-# Do not delete.
-
-folderID: 5chsp-ph2pu
-created: 2026-10-23T03:04:42-07:00
