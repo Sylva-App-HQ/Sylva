@@ -1,13 +1,11 @@
 {
-  "id": "sylva-app",
   "name": "Sylva",
   "short_name": "Sylva",
   "description": "Local-first hierarchical thought and tree management engine.",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#070B0E",
+  "theme_color": "#0F171F",
   "orientation": "any",
   "icons": [
     {
