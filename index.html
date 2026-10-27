@@ -1,2744 +1,627 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sylva</title>
-    
-    <!-- PWA Settings with Cache-Busted Manifest -->
-    <link rel="manifest" href="manifest.json?v=2">
-    <meta name="application-name" content="Sylva">
-    <meta name="apple-mobile-web-app-title" content="Sylva">
-    <meta name="theme-color" content="#0f172a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: rgba(30, 41, 59, 0.88);
-            --panel-border: rgba(51, 65, 85, 0.65);
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.35);
-            --node-bg: #1e293b;
-            --node-border: #475569;
-            --node-selected: #38bdf8;
-            --line-color: #64748b;
-            --danger: #ef4444;
-
-            /* Botanical Base Variables */
-            --fruit-color: #f59e0b;
-            --fruit-ripe: #10b981;
-            --seed-color: #c084fc;
-
-            /* Active Season Tokens */
-            --season-accent: #22c55e;
-            --season-glow: rgba(34, 197, 94, 0.25);
-            --season-border: rgba(34, 197, 94, 0.4);
-        }
-
-        body.season-spring {
-            --season-accent: #4ade80;
-            --season-glow: rgba(74, 222, 128, 0.3);
-            --season-border: rgba(74, 222, 128, 0.45);
-        }
-
-        body.season-summer {
-            --season-accent: #10b981;
-            --season-glow: rgba(16, 185, 129, 0.3);
-            --season-border: rgba(16, 185, 129, 0.45);
-        }
-
-        body.season-fall {
-            --season-accent: #f59e0b;
-            --season-glow: rgba(245, 158, 11, 0.3);
-            --season-border: rgba(245, 158, 11, 0.45);
-        }
-
-        body.season-winter {
-            --season-accent: #38bdf8;
-            --season-glow: rgba(56, 189, 248, 0.25);
-            --season-border: rgba(148, 163, 184, 0.45);
-            --node-bg: #182234;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            touch-action: none;
-        }
-
-        body {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        #canvas-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            cursor: grab;
-            overflow: hidden;
-        }
-
-        #canvas-container:active {
-            cursor: grabbing;
-        }
-
-        /* Unified World Plane */
-        #world {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            transform-origin: 0 0;
-            will-change: transform;
-        }
-
-        svg#connections {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            overflow: visible;
-        }
-
-        #nodes-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        /* Symmetric 3-Column Top Bar */
-        .toolbar {
-            position: absolute;
-            top: env(safe-area-inset-top, 14px);
-            left: 12px;
-            right: 12px;
-            z-index: 20;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            align-items: center;
-            gap: 10px;
-            background: var(--panel-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--panel-border);
-            padding: 8px 10px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-        }
-
-        .toolbar button {
-            width: 100%;
-            height: 38px;
-            background: #334155;
-            color: var(--text-primary);
-            border: 1px solid var(--node-border);
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-
-        .toolbar button:active {
-            background: var(--accent);
-            color: #0f172a;
-        }
-
-        #btn-center-action.mode-forest {
-            background: #1e3a2f;
-            border-color: #22c55e;
-            color: #4ade80;
-        }
-
-        #btn-center-action.mode-forest:active {
-            background: #22c55e;
-            color: #0f172a;
-        }
-
-        /* Breadcrumb Navigation & Season Bar */
-        .breadcrumb-bar {
-            position: absolute;
-            top: calc(env(safe-area-inset-top, 14px) + 58px);
-            left: 12px;
-            right: 12px;
-            z-index: 19;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            background: rgba(15, 23, 42, 0.78);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--panel-border);
-            padding: 6px 12px;
-            border-radius: 10px;
-        }
-
-        .breadcrumb-nav-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow-x: auto;
-            touch-action: pan-x;
-        }
-
-        .breadcrumb-btn-up {
-            background: #1e293b;
-            border: 1px solid var(--node-border);
-            color: var(--accent);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
-        }
-
-        .breadcrumb-trail {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        .breadcrumb-crumb {
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: color 0.15s ease;
-            font-weight: 500;
-        }
-
-        .breadcrumb-crumb:hover, .breadcrumb-crumb.active {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .breadcrumb-separator {
-            color: var(--line-color);
-            font-size: 10px;
-        }
-
-        .season-badge-btn {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid var(--season-border);
-            color: var(--season-accent);
-            padding: 4px 9px;
-            border-radius: 14px;
-            font-size: 11px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            white-space: nowrap;
-            box-shadow: 0 0 10px var(--season-glow);
-            transition: all 0.2s ease;
-        }
-
-        /* Node Elements */
-        .node {
-            position: absolute;
-            background: var(--node-bg);
-            border: 2px solid var(--node-border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            width: 215px;
-            cursor: grab;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-            transition: border-color 0.2s, box-shadow 0.2s;
-            will-change: transform;
-            pointer-events: auto;
-        }
-
-        .node.selected {
-            border-color: var(--node-selected);
-            box-shadow: 0 0 18px var(--accent-glow);
-        }
-
-        .node.dragging {
-            cursor: grabbing;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
-        }
-
-        .node.type-fruit {
-            border-color: rgba(245, 158, 11, 0.45);
-        }
-
-        .node.type-fruit.ripe {
-            border-color: var(--fruit-ripe);
-            background: rgba(16, 185, 129, 0.08);
-        }
-
-        .node.type-fruit.ripe .node-title {
-            text-decoration: line-through;
-            color: #94a3b8;
-        }
-
-        .node.type-seed {
-            border-color: rgba(192, 132, 252, 0.5);
-            border-style: dashed;
-        }
-
-        .node-header-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-
-        .node-badge {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 2px 6px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-            pointer-events: none;
-        }
-
-        .badge-leaf {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent);
-        }
-
-        .badge-fruit {
-            background: rgba(245, 158, 11, 0.18);
-            color: var(--fruit-color);
-        }
-
-        .badge-fruit.ripe {
-            background: rgba(16, 185, 129, 0.18);
-            color: var(--fruit-ripe);
-        }
-
-        .badge-seed {
-            background: rgba(192, 132, 252, 0.18);
-            color: var(--seed-color);
-        }
-
-        .fruit-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--fruit-ripe);
-            pointer-events: auto;
-        }
-
-        .seed-open-btn {
-            background: rgba(192, 132, 252, 0.18);
-            border: 1px solid var(--seed-color);
-            color: var(--seed-color);
-            font-size: 10px;
-            font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 6px;
-            pointer-events: auto;
-        }
-
-        .node-title {
-            font-size: 14px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            pointer-events: none;
-            flex: 1;
-        }
-
-        .node-snippet {
-            font-size: 11px;
-            color: var(--text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        /* Botanical Vector Trees on Forest Floor */
-        .botanical-tree-plot {
-            position: absolute;
-            width: 220px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: grab;
-            pointer-events: auto;
-            will-change: transform;
-            transition: box-shadow 0.2s ease;
-        }
-
-        .botanical-tree-plot.dragging {
-            cursor: grabbing;
-            z-index: 50;
-        }
-
-        .botanical-tree-svg {
-            width: 190px;
-            height: 220px;
-            filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.65));
-            overflow: visible;
-            pointer-events: none;
-        }
-
-        .botanical-tree-card {
-            margin-top: -12px;
-            background: rgba(15, 23, 42, 0.88);
-            backdrop-filter: blur(12px);
-            border: 2px solid var(--panel-border);
-            border-radius: 12px;
-            padding: 8px 14px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-            width: 200px;
-            z-index: 5;
-            pointer-events: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .botanical-tree-plot.selected .botanical-tree-card {
-            border-color: var(--accent);
-            box-shadow: 0 0 18px var(--accent-glow);
-        }
-
-        .botanical-tree-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-primary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            margin-bottom: 2px;
-        }
-
-        .botanical-tree-stats {
-            font-size: 10px;
-            color: var(--text-secondary);
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        /* Sidebars */
-        .sidebar {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 290px;
-            background: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            z-index: 30;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            touch-action: pan-y;
-        }
-
-        .sidebar-left {
-            left: 0;
-            border-right: 1px solid var(--panel-border);
-            transform: translateX(-100%);
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .sidebar-left.open { transform: translateX(0); }
-
-        .sidebar-right {
-            right: 0;
-            border-left: 1px solid var(--panel-border);
-            transform: translateX(100%);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .sidebar-right.open { transform: translateX(0); }
-
-        .sidebar-header {
-            padding: calc(env(safe-area-inset-top, 14px) + 12px) 16px 14px 16px;
-            border-bottom: 1px solid var(--panel-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sidebar-header h3 {
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            flex: 1;
-        }
-
-        .sidebar-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            touch-action: pan-y;
-        }
-
-        .sidebar-item {
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            touch-action: manipulation;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sidebar-item:active, .sidebar-item.selected {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: var(--accent);
-        }
-
-        .sidebar-item-content { flex: 1; overflow: hidden; }
-
-        .sidebar-item-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .sidebar-item-desc {
-            font-size: 11px;
-            color: var(--text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .trees-menu-actions {
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            border-bottom: 1px solid var(--panel-border);
-        }
-
-        .action-button-primary {
-            width: 100%;
-            text-align: center;
-            background: #1e293b;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            font-weight: 600;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .trees-section-header {
-            padding: 12px 14px 4px 14px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-secondary);
-        }
-
-        /* Minimap */
-        .pip-minimap {
-            position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 14px) + 12px);
-            left: 14px;
-            width: 140px;
-            height: 140px;
-            aspect-ratio: 1 / 1;
-            background: var(--panel-bg);
-            backdrop-filter: blur(14px);
-            border: 1.5px solid var(--panel-border);
-            border-radius: 14px;
-            z-index: 15;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            cursor: pointer;
-            touch-action: none;
-        }
-
-        .pip-minimap svg { width: 100%; height: 100%; display: block; }
-
-        .zoom-indicator {
-            position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 14px) + 12px);
-            right: 14px;
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            color: var(--text-secondary);
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        /* Bottom Sheets */
-        .side-panel {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            max-height: 85vh;
-            background: var(--panel-bg);
-            backdrop-filter: blur(24px);
-            border-top: 1px solid var(--panel-border);
-            border-radius: 20px 20px 0 0;
-            z-index: 40;
-            display: flex;
-            flex-direction: column;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            touch-action: pan-y;
-        }
-
-        .side-panel.open { transform: translateY(0); }
-
-        .panel-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--panel-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .panel-header h2 { font-size: 16px; font-weight: 600; }
-
-        .close-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 24px;
-            padding: 4px 8px;
-        }
-
-        .panel-body {
-            padding: 16px 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            touch-action: pan-y;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .input-group label {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-
-        .input-group input, .input-group textarea, .input-group select {
-            background: #0f172a;
-            border: 1px solid var(--node-border);
-            border-radius: 8px;
-            padding: 10px;
-            color: var(--text-primary);
-            font-size: 14px;
-            outline: none;
-            touch-action: auto;
-        }
-
-        .input-group textarea { resize: none; min-height: 80px; }
-
-        .type-selector-group { display: flex; gap: 8px; }
-
-        .type-radio-btn {
-            flex: 1;
-            text-align: center;
-            padding: 8px 4px;
-            border: 1px solid var(--node-border);
-            border-radius: 8px;
-            background: #0f172a;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .type-radio-btn.active[data-type="leaf"] {
-            border-color: var(--accent);
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent);
-        }
-
-        .type-radio-btn.active[data-type="fruit"] {
-            border-color: var(--fruit-color);
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--fruit-color);
-        }
-
-        .type-radio-btn.active[data-type="seed"] {
-            border-color: var(--seed-color);
-            background: rgba(192, 132, 252, 0.15);
-            color: var(--seed-color);
-        }
-
-        .panel-footer {
-            padding: 14px 20px calc(env(safe-area-inset-bottom, 14px) + 10px);
-            border-top: 1px solid var(--panel-border);
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .btn-danger { background: #7f1d1d; border-color: #991b1b; }
-        .btn-harvest { background: #b45309; border-color: #d97706; }
-        .btn-prune { background: #334155; border-color: #64748b; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sylva | Visual Thought & Project Trees</title>
+  <meta name="description" content="Organize ideas, projects, and notes into visual growth trees. 100% private and offline.">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg-canvas: #070B0E;
+      --bg-surface: #0F171F;
+      --bg-surface-elevated: #16222E;
+      --border-subtle: #202F3E;
+      --border-strong: #33485E;
+      --accent: #2DD4BF;
+      --accent-muted: #134E4A;
+      --accent-glow: rgba(45, 212, 191, 0.2);
+      --text-main: #F1F5F9;
+      --text-muted: #94A3B8;
+      --text-faint: #475569;
+      --node-leaf: #10B981;
+      --node-fruit: #F59E0B;
+      --node-seed: #A855F7;
+      --node-branch: #38BDF8;
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--bg-canvas); color: var(--text-main);
+      font-family: var(--font-ui); font-size: 13px;
+      touch-action: none;
+    }
+
+    /* Fixed Modern Header */
+    .app-header {
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      display: flex; justify-content: space-between; gap: 8px;
+      z-index: 30; pointer-events: none;
+    }
+    .header-group { display: flex; gap: 6px; pointer-events: auto; }
+
+    /* Bottom Left Floating Actions */
+    .bottom-actions {
+      position: absolute; bottom: 12px; left: 12px; 
+      display: flex; gap: 6px; z-index: 25; pointer-events: auto;
+    }
+
+    /* Button System */
+    .btn {
+      height: 38px; padding: 0 12px;
+      background: var(--bg-surface); color: var(--text-main);
+      border: 1px solid var(--border-subtle); border-radius: 8px;
+      font-size: 12px; font-weight: 600; display: inline-flex;
+      align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .btn:hover:not(:disabled) { border-color: var(--accent); background: var(--bg-surface-elevated); box-shadow: 0 0 10px var(--accent-glow); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+    .btn-accent { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); }
+    .btn-lock { padding: 0; width: 38px; }
+    .btn-lock.unlocked { border-color: #F59E0B; color: #F59E0B; }
+
+    /* Infinite Canvas Viewport */
+    #viewport { width: 100%; height: 100%; position: absolute; top: 0; left: 0; overflow: hidden; touch-action: none; cursor: grab; }
+    #viewport.canvas-locked { cursor: default; }
+
+    #world { position: absolute; top: 0; left: 0; width: 10000px; height: 10000px; transform-origin: 0 0; pointer-events: none; }
+    #canvas-svg, #tree-layer, #forest-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+    /* Node Cards */
+    .node-card {
+      position: absolute; background: var(--bg-surface);
+      border: 1px solid var(--border-subtle); border-radius: 10px;
+      padding: 12px 14px; width: 190px; pointer-events: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer;
+    }
+    .node-card.selected { border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); }
+    .node-card.type-trunk { border-left: 5px solid #B45309; }
+    .node-card.type-branch { border-left: 5px solid var(--node-branch); }
+    .node-card.type-leaf { border-left: 5px solid var(--node-leaf); }
+    .node-card.type-fruit { border-left: 5px solid var(--node-fruit); }
+    .node-card.type-seed { border-left: 5px solid var(--node-seed); }
+    .node-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .node-title { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .node-desc { font-size: 11px; color: var(--text-muted); line-height: 1.3; max-height: 28px; overflow: hidden; }
+
+    /* Forest Trees */
+    .forest-tree-entity {
+      position: absolute; display: flex; flex-direction: column; align-items: center;
+      width: 140px; cursor: pointer; pointer-events: auto; text-align: center;
+    }
+    .tree-icon-box {
+      width: 76px; height: 76px; background: var(--bg-surface);
+      border: 2px solid var(--border-subtle); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .forest-tree-entity:hover .tree-icon-box { border-color: var(--accent); }
+
+    /* Sidebars */
+    .drawer {
+      position: absolute; top: 58px; bottom: 12px; width: 320px; max-width: calc(100vw - 24px);
+      background: var(--bg-surface); border: 1px solid var(--border-strong);
+      border-radius: 12px; z-index: 40; display: flex; flex-direction: column;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.7); transition: transform 0.25s ease;
+    }
+    #drawer-left { left: 12px; transform: translateX(-360px); }
+    #drawer-left.open { transform: translateX(0); }
+    #drawer-right { right: 12px; transform: translateX(360px); }
+    #drawer-right.open { transform: translateX(0); }
+    .drawer-header { padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-body { padding: 14px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 14px; }
+    .directory-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+
+    /* Modals */
+    .modal-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      z-index: 60; display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      width: 480px; max-width: 90vw; background: var(--bg-surface);
+      border: 1px solid var(--border-strong); border-radius: 12px;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; }
+    .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .field-group input, .field-group textarea, .field-group select { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; }
+
+    /* PIP Minimap & Privacy Dot */
+    #pip-minimap {
+      position: absolute; bottom: 12px; right: 12px; width: 140px; height: 95px;
+      background: var(--bg-surface); border: 1px solid var(--border-strong);
+      border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      pointer-events: auto; cursor: crosshair;
+    }
+    #pip-canvas { width: 100%; height: 100%; display: block; }
+    .privacy-dot {
+      position: absolute; bottom: 6px; left: 6px; width: 8px; height: 8px;
+      background: #10B981; border-radius: 50%; box-shadow: 0 0 6px #10B981; pointer-events: none;
+    }
+  </style>
 </head>
-<body class="season-spring">
+<body>
 
-    <div id="canvas-container">
-        <div id="world">
-            <svg id="connections"></svg>
-            <div id="nodes-layer"></div>
-        </div>
+  <!-- Web Install Prompt Modal -->
+  <div class="modal-overlay" id="modal-install-prompt" style="display:none; z-index: 2000; background: var(--bg-canvas);">
+    <div class="modal-card" style="text-align: center; border: none; padding: 30px; box-shadow: none; background: transparent;">
+      <div style="width: 80px; height: 80px; border: 2px solid var(--accent); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;">
+         <svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>
+      </div>
+      <h2 style="margin-bottom: 12px; color: var(--text-main);">Install Sylva</h2>
+      <p style="color: var(--text-muted); line-height: 1.5; margin-bottom: 24px;">Sylva is a high-speed, local-first workspace. Install it to your device to enable 100% offline access and smooth interactions.</p>
+      <button class="btn btn-accent" id="btn-trigger-install" style="width: 100%; height: 44px; font-size: 14px; margin-bottom: 12px;">Install App</button>
+      <button class="btn" id="btn-continue-web" style="width: 100%; height: 44px; font-size: 14px; border: none; background: transparent;">Continue in Browser</button>
     </div>
+  </div>
 
-    <!-- Symmetric Top Action Toolbar (Equal Dimensions & Spacing) -->
-    <div class="toolbar">
-        <button id="btn-toggle-sidebar">☰ Nodes</button>
-        <button id="btn-center-action">+ Add Branch</button>
-        <button id="btn-toggle-trees">Nursery ▾</button>
-        <input type="file" id="import-file-input" accept=".json" style="display: none;">
+  <!-- Top Action Bar -->
+  <header class="app-header">
+    <div class="header-group">
+      <button class="btn" id="btn-toggle-directory">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span id="label-directory">Nodes</span>
+      </button>
+      <button class="btn btn-accent" id="btn-grow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Grow...</span>
+      </button>
     </div>
-
-    <!-- Breadcrumb Hierarchy & Season Bar -->
-    <div class="breadcrumb-bar" id="breadcrumb-bar">
-        <div class="breadcrumb-nav-group">
-            <button class="breadcrumb-btn-up" id="btn-tree-up">▲ Up</button>
-            <div class="breadcrumb-trail" id="breadcrumb-trail"></div>
-        </div>
-        <button class="season-badge-btn" id="btn-season-toggle">🌸 Spring</button>
+    <div class="header-group">
+      <button class="btn btn-lock" id="btn-lock" title="Toggle Drag/Arrange Lock">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
+      <button class="btn" id="btn-toggle-nursery">Nursery</button>
     </div>
+  </header>
 
-    <!-- Left Sidebar: Alphabetical Node Index -->
-    <div class="sidebar sidebar-left" id="sidebar">
-        <div class="sidebar-header">
-            <h3>Node Index (A–Z)</h3>
-            <button class="btn-sub-action" id="btn-auto-tidy">Auto-Tidy</button>
-            <button class="close-btn" id="btn-close-sidebar">&times;</button>
-        </div>
-        <div class="sidebar-list" id="sidebar-list"></div>
+  <!-- Bottom Left Actions -->
+  <div class="bottom-actions">
+    <button class="btn" id="btn-switch-context">Forest</button>
+    <button class="btn" id="btn-season">Season</button>
+  </div>
+
+  <!-- Canvas Surface -->
+  <main id="viewport">
+    <div id="world">
+      <svg id="canvas-svg"></svg>
+      <div id="tree-layer"></div>
+      <div id="forest-layer" style="display: none;"></div>
     </div>
+  </main>
 
-    <!-- Right Sidebar: Nursery Vault -->
-    <div class="sidebar sidebar-right" id="trees-sidebar">
-        <div class="sidebar-header">
-            <h3>Nursery</h3>
-            <button class="close-btn" id="btn-close-trees">&times;</button>
-        </div>
-        <div class="trees-menu-actions">
-            <button class="action-button-primary" id="btn-menu-import">📂 Import Tree</button>
-            <button class="action-button-primary" id="btn-menu-save">💾 Save Tree</button>
-        </div>
-        <div class="trees-section-header">Saved Trees (A–Z)</div>
-        <div class="sidebar-list" id="trees-list"></div>
+  <!-- Left Sidebar (Directory) -->
+  <aside class="drawer" id="drawer-left">
+    <div class="drawer-header"><strong id="left-title">Directory</strong><button class="btn" style="padding:0 8px; height:28px;" id="btn-close-left">&times;</button></div>
+    <div class="drawer-body">
+      <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">PINNED</div><ul class="directory-list" id="list-pinned-left"></ul></div>
+      <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">ALL ITEMS (A-Z)</div><ul class="directory-list" id="list-atoz-left"></ul></div>
     </div>
+  </aside>
 
-    <!-- Square Picture-in-Picture Minimap -->
-    <div class="pip-minimap" id="pip-container">
-        <svg id="minimap-svg"></svg>
+  <!-- Right Sidebar (Nursery / Workspaces) -->
+  <aside class="drawer" id="drawer-right">
+    <div class="drawer-header"><strong>Nursery & Backups</strong><button class="btn" style="padding:0 8px; height:28px;" id="btn-close-right">&times;</button></div>
+    <div class="drawer-body">
+      <div id="nursery-actions" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div style="margin-top: 10px; padding: 12px; background: rgba(45, 212, 191, 0.1); border: 1px solid var(--accent); border-radius: 8px; text-align: center;">
+        <p style="font-size: 11px; margin-bottom: 8px;">Support development and unlock lifetime premium templates.</p>
+        <button class="btn btn-accent" style="width:100%;" onclick="window.open('https://your-payment-link-here.com', '_blank')">Upgrade to Pro ($49)</button>
+      </div>
+      <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div><ul class="directory-list" id="list-atoz-right"></ul></div>
     </div>
+  </aside>
 
-    <div class="zoom-indicator" id="zoom-indicator">Zoom: 100%</div>
-
-    <!-- Node Editor Panel -->
-    <div class="side-panel" id="side-panel">
-        <div class="panel-header">
-            <h2 id="panel-title-heading">Edit Node</h2>
-            <button class="close-btn" id="btn-close-panel">&times;</button>
+  <!-- Inspector Modal -->
+  <div class="modal-overlay" id="modal-inspector">
+    <div class="modal-card">
+      <div class="modal-header"><h3 id="inspect-header-title">Inspect Node</h3><button class="btn" style="padding:0 8px; height:28px;" id="btn-close-inspector">&times;</button></div>
+      <div class="modal-body">
+        <div class="field-group"><label>Title</label><input type="text" id="node-input-title"></div>
+        <div class="field-group"><label>Notes & Details</label><textarea id="node-input-desc" rows="4"></textarea></div>
+        <div class="field-group" id="node-type-container">
+          <label>Type</label>
+          <select id="node-input-type">
+            <option value="branch">Branch (Group / Category)</option>
+            <option value="leaf">Leaf (Note / Idea)</option>
+            <option value="fruit">Fruit (Goal / Completed)</option>
+            <option value="seed">Seed (Question / Future Idea)</option>
+          </select>
         </div>
-        <div class="panel-body">
-            <div class="input-group">
-                <label>Node Type</label>
-                <div class="type-selector-group">
-                    <div class="type-radio-btn active" data-type="leaf">🍃 Leaf</div>
-                    <div class="type-radio-btn" data-type="fruit" id="label-fruit-type">🍎 Fruit</div>
-                    <div class="type-radio-btn" data-type="seed">🌱 Seed (Tree)</div>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label for="node-title-input">Node Title</label>
-                <input type="text" id="node-title-input" placeholder="Title...">
-            </div>
-
-            <div class="input-group" id="fruit-options-group" style="display: none;">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                    <input type="checkbox" id="fruit-ripe-toggle" style="width: 18px; height: 18px; accent-color: var(--fruit-ripe);">
-                    <span id="label-ripe-text">Mark as Ripe / Completed</span>
-                </label>
-            </div>
-
-            <div class="input-group" id="seed-options-group" style="display: none;">
-                <label for="seed-linked-tree-select">Target Sub-Tree to Link</label>
-                <select id="seed-linked-tree-select"></select>
-            </div>
-
-            <div class="input-group">
-                <label for="node-desc-input">Notes & Parameters</label>
-                <textarea id="node-desc-input" placeholder="Notes..."></textarea>
-            </div>
-        </div>
-        <div class="panel-footer">
-            <button class="btn-danger" id="btn-delete">Delete</button>
-            <button id="btn-save">Save</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-node">Delete</button>
+        <button class="btn btn-accent" id="btn-save-node">Save Changes</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Season & Harvest Console Panel -->
-    <div class="side-panel" id="season-panel">
-        <div class="panel-header">
-            <h2 id="season-panel-title">Canopy Lifecycle & Seasons</h2>
-            <button class="close-btn" id="btn-close-season">&times;</button>
+  <!-- Season & Clean-Up Modal -->
+  <div class="modal-overlay" id="modal-season">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Tree Life Cycle & Harvest</h3><button class="btn" style="padding:0 8px; height:28px;" id="btn-close-season">&times;</button></div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>Current Season</label>
+          <select id="select-tree-season">
+            <option value="Spring">Spring (New Growth)</option>
+            <option value="Summer">Summer (Active Development)</option>
+            <option value="Autumn">Autumn (Harvest & Review)</option>
+            <option value="Winter">Winter (Rest & Planning)</option>
+          </select>
         </div>
-        <div class="panel-body">
-            <div class="input-group">
-                <label>Tree Archetype & Species</label>
-                <select id="tree-species-select">
-                    <option value="oak">🌳 Ancient Oak (Research & Deep Logic)</option>
-                    <option value="evergreen">🌲 Evergreen Pine (Wiki & Permanent SOPs)</option>
-                    <option value="orchard">🍎 Fruit Orchard (Sprints & Goal Execution)</option>
-                    <option value="willow">🎋 Weeping Willow (Scratchpad & Brainstorms)</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>Current Season</label>
-                <div class="type-selector-group">
-                    <button class="type-radio-btn" data-season="spring">🌸 Spring</button>
-                    <button class="type-radio-btn" data-season="summer">☀️ Summer</button>
-                    <button class="type-radio-btn" data-season="fall">🍂 Fall</button>
-                    <button class="type-radio-btn" data-season="winter">❄️ Winter</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Lifecycle Actions</label>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn-harvest" id="btn-harvest-action" style="flex: 1;">🧺 Harvest Ripe</button>
-                    <button class="btn-prune" id="btn-prune-action" style="flex: 1;">✂️ Prune Deadwood</button>
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label id="harvest-basket-label">Harvest Basket (Archived Milestones)</label>
-                <div id="harvest-basket-list" style="background:#0f172a; border:1px solid var(--node-border); border-radius:8px; padding:8px; max-height:160px; overflow-y:auto; font-size:12px;"></div>
-            </div>
+        <div class="field-group">
+          <label>Clean Inactive Notes (Prune)</label>
+          <p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p>
+          <button class="btn" style="margin-top:6px;" id="btn-action-prune">Archive Empty Notes</button>
         </div>
-        <div class="panel-footer">
-            <button id="btn-apply-season" style="width:100%;">Apply Lifecycle Settings</button>
+        <div class="field-group">
+          <label>Harvest Basket (<span id="harvest-total">0</span> Completed Goals)</label>
+          <ul class="directory-list" id="list-harvest" style="max-height:120px; overflow-y:auto;"></ul>
         </div>
+      </div>
+      <div class="modal-footer"><button class="btn" id="btn-season-done">Done</button><button class="btn btn-accent" id="btn-harvest-all">Harvest All Ripe</button></div>
     </div>
+  </div>
 
-    <script>
-        const STORAGE_KEY = 'sylva_data_v1';
-        const LIBRARY_KEY = 'sylva_library_v1';
+  <!-- Walkthrough Modal -->
+  <div class="modal-overlay" id="modal-walkthrough">
+    <div class="modal-card" style="width: 440px;">
+      <div class="modal-header">
+        <h3 id="walk-title">Welcome to Sylva</h3>
+        <span style="font-size:11px; color:var(--accent);" id="walk-step">1 / 3</span>
+      </div>
+      <div class="modal-body" id="walk-body" style="font-size:13px; line-height:1.6; color:var(--text-muted);"></div>
+      <div class="modal-footer">
+        <button class="btn" id="btn-walk-skip">Skip</button>
+        <button class="btn btn-accent" id="btn-walk-next">Next</button>
+      </div>
+    </div>
+  </div>
 
-        const SPECIES_CONFIG = {
-            oak: {
-                name: 'Ancient Oak',
-                icon: '🌳',
-                fruitName: 'Acorn',
-                fruitIcon: '🌰',
-                ripeIcon: '✨🌰',
-                desc: 'Deep Hierarchies & Research'
-            },
-            evergreen: {
-                name: 'Evergreen Pine',
-                icon: '🌲',
-                fruitName: 'Pinecone',
-                fruitIcon: '🪵',
-                ripeIcon: '✨🪵',
-                desc: 'Persistent Wiki & Core Reference'
-            },
-            orchard: {
-                name: 'Fruit Orchard',
-                icon: '🍎',
-                fruitName: 'Apple',
-                fruitIcon: '🍎',
-                ripeIcon: '🍏',
-                desc: 'Sprints & Actionable Projects'
-            },
-            willow: {
-                name: 'Weeping Willow',
-                icon: '🎋',
-                fruitName: 'Shoot',
-                fruitIcon: '🫐',
-                ripeIcon: '✨🫐',
-                desc: 'Flexible Scratchpad & Brainstorming'
-            }
-        };
+  <!-- Picture-in-Picture Minimap -->
+  <aside id="pip-minimap">
+    <canvas id="pip-canvas"></canvas>
+    <div class="privacy-dot" title="100% Offline & Private"></div>
+  </aside>
 
-        const SEASONS_CONFIG = {
-            spring: { name: 'Spring', icon: '🌸', desc: 'Sprouting & Ideation' },
-            summer: { name: 'Summer', icon: '☀️', desc: 'Execution & High Activity' },
-            fall: { name: 'Fall', icon: '🍂', desc: 'Harvest & Retrospectives' },
-            winter: { name: 'Winter', icon: '❄️', desc: 'Pruning & Dormancy' }
-        };
+  <script>
+    (function () {
+      'use strict';
 
-        const defaultRegistry = {
-            'root_tree': {
-                id: 'root_tree',
-                title: 'Core Architecture',
-                species: 'oak',
-                season: 'spring',
-                x: -110,
-                y: 80,
-                zIndex: 2,
-                harvestBasket: [],
+      // PWA Web Install Logic
+      let deferredInstallPrompt = null;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        if (!isStandalone && !localStorage.getItem('sylva_web_bypassed')) {
+          document.getElementById('modal-install-prompt').style.display = 'flex';
+        }
+      });
+
+      document.getElementById('btn-continue-web').addEventListener('click', () => {
+        localStorage.setItem('sylva_web_bypassed', 'true');
+        document.getElementById('modal-install-prompt').style.display = 'none';
+        checkFirstRun();
+      });
+
+      document.getElementById('btn-trigger-install').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice.outcome === 'accepted') document.getElementById('modal-install-prompt').style.display = 'none';
+          deferredInstallPrompt = null;
+        }
+      });
+
+      // App State
+      let state = {
+        viewMode: 'tree', activeForestId: 'forest-1', activeTreeId: 'tree-1',
+        isLocked: true, panX: 40, panY: 80, scale: 1, selectedId: null, history: [],
+        forests: [
+          {
+            id: 'forest-1', title: 'My Workspace', pinned: false,
+            trees: [
+              {
+                id: 'tree-1', title: 'Project Roadmap', type: 'Pine', season: 'Spring', pinned: true, x: 120, y: 100,
                 nodes: [
-                    {
-                        id: 'root',
-                        title: 'Node 1',
-                        description: 'Root system concept and foundational trunk.',
-                        type: 'leaf',
-                        x: 0,
-                        y: 100,
-                        parentId: null,
-                        zIndex: 2
-                    },
-                    {
-                        id: 'node-2',
-                        title: 'Node 2',
-                        description: 'Actionable milestone item.',
-                        type: 'fruit',
-                        isRipe: false,
-                        x: -160,
-                        y: 280,
-                        parentId: 'root',
-                        zIndex: 3
-                    },
-                    {
-                        id: 'node-3',
-                        title: 'Node 3',
-                        description: 'Nested tree capsule leading to sub-canopy.',
-                        type: 'seed',
-                        childTreeId: 'sub_tree_node_3',
-                        x: 160,
-                        y: 280,
-                        parentId: 'root',
-                        zIndex: 4
-                    }
+                  { id: 'root', title: 'Main Goal', desc: 'The starting vision for this project.', type: 'trunk', parentId: null, x: 260, y: 60, pinned: true },
+                  { id: 'b1', title: 'Phase 1: Structure', desc: 'Core UI architecture.', type: 'branch', parentId: 'root', x: 100, y: 220, pinned: true },
+                  { id: 'l1', title: 'Touch Tuning', desc: 'Smooth mobile gestures.', type: 'leaf', parentId: 'b1', x: 60, y: 380, pinned: false },
+                  { id: 'f1', title: 'Store Release', desc: 'Ready for install.', type: 'fruit', parentId: 'b1', x: 220, y: 380, pinned: false, ripe: true },
+                  { id: 'b2', title: 'Phase 2: Growth', desc: 'Marketing & SEO.', type: 'branch', parentId: 'root', x: 420, y: 220, pinned: false }
                 ]
-            },
-            'sub_tree_node_3': {
-                id: 'sub_tree_node_3',
-                title: 'Branch Pipeline',
-                species: 'orchard',
-                season: 'summer',
-                x: 180,
-                y: 80,
-                zIndex: 3,
-                harvestBasket: [],
-                nodes: [
-                    {
-                        id: 'sub-root',
-                        title: 'Pipeline Core',
-                        description: 'Sprint planning and sprint deliverables.',
-                        type: 'leaf',
-                        x: 0,
-                        y: 100,
-                        parentId: null,
-                        zIndex: 2
-                    }
-                ]
+              }
+            ]
+          }
+        ]
+      };
+
+      const viewport = document.getElementById('viewport');
+      const world = document.getElementById('world');
+      const canvasSvg = document.getElementById('canvas-svg');
+      const treeLayer = document.getElementById('tree-layer');
+      const forestLayer = document.getElementById('forest-layer');
+      const pipCanvas = document.getElementById('pip-canvas');
+
+      function init() {
+        loadData();
+        setupInputHandlers();
+        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) checkFirstRun();
+        else if (!deferredInstallPrompt) document.getElementById('modal-install-prompt').style.display = 'flex';
+        render();
+      }
+
+      function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
+      function getTree() { const f = getForest(); return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0]; }
+      function saveData() { try { localStorage.setItem('sylva_v3_state', JSON.stringify(state)); } catch (e) {} }
+      function loadData() { const r = localStorage.getItem('sylva_v3_state'); if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch (e) {} } }
+      function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
+
+      function render() {
+        const forest = getForest();
+        const tree = getTree();
+        const btnLock = document.getElementById('btn-lock');
+        btnLock.className = `btn btn-lock ${state.isLocked ? '' : 'unlocked'}`;
+        btnLock.innerHTML = state.isLocked
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+        document.getElementById('btn-grow').disabled = !state.isLocked;
+        document.getElementById('btn-season').disabled = !state.isLocked;
+
+        if (state.viewMode === 'forest') {
+          document.getElementById('btn-switch-context').innerText = 'Tree View';
+          document.getElementById('label-directory').innerText = 'Forest';
+          treeLayer.style.display = 'none'; forestLayer.style.display = 'block';
+          renderForest();
+        } else {
+          document.getElementById('btn-switch-context').innerText = 'Forest View';
+          document.getElementById('label-directory').innerText = 'Nodes';
+          forestLayer.style.display = 'none'; treeLayer.style.display = 'block';
+          renderTree();
+        }
+        renderDrawers();
+        updateWorldTransform();
+      }
+
+      function renderTree() {
+        const tree = getTree();
+        treeLayer.innerHTML = ''; canvasSvg.innerHTML = '';
+        tree.nodes.forEach(n => {
+          if (n.parentId) {
+            const p = tree.nodes.find(pn => pn.id === n.parentId);
+            if (p) {
+              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              const sx = p.x + 95, sy = p.y + 60, ex = n.x + 95, ey = n.y, my = (sy + ey) / 2;
+              path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
+              path.setAttribute('stroke', '#33485E'); path.setAttribute('stroke-width', '2.5'); path.setAttribute('fill', 'none');
+              canvasSvg.appendChild(path);
             }
+          }
+        });
+
+        tree.nodes.forEach(node => {
+          const el = document.createElement('div');
+          el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''}`;
+          el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
+          el.addEventListener('pointerdown', (e) => {
+            e.stopPropagation(); state.selectedId = node.id;
+            if (!state.isLocked) startDragging(e, node); else openInspector(node);
+            render();
+          });
+          treeLayer.appendChild(el);
+        });
+      }
+
+      function renderForest() {
+        const forest = getForest();
+        forestLayer.innerHTML = ''; canvasSvg.innerHTML = '';
+        forest.trees.forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'forest-tree-entity'; el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
+          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`;
+          el.addEventListener('pointerdown', (e) => {
+            e.stopPropagation(); state.selectedId = t.id;
+            if (!state.isLocked) startDragging(e, t);
+            else { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }
+          });
+          forestLayer.appendChild(el);
+        });
+      }
+
+      function startDragging(e, entity) {
+        let sx = e.clientX, sy = e.clientY, ox = entity.x, oy = entity.y;
+        function onMove(evt) {
+          entity.x = ox + (evt.clientX - sx) / state.scale;
+          entity.y = oy + (evt.clientY - sy) / state.scale;
+          if (state.viewMode === 'tree') renderTree(); else renderForest();
+        }
+        function onUp() { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); saveData(); }
+        window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
+      }
+
+      function setupInputHandlers() {
+        let activePointers = new Map(), prevPinchDist = null, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
+
+        viewport.addEventListener('pointerdown', (e) => {
+          activePointers.set(e.pointerId, e);
+          if (activePointers.size === 1) { panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY; }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, e);
+
+          if (activePointers.size === 2) {
+            const pts = Array.from(activePointers.values());
+            const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
+            const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+
+            if (prevPinchDist) {
+              const ratio = dist / prevPinchDist;
+              const newScale = Math.min(Math.max(state.scale * ratio, 0.3), 3.0);
+              state.panX = cx - (cx - state.panX) * (newScale / state.scale);
+              state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+              state.scale = newScale; updateWorldTransform();
+            }
+            prevPinchDist = dist;
+          } else if (activePointers.size === 1) {
+            state.panX = initPanX + (e.clientX - panStartCX);
+            state.panY = initPanY + (e.clientY - panStartCY);
+            updateWorldTransform();
+          }
+        });
+
+        const endPointer = (e) => { activePointers.delete(e.pointerId); if (activePointers.size < 2) prevPinchDist = null; };
+        window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
+        viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.3), 3.0); updateWorldTransform(); }, { passive: false });
+
+        pipCanvas.addEventListener('click', (e) => {
+          const rect = pipCanvas.getBoundingClientRect();
+          centerOn((e.clientX - rect.left) / 0.12, (e.clientY - rect.top) / 0.12);
+        });
+
+        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = state.viewMode === 'tree' ? 'forest' : 'tree'; render(); });
+        document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
+        document.getElementById('btn-grow').addEventListener('click', () => {
+          if (state.viewMode === 'tree') {
+            const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
+            const node = { id: 'n_' + Date.now(), title: 'New Idea', desc: '', type: 'leaf', parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
+            tree.nodes.push(node); state.selectedId = node.id; render(); openInspector(node);
+          } else {
+            const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Project Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
+            forest.trees.push(newTree); render();
+          }
+        });
+
+        document.getElementById('btn-season').addEventListener('click', openSeasonModal);
+        document.getElementById('btn-close-season').addEventListener('click', () => document.getElementById('modal-season').classList.remove('open'));
+        document.getElementById('btn-season-done').addEventListener('click', () => { getTree().season = document.getElementById('select-tree-season').value; document.getElementById('modal-season').classList.remove('open'); render(); });
+        document.getElementById('btn-action-prune').addEventListener('click', () => { const t = getTree(); const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); document.getElementById('modal-season').classList.remove('open'); render(); });
+        document.getElementById('btn-harvest-all').addEventListener('click', () => { getTree().nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); document.getElementById('modal-season').classList.remove('open'); render(); });
+
+        const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
+        document.getElementById('btn-toggle-directory').addEventListener('click', () => dl.classList.toggle('open'));
+        document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => dr.classList.toggle('open'));
+        document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
+        document.getElementById('btn-close-inspector').addEventListener('click', () => document.getElementById('modal-inspector').classList.remove('open'));
+      }
+
+      function centerOn(x, y) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform(); }
+
+      function openInspector(node) {
+        document.getElementById('inspect-header-title').innerText = `Inspect Node`;
+        document.getElementById('node-input-title').value = node.title;
+        document.getElementById('node-input-desc').value = node.desc || '';
+        document.getElementById('node-input-type').value = node.type;
+        document.getElementById('node-input-type').disabled = (node.type === 'trunk');
+        document.getElementById('btn-save-node').onclick = () => { node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; document.getElementById('modal-inspector').classList.remove('open'); render(); };
+        const bD = document.getElementById('btn-delete-node');
+        bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex';
+        bD.onclick = () => { getTree().nodes = getTree().nodes.filter(n => n.id !== node.id && n.parentId !== node.id); document.getElementById('modal-inspector').classList.remove('open'); render(); };
+        document.getElementById('modal-inspector').classList.add('open');
+      }
+
+      function openSeasonModal() {
+        const t = getTree(); document.getElementById('select-tree-season').value = t.season;
+        const list = document.getElementById('list-harvest'); list.innerHTML = '';
+        const fruits = t.nodes.filter(n => n.type === 'fruit');
+        document.getElementById('harvest-total').innerText = fruits.length;
+        fruits.forEach(f => {
+          const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn" style="height:24px; font-size:10px;">Inspect</button>`;
+          li.addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); openInspector(f); });
+          list.appendChild(li);
+        });
+        document.getElementById('modal-season').classList.add('open');
+      }
+
+      function renderDrawers() {
+        const forest = getForest(), tree = getTree(), pLeft = document.getElementById('list-pinned-left'), aLeft = document.getElementById('list-atoz-left');
+        pLeft.innerHTML = ''; aLeft.innerHTML = '';
+        if (state.viewMode === 'tree') {
+          document.getElementById('left-title').innerText = 'Tree Directory';
+          const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title));
+          sorted.forEach(n => {
+            const li = createDirItem(n.title, getNodeIcon(n.type), n.pinned, () => { centerOn(n.x, n.y); openInspector(n); }, () => { n.pinned = !n.pinned; saveData(); renderDrawers(); });
+            if (n.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li);
+          });
+        } else {
+          document.getElementById('left-title').innerText = 'Forest Directory';
+          const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title));
+          sorted.forEach(t => {
+            const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }, () => { t.pinned = !t.pinned; saveData(); renderDrawers(); });
+            if (t.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li);
+          });
+        }
+
+        const acts = document.getElementById('nursery-actions');
+        acts.innerHTML = `<button class="btn btn-accent" id="btn-export-backup">Export Backup (.json)</button><button class="btn" id="btn-import-backup">Import Backup File</button>`;
+        document.getElementById('btn-export-backup').onclick = () => { const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.3.2', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
+        document.getElementById('btn-import-backup').onclick = () => {
+          const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+          input.onchange = (e) => { const r = new FileReader(); r.onload = (evt) => { try { const p = JSON.parse(evt.target.result); if (p.forest) { p.forest.id = 'f_' + Date.now(); state.forests.push(p.forest); state.activeForestId = p.forest.id; render(); } } catch (err) { alert('Invalid backup.'); } }; r.readAsText(e.target.files[0]); }; input.click();
         };
+      }
 
-        let treeRegistry = defaultRegistry;
-        let activeTreePath = ['root_tree'];
-        let currentTreeId = 'root_tree';
-        let nodes = [];
-        let highestZIndex = 10;
-        let isForestView = false;
+      function createDirItem(title, iconHtml, isPinned, onClick, onPin) {
+        const li = document.createElement('li'); li.className = 'directory-item';
+        li.innerHTML = `<div style="display:flex; align-items:center; gap:8px; overflow:hidden;">${iconHtml}<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${escapeHTML(title)}</span></div><span style="cursor:pointer; color:${isPinned ? 'var(--node-fruit)' : 'var(--text-faint)'};">★</span>`;
+        li.firstElementChild.onclick = onClick; li.lastElementChild.onclick = (e) => { e.stopPropagation(); onPin(); }; return li;
+      }
 
-        let selectedNodeId = null;
-        let selectedTreePlotId = null;
-        let scale = 1;
-        let panX = window.innerWidth / 2 - 105;
-        let panY = 80;
-
-        let isPanning = false;
-        let startPanX = 0, startPanY = 0;
-
-        let isDraggingElement = false;
-        let draggedElementId = null;
-        let dragWorldOffsetX = 0, dragWorldOffsetY = 0;
-        let holdTimer = null;
-        let activeDragPointerId = null;
-
-        let lastTapElementId = null;
-        let lastTapTime = 0;
-
-        let editingNodeType = 'leaf';
-
-        // Multi-touch tracking
-        let activeTouches = new Map();
-        let initialPinchDistance = null;
-        let initialPinchScale = 1;
-        let pinchCenterWorldX = 0;
-        let pinchCenterWorldY = 0;
-
-        // Minimap Camera State (Square 1:1)
-        let pipView = { x: 0, y: 0, w: 1000, h: 1000 };
-        let isPipPanning = false;
-        let pipStartPointerX = 0, pipStartPointerY = 0;
-        let pipStartViewX = 0, pipStartViewY = 0;
-        let pipLastClickTime = 0;
-        let pipInitialPinchDist = null;
-        let pipInitialW = 0, pipInitialH = 0;
-        let pipPointerMoved = false;
-        let pipSingleClickTimer = null;
-        let pipIsDoubleTap = false;
-
-        // DOM Elements
-        const container = document.getElementById('canvas-container');
-        const world = document.getElementById('world');
-        const nodesLayer = document.getElementById('nodes-layer');
-        const svgLayer = document.getElementById('connections');
-        const pipContainer = document.getElementById('pip-container');
-        const minimapSvg = document.getElementById('minimap-svg');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarList = document.getElementById('sidebar-list');
-        const treesSidebar = document.getElementById('trees-sidebar');
-        const treesList = document.getElementById('trees-list');
-        const sidePanel = document.getElementById('side-panel');
-        const seasonPanel = document.getElementById('season-panel');
-        const zoomIndicator = document.getElementById('zoom-indicator');
-        const titleInput = document.getElementById('node-title-input');
-        const descInput = document.getElementById('node-desc-input');
-        const importFileInput = document.getElementById('import-file-input');
-        const fruitOptionsGroup = document.getElementById('fruit-options-group');
-        const fruitRipeToggle = document.getElementById('fruit-ripe-toggle');
-        const seedOptionsGroup = document.getElementById('seed-options-group');
-        const seedLinkedTreeSelect = document.getElementById('seed-linked-tree-select');
-        const typeButtons = document.querySelectorAll('#side-panel .type-radio-btn');
-        const seasonToggleBtn = document.getElementById('btn-season-toggle');
-        const treeSpeciesSelect = document.getElementById('tree-species-select');
-        const seasonButtons = document.querySelectorAll('#season-panel [data-season]');
-        const harvestBasketList = document.getElementById('harvest-basket-list');
-        const centerActionButton = document.getElementById('btn-center-action');
-
-        function isEditorOpen() {
-            return sidePanel.classList.contains('open') || seasonPanel.classList.contains('open');
+      // Standard Intuitive UI Icons
+      function getNodeIcon(type) {
+        switch (type) {
+          case 'trunk': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`;
+          case 'branch': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
+          case 'leaf': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+          case 'fruit': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+          case 'seed': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.5"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A6 6 0 1 0 7.5 11.5c.76.76 1.23 1.52 1.41 2.5z"/></svg>`;
         }
+      }
 
-        function getActiveTree() {
-            if (!treeRegistry[currentTreeId]) {
-                currentTreeId = Object.keys(treeRegistry)[0] || 'root_tree';
-            }
-            return treeRegistry[currentTreeId];
+      function getTreeIcon(type) { return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`; }
+
+      function renderMinimap() {
+        const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 95;
+        ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 95);
+        if (state.viewMode === 'tree') {
+          const t = getTree(); ctx.strokeStyle = '#33485E';
+          t.nodes.forEach(n => {
+            if (n.parentId) { const p = t.nodes.find(pn => pn.id === n.parentId); if (p) { ctx.beginPath(); ctx.moveTo(p.x * 0.12 + 15, p.y * 0.12 + 10); ctx.lineTo(n.x * 0.12 + 15, n.y * 0.12 + 10); ctx.stroke(); } }
+          });
+          t.nodes.forEach(n => { ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : '#10B981'; ctx.fillRect(n.x * 0.12 + 12, n.y * 0.12 + 8, 6, 4); });
         }
-
-        function loadNodes() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed.treeRegistry && parsed.currentTreeId && parsed.treeRegistry[parsed.currentTreeId]) {
-                        treeRegistry = parsed.treeRegistry;
-                        currentTreeId = parsed.currentTreeId;
-                        activeTreePath = parsed.activeTreePath || [currentTreeId];
-                        return treeRegistry[currentTreeId].nodes;
-                    }
-                }
-            } catch (e) {}
-            return treeRegistry['root_tree'].nodes;
-        }
-
-        function saveNodes() {
-            try {
-                if (!isForestView && treeRegistry[currentTreeId]) {
-                    treeRegistry[currentTreeId].nodes = nodes;
-                }
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    treeRegistry: treeRegistry,
-                    currentTreeId: currentTreeId,
-                    activeTreePath: activeTreePath
-                }));
-            } catch (e) {
-                console.error('Storage quota exceeded', e);
-            }
-        }
-
-        function loadLibrary() {
-            try {
-                const lib = localStorage.getItem(LIBRARY_KEY);
-                if (lib) return JSON.parse(lib);
-            } catch (e) {}
-            const initialLib = { 'Core Architecture.json': treeRegistry['root_tree'].nodes };
-            saveLibrary(initialLib);
-            return initialLib;
-        }
-
-        function saveLibrary(lib) {
-            try {
-                localStorage.setItem(LIBRARY_KEY, JSON.stringify(lib));
-            } catch (e) {
-                console.error('Library quota exceeded', e);
-            }
-        }
-
-        function updateCenterButtonState() {
-            if (isForestView) {
-                centerActionButton.textContent = '🌱 Plant Tree';
-                centerActionButton.classList.add('mode-forest');
-            } else {
-                centerActionButton.textContent = '+ Add Branch';
-                centerActionButton.classList.remove('mode-forest');
-            }
-        }
-
-        function applySeasonVisuals() {
-            const tree = getActiveTree();
-            const season = tree.season || 'spring';
-            document.body.className = `season-${season}`;
-            const sInfo = SEASONS_CONFIG[season] || SEASONS_CONFIG.spring;
-            seasonToggleBtn.textContent = `${sInfo.icon} ${sInfo.name}`;
-            seasonButtons.forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-season') === season);
-            });
-        }
-
-        function init() {
-            nodes = loadNodes();
-            nodes.forEach(n => {
-                if (n.zIndex && n.zIndex > highestZIndex) highestZIndex = n.zIndex;
-                if (!n.type) n.type = 'leaf';
-            });
-
-            applySeasonVisuals();
-            updateCenterButtonState();
-            render();
-            updateTransform();
-            resetMinimapCamera();
-            renderSidebar();
-            renderTreesList();
-            renderBreadcrumbs();
-            setupPointerEvents();
-            setupPipEvents();
-            setupEditorTypeEvents();
-            setupSeasonPanelEvents();
-            registerServiceWorker();
-        }
-
-        function render() {
-            nodesLayer.innerHTML = '';
-            svgLayer.innerHTML = '';
-
-            if (isForestView) {
-                renderForestBotanicalTrees();
-                return;
-            }
-
-            const activeTree = getActiveTree();
-            const species = SPECIES_CONFIG[activeTree.species || 'oak'] || SPECIES_CONFIG.oak;
-
-            nodes.forEach(node => {
-                if (node.parentId) {
-                    const parent = nodes.find(n => n.id === node.parentId);
-                    if (parent) {
-                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        path.id = `edge-${node.id}`;
-                        path.setAttribute('d', calculatePath(parent, node));
-                        path.setAttribute('stroke', '#64748b');
-                        path.setAttribute('stroke-width', '2.5');
-                        path.setAttribute('fill', 'none');
-                        svgLayer.appendChild(path);
-                    }
-                }
-            });
-
-            nodes.forEach(node => {
-                const el = document.createElement('div');
-                const isSelected = (node.id === selectedNodeId);
-                const nodeType = node.type || 'leaf';
-                const isRipe = node.isRipe || false;
-
-                el.className = `node type-${nodeType} ${isRipe ? 'ripe' : ''} ${isSelected ? 'selected' : ''}`;
-                el.id = `dom-${node.id}`;
-                el.style.transform = `translate(${node.x}px, ${node.y}px)`;
-                el.style.zIndex = node.zIndex || 2;
-
-                let headerRightHtml = '';
-                if (nodeType === 'leaf') {
-                    headerRightHtml = `<span class="node-badge badge-leaf">Leaf</span>`;
-                } else if (nodeType === 'fruit') {
-                    const fruitIcon = isRipe ? species.ripeIcon : species.fruitIcon;
-                    headerRightHtml = `
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span class="node-badge badge-fruit ${isRipe ? 'ripe' : ''}">${fruitIcon} ${isRipe ? 'Ripe' : species.fruitName}</span>
-                            <input type="checkbox" class="fruit-checkbox" ${isRipe ? 'checked' : ''} title="Mark Ripe">
-                        </div>
-                    `;
-                } else if (nodeType === 'seed') {
-                    headerRightHtml = `
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span class="node-badge badge-seed">Seed</span>
-                            <button class="seed-open-btn" title="Open Nested Tree">Open ↗</button>
-                        </div>
-                    `;
-                }
-
-                el.innerHTML = `
-                    <div class="node-header-row">
-                        <div class="node-title">${escapeHTML(node.title)}</div>
-                        ${headerRightHtml}
-                    </div>
-                    <div class="node-snippet">${escapeHTML(node.description)}</div>
-                `;
-
-                const fruitCb = el.querySelector('.fruit-checkbox');
-                if (fruitCb) {
-                    fruitCb.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        node.isRipe = fruitCb.checked;
-                        saveNodes();
-                        render();
-                        updateMinimap();
-                    });
-                }
-
-                const seedBtn = el.querySelector('.seed-open-btn');
-                if (seedBtn) {
-                    seedBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        openNestedTree(node);
-                    });
-                }
-
-                el.addEventListener('pointerdown', (e) => {
-                    if (isEditorOpen() || activeTouches.size >= 2) return;
-                    if (e.target.classList.contains('fruit-checkbox') || e.target.classList.contains('seed-open-btn')) return;
-
-                    const now = Date.now();
-                    if (lastTapElementId === node.id && (now - lastTapTime) < 320) {
-                        clearTimeout(holdTimer);
-                        selectNode(node.id, true);
-                        lastTapTime = 0;
-                        return;
-                    }
-                    lastTapElementId = node.id;
-                    lastTapTime = now;
-
-                    const isAlreadySelected = (selectedNodeId === node.id);
-
-                    const startDrag = () => {
-                        isPanning = false;
-                        isDraggingElement = true;
-                        draggedElementId = node.id;
-                        activeDragPointerId = e.pointerId;
-                        el.classList.add('dragging');
-
-                        const worldPointerX = (e.clientX - panX) / scale;
-                        const worldPointerY = (e.clientY - panY) / scale;
-                        dragWorldOffsetX = worldPointerX - node.x;
-                        dragWorldOffsetY = worldPointerY - node.y;
-                    };
-
-                    if (isAlreadySelected || e.pointerType === 'mouse') {
-                        e.stopPropagation();
-                        elevateNodeZIndex(node);
-                        startDrag();
-                    } else {
-                        selectNode(node.id, false);
-
-                        if (activeTouches.size === 1) {
-                            isPanning = true;
-                            startPanX = e.clientX - panX;
-                            startPanY = e.clientY - panY;
-                        }
-
-                        clearTimeout(holdTimer);
-                        holdTimer = setTimeout(() => {
-                            if (activeTouches.has(e.pointerId) && activeTouches.size === 1) {
-                                startDrag();
-                                if (navigator.vibrate) navigator.vibrate(25);
-                            }
-                        }, 200);
-                    }
-                });
-
-                nodesLayer.appendChild(el);
-            });
-        }
-
-        // Procedural Vector Trees for Forest Overview (Swapped: Double-Tap opens Settings, Long-Press Enters Canopy)
-        function renderForestBotanicalTrees() {
-            const treeKeys = Object.keys(treeRegistry);
-
-            treeKeys.forEach((tId, idx) => {
-                const tree = treeRegistry[tId];
-                const speciesKey = tree.species || 'oak';
-                const seasonKey = tree.season || 'spring';
-                const species = SPECIES_CONFIG[speciesKey] || SPECIES_CONFIG.oak;
-
-                if (tree.x === undefined) tree.x = (idx * 300) - ((treeKeys.length * 300) / 2) + 40;
-                if (tree.y === undefined) tree.y = 80;
-
-                const plot = document.createElement('div');
-                const isSelected = (selectedTreePlotId === tId);
-                plot.className = `botanical-tree-plot ${isSelected ? 'selected' : ''}`;
-                plot.id = `tree-plot-${tId}`;
-                plot.style.transform = `translate(${tree.x}px, ${tree.y}px)`;
-                plot.style.zIndex = tree.zIndex || 2;
-
-                const nodeCount = tree.nodes.length;
-                const ripeCount = tree.nodes.filter(n => n.type === 'fruit' && n.isRipe).length;
-                const totalFruit = tree.nodes.filter(n => n.type === 'fruit').length;
-
-                const treeSvg = generateBotanicalTreeSvg(speciesKey, seasonKey, nodeCount, ripeCount);
-
-                plot.innerHTML = `
-                    ${treeSvg}
-                    <div class="botanical-tree-card">
-                        <div class="botanical-tree-title">${species.icon} ${escapeHTML(tree.title)}</div>
-                        <div class="botanical-tree-stats">
-                            <span>🌿 ${nodeCount}</span>
-                            <span>${species.fruitIcon} ${ripeCount}/${totalFruit}</span>
-                            <span>${SEASONS_CONFIG[seasonKey]?.icon || '🌸'}</span>
-                        </div>
-                    </div>
-                `;
-
-                plot.addEventListener('pointerdown', (e) => {
-                    if (isEditorOpen() || activeTouches.size >= 2) return;
-
-                    const now = Date.now();
-
-                    // Double-tap opens Canopy Lifecycle and Seasons Drawer
-                    if (lastTapElementId === tId && (now - lastTapTime) < 320) {
-                        clearTimeout(holdTimer);
-                        openSeasonPanel(tId);
-                        lastTapTime = 0;
-                        return;
-                    }
-                    lastTapElementId = tId;
-                    lastTapTime = now;
-
-                    const isAlreadySelected = (selectedTreePlotId === tId);
-                    selectTreePlot(tId);
-
-                    const startDragTree = () => {
-                        isPanning = false;
-                        isDraggingElement = true;
-                        draggedElementId = tId;
-                        activeDragPointerId = e.pointerId;
-                        plot.classList.add('dragging');
-
-                        const worldPointerX = (e.clientX - panX) / scale;
-                        const worldPointerY = (e.clientY - panY) / scale;
-                        dragWorldOffsetX = worldPointerX - tree.x;
-                        dragWorldOffsetY = worldPointerY - tree.y;
-                    };
-
-                    if (isAlreadySelected || e.pointerType === 'mouse') {
-                        e.stopPropagation();
-                        elevateTreePlotZIndex(tree);
-                        startDragTree();
-                    } else {
-                        if (activeTouches.size === 1) {
-                            isPanning = true;
-                            startPanX = e.clientX - panX;
-                            startPanY = e.clientY - panY;
-                        }
-                    }
-
-                    // Long-press (500ms) vibrates device and enters the tree canopy
-                    clearTimeout(holdTimer);
-                    holdTimer = setTimeout(() => {
-                        if (activeTouches.has(e.pointerId) && !isDraggingElement) {
-                            if (navigator.vibrate) navigator.vibrate(40);
-                            enterTreeCanopy(tId);
-                        }
-                    }, 500);
-                });
-
-                nodesLayer.appendChild(plot);
-            });
-        }
-
-        function selectTreePlot(treeId) {
-            selectedTreePlotId = treeId;
-            document.querySelectorAll('.botanical-tree-plot').forEach(el => {
-                el.classList.toggle('selected', el.id === `tree-plot-${treeId}`);
-            });
-            updateMinimap();
-        }
-
-        function elevateTreePlotZIndex(tree) {
-            highestZIndex += 1;
-            tree.zIndex = highestZIndex;
-            const domEl = document.getElementById(`tree-plot-${tree.id}`);
-            if (domEl) domEl.style.zIndex = tree.zIndex;
-        }
-
-        function generateBotanicalTreeSvg(species, season, nodeCount, ripeCount) {
-            let cTop = '#4ade80', cBot = '#15803d';
-            if (season === 'summer') { cTop = '#22c55e'; cBot = '#065f46'; }
-            else if (season === 'fall') { cTop = '#f59e0b'; cBot = '#9a3412'; }
-            else if (season === 'winter') { cTop = '#94a3b8'; cBot = '#334155'; }
-
-            const growth = Math.min(Math.max(nodeCount / 10, 0.75), 1.35);
-
-            let foliagePath = '';
-            let trunkPath = '';
-
-            if (species === 'oak') {
-                trunkPath = `M 88 200 C 88 150, 78 130, 68 115 C 80 120, 108 120, 120 115 C 110 130, 102 150, 102 200 Z`;
-                foliagePath = `
-                    M 95 30 
-                    C 60 25, 30 55, 38 85 
-                    C 15 100, 20 135, 48 145 
-                    C 60 160, 130 160, 142 145 
-                    C 170 135, 175 100, 152 85 
-                    C 160 55, 130 25, 95 30 Z
-                `;
-            } else if (species === 'evergreen') {
-                trunkPath = `M 92 200 L 92 120 L 98 120 L 98 200 Z`;
-                foliagePath = `
-                    M 95 20 
-                    L 115 55 L 105 55 L 125 90 L 112 90 L 135 130 L 55 130 L 78 90 L 65 90 L 85 55 L 75 55 Z
-                `;
-            } else if (species === 'orchard') {
-                trunkPath = `M 89 200 C 89 155, 82 140, 75 125 C 90 128, 100 128, 115 125 C 108 140, 101 155, 101 200 Z`;
-                foliagePath = `
-                    M 95 35 
-                    C 65 35, 42 60, 48 90 
-                    C 28 105, 35 140, 62 145 
-                    C 80 155, 110 155, 128 145 
-                    C 155 140, 162 105, 142 90 
-                    C 148 60, 125 35, 95 35 Z
-                `;
-            } else {
-                trunkPath = `M 86 200 C 86 160, 92 140, 105 110 C 95 125, 90 150, 96 200 Z`;
-                foliagePath = `
-                    M 95 25 
-                    C 50 30, 25 75, 28 135 
-                    C 45 155, 65 110, 85 95 
-                    C 105 110, 125 155, 162 135 
-                    C 165 75, 140 30, 95 25 Z
-                `;
-            }
-
-            let fruitDots = '';
-            const fruitSpots = [
-                { x: 75, y: 70 }, { x: 115, y: 65 }, { x: 60, y: 105 },
-                { x: 130, y: 100 }, { x: 95, y: 115 }, { x: 95, y: 50 }
-            ];
-
-            const renderFruitsCount = Math.min(ripeCount, fruitSpots.length);
-            for (let i = 0; i < renderFruitsCount; i++) {
-                const pt = fruitSpots[i];
-                fruitDots += `<circle cx="${pt.x}" cy="${pt.y}" r="5.5" fill="#10b981" stroke="#ffffff" stroke-width="1.5" filter="drop-shadow(0 0 4px #10b981)"/>`;
-            }
-
-            const uniqueGradId = `tree-grad-${Math.random().toString(36).substr(2, 6)}`;
-
-            return `
-                <svg class="botanical-tree-svg" viewBox="0 0 190 220" style="transform: scale(${growth}); transform-origin: 50% 90%;">
-                    <defs>
-                        <linearGradient id="${uniqueGradId}" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stop-color="${cTop}"/>
-                            <stop offset="100%" stop-color="${cBot}"/>
-                        </linearGradient>
-                    </defs>
-                    <ellipse cx="95" cy="202" rx="42" ry="7" fill="rgba(0,0,0,0.5)" filter="blur(2px)"/>
-                    <path d="${trunkPath}" fill="#78350f" stroke="#451a03" stroke-width="2"/>
-                    <path d="${foliagePath}" fill="url(#${uniqueGradId})" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-                    ${fruitDots}
-                </svg>
-            `;
-        }
-
-        function enterTreeCanopy(treeId) {
-            isForestView = false;
-            currentTreeId = treeId;
-            activeTreePath = [treeId];
-            nodes = treeRegistry[treeId].nodes;
-            selectedNodeId = null;
-            selectedTreePlotId = null;
-
-            applySeasonVisuals();
-            updateCenterButtonState();
-            saveNodes();
-            render();
-            renderSidebar();
-            renderBreadcrumbs();
-            resetMinimapCamera();
-            autoTidyTopDown();
-        }
-
-        function enterForestView() {
-            isForestView = true;
-            selectedNodeId = null;
-            selectedTreePlotId = null;
-            document.body.className = 'season-spring';
-            seasonToggleBtn.textContent = '🌲 Forest';
-
-            updateCenterButtonState();
-            render();
-            renderBreadcrumbs();
-            renderSidebar();
-            resetMinimapCamera();
-
-            panX = window.innerWidth / 2;
-            panY = 120;
-            scale = 0.85;
-            updateTransform();
-        }
-
-        function promptPlantNewTree() {
-            const treeNameInput = prompt('Enter a name for the new tree:', 'New_Canopy');
-            if (!treeNameInput) return;
-
-            const finalName = treeNameInput.endsWith('.json') ? treeNameInput : `${treeNameInput}.json`;
-            const newTreeId = 'tree_' + Date.now();
-
-            const freshTreeNodes = [
-                {
-                    id: 'root',
-                    title: 'Node 1',
-                    description: 'Root system concept and foundational trunk.',
-                    type: 'leaf',
-                    x: 0,
-                    y: 100,
-                    parentId: null,
-                    zIndex: 2
-                }
-            ];
-
-            const existingPlots = Object.keys(treeRegistry).length;
-
-            treeRegistry[newTreeId] = {
-                id: newTreeId,
-                title: treeNameInput.replace('.json', ''),
-                species: 'oak',
-                season: 'spring',
-                x: (existingPlots * 300) - 150,
-                y: 80,
-                zIndex: 2,
-                harvestBasket: [],
-                nodes: freshTreeNodes
-            };
-
-            const lib = loadLibrary();
-            lib[finalName] = freshTreeNodes;
-            saveLibrary(lib);
-
-            currentTreeId = newTreeId;
-            activeTreePath = [newTreeId];
-            nodes = freshTreeNodes;
-            selectedNodeId = null;
-            highestZIndex = 10;
-            saveNodes();
-
-            isForestView = false;
-            applySeasonVisuals();
-            updateCenterButtonState();
-            render();
-            renderSidebar();
-            renderTreesList();
-            renderBreadcrumbs();
-            resetMinimapCamera();
-            autoTidyTopDown();
-            treesSidebar.classList.remove('open');
-        }
-
-        function renderBreadcrumbs() {
-            const trail = document.getElementById('breadcrumb-trail');
-            const upBtn = document.getElementById('btn-tree-up');
-            trail.innerHTML = '';
-
-            const forestCrumb = document.createElement('span');
-            forestCrumb.className = `breadcrumb-crumb ${isForestView ? 'active' : ''}`;
-            forestCrumb.textContent = '🌲 Forest';
-            forestCrumb.addEventListener('click', enterForestView);
-            trail.appendChild(forestCrumb);
-
-            if (isForestView) {
-                upBtn.style.display = 'none';
-                return;
-            }
-
-            const sepInitial = document.createElement('span');
-            sepInitial.className = 'breadcrumb-separator';
-            sepInitial.textContent = '>';
-            trail.appendChild(sepInitial);
-
-            upBtn.style.display = 'flex';
-
-            activeTreePath.forEach((treeId, index) => {
-                const tree = treeRegistry[treeId];
-                if (!tree) return;
-
-                const crumb = document.createElement('span');
-                crumb.className = `breadcrumb-crumb ${index === activeTreePath.length - 1 ? 'active' : ''}`;
-                crumb.textContent = tree.title || 'Untitled Tree';
-
-                crumb.addEventListener('click', () => {
-                    navigateToCrumbIndex(index);
-                });
-
-                trail.appendChild(crumb);
-
-                if (index < activeTreePath.length - 1) {
-                    const sep = document.createElement('span');
-                    sep.className = 'breadcrumb-separator';
-                    sep.textContent = '>';
-                    trail.appendChild(sep);
-                }
-            });
-        }
-
-        function navigateToCrumbIndex(targetIndex) {
-            isForestView = false;
-            treeRegistry[currentTreeId].nodes = JSON.parse(JSON.stringify(nodes));
-            activeTreePath = activeTreePath.slice(0, targetIndex + 1);
-            currentTreeId = activeTreePath[activeTreePath.length - 1];
-            loadActiveTree();
-        }
-
-        function navigateUpOneLevel() {
-            if (activeTreePath.length > 1) {
-                navigateToCrumbIndex(activeTreePath.length - 2);
-            } else {
-                enterForestView();
-            }
-        }
-
-        function loadActiveTree() {
-            isForestView = false;
-            nodes = treeRegistry[currentTreeId].nodes;
-            selectedNodeId = null;
-            selectedTreePlotId = null;
-
-            applySeasonVisuals();
-            updateCenterButtonState();
-            saveNodes();
-            render();
-            renderSidebar();
-            renderBreadcrumbs();
-            resetMinimapCamera();
-            autoTidyTopDown();
-        }
-
-        function openNestedTree(node) {
-            if (!node.childTreeId || !treeRegistry[node.childTreeId]) {
-                const newTreeId = 'tree_' + node.id;
-                node.childTreeId = newTreeId;
-                
-                const activeTree = getActiveTree();
-                treeRegistry[newTreeId] = {
-                    id: newTreeId,
-                    title: node.title,
-                    species: activeTree.species || 'orchard',
-                    season: activeTree.season || 'spring',
-                    x: 0,
-                    y: 80,
-                    zIndex: 2,
-                    harvestBasket: [],
-                    nodes: [
-                        {
-                            id: 'root_' + Date.now(),
-                            title: `${node.title} Core`,
-                            description: `Drill-down workspace for ${node.title}.`,
-                            type: 'leaf',
-                            x: 0,
-                            y: 100,
-                            parentId: null,
-                            zIndex: 2
-                        }
-                    ]
-                };
-            }
-
-            treeRegistry[currentTreeId].nodes = JSON.parse(JSON.stringify(nodes));
-            activeTreePath.push(node.childTreeId);
-            currentTreeId = node.childTreeId;
-            loadActiveTree();
-        }
-
-        function elevateNodeZIndex(node) {
-            highestZIndex += 1;
-            node.zIndex = highestZIndex;
-            const domEl = document.getElementById(`dom-${node.id}`);
-            if (domEl) domEl.style.zIndex = node.zIndex;
-        }
-
-        function calculatePath(parent, node) {
-            const sX = parent.x + 107;
-            const sY = parent.y + 68;
-            const eX = node.x + 107;
-            const eY = node.y;
-            const midY = (sY + eY) / 2;
-            return `M ${sX} ${sY} C ${sX} ${midY}, ${eX} ${midY}, ${eX} ${eY}`;
-        }
-
-        function updateNodeVisuals(node) {
-            const el = document.getElementById(`dom-${node.id}`);
-            if (el) {
-                el.style.transform = `translate(${node.x}px, ${node.y}px)`;
-                el.style.zIndex = node.zIndex || 2;
-            }
-
-            if (node.parentId) {
-                const parent = nodes.find(n => n.id === node.parentId);
-                const inEdge = document.getElementById(`edge-${node.id}`);
-                if (inEdge && parent) {
-                    inEdge.setAttribute('d', calculatePath(parent, node));
-                }
-            }
-
-            nodes.filter(n => n.parentId === node.id).forEach(child => {
-                const outEdge = document.getElementById(`edge-${child.id}`);
-                if (outEdge) {
-                    outEdge.setAttribute('d', calculatePath(node, child));
-                }
-            });
-        }
-
-        function escapeHTML(str) {
-            return (str || '').replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
-        }
-
-        function selectNode(id, openEditor = false) {
-            selectedNodeId = id;
-            document.querySelectorAll('.node').forEach(el => {
-                el.classList.toggle('selected', el.id === `dom-${id}`);
-            });
-
-            if (id) {
-                const node = nodes.find(n => n.id === id);
-                if (node) elevateNodeZIndex(node);
-            }
-
-            if (openEditor) {
-                const node = nodes.find(n => n.id === id);
-                if (node) {
-                    titleInput.value = node.title;
-                    descInput.value = node.description;
-                    setEditorNodeType(node.type || 'leaf');
-                    fruitRipeToggle.checked = node.isRipe || false;
-                    populateSeedTreeDropdown(node.childTreeId);
-
-                    const activeTree = getActiveTree();
-                    const species = SPECIES_CONFIG[activeTree.species || 'oak'] || SPECIES_CONFIG.oak;
-                    document.getElementById('label-fruit-type').textContent = `${species.fruitIcon} ${species.fruitName}`;
-                    document.getElementById('label-ripe-text').textContent = `Mark ${species.fruitName} as Ripe / Harvested`;
-
-                    sidePanel.classList.add('open');
-                }
-            }
-
-            renderSidebar();
-            updateMinimap();
-        }
-
-        function deselectAll() {
-            if (isForestView) {
-                if (selectedTreePlotId) {
-                    selectedTreePlotId = null;
-                    document.querySelectorAll('.botanical-tree-plot').forEach(p => p.classList.remove('selected'));
-                    updateMinimap();
-                }
-                return;
-            }
-
-            if (selectedNodeId && !isEditorOpen()) {
-                selectedNodeId = null;
-                document.querySelectorAll('.node').forEach(n => n.classList.remove('selected'));
-                updateMinimap();
-                renderSidebar();
-            }
-        }
-
-        function focusNodeAsHeader(node) {
-            const targetScale = 1.65;
-            scale = targetScale;
-            panX = (window.innerWidth / 2) - ((node.x + 107) * scale);
-            panY = 160 - (node.y * scale);
-            
-            updateTransform();
-            zoomIndicator.innerText = `Zoom: ${Math.round(scale * 100)}%`;
-        }
-
-        function centerOnNode(node) {
-            panX = (window.innerWidth / 2) - ((node.x + 107) * scale);
-            panY = (window.innerHeight / 2) - ((node.y + 35) * scale);
-            updateTransform();
-        }
-
-        function setupEditorTypeEvents() {
-            typeButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    setEditorNodeType(btn.getAttribute('data-type'));
-                });
-            });
-        }
-
-        function setEditorNodeType(type) {
-            editingNodeType = type;
-            typeButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-type') === type));
-            fruitOptionsGroup.style.display = (type === 'fruit') ? 'flex' : 'none';
-            seedOptionsGroup.style.display = (type === 'seed') ? 'flex' : 'none';
-        }
-
-        function populateSeedTreeDropdown(selectedTreeId) {
-            seedLinkedTreeSelect.innerHTML = '<option value="">-- Auto-Generated Sub-Tree --</option>';
-            Object.keys(treeRegistry).forEach(k => {
-                if (k !== currentTreeId) {
-                    const opt = document.createElement('option');
-                    opt.value = k;
-                    opt.textContent = treeRegistry[k].title || k;
-                    if (k === selectedTreeId) opt.selected = true;
-                    seedLinkedTreeSelect.appendChild(opt);
-                }
-            });
-        }
-
-        let activeTargetTreeId = null;
-
-        function setupSeasonPanelEvents() {
-            seasonToggleBtn.addEventListener('click', () => {
-                openSeasonPanel();
-            });
-
-            document.getElementById('btn-close-season').addEventListener('click', () => {
-                seasonPanel.classList.remove('open');
-            });
-
-            seasonButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    seasonButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                });
-            });
-
-            document.getElementById('btn-apply-season').addEventListener('click', () => {
-                const targetId = activeTargetTreeId || currentTreeId;
-                const targetTree = treeRegistry[targetId];
-                if (targetTree) {
-                    targetTree.species = treeSpeciesSelect.value;
-                    const activeSeasonBtn = document.querySelector('#season-panel [data-season].active');
-                    if (activeSeasonBtn) {
-                        targetTree.season = activeSeasonBtn.getAttribute('data-season');
-                    }
-                    saveNodes();
-                    if (!isForestView && targetId === currentTreeId) {
-                        applySeasonVisuals();
-                    }
-                    render();
-                    renderSidebar();
-                }
-                seasonPanel.classList.remove('open');
-            });
-
-            document.getElementById('btn-harvest-action').addEventListener('click', () => {
-                const targetId = activeTargetTreeId || currentTreeId;
-                const targetTree = treeRegistry[targetId];
-                if (!targetTree.harvestBasket) targetTree.harvestBasket = [];
-
-                const treeNodeList = isForestView ? targetTree.nodes : nodes;
-                const ripeNodes = treeNodeList.filter(n => n.type === 'fruit' && n.isRipe);
-                if (ripeNodes.length === 0) {
-                    alert('No ripe fruits ready for harvest on this canopy.');
-                    return;
-                }
-
-                if (confirm(`Harvest ${ripeNodes.length} ripe fruit(s) into your Harvest Basket?`)) {
-                    ripeNodes.forEach(rn => {
-                        targetTree.harvestBasket.push({
-                            id: rn.id,
-                            title: rn.title,
-                            description: rn.description,
-                            harvestedAt: new Date().toLocaleDateString()
-                        });
-                    });
-
-                    const ripeIds = new Set(ripeNodes.map(n => n.id));
-                    targetTree.nodes = treeNodeList.filter(n => !ripeIds.has(n.id));
-                    if (!isForestView && targetId === currentTreeId) {
-                        nodes = targetTree.nodes;
-                    }
-                    saveNodes();
-                    render();
-                    renderSidebar();
-                    populateHarvestBasketList(targetId);
-                    updateMinimap();
-                }
-            });
-
-            document.getElementById('btn-prune-action').addEventListener('click', () => {
-                const targetId = activeTargetTreeId || currentTreeId;
-                const targetTree = treeRegistry[targetId];
-                const treeNodeList = isForestView ? targetTree.nodes : nodes;
-
-                const deadLeaves = treeNodeList.filter(n => n.type === 'leaf' && n.id !== 'root' && !n.description && !treeNodeList.some(child => child.parentId === n.id));
-                if (deadLeaves.length === 0) {
-                    alert('No deadwood found. Canopy is clean and active.');
-                    return;
-                }
-
-                if (confirm(`Prune ${deadLeaves.length} dead leaf node(s) without notes or children?`)) {
-                    const deadIds = new Set(deadLeaves.map(n => n.id));
-                    targetTree.nodes = treeNodeList.filter(n => !deadIds.has(n.id));
-                    if (!isForestView && targetId === currentTreeId) {
-                        nodes = targetTree.nodes;
-                    }
-                    saveNodes();
-                    render();
-                    renderSidebar();
-                    updateMinimap();
-                }
-            });
-        }
-
-        function openSeasonPanel(treeId = null) {
-            activeTargetTreeId = treeId || currentTreeId;
-            const targetTree = treeRegistry[activeTargetTreeId];
-            if (!targetTree) return;
-
-            document.getElementById('season-panel-title').textContent = `${targetTree.title} Lifecycle`;
-            treeSpeciesSelect.value = targetTree.species || 'oak';
-
-            seasonButtons.forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-season') === (targetTree.season || 'spring'));
-            });
-
-            populateHarvestBasketList(activeTargetTreeId);
-            seasonPanel.classList.add('open');
-        }
-
-        function populateHarvestBasketList(treeId) {
-            const targetTree = treeRegistry[treeId || currentTreeId];
-            const basket = targetTree?.harvestBasket || [];
-            harvestBasketList.innerHTML = '';
-
-            if (basket.length === 0) {
-                harvestBasketList.innerHTML = '<div style="color:var(--text-secondary); padding:4px;">No harvested fruits yet. Mark fruits as ripe and click "Harvest Ripe".</div>';
-                return;
-            }
-
-            basket.slice().reverse().forEach(item => {
-                const row = document.createElement('div');
-                row.style.padding = '4px 0';
-                row.style.borderBottom = '1px solid #1e293b';
-                row.innerHTML = `<span style="color:var(--fruit-ripe); font-weight:600;">✓ ${escapeHTML(item.title)}</span> <span style="color:var(--text-secondary); font-size:10px;">(${item.harvestedAt})</span>`;
-                harvestBasketList.appendChild(row);
-            });
-        }
-
-        function setupPointerEvents() {
-            document.getElementById('btn-tree-up').addEventListener('click', navigateUpOneLevel);
-
-            centerActionButton.addEventListener('click', () => {
-                if (isForestView) {
-                    promptPlantNewTree();
-                } else {
-                    const parentId = selectedNodeId || nodes[0]?.id || null;
-                    const parent = nodes.find(n => n.id === parentId);
-                    const newNodeId = 'node-' + Date.now();
-                    highestZIndex += 1;
-                    nodes.push({
-                        id: newNodeId,
-                        title: `Node ${nodes.length + 1}`,
-                        description: 'Branch details & notes...',
-                        type: 'leaf',
-                        x: parent ? parent.x + (Math.random() * 60 - 30) : 0,
-                        y: parent ? parent.y + 150 : 100,
-                        parentId: parentId,
-                        zIndex: highestZIndex
-                    });
-                    saveNodes();
-                    render();
-                    renderSidebar();
-                    selectNode(newNodeId, true);
-                    updateMinimap();
-                }
-            });
-
-            window.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('#pip-container') || e.target.closest('#side-panel') || e.target.closest('#season-panel') || e.target.closest('.toolbar') || e.target.closest('#breadcrumb-bar') || e.target.closest('#sidebar') || e.target.closest('#trees-sidebar')) {
-                    return;
-                }
-
-                activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-                if (activeTouches.size === 2) {
-                    clearTimeout(holdTimer);
-                    isPanning = false;
-                    isDraggingElement = false;
-                    draggedElementId = null;
-                    document.querySelectorAll('.node, .botanical-tree-plot').forEach(el => el.classList.remove('dragging'));
-
-                    const [t1, t2] = Array.from(activeTouches.values());
-                    initialPinchDistance = Math.hypot(t2.x - t1.x, t2.y - t1.y) || 1;
-                    initialPinchScale = scale;
-
-                    const midScreenX = (t1.x + t2.x) / 2;
-                    const midScreenY = (t1.y + t2.y) / 2;
-
-                    pinchCenterWorldX = (midScreenX - panX) / scale;
-                    pinchCenterWorldY = (midScreenY - panY) / scale;
-                } else if (activeTouches.size === 1) {
-                    const isOverElement = !!e.target.closest('.node') || !!e.target.closest('.botanical-tree-plot');
-                    if (!isOverElement) {
-                        deselectAll();
-                        isPanning = true;
-                        startPanX = e.clientX - panX;
-                        startPanY = e.clientY - panY;
-                    }
-                }
-            }, { capture: true });
-
-            window.addEventListener('pointermove', (e) => {
-                if (activeTouches.has(e.pointerId)) {
-                    activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-                }
-
-                if (holdTimer && !isDraggingElement) {
-                    const tracked = activeTouches.get(e.pointerId);
-                    if (tracked && Math.hypot(e.clientX - tracked.x, e.clientY - tracked.y) > 8) {
-                        clearTimeout(holdTimer);
-                    }
-                }
-
-                if (activeTouches.size === 2) {
-                    const [t1, t2] = Array.from(activeTouches.values());
-                    const currentDist = Math.hypot(t2.x - t1.x, t2.y - t1.y);
-                    const currentMidX = (t1.x + t2.x) / 2;
-                    const currentMidY = (t1.y + t2.y) / 2;
-
-                    if (!initialPinchDistance) {
-                        initialPinchDistance = currentDist || 1;
-                        initialPinchScale = scale;
-                        pinchCenterWorldX = (currentMidX - panX) / scale;
-                        pinchCenterWorldY = (currentMidY - panY) / scale;
-                    }
-
-                    const targetScale = Math.min(Math.max(initialPinchScale * (currentDist / initialPinchDistance), 0.3), 3.0);
-
-                    scale = targetScale;
-                    panX = currentMidX - pinchCenterWorldX * scale;
-                    panY = currentMidY - pinchCenterWorldY * scale;
-
-                    updateTransform();
-                    zoomIndicator.innerText = `Zoom: ${Math.round(scale * 100)}%`;
-                    return;
-                }
-
-                // Dragging in Forest View
-                if (isForestView && isDraggingElement && draggedElementId && !isEditorOpen()) {
-                    const tree = treeRegistry[draggedElementId];
-                    if (tree) {
-                        const worldPointerX = (e.clientX - panX) / scale;
-                        const worldPointerY = (e.clientY - panY) / scale;
-                        tree.x = worldPointerX - dragWorldOffsetX;
-                        tree.y = worldPointerY - dragWorldOffsetY;
-                        
-                        const domEl = document.getElementById(`tree-plot-${draggedElementId}`);
-                        if (domEl) domEl.style.transform = `translate(${tree.x}px, ${tree.y}px)`;
-                        updateMinimap();
-                    }
-                    return;
-                }
-
-                // Dragging in Tree View
-                if (!isForestView && isDraggingElement && draggedElementId && !isEditorOpen()) {
-                    const node = nodes.find(n => n.id === draggedElementId);
-                    if (node) {
-                        const worldPointerX = (e.clientX - panX) / scale;
-                        const worldPointerY = (e.clientY - panY) / scale;
-                        node.x = worldPointerX - dragWorldOffsetX;
-                        node.y = worldPointerY - dragWorldOffsetY;
-                        updateNodeVisuals(node);
-                        updateMinimap();
-                    }
-                    return;
-                }
-
-                if (isPanning && activeTouches.size === 1 && !isEditorOpen()) {
-                    panX = e.clientX - startPanX;
-                    panY = e.clientY - startPanY;
-                    updateTransform();
-                }
-            });
-
-            const onPointerEnd = (e) => {
-                clearTimeout(holdTimer);
-                activeTouches.delete(e.pointerId);
-
-                if (isDraggingElement && activeDragPointerId === e.pointerId) {
-                    saveNodes();
-                    isDraggingElement = false;
-                    draggedElementId = null;
-                    activeDragPointerId = null;
-                    document.querySelectorAll('.node, .botanical-tree-plot').forEach(el => el.classList.remove('dragging'));
-                }
-
-                if (activeTouches.size < 2) initialPinchDistance = null;
-                if (activeTouches.size === 1) {
-                    const remaining = Array.from(activeTouches.values())[0];
-                    isPanning = true;
-                    startPanX = remaining.x - panX;
-                    startPanY = remaining.y - panY;
-                } else if (activeTouches.size === 0) {
-                    isPanning = false;
-                }
-            };
-
-            window.addEventListener('pointerup', onPointerEnd);
-            window.addEventListener('pointercancel', onPointerEnd);
-
-            container.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                const zoomFactor = 1.1;
-                const newScale = e.deltaY < 0 ? Math.min(scale * zoomFactor, 3.0) : Math.max(scale / zoomFactor, 0.3);
-
-                const mouseWorldX = (e.clientX - panX) / scale;
-                const mouseWorldY = (e.clientY - panY) / scale;
-
-                scale = newScale;
-                panX = e.clientX - mouseWorldX * scale;
-                panY = e.clientY - mouseWorldY * scale;
-
-                updateTransform();
-                zoomIndicator.innerText = `Zoom: ${Math.round(scale * 100)}%`;
-            }, { passive: false });
-
-            // Sidebar Controls
-            document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
-                treesSidebar.classList.remove('open');
-                sidebar.classList.toggle('open');
-            });
-
-            document.getElementById('btn-close-sidebar').addEventListener('click', () => {
-                sidebar.classList.remove('open');
-            });
-
-            document.getElementById('btn-toggle-trees').addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                treesSidebar.classList.toggle('open');
-            });
-
-            document.getElementById('btn-close-trees').addEventListener('click', () => {
-                treesSidebar.classList.remove('open');
-            });
-
-            document.getElementById('btn-auto-tidy').addEventListener('click', () => {
-                if (isForestView) return;
-                autoTidyTopDown();
-                sidebar.classList.remove('open');
-            });
-
-            document.getElementById('btn-close-panel').addEventListener('click', () => {
-                sidePanel.classList.remove('open');
-            });
-
-            // Node Editor Save Button
-            document.getElementById('btn-save').addEventListener('click', () => {
-                if (selectedNodeId) {
-                    const node = nodes.find(n => n.id === selectedNodeId);
-                    if (node) {
-                        node.title = titleInput.value.trim() || 'Untitled';
-                        node.description = descInput.value.trim();
-                        node.type = editingNodeType;
-                        if (editingNodeType === 'fruit') {
-                            node.isRipe = fruitRipeToggle.checked;
-                        } else if (editingNodeType === 'seed') {
-                            node.childTreeId = seedLinkedTreeSelect.value || node.childTreeId || ('tree_' + node.id);
-                        }
-                        saveNodes();
-                        render();
-                        renderSidebar();
-                        renderBreadcrumbs();
-                        updateMinimap();
-                    }
-                }
-                sidePanel.classList.remove('open');
-            });
-
-            document.getElementById('btn-delete').addEventListener('click', () => {
-                if (selectedNodeId && selectedNodeId !== 'root') {
-                    const toDelete = new Set([selectedNodeId]);
-                    let added;
-                    do {
-                        added = false;
-                        nodes.forEach(n => {
-                            if (n.parentId && toDelete.has(n.parentId) && !toDelete.has(n.id)) {
-                                toDelete.add(n.id);
-                                added = true;
-                            }
-                        });
-                    } while (added);
-
-                    nodes = nodes.filter(n => !toDelete.has(n.id));
-                    selectedNodeId = null;
-                    saveNodes();
-                    sidePanel.classList.remove('open');
-                    render();
-                    renderSidebar();
-                    updateMinimap();
-                }
-            });
-
-            // Nursery: Import Tree File
-            document.getElementById('btn-menu-import').addEventListener('click', () => {
-                importFileInput.click();
-            });
-
-            importFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const imported = JSON.parse(event.target.result);
-                        if (Array.isArray(imported) && imported.length > 0 && imported[0].id) {
-                            const newTreeId = 'tree_' + Date.now();
-                            treeRegistry[newTreeId] = {
-                                id: newTreeId,
-                                title: file.name.replace('.json', ''),
-                                species: 'oak',
-                                season: 'spring',
-                                x: 0,
-                                y: 80,
-                                zIndex: 2,
-                                harvestBasket: [],
-                                nodes: imported
-                            };
-
-                            const lib = loadLibrary();
-                            lib[file.name] = imported;
-                            saveLibrary(lib);
-                            renderTreesList();
-
-                            currentTreeId = newTreeId;
-                            activeTreePath = [newTreeId];
-                            nodes = imported;
-                            selectedNodeId = null;
-                            saveNodes();
-
-                            isForestView = false;
-                            applySeasonVisuals();
-                            updateCenterButtonState();
-                            render();
-                            renderSidebar();
-                            renderBreadcrumbs();
-                            resetMinimapCamera();
-                            autoTidyTopDown();
-                            treesSidebar.classList.remove('open');
-                        } else {
-                            alert('Invalid tree JSON format.');
-                        }
-                    } catch (err) {
-                        alert('Could not parse JSON file.');
-                    }
-                    importFileInput.value = '';
-                };
-                reader.readAsText(file);
-            });
-
-            // Nursery: Save Tree File
-            document.getElementById('btn-menu-save').addEventListener('click', () => {
-                const activeTree = getActiveTree();
-                const defaultName = (activeTree.title || 'My_Tree').replace(/[^a-z0-9_\-]/gi, '_') + '.json';
-                const inputName = prompt('Enter file name to save tree:', defaultName);
-                if (!inputName) return;
-
-                const finalName = inputName.endsWith('.json') ? inputName : `${inputName}.json`;
-
-                const lib = loadLibrary();
-                lib[finalName] = JSON.parse(JSON.stringify(nodes));
-                saveLibrary(lib);
-                renderTreesList();
-
-                const blob = new Blob([JSON.stringify(nodes, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = finalName;
-                a.click();
-                URL.revokeObjectURL(url);
-            });
-        }
-
-        function updateTransform() {
-            world.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-        }
-
-        function resetMinimapCamera() {
-            if (isForestView) {
-                const treeKeys = Object.keys(treeRegistry);
-                if (treeKeys.length === 0) return;
-                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-                treeKeys.forEach(k => {
-                    const t = treeRegistry[k];
-                    minX = Math.min(minX, t.x || 0);
-                    maxX = Math.max(maxX, (t.x || 0) + 220);
-                    minY = Math.min(minY, t.y || 0);
-                    maxY = Math.max(maxY, (t.y || 0) + 260);
-                });
-                const pad = 100;
-                const w = Math.max(maxX - minX + pad * 2, 600);
-                const h = Math.max(maxY - minY + pad * 2, 600);
-                pipView.w = Math.max(w, h);
-                pipView.h = Math.max(w, h);
-                pipView.x = (minX + maxX) / 2 - pipView.w / 2;
-                pipView.y = (minY + maxY) / 2 - pipView.h / 2;
-                updateMinimap();
-                return;
-            }
-
-            if (nodes.length === 0) return;
-
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            nodes.forEach(n => {
-                minX = Math.min(minX, n.x);
-                maxX = Math.max(maxX, n.x + 215);
-                minY = Math.min(minY, n.y);
-                maxY = Math.max(maxY, n.y + 70);
-            });
-
-            const pad = 80;
-            const treeW = maxX - minX + pad * 2;
-            const treeH = maxY - minY + pad * 2;
-            const maxDimension = Math.max(treeW, treeH, 400);
-
-            pipView.w = maxDimension;
-            pipView.h = maxDimension;
-            pipView.x = (minX + maxX) / 2 - pipView.w / 2;
-            pipView.y = (minY + maxY) / 2 - pipView.h / 2;
-
-            updateMinimap();
-        }
-
-        function setupPipEvents() {
-            const pipTouches = new Map();
-
-            pipContainer.addEventListener('pointerdown', (e) => {
-                e.stopPropagation();
-                pipTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-                pipPointerMoved = false;
-
-                const now = Date.now();
-                if (pipTouches.size === 1 && (now - pipLastClickTime) < 300) {
-                    pipIsDoubleTap = true;
-                    if (pipSingleClickTimer) {
-                        clearTimeout(pipSingleClickTimer);
-                        pipSingleClickTimer = null;
-                    }
-                    resetMinimapCamera();
-                    pipLastClickTime = 0;
-                } else {
-                    pipIsDoubleTap = false;
-                    pipLastClickTime = now;
-                }
-
-                if (pipTouches.size === 1) {
-                    isPipPanning = true;
-                    pipStartPointerX = e.clientX;
-                    pipStartPointerY = e.clientY;
-                    pipStartViewX = pipView.x;
-                    pipStartViewY = pipView.y;
-                } else if (pipTouches.size === 2) {
-                    isPipPanning = false;
-                    if (pipSingleClickTimer) {
-                        clearTimeout(pipSingleClickTimer);
-                        pipSingleClickTimer = null;
-                    }
-                    const [t1, t2] = Array.from(pipTouches.values());
-                    pipInitialPinchDist = Math.hypot(t2.x - t1.x, t2.y - t1.y);
-                    pipInitialW = pipView.w;
-                    pipInitialH = pipView.h;
-                }
-            });
-
-            window.addEventListener('pointermove', (e) => {
-                if (pipTouches.has(e.pointerId)) {
-                    pipTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-                }
-
-                if (pipTouches.size === 2 && pipInitialPinchDist) {
-                    pipPointerMoved = true;
-                    const [t1, t2] = Array.from(pipTouches.values());
-                    const currentDist = Math.hypot(t2.x - t1.x, t2.y - t1.y);
-                    const factor = pipInitialPinchDist / currentDist;
-
-                    const newW = pipInitialW * factor;
-                    const newH = pipInitialH * factor;
-
-                    pipView.x += (pipView.w - newW) / 2;
-                    pipView.y += (pipView.h - newH) / 2;
-                    pipView.w = newW;
-                    pipView.h = newH;
-
-                    updateMinimap();
-                } else if (isPipPanning && pipTouches.size === 1) {
-                    const rect = pipContainer.getBoundingClientRect();
-                    const moveDist = Math.hypot(e.clientX - pipStartPointerX, e.clientY - pipStartPointerY);
-                    if (moveDist > 6) {
-                        pipPointerMoved = true;
-                        if (pipSingleClickTimer) {
-                            clearTimeout(pipSingleClickTimer);
-                            pipSingleClickTimer = null;
-                        }
-                    }
-
-                    const dx = (e.clientX - pipStartPointerX) * (pipView.w / rect.width);
-                    const dy = (e.clientY - pipStartPointerY) * (pipView.h / rect.height);
-
-                    pipView.x = pipStartViewX - dx;
-                    pipView.y = pipStartViewY - dy;
-                    updateMinimap();
-                }
-            });
-
-            const onPipEnd = (e) => {
-                if (!pipPointerMoved && !pipIsDoubleTap && isPipPanning && (e.target === pipContainer || (e.target && e.target.tagName === 'svg'))) {
-                    const clientX = e.clientX;
-                    const clientY = e.clientY;
-                    const rect = pipContainer.getBoundingClientRect();
-
-                    pipSingleClickTimer = setTimeout(() => {
-                        const relX = (clientX - rect.left) / rect.width;
-                        const relY = (clientY - rect.top) / rect.height;
-
-                        const targetWorldX = pipView.x + relX * pipView.w;
-                        const targetWorldY = pipView.y + relY * pipView.h;
-
-                        panX = (window.innerWidth / 2) - (targetWorldX * scale);
-                        panY = (window.innerHeight / 2) - (targetWorldY * scale);
-                        updateTransform();
-                        pipSingleClickTimer = null;
-                    }, 280);
-                }
-
-                pipTouches.delete(e.pointerId);
-                if (pipTouches.size < 2) pipInitialPinchDist = null;
-                if (pipTouches.size === 0) {
-                    isPipPanning = false;
-                    pipIsDoubleTap = false;
-                }
-            };
-
-            window.addEventListener('pointerup', onPipEnd);
-            window.addEventListener('pointercancel', onPipEnd);
-
-            pipContainer.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const zoomFactor = e.deltaY < 0 ? 0.9 : 1.1;
-
-                const newW = pipView.w * zoomFactor;
-                const newH = pipView.h * zoomFactor;
-
-                pipView.x += (pipView.w - newW) / 2;
-                pipView.y += (pipView.h - newH) / 2;
-                pipView.w = newW;
-                pipView.h = newH;
-
-                updateMinimap();
-            }, { passive: false });
-        }
-
-        function updateMinimap() {
-            minimapSvg.setAttribute('viewBox', `${pipView.x} ${pipView.y} ${pipView.w} ${pipView.h}`);
-            minimapSvg.innerHTML = '';
-
-            // Forest View Minimap
-            if (isForestView) {
-                const treeKeys = Object.keys(treeRegistry);
-                treeKeys.forEach((tId) => {
-                    const tree = treeRegistry[tId];
-                    const isSelected = (selectedTreePlotId === tId);
-
-                    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    g.style.cursor = 'pointer';
-
-                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', (tree.x || 0) + 110);
-                    circle.setAttribute('cy', (tree.y || 0) + 130);
-                    circle.setAttribute('r', isSelected ? '46' : '36');
-                    circle.setAttribute('fill', isSelected ? 'rgba(56, 189, 248, 0.45)' : 'rgba(74, 222, 128, 0.4)');
-                    circle.setAttribute('stroke', isSelected ? '#38bdf8' : '#22c55e');
-                    circle.setAttribute('stroke-width', '4');
-
-                    g.appendChild(circle);
-
-                    g.addEventListener('pointerdown', (e) => {
-                        e.stopPropagation();
-                        if (pipSingleClickTimer) {
-                            clearTimeout(pipSingleClickTimer);
-                            pipSingleClickTimer = null;
-                        }
-                        selectTreePlot(tId);
-                        panX = (window.innerWidth / 2) - (((tree.x || 0) + 110) * scale);
-                        panY = (window.innerHeight / 2) - (((tree.y || 0) + 130) * scale);
-                        updateTransform();
-                    });
-
-                    minimapSvg.appendChild(g);
-                });
-                return;
-            }
-
-            if (nodes.length === 0) return;
-
-            // Canopy Minimap
-            nodes.forEach(node => {
-                if (node.parentId) {
-                    const parent = nodes.find(n => n.id === node.parentId);
-                    if (parent) {
-                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                        line.setAttribute('x1', parent.x + 107);
-                        line.setAttribute('y1', parent.y + 35);
-                        line.setAttribute('x2', node.x + 107);
-                        line.setAttribute('y2', node.y + 35);
-                        line.setAttribute('stroke', '#64748b');
-                        line.setAttribute('stroke-width', String(Math.max(pipView.w * 0.007, 3)));
-                        minimapSvg.appendChild(line);
-                    }
-                }
-            });
-
-            const radius = Math.max(pipView.w * 0.024, 7);
-            nodes.forEach(node => {
-                const isSelected = node.id === selectedNodeId;
-                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                g.style.cursor = 'pointer';
-
-                const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                hit.setAttribute('cx', node.x + 107);
-                hit.setAttribute('cy', node.y + 35);
-                hit.setAttribute('r', String(radius * 2.8));
-                hit.setAttribute('fill', 'transparent');
-
-                let dotColor = '#38bdf8';
-                if (node.type === 'fruit') {
-                    dotColor = node.isRipe ? '#10b981' : '#f59e0b';
-                } else if (node.type === 'seed') {
-                    dotColor = '#c084fc';
-                }
-
-                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                circle.setAttribute('cx', node.x + 107);
-                circle.setAttribute('cy', node.y + 35);
-                circle.setAttribute('r', String(isSelected ? radius * 1.4 : radius));
-                circle.setAttribute('fill', isSelected ? '#ef4444' : dotColor);
-                if (isSelected) {
-                    circle.setAttribute('stroke', '#ffffff');
-                    circle.setAttribute('stroke-width', String(radius * 0.35));
-                }
-
-                g.appendChild(hit);
-                g.appendChild(circle);
-
-                g.addEventListener('pointerdown', (e) => {
-                    e.stopPropagation();
-                    if (pipSingleClickTimer) {
-                        clearTimeout(pipSingleClickTimer);
-                        pipSingleClickTimer = null;
-                    }
-                    selectNode(node.id, false);
-                    focusNodeAsHeader(node);
-                });
-
-                minimapSvg.appendChild(g);
-            });
-        }
-
-        function renderSidebar() {
-            const sorted = isForestView ? [] : [...nodes].sort((a, b) => a.title.localeCompare(b.title));
-            sidebarList.innerHTML = '';
-
-            if (isForestView) {
-                sidebarList.innerHTML = '<div style="font-size:12px; color:var(--text-secondary); padding:12px;">Forest overview active. Double-tap any tree to view settings, or long-press to enter.</div>';
-                return;
-            }
-
-            const activeTree = getActiveTree();
-            const species = SPECIES_CONFIG[activeTree.species || 'oak'] || SPECIES_CONFIG.oak;
-
-            sorted.forEach(node => {
-                const item = document.createElement('div');
-                item.className = `sidebar-item ${node.id === selectedNodeId ? 'selected' : ''}`;
-                
-                let icon = '🍃';
-                if (node.type === 'fruit') icon = node.isRipe ? species.ripeIcon : species.fruitIcon;
-                else if (node.type === 'seed') icon = '🌱';
-
-                item.innerHTML = `
-                    <div class="sidebar-item-content">
-                        <div class="sidebar-item-title">${icon} ${escapeHTML(node.title)}</div>
-                        <div class="sidebar-item-desc">${escapeHTML(node.description || 'No description')}</div>
-                    </div>
-                `;
-
-                item.addEventListener('click', () => {
-                    selectNode(node.id, false);
-                    centerOnNode(node);
-                    sidebar.classList.remove('open');
-                });
-
-                sidebarList.appendChild(item);
-            });
-        }
-
-        function renderTreesList() {
-            const lib = loadLibrary();
-            const keys = Object.keys(lib).sort((a, b) => a.localeCompare(b));
-            treesList.innerHTML = '';
-
-            if (keys.length === 0) {
-                treesList.innerHTML = '<div style="font-size: 12px; color: var(--text-secondary); padding: 12px;">No saved trees yet. Click "Save Tree" above to vault one.</div>';
-                return;
-            }
-
-            keys.forEach(fileName => {
-                const treeData = lib[fileName];
-                const count = Array.isArray(treeData) ? treeData.length : 0;
-
-                const item = document.createElement('div');
-                item.className = 'sidebar-item';
-                item.innerHTML = `
-                    <div class="sidebar-item-content">
-                        <div class="sidebar-item-title">🌳 ${escapeHTML(fileName)}</div>
-                        <div class="sidebar-item-desc">${count} node${count === 1 ? '' : 's'}</div>
-                    </div>
-                `;
-
-                item.addEventListener('click', () => {
-                    const loadedTreeId = 'tree_' + fileName.replace(/[^a-z0-9_\-]/gi, '_');
-                    treeRegistry[loadedTreeId] = {
-                        id: loadedTreeId,
-                        title: fileName.replace('.json', ''),
-                        species: 'oak',
-                        season: 'spring',
-                        x: 0,
-                        y: 80,
-                        zIndex: 2,
-                        harvestBasket: [],
-                        nodes: JSON.parse(JSON.stringify(treeData))
-                    };
-
-                    currentTreeId = loadedTreeId;
-                    activeTreePath = [loadedTreeId];
-                    nodes = treeRegistry[loadedTreeId].nodes;
-                    selectedNodeId = null;
-
-                    isForestView = false;
-                    applySeasonVisuals();
-                    updateCenterButtonState();
-                    saveNodes();
-                    render();
-                    renderSidebar();
-                    renderBreadcrumbs();
-                    resetMinimapCamera();
-                    autoTidyTopDown();
-                    treesSidebar.classList.remove('open');
-                });
-
-                treesList.appendChild(item);
-            });
-        }
-
-        function autoTidyTopDown() {
-            if (isForestView) return;
-            const root = nodes.find(n => n.parentId === null);
-            if (!root) return;
-
-            const levels = {};
-            function assign(id, lvl) {
-                if (!levels[lvl]) levels[lvl] = [];
-                levels[lvl].push(id);
-                nodes.filter(n => n.parentId === id).forEach(c => assign(c.id, lvl + 1));
-            }
-            assign(root.id, 0);
-
-            const startX = 0;
-            const startY = 100;
-            const spacingX = 245;
-            const spacingY = 150;
-
-            Object.keys(levels).forEach(lvlStr => {
-                const lvl = parseInt(lvlStr);
-                const ids = levels[lvl];
-                const totalWidth = ids.length * spacingX;
-                ids.forEach((id, idx) => {
-                    const n = nodes.find(x => x.id === id);
-                    if (n) {
-                        n.x = startX - (totalWidth / 2) + (idx * spacingX) + (spacingX / 2) - 107;
-                        n.y = startY + (lvl * spacingY);
-                    }
-                });
-            });
-
-            saveNodes();
-            render();
-            resetMinimapCamera();
-            panX = window.innerWidth / 2;
-            panY = 100;
-            updateTransform();
-        }
-
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA ServiceWorker registered', reg))
-                    .catch(err => console.error('PWA registration failed', err));
-            }
-        }
-
-        init();
-    </script>
+      }
+
+      const STEPS = [
+        { title: 'Think in Growth Trees', text: 'Welcome to Sylva. Instead of static lists or messy blank canvases, Sylva organizes your goals, notes, and research into living trees with branches, leaves, and harvestable milestone fruits.' },
+        { title: 'Lock to Protect, Unlock to Move', text: 'Tap the Lock icon in the header when you want to drag notes around to organize them. Keep it locked during regular use for smooth, accidental-drag-free reading and note-taking.' },
+        { title: 'Zero Tracking & Total Privacy', text: 'Sylva runs entirely on your device with 100% offline persistence. Use the Nursery panel to export clean JSON backups anytime.' }
+      ];
+      let stepIdx = 0;
+      function checkFirstRun() { if (!localStorage.getItem('sylva_v3_onboarded')) showStep(0); }
+      function showStep(idx) { stepIdx = idx; document.getElementById('walk-title').innerText = STEPS[idx].title; document.getElementById('walk-body').innerText = STEPS[idx].text; document.getElementById('walk-step').innerText = `${idx + 1} / ${STEPS.length}`; document.getElementById('modal-walkthrough').classList.add('open'); }
+      document.getElementById('btn-walk-next').onclick = () => { if (stepIdx < STEPS.length - 1) showStep(stepIdx + 1); else { localStorage.setItem('sylva_v3_onboarded', 'true'); document.getElementById('modal-walkthrough').classList.remove('open'); } };
+      document.getElementById('btn-walk-skip').onclick = () => { localStorage.setItem('sylva_v3_onboarded', 'true'); document.getElementById('modal-walkthrough').classList.remove('open'); };
+      function escapeHTML(s) { return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)); }
+      init();
+    })();
+  </script>
 </body>
 </html>
