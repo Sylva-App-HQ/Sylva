@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sylva | Local-First Hierarchical Thought Engine</title>
-  <meta name="description" content="Local-first hierarchical spatial thinking engine. Zero telemetry, deterministic, offline-first.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sylva | Visual Thought & Project Trees</title>
+  <meta name="description" content="Organize ideas, projects, and notes into visual growth trees. 100% private and offline.">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
@@ -25,224 +25,189 @@
       --node-fruit: #F59E0B;
       --node-seed: #A855F7;
       --node-branch: #38BDF8;
-      --status-critical: #EF4444;
-      --status-warning: #F59E0B;
-      --status-nominal: #10B981;
       --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
-      --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+      --font-mono: "JetBrains Mono", Menlo, Consolas, monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body {
-      width: 100vw; height: 100vh; overflow: hidden;
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
       background: var(--bg-canvas); color: var(--text-main);
       font-family: var(--font-ui); font-size: 13px;
+      touch-action: none;
     }
 
-    /* Primary Viewport */
-    #viewport { width: 100%; height: 100%; position: relative; cursor: grab; overflow: hidden; }
-    #viewport.canvas-locked { cursor: default; }
-    #viewport:active:not(.canvas-locked) { cursor: grabbing; }
-
-    /* SVG Connections */
-    #canvas-svg {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none; z-index: 1;
-    }
-
-    /* Transform Layers */
-    #tree-layer, #forest-layer {
-      position: absolute; top: 0; left: 0;
-      transform-origin: 0 0; z-index: 2;
-    }
-
-    /* Top Action Bar */
+    /* Fixed Modern Header */
     .app-header {
-      position: absolute; top: 16px; left: 16px; right: 16px;
-      display: flex; justify-content: space-between; align-items: center;
-      z-index: 20; pointer-events: none;
+      position: absolute; top: 12px; left: 12px; right: 12px;
+      display: grid; grid-template-columns: auto 1fr auto; gap: 8px;
+      align-items: center; z-index: 30; pointer-events: none;
     }
-    .header-group { display: flex; gap: 8px; align-items: center; pointer-events: auto; }
+    .header-left, .header-right { display: flex; gap: 6px; align-items: center; pointer-events: auto; }
+    .header-center { display: flex; justify-content: center; pointer-events: auto; }
 
-    /* Tactical Modern Buttons */
+    /* Button System: Equal Sizing & Consistent Geometry */
     .btn {
+      height: 38px; min-width: 38px; padding: 0 12px;
       background: var(--bg-surface); color: var(--text-main);
       border: 1px solid var(--border-subtle); border-radius: 8px;
-      padding: 8px 14px; font-size: 12px; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; display: inline-flex;
+      align-items: center; justify-content: center; gap: 6px;
       cursor: pointer; transition: all 0.15s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
     .btn:hover:not(:disabled) {
       border-color: var(--accent); background: var(--bg-surface-elevated);
-      color: var(--text-main); box-shadow: 0 0 12px var(--accent-glow);
+      box-shadow: 0 0 10px var(--accent-glow);
     }
-    .btn:disabled, .btn.disabled-state {
-      opacity: 0.35; cursor: not-allowed; pointer-events: none; filter: grayscale(1);
-    }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
     .btn-accent { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); }
-    .btn-danger { background: #450A0A; border-color: #991B1B; color: #FCA5A5; }
-    .btn-danger:hover:not(:disabled) { background: #7F1D1D; border-color: #EF4444; color: #FFF; }
-    .btn-lock { min-width: 42px; justify-content: center; padding: 8px 10px; }
-    .btn-lock.unlocked { border-color: var(--status-warning); color: var(--status-warning); }
+    .btn-install { background: #1E3A8A; border-color: #3B82F6; color: #93C5FD; display: none; }
+    .btn-lock { padding: 0; width: 38px; }
+    .btn-lock.unlocked { border-color: #F59E0B; color: #F59E0B; }
 
-    /* Dropdown Menus */
-    .dropdown { position: relative; display: inline-block; }
-    .dropdown-content {
-      display: none; position: absolute; top: calc(100% + 6px); left: 0;
-      background: var(--bg-surface); border: 1px solid var(--border-strong);
-      border-radius: 8px; min-width: 190px; z-index: 30;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6); overflow: hidden;
+    /* Infinite Canvas Viewport */
+    #viewport {
+      width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+      overflow: hidden; touch-action: none; cursor: grab;
     }
-    .dropdown.active .dropdown-content { display: block; }
-    .dropdown-item {
-      padding: 10px 14px; color: var(--text-main); display: flex;
-      align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s;
-    }
-    .dropdown-item:hover { background: var(--bg-surface-elevated); color: var(--accent); }
+    #viewport.canvas-locked { cursor: default; }
 
-    /* Sidebars / Panels */
+    /* Unified World (Synchronized Node + Line Scaling) */
+    #world {
+      position: absolute; top: 0; left: 0;
+      width: 10000px; height: 10000px;
+      transform-origin: 0 0;
+      pointer-events: none;
+    }
+    #canvas-svg {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    #tree-layer, #forest-layer {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* Node Cards */
+    .node-card {
+      position: absolute; background: var(--bg-surface);
+      border: 1px solid var(--border-subtle); border-radius: 10px;
+      padding: 12px 14px; width: 190px; pointer-events: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer;
+    }
+    .node-card.selected { border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); }
+    .node-card.type-trunk { border-left: 5px solid #B45309; }
+    .node-card.type-branch { border-left: 5px solid var(--node-branch); }
+    .node-card.type-leaf { border-left: 5px solid var(--node-leaf); }
+    .node-card.type-fruit { border-left: 5px solid var(--node-fruit); }
+    .node-card.type-seed { border-left: 5px solid var(--node-seed); }
+    .node-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .node-title { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .node-desc { font-size: 11px; color: var(--text-muted); line-height: 1.3; max-height: 28px; overflow: hidden; }
+
+    /* Forest Trees */
+    .forest-tree-entity {
+      position: absolute; display: flex; flex-direction: column; align-items: center;
+      width: 140px; cursor: pointer; pointer-events: auto; text-align: center;
+    }
+    .tree-icon-box {
+      width: 76px; height: 76px; background: var(--bg-surface);
+      border: 2px solid var(--border-subtle); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .forest-tree-entity:hover .tree-icon-box { border-color: var(--accent); }
+
+    /* Sidebars */
     .drawer {
-      position: absolute; top: 68px; bottom: 16px; width: 340px;
+      position: absolute; top: 62px; bottom: 12px; width: 320px; max-width: calc(100vw - 24px);
       background: var(--bg-surface); border: 1px solid var(--border-strong);
-      border-radius: 12px; z-index: 25; display: flex; flex-direction: column;
-      box-shadow: 0 12px 32px rgba(0,0,0,0.6); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 12px; z-index: 40; display: flex; flex-direction: column;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.7); transition: transform 0.25s ease;
     }
-    #drawer-left { left: 16px; transform: translateX(-400px); }
+    #drawer-left { left: 12px; transform: translateX(-360px); }
     #drawer-left.open { transform: translateX(0); }
-    #drawer-right { right: 16px; transform: translateX(400px); }
+    #drawer-right { right: 12px; transform: translateX(360px); }
     #drawer-right.open { transform: translateX(0); }
-    .drawer-header {
-      padding: 14px 16px; border-bottom: 1px solid var(--border-subtle);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .drawer-title { font-weight: 700; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
-    .drawer-body { padding: 14px 16px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 14px; }
-
-    /* Pinned and A-Z Directory Lists */
-    .list-section-header {
-      font-size: 10px; font-weight: 700; color: var(--text-muted);
-      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px;
-      display: flex; justify-content: space-between;
-    }
+    .drawer-header { padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .drawer-body { padding: 14px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 14px; }
     .directory-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
     .directory-item {
-      padding: 7px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);
+      padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);
       border-radius: 6px; display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; transition: all 0.15s;
+      cursor: pointer;
     }
-    .directory-item:hover { border-color: var(--accent); }
-    .directory-item-left { display: flex; align-items: center; gap: 8px; overflow: hidden; }
-    .pin-toggle { cursor: pointer; color: var(--text-faint); }
-    .pin-toggle.pinned { color: var(--node-fruit); }
 
-    /* Node & Tree Detail Modal */
+    /* Modals */
     .modal-overlay {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-      z-index: 50; display: none; align-items: center; justify-content: center;
+      z-index: 60; display: none; align-items: center; justify-content: center;
     }
     .modal-overlay.open { display: flex; }
     .modal-card {
-      width: 540px; max-width: 90vw; background: var(--bg-surface);
+      width: 480px; max-width: 90vw; background: var(--bg-surface);
       border: 1px solid var(--border-strong); border-radius: 12px;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column;
-      overflow: hidden;
+      display: flex; flex-direction: column; overflow: hidden;
     }
-    .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
-    .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 70vh; }
-    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; gap: 10px; }
-
-    /* Modernized Field Controls */
+    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; }
+    .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; }
     .field-group { display: flex; flex-direction: column; gap: 6px; }
-    .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+    .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
     .field-group input, .field-group textarea, .field-group select {
       background: var(--bg-canvas); border: 1px solid var(--border-subtle);
-      color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px;
-      outline: none; font-family: inherit; transition: border-color 0.15s;
+      color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none;
     }
-    .field-group input:focus, .field-group textarea:focus { border-color: var(--accent); }
-
-    /* Node Canvas Component */
-    .node-card {
-      position: absolute; background: var(--bg-surface); border: 2px solid var(--border-subtle);
-      border-radius: 10px; padding: 12px 14px; min-width: 170px; max-width: 250px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .node-card.selected { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
-    .node-card.type-trunk { border-left: 6px solid #B45309; }
-    .node-card.type-branch { border-left: 6px solid var(--node-branch); }
-    .node-card.type-leaf { border-left: 6px solid var(--node-leaf); }
-    .node-card.type-fruit { border-left: 6px solid var(--node-fruit); }
-    .node-card.type-seed { border-left: 6px solid var(--node-seed); }
-    .node-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-    .node-title-text { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; }
-    .node-snippet-text { font-size: 11px; color: var(--text-muted); display: -webkit-box; line-clamp: 2; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-    /* Forest Tree Canvas Entity */
-    .forest-tree-entity {
-      position: absolute; display: flex; flex-direction: column; align-items: center;
-      cursor: pointer; width: 140px; text-align: center;
-    }
-    .tree-icon-container {
-      width: 80px; height: 80px; background: var(--bg-surface);
-      border: 2px solid var(--border-subtle); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .forest-tree-entity:hover .tree-icon-container { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
-    .tree-label-tag { margin-top: 8px; font-weight: 600; font-size: 12px; }
-    .tree-nodes-count { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); }
 
     /* Picture-in-Picture Minimap */
     #pip-minimap {
-      position: absolute; bottom: 16px; right: 16px; width: 180px; height: 130px;
+      position: absolute; bottom: 12px; right: 12px; width: 140px; height: 95px;
       background: var(--bg-surface); border: 1px solid var(--border-strong);
-      border-radius: 8px; z-index: 20; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
     }
-    #pip-canvas { width: 100%; height: 100%; }
+    #pip-canvas { width: 100%; height: 100%; display: block; }
 
-    /* Onboarding Walkthrough Wizard */
-    #walkthrough-modal { z-index: 100; }
-    .step-counter { font-size: 11px; font-family: var(--font-mono); color: var(--accent); }
-
-    /* Classification & Sovereign Indicator */
-    .airgap-indicator {
-      position: absolute; bottom: 16px; left: 16px;
+    /* Privacy Banner */
+    .privacy-tag {
+      position: absolute; bottom: 12px; left: 12px;
       background: var(--bg-surface); border: 1px solid var(--border-subtle);
-      border-radius: 6px; padding: 6px 12px; font-size: 10px; font-family: var(--font-mono);
-      display: flex; align-items: center; gap: 8px; z-index: 10; pointer-events: none;
+      border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: var(--font-mono);
+      display: flex; align-items: center; gap: 6px; z-index: 20; pointer-events: none;
     }
-    .security-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--status-nominal); }
+    .privacy-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--node-leaf); }
   </style>
 </head>
 <body>
 
-  <!-- Top Action Header -->
+  <!-- Top Action Bar -->
   <header class="app-header">
-    <div class="header-group">
+    <div class="header-left">
       <button class="btn" id="btn-toggle-directory">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-        <span id="label-directory-btn">Branches & Nodes</span>
+        <span id="label-directory">Nodes</span>
       </button>
-
-      <div class="dropdown" id="dropdown-grow">
-        <button class="btn btn-accent" id="btn-grow-trigger">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          <span>Grow...</span>
-        </button>
-        <div class="dropdown-content" id="grow-menu-items"></div>
-      </div>
+      <button class="btn btn-accent" id="btn-grow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Grow...</span>
+      </button>
     </div>
 
-    <div class="header-group">
-      <button class="btn" id="btn-switch-context">Forest View</button>
+    <div class="header-center">
+      <button class="btn btn-install" id="btn-install-app">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span>Install App</span>
+      </button>
+    </div>
+
+    <div class="header-right">
+      <button class="btn" id="btn-switch-context">Forest</button>
       <button class="btn" id="btn-season">Season</button>
-      <button class="btn btn-lock" id="btn-lock-canvas" title="Toggle Canvas Lock">
-        <svg id="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
+      <button class="btn btn-lock" id="btn-lock" title="Toggle Drag/Arrange Lock">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </button>
       <button class="btn" id="btn-toggle-nursery">Nursery</button>
     </div>
@@ -250,115 +215,136 @@
 
   <!-- Canvas Surface -->
   <main id="viewport">
-    <svg id="canvas-svg"></svg>
-    <div id="tree-layer"></div>
-    <div id="forest-layer" style="display: none;"></div>
+    <div id="world">
+      <svg id="canvas-svg"></svg>
+      <div id="tree-layer"></div>
+      <div id="forest-layer" style="display: none;"></div>
+    </div>
   </main>
 
-  <!-- Left Sidebar (Branches & Nodes Directory) -->
+  <!-- Left Sidebar (Directory) -->
   <aside class="drawer" id="drawer-left">
     <div class="drawer-header">
-      <span class="drawer-title" id="left-drawer-heading">Hierarchy Directory</span>
-      <button class="btn" style="padding: 4px 8px;" id="btn-close-left-drawer">&times;</button>
+      <strong id="left-title">Directory</strong>
+      <button class="btn" style="padding:0 8px; height:28px;" id="btn-close-left">&times;</button>
     </div>
     <div class="drawer-body">
       <div>
-        <div class="list-section-header">Pinned Items</div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">PINNED</div>
         <ul class="directory-list" id="list-pinned-left"></ul>
       </div>
       <div>
-        <div class="list-section-header" id="left-atoz-heading">A-Z Index</div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">ALL ITEMS (A-Z)</div>
         <ul class="directory-list" id="list-atoz-left"></ul>
       </div>
     </div>
   </aside>
 
-  <!-- Right Sidebar (Nursery / Enterprise File Engine) -->
+  <!-- Right Sidebar (Nursery / Workspaces) -->
   <aside class="drawer" id="drawer-right">
     <div class="drawer-header">
-      <span class="drawer-title">Nursery & Workspace</span>
-      <button class="btn" style="padding: 4px 8px;" id="btn-close-right-drawer">&times;</button>
+      <strong>Nursery & Backups</strong>
+      <button class="btn" style="padding:0 8px; height:28px;" id="btn-close-right">&times;</button>
     </div>
     <div class="drawer-body">
-      <div id="nursery-action-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div id="nursery-actions" style="display: flex; flex-direction: column; gap: 8px;"></div>
       <div>
-        <div class="list-section-header">Templates</div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">STARTER TEMPLATES</div>
         <ul class="directory-list" id="list-templates"></ul>
       </div>
       <div>
-        <div class="list-section-header">Pinned Workspaces</div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">PINNED WORKSPACES</div>
         <ul class="directory-list" id="list-pinned-right"></ul>
       </div>
       <div>
-        <div class="list-section-header" id="right-atoz-heading">A-Z Workspaces</div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div>
         <ul class="directory-list" id="list-atoz-right"></ul>
       </div>
       <div>
-        <div class="list-section-header">History & Changelog</div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">RECENT EDITS</div>
         <ul class="directory-list" id="list-history"></ul>
       </div>
     </div>
   </aside>
 
-  <!-- Node & Tree Inspector Modal -->
+  <!-- Inspector Modal -->
   <div class="modal-overlay" id="modal-inspector">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modal-title">Inspect Structure</h3>
-        <button class="btn" style="padding: 4px 8px;" id="btn-close-modal">&times;</button>
-      </div>
-      <div class="modal-body" id="modal-form-body"></div>
-      <div class="modal-footer" id="modal-action-footer"></div>
-    </div>
-  </div>
-
-  <!-- Seasonal / Lifecycle Management Modal -->
-  <div class="modal-overlay" id="modal-season">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>Seasonal & Lifecycle Engine</h3>
-        <button class="btn" style="padding: 4px 8px;" id="btn-close-season-modal">&times;</button>
+        <h3 id="inspect-header-title">Inspect Node</h3>
+        <button class="btn" style="padding:0 8px; height:28px;" id="btn-close-inspector">&times;</button>
       </div>
       <div class="modal-body">
         <div class="field-group">
-          <label>Tree Season State</label>
-          <select id="season-selector">
-            <option value="Spring">Spring (Germination & Leaf Sprouting)</option>
-            <option value="Summer">Summer (Growth Acceleration)</option>
-            <option value="Autumn">Autumn (Harvest & Ripening)</option>
-            <option value="Winter">Winter (Dormancy & Structural Rest)</option>
+          <label>Title</label>
+          <input type="text" id="node-input-title">
+        </div>
+        <div class="field-group">
+          <label>Notes & Details</label>
+          <textarea id="node-input-desc" rows="4"></textarea>
+        </div>
+        <div class="field-group" id="node-type-container">
+          <label>Type</label>
+          <select id="node-input-type">
+            <option value="branch">Branch (Group / Category)</option>
+            <option value="leaf">Leaf (Note / Idea)</option>
+            <option value="fruit">Fruit (Goal / Completed)</option>
+            <option value="seed">Seed (Question / Future Idea)</option>
           </select>
-        </div>
-        <div class="field-group">
-          <label>Prune Deadwood</label>
-          <p style="font-size: 11px; color: var(--text-muted);">
-            Scans this tree for disconnected, empty, or abandoned sub-nodes and moves them safely to the history archive.
-          </p>
-          <button class="btn btn-danger" id="btn-run-prune" style="margin-top: 6px;">Execute Prune Deadwood</button>
-        </div>
-        <div class="field-group">
-          <label>Harvest Basket (<span id="harvest-count">0</span> ripe fruits)</label>
-          <ul class="directory-list" id="list-harvest-basket" style="max-height: 140px; overflow-y: auto;"></ul>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn" id="btn-close-season-ok">Close</button>
-        <button class="btn btn-accent" id="btn-harvest-all-ripe">Harvest All Ripe</button>
+        <button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-node">Delete</button>
+        <button class="btn btn-accent" id="btn-save-node">Save Changes</button>
       </div>
     </div>
   </div>
 
-  <!-- First-Time Onboarding Walkthrough -->
-  <div class="modal-overlay" id="walkthrough-modal">
-    <div class="modal-card" style="width: 480px;">
+  <!-- Season & Clean-Up Modal -->
+  <div class="modal-overlay" id="modal-season">
+    <div class="modal-card">
       <div class="modal-header">
-        <h3 id="walkthrough-title">Welcome to Sylva</h3>
-        <span class="step-counter" id="walkthrough-step-counter">1 / 4</span>
+        <h3>Tree Life Cycle & Harvest</h3>
+        <button class="btn" style="padding:0 8px; height:28px;" id="btn-close-season">&times;</button>
       </div>
-      <div class="modal-body" id="walkthrough-body-text" style="font-size: 13px; line-height: 1.6; color: var(--text-muted);"></div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>Current Season</label>
+          <select id="select-tree-season">
+            <option value="Spring">Spring (New Growth)</option>
+            <option value="Summer">Summer (Active Development)</option>
+            <option value="Autumn">Autumn (Harvest & Review)</option>
+            <option value="Winter">Winter (Rest & Planning)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Clean Inactive Notes (Prune)</label>
+          <p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p>
+          <button class="btn" style="margin-top:6px;" id="btn-action-prune">Archive Empty Notes</button>
+        </div>
+        <div class="field-group">
+          <label>Harvest Basket (<span id="harvest-total">0</span> Completed Goals)</label>
+          <ul class="directory-list" id="list-harvest" style="max-height:120px; overflow-y:auto;"></ul>
+        </div>
+      </div>
       <div class="modal-footer">
-        <button class="btn" id="btn-skip-walkthrough">Skip</button>
-        <button class="btn btn-accent" id="btn-next-walkthrough">Next</button>
+        <button class="btn" id="btn-season-done">Done</button>
+        <button class="btn btn-accent" id="btn-harvest-all">Harvest All Ripe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Walkthrough Modal -->
+  <div class="modal-overlay" id="modal-walkthrough">
+    <div class="modal-card" style="width: 440px;">
+      <div class="modal-header">
+        <h3 id="walk-title">Welcome to Sylva</h3>
+        <span style="font-size:11px; font-family:var(--font-mono); color:var(--accent);" id="walk-step">1 / 3</span>
+      </div>
+      <div class="modal-body" id="walk-body" style="font-size:13px; line-height:1.6; color:var(--text-muted);"></div>
+      <div class="modal-footer">
+        <button class="btn" id="btn-walk-skip">Skip</button>
+        <button class="btn btn-accent" id="btn-walk-next">Next</button>
       </div>
     </div>
   </div>
@@ -368,61 +354,71 @@
     <canvas id="pip-canvas"></canvas>
   </aside>
 
-  <!-- Airgap Cryptographic Status Banner -->
-  <footer class="airgap-indicator">
-    <div class="security-dot"></div>
-    <span>AIR-GAPPED // ZERO-TELEMETRY PERSISTENCE ACTIVE</span>
+  <!-- Offline Privacy Banner -->
+  <footer class="privacy-tag">
+    <div class="privacy-dot"></div>
+    <span>100% PRIVATE & OFFLINE</span>
   </footer>
 
   <script>
-    /* Sylva Enterprise Core Engine v0.3.0-Alpha */
     (function () {
       'use strict';
 
-      // Application State
+      // PWA Install Prompt Interceptor
+      let deferredInstallPrompt = null;
+      const btnInstall = document.getElementById('btn-install-app');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        btnInstall.style.display = 'inline-flex';
+      });
+
+      btnInstall.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          btnInstall.style.display = 'none';
+        }
+        deferredInstallPrompt = null;
+      });
+
+      window.addEventListener('appinstalled', () => {
+        btnInstall.style.display = 'none';
+      });
+
+      // App State
       let state = {
-        viewMode: 'tree', // 'tree' or 'forest'
-        activeForestId: 'forest-alpha',
+        viewMode: 'tree',
+        activeForestId: 'forest-1',
         activeTreeId: 'tree-1',
-        isCanvasLocked: true,
+        isLocked: true,
+        panX: 40,
+        panY: 80,
         scale: 1,
-        panX: 0,
-        panY: 0,
         selectedId: null,
         history: [],
         forests: [
           {
-            id: 'forest-alpha',
-            title: 'Master Enterprise Architecture',
+            id: 'forest-1',
+            title: 'My Workspace',
             pinned: false,
             trees: [
               {
                 id: 'tree-1',
-                title: 'Core Philosophy & Architecture',
+                title: 'Project Roadmap',
                 type: 'Pine',
                 season: 'Spring',
                 pinned: true,
                 x: 120,
                 y: 100,
                 nodes: [
-                  { id: 'n-trunk', title: 'Core Philosophy', desc: 'Foundational root architecture of Sylva.', type: 'trunk', parentId: null, x: 260, y: 60, pinned: true },
-                  { id: 'n-b1', title: 'Data Sovereignty', desc: 'Local-first zero telemetry execution.', type: 'branch', parentId: 'n-trunk', x: 100, y: 220, pinned: true },
-                  { id: 'n-l1', title: 'IndexedDB Engine', desc: 'Hardware-level atomic persistence.', type: 'leaf', parentId: 'n-b1', x: 60, y: 380, pinned: false },
-                  { id: 'n-f1', title: 'Air-Gap Certification', desc: 'Milestone: Verified 0kb outbound egress.', type: 'fruit', parentId: 'n-b1', x: 220, y: 380, pinned: false, ripe: true },
-                  { id: 'n-b2', title: 'Tactile Ergonomics', desc: 'Unified pointer system for mobile and mouse.', type: 'branch', parentId: 'n-trunk', x: 420, y: 220, pinned: false },
-                  { id: 'n-s1', title: 'Stylus Gestures', desc: 'Evaluate palm rejection hooks.', type: 'seed', parentId: 'n-b2', x: 420, y: 380, pinned: false }
-                ]
-              },
-              {
-                id: 'tree-2',
-                title: 'Infrastructure Supply Chain',
-                type: 'Oak',
-                season: 'Summer',
-                pinned: false,
-                x: 360,
-                y: 100,
-                nodes: [
-                  { id: 'n-trunk2', title: 'Supply Chain Operations', desc: 'Logistics dependencies.', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }
+                  { id: 'root', title: 'Main Goal', desc: 'The starting vision for this project.', type: 'trunk', parentId: null, x: 260, y: 60, pinned: true },
+                  { id: 'b1', title: 'Phase 1: Design', desc: 'Core architecture and visual polish.', type: 'branch', parentId: 'root', x: 100, y: 220, pinned: true },
+                  { id: 'l1', title: 'Touch Tuning', desc: 'Smooth mobile gestures and zoom.', type: 'leaf', parentId: 'b1', x: 60, y: 380, pinned: false },
+                  { id: 'f1', title: 'Store Release', desc: 'Publish ready for install.', type: 'fruit', parentId: 'b1', x: 220, y: 380, pinned: false, ripe: true },
+                  { id: 'b2', title: 'Phase 2: Growth', desc: 'Reaching new users and builders.', type: 'branch', parentId: 'root', x: 420, y: 220, pinned: false }
                 ]
               }
             ]
@@ -430,187 +426,124 @@
         ]
       };
 
-      // Template Registry
       const TEMPLATES = [
-        { name: 'Personal PKM Life Tree', type: 'Pine', desc: 'Root goals branching into daily leaves and milestone fruits.' },
-        { name: 'Sports Analytics & Scouting', type: 'Oak', desc: 'Pitch sequences, batter profiles, and roster logic.' },
-        { name: 'Enterprise Incident Response', type: 'Willow', desc: 'SEV-0 triage hierarchy with contingency fruit nodes.' },
-        { name: 'Government Compliance Vault', type: 'Fruit Tree', desc: 'Air-gap attestation records and verifiable dependencies.' }
+        { name: 'Personal Life Goals', type: 'Pine', desc: 'Organize personal vision, habits, and target milestones.' },
+        { name: 'Work Project Sprint', type: 'Oak', desc: 'Track deliverables, team notes, and target completion fruits.' },
+        { name: 'Study & Learning Tree', type: 'Willow', desc: 'Break complex subjects into digestible concept leaves.' }
       ];
 
-      // DOM Elements
+      // DOM Handles
       const viewport = document.getElementById('viewport');
+      const world = document.getElementById('world');
       const canvasSvg = document.getElementById('canvas-svg');
       const treeLayer = document.getElementById('tree-layer');
       const forestLayer = document.getElementById('forest-layer');
       const btnContext = document.getElementById('btn-switch-context');
-      const btnDirectory = document.getElementById('btn-toggle-directory');
-      const btnNursery = document.getElementById('btn-toggle-nursery');
-      const btnLock = document.getElementById('btn-lock-canvas');
+      const btnLock = document.getElementById('btn-lock');
       const btnSeason = document.getElementById('btn-season');
+      const btnGrow = document.getElementById('btn-grow');
       const drawerLeft = document.getElementById('drawer-left');
       const drawerRight = document.getElementById('drawer-right');
-      const dropdownGrow = document.getElementById('dropdown-grow');
-      const growMenuItems = document.getElementById('grow-menu-items');
-      const modalInspector = document.getElementById('modal-inspector');
-      const modalSeason = document.getElementById('modal-season');
-      const walkthroughModal = document.getElementById('walkthrough-modal');
       const pipCanvas = document.getElementById('pip-canvas');
 
-      // Initialize
       function init() {
-        loadLocalStore();
-        setupEvents();
+        loadData();
+        setupInputHandlers();
         checkFirstRun();
         render();
       }
 
-      function getActiveForest() {
+      function getForest() {
         return state.forests.find(f => f.id === state.activeForestId) || state.forests[0];
       }
-
-      function getActiveTree() {
-        const forest = getActiveForest();
-        return forest.trees.find(t => t.id === state.activeTreeId) || forest.trees[0];
+      function getTree() {
+        const f = getForest();
+        return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0];
       }
 
-      function recordHistory(label) {
-        state.history.unshift({ time: new Date().toLocaleTimeString(), label: label });
-        if (state.history.length > 20) state.history.pop();
-        saveLocalStore();
+      function addHistory(text) {
+        state.history.unshift({ time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), text: text });
+        if (state.history.length > 15) state.history.pop();
+        saveData();
       }
 
-      function saveLocalStore() {
+      function saveData() {
         try {
-          localStorage.setItem('sylva_enterprise_state', JSON.stringify({
+          localStorage.setItem('sylva_v3_state', JSON.stringify({
             forests: state.forests,
             activeForestId: state.activeForestId,
             activeTreeId: state.activeTreeId,
             history: state.history
           }));
-        } catch (e) {
-          console.error('Local persistence boundary full', e);
-        }
+        } catch (e) {}
       }
 
-      function loadLocalStore() {
-        const raw = localStorage.getItem('sylva_enterprise_state');
+      function loadData() {
+        const raw = localStorage.getItem('sylva_v3_state');
         if (raw) {
           try {
             const parsed = JSON.parse(raw);
             state.forests = parsed.forests;
-            state.activeForestId = parsed.activeForestId || state.forests[0].id;
-            state.activeTreeId = parsed.activeTreeId || state.forests[0].trees[0].id;
+            state.activeForestId = parsed.activeForestId;
+            state.activeTreeId = parsed.activeTreeId;
             state.history = parsed.history || [];
           } catch (e) {}
         }
       }
 
-      // Procedural Botanical SVG Visualizers
-      function getTreeBotanicalIcon(type) {
-        switch (type) {
-          case 'Willow':
-            return `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M24 44V26"/>
-              <path d="M24 26C20 18 8 20 8 36"/>
-              <path d="M24 24C18 12 14 16 12 34"/>
-              <path d="M24 26C28 18 40 20 40 36"/>
-              <path d="M24 24C30 12 34 16 36 34"/>
-              <path d="M24 20C24 10 20 6 18 16"/>
-              <path d="M24 20C24 10 28 6 30 16"/>
-            </svg>`;
-          case 'Oak':
-            return `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M24 44V30"/>
-              <path d="M24 30C16 30 10 24 10 16C10 8 24 4 24 4C24 4 38 8 38 16C38 24 32 30 24 30Z"/>
-              <path d="M16 22C20 26 28 26 32 22"/>
-            </svg>`;
-          case 'Fruit Tree':
-            return `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M24 44V28"/>
-              <circle cx="24" cy="18" r="14"/>
-              <circle cx="18" cy="16" r="2.5" fill="var(--node-fruit)"/>
-              <circle cx="28" cy="14" r="2.5" fill="var(--node-fruit)"/>
-              <circle cx="23" cy="24" r="2.5" fill="var(--node-fruit)"/>
-            </svg>`;
-          case 'Pine':
-          default:
-            return `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M24 44V34"/>
-              <path d="M24 6L14 20H34L24 6Z"/>
-              <path d="M24 16L10 34H38L24 16Z"/>
-            </svg>`;
-        }
-      }
-
-      function getNodeTypeIcon(type) {
-        switch (type) {
-          case 'trunk':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M6 3v18M18 3v18M6 12h12"/></svg>`;
-          case 'branch':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.5"><path d="M6 3v12a3 3 0 0 0 3 3h12M18 9l3 9-9-3"/></svg>`;
-          case 'leaf':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 4 13C4 6 11 3 20 3c0 9-3 16-9 17Z"/><path d="M11 20c-1-4 0-8 3-11"/></svg>`;
-          case 'fruit':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><circle cx="12" cy="12" r="8"/><path d="M12 2v2"/></svg>`;
-          case 'seed':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
-        }
-      }
-
-      // Render Controller
-      function render() {
-        const forest = getActiveForest();
-        const tree = getActiveTree();
-
-        // Lock State Visuals
-        btnLock.className = `btn btn-lock ${state.isCanvasLocked ? '' : 'unlocked'}`;
-        btnLock.innerHTML = state.isCanvasLocked
-          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
-
-        viewport.className = state.isCanvasLocked ? 'canvas-locked' : '';
-        document.getElementById('btn-grow-trigger').disabled = !state.isCanvasLocked;
-        btnSeason.disabled = !state.isCanvasLocked;
-
-        // View Mode Toggle
-        if (state.viewMode === 'forest') {
-          btnContext.innerText = 'Tree View';
-          document.getElementById('label-directory-btn').innerText = 'Forest Inventory';
-          treeLayer.style.display = 'none';
-          forestLayer.style.display = 'block';
-          renderForestView();
-        } else {
-          btnContext.innerText = 'Forest View';
-          document.getElementById('label-directory-btn').innerText = 'Branches & Nodes';
-          forestLayer.style.display = 'none';
-          treeLayer.style.display = 'block';
-          renderTreeView();
-        }
-
-        renderGrowDropdown();
-        renderDrawers();
+      function updateWorldTransform() {
+        world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
         renderMinimap();
       }
 
-      // Tree View Render
-      function renderTreeView() {
-        const tree = getActiveTree();
+      function render() {
+        const forest = getForest();
+        const tree = getTree();
+
+        // Lock button styling
+        btnLock.className = `btn btn-lock ${state.isLocked ? '' : 'unlocked'}`;
+        btnLock.innerHTML = state.isLocked
+          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+        
+        btnGrow.disabled = !state.isLocked;
+        btnSeason.disabled = !state.isLocked;
+
+        if (state.viewMode === 'forest') {
+          btnContext.innerText = 'Tree View';
+          document.getElementById('label-directory').innerText = 'Forest';
+          treeLayer.style.display = 'none';
+          forestLayer.style.display = 'block';
+          renderForest();
+        } else {
+          btnContext.innerText = 'Forest View';
+          document.getElementById('label-directory').innerText = 'Nodes';
+          forestLayer.style.display = 'none';
+          treeLayer.style.display = 'block';
+          renderTree();
+        }
+
+        renderDrawers();
+        updateWorldTransform();
+      }
+
+      // Unified Tree Render: SVG lines & Nodes reside in same world container
+      function renderTree() {
+        const tree = getTree();
         treeLayer.innerHTML = '';
         canvasSvg.innerHTML = '';
 
-        // Render Bezier Branches
         tree.nodes.forEach(node => {
           if (node.parentId) {
-            const parent = tree.nodes.find(n => n.id === node.parentId);
-            if (parent) {
+            const p = tree.nodes.find(n => n.id === node.parentId);
+            if (p) {
               const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              const startX = parent.x + 95;
-              const startY = parent.y + 65;
-              const endX = node.x + 95;
-              const endY = node.y;
-              const midY = (startY + endY) / 2;
-              path.setAttribute('d', `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`);
+              const sx = p.x + 95;
+              const sy = p.y + 60;
+              const ex = node.x + 95;
+              const ey = node.y;
+              const my = (sy + ey) / 2;
+              path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
               path.setAttribute('stroke', '#33485E');
               path.setAttribute('stroke-width', '2.5');
               path.setAttribute('fill', 'none');
@@ -619,736 +552,516 @@
           }
         });
 
-        // Render Nodes
         tree.nodes.forEach(node => {
-          const card = document.createElement('div');
-          card.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''}`;
-          card.style.transform = `translate(${node.x}px, ${node.y}px)`;
-          card.innerHTML = `
-            <div class="node-header-row">
-              ${getNodeTypeIcon(node.type)}
-              <div class="node-title-text">${escapeHTML(node.title)}</div>
-            </div>
-            <div class="node-snippet-text">${escapeHTML(node.desc || '')}</div>
-          `;
-
-          // Tap/Click vs Drag mechanics
-          card.addEventListener('pointerdown', (e) => {
-            e.stopPropagation();
-            state.selectedId = node.id;
-            if (!state.isCanvasLocked) {
-              startDraggingEntity(e, node);
-            } else {
-              openNodeInspector(node);
-            }
-            render();
-          });
-
-          treeLayer.appendChild(card);
-        });
-
-        updateLayerTransform(treeLayer);
-      }
-
-      // Forest View Render
-      function renderForestView() {
-        const forest = getActiveForest();
-        forestLayer.innerHTML = '';
-        canvasSvg.innerHTML = '';
-
-        forest.trees.forEach(tree => {
           const el = document.createElement('div');
-          el.className = 'forest-tree-entity';
-          el.style.transform = `translate(${tree.x}px, ${tree.y}px)`;
+          el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''}`;
+          el.style.left = `${node.x}px`;
+          el.style.top = `${node.y}px`;
           el.innerHTML = `
-            <div class="tree-icon-container">
-              ${getTreeBotanicalIcon(tree.type)}
+            <div class="node-header-row">
+              ${getNodeIcon(node.type)}
+              <div class="node-title">${escapeHTML(node.title)}</div>
             </div>
-            <div class="tree-label-tag">${escapeHTML(tree.title)}</div>
-            <div class="tree-nodes-count">${tree.nodes.length} nodes (${tree.season})</div>
+            <div class="node-desc">${escapeHTML(node.desc || '')}</div>
           `;
 
           el.addEventListener('pointerdown', (e) => {
             e.stopPropagation();
-            state.selectedId = tree.id;
-            if (!state.isCanvasLocked) {
-              startDraggingEntity(e, tree);
+            state.selectedId = node.id;
+            if (!state.isLocked) {
+              startDragging(e, node);
             } else {
-              // Center and zoom in, then open tree
-              focusEntityCoordinates(tree.x, tree.y, () => {
-                state.activeTreeId = tree.id;
-                state.viewMode = 'tree';
-                render();
-              });
+              openInspector(node);
+            }
+            render();
+          });
+
+          treeLayer.appendChild(el);
+        });
+      }
+
+      function renderForest() {
+        const forest = getForest();
+        forestLayer.innerHTML = '';
+        canvasSvg.innerHTML = '';
+
+        forest.trees.forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'forest-tree-entity';
+          el.style.left = `${t.x}px`;
+          el.style.top = `${t.y}px`;
+          el.innerHTML = `
+            <div class="tree-icon-box">${getTreeIcon(t.type)}</div>
+            <div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div>
+            <div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>
+          `;
+
+          el.addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            state.selectedId = t.id;
+            if (!state.isLocked) {
+              startDragging(e, t);
+            } else {
+              state.activeTreeId = t.id;
+              state.viewMode = 'tree';
+              centerOn(t.x, t.y);
+              render();
             }
           });
 
           forestLayer.appendChild(el);
         });
-
-        updateLayerTransform(forestLayer);
       }
 
-      function updateLayerTransform(layer) {
-        layer.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
-        canvasSvg.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
-      }
-
-      // Dynamic Grow Menu Handler
-      function renderGrowDropdown() {
-        growMenuItems.innerHTML = '';
-        if (state.viewMode === 'tree') {
-          const items = [
-            { label: '... a Branch', type: 'branch', icon: getNodeTypeIcon('branch') },
-            { label: '... a Leaf', type: 'leaf', icon: getNodeTypeIcon('leaf') },
-            { label: '... a Fruit', type: 'fruit', icon: getNodeTypeIcon('fruit') },
-            { label: '... a Seed', type: 'seed', icon: getNodeTypeIcon('seed') }
-          ];
-          items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'dropdown-item';
-            div.innerHTML = `${item.icon} <span>${item.label}</span>`;
-            div.addEventListener('click', () => {
-              growNode(item.type);
-              dropdownGrow.classList.remove('active');
-            });
-            growMenuItems.appendChild(div);
-          });
-        } else {
-          const items = [
-            { label: '... a New Tree', act: 'tree', icon: getTreeBotanicalIcon('Pine') },
-            { label: '... a New Forest', act: 'forest', icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>` }
-          ];
-          items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'dropdown-item';
-            div.innerHTML = `<span style="width:20px;display:flex;">${item.icon}</span> <span>${item.label}</span>`;
-            div.addEventListener('click', () => {
-              if (item.act === 'tree') growTree();
-              else growForest();
-              dropdownGrow.classList.remove('active');
-            });
-            growMenuItems.appendChild(div);
-          });
-        }
-      }
-
-      function growNode(type) {
-        const tree = getActiveTree();
-        const parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
-        const newNode = {
-          id: 'node-' + Date.now(),
-          title: `New ${type.charAt(0).toUpperCase() + type.slice(1)}`,
-          desc: 'Operational parameters and notes.',
-          type: type,
-          parentId: parent.id,
-          x: parent.x + (Math.random() * 80 - 40),
-          y: parent.y + 160,
-          pinned: false
-        };
-        tree.nodes.push(newNode);
-        state.selectedId = newNode.id;
-        recordHistory(`Grew ${type} under ${parent.title}`);
-        render();
-        openNodeInspector(newNode);
-      }
-
-      function growTree() {
-        const forest = getActiveForest();
-        const newTree = {
-          id: 'tree-' + Date.now(),
-          title: 'New Project Tree',
-          type: 'Pine',
-          season: 'Spring',
-          pinned: false,
-          x: 200 + (forest.trees.length * 150),
-          y: 120,
-          nodes: [
-            { id: 'trunk-' + Date.now(), title: 'Core Trunk', desc: 'Root concept.', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }
-          ]
-        };
-        forest.trees.push(newTree);
-        recordHistory(`Planted new tree: ${newTree.title}`);
-        render();
-      }
-
-      function growForest() {
-        const newForestId = 'forest-' + Date.now();
-        const newForest = {
-          id: newForestId,
-          title: 'Autonomous Workspace Forest',
-          pinned: false,
-          trees: [
-            {
-              id: 'tree-init',
-              title: 'Primary Seed Tree',
-              type: 'Pine',
-              season: 'Spring',
-              pinned: false,
-              x: 180,
-              y: 100,
-              nodes: [
-                { id: 'trunk-init', title: 'System Root', desc: 'Starting thought boundary.', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }
-              ]
-            }
-          ]
-        };
-        state.forests.push(newForest);
-        state.activeForestId = newForestId;
-        state.activeTreeId = 'tree-init';
-        recordHistory('Cultivated new autonomous Forest');
-        render();
-      }
-
-      // Dragging Engine
-      function startDraggingEntity(e, entity) {
-        let startClientX = e.clientX;
-        let startClientY = e.clientY;
-        let origX = entity.x;
-        let origY = entity.y;
+      function startDragging(e, entity) {
+        let sx = e.clientX;
+        let sy = e.clientY;
+        let ox = entity.x;
+        let oy = entity.y;
 
         function onMove(evt) {
-          const dx = (evt.clientX - startClientX) / state.scale;
-          const dy = (evt.clientY - startClientY) / state.scale;
-          entity.x = origX + dx;
-          entity.y = origY + dy;
-          if (state.viewMode === 'tree') renderTreeView();
-          else renderForestView();
+          const dx = (evt.clientX - sx) / state.scale;
+          const dy = (evt.clientY - sy) / state.scale;
+          entity.x = ox + dx;
+          entity.y = oy + dy;
+          if (state.viewMode === 'tree') renderTree();
+          else renderForest();
         }
 
-        function onEnd() {
+        function onUp() {
           window.removeEventListener('pointermove', onMove);
-          window.removeEventListener('pointerup', onEnd);
-          saveLocalStore();
+          window.removeEventListener('pointerup', onUp);
+          saveData();
         }
 
         window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onEnd);
+        window.addEventListener('pointerup', onUp);
       }
 
-      // Navigation & Minimap Jump
-      function focusEntityCoordinates(targetX, targetY, callback) {
-        state.scale = 1.2;
-        state.panX = (window.innerWidth / 2) - (targetX * state.scale) - 80;
-        state.panY = 120 - (targetY * state.scale);
-        render();
-        if (callback) setTimeout(callback, 200);
-      }
+      // Gestures: Unified Multi-Touch Pinch-To-Zoom & Pan Engine
+      function setupInputHandlers() {
+        let activePointers = new Map();
+        let prevPinchDist = null;
+        let panStartClientX = 0;
+        let panStartClientY = 0;
+        let initialPanX = 0;
+        let initialPanY = 0;
 
-      // Sidebar Directories
-      function renderDrawers() {
-        const forest = getActiveForest();
-        const tree = getActiveTree();
-
-        // Left Drawer
-        const listPinnedLeft = document.getElementById('list-pinned-left');
-        const listAtoZLeft = document.getElementById('list-atoz-left');
-        listPinnedLeft.innerHTML = '';
-        listAtoZLeft.innerHTML = '';
-
-        if (state.viewMode === 'tree') {
-          document.getElementById('left-drawer-heading').innerText = 'Tree Hierarchy';
-          document.getElementById('left-atoz-heading').innerText = 'A-Z Branches & Nodes';
-
-          const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title));
-          sorted.forEach(node => {
-            const li = createDirItem(node.title, getNodeTypeIcon(node.type), node.pinned, () => {
-              focusEntityCoordinates(node.x, node.y);
-              openNodeInspector(node);
-            }, () => {
-              node.pinned = !node.pinned;
-              saveLocalStore();
-              renderDrawers();
-            });
-
-            if (node.pinned) listPinnedLeft.appendChild(li.cloneNode(true));
-            listAtoZLeft.appendChild(li);
-          });
-        } else {
-          document.getElementById('left-drawer-heading').innerText = 'Forest Directory';
-          document.getElementById('left-atoz-heading').innerText = 'A-Z Trees';
-
-          const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title));
-          sorted.forEach(t => {
-            const li = createDirItem(t.title, getTreeBotanicalIcon(t.type), t.pinned, () => {
-              focusEntityCoordinates(t.x, t.y, () => {
-                state.activeTreeId = t.id;
-                state.viewMode = 'tree';
-                render();
-              });
-            }, () => {
-              t.pinned = !t.pinned;
-              saveLocalStore();
-              renderDrawers();
-            });
-
-            if (t.pinned) listPinnedLeft.appendChild(li.cloneNode(true));
-            listAtoZLeft.appendChild(li);
-          });
-        }
-
-        // Right Drawer (Nursery)
-        renderNurseryActions();
-        renderRightDirectories();
-        renderHistoryList();
-      }
-
-      function createDirItem(label, iconHtml, isPinned, onClick, onPinToggle) {
-        const li = document.createElement('li');
-        li.className = 'directory-item';
-        li.innerHTML = `
-          <div class="directory-item-left">
-            <span style="display:inline-flex; width:16px;">${iconHtml}</span>
-            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">${escapeHTML(label)}</span>
-          </div>
-          <span class="pin-toggle ${isPinned ? 'pinned' : ''}">★</span>
-        `;
-        li.querySelector('.directory-item-left').addEventListener('click', onClick);
-        li.querySelector('.pin-toggle').addEventListener('click', (e) => {
-          e.stopPropagation();
-          onPinToggle();
-        });
-        return li;
-      }
-
-      function renderNurseryActions() {
-        const container = document.getElementById('nursery-action-container');
-        container.innerHTML = '';
-
-        if (state.viewMode === 'forest') {
-          container.innerHTML = `
-            <button class="btn btn-accent" id="btn-save-forest">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              Save Forest (.sylva.json)
-            </button>
-            <button class="btn" id="btn-transplant-forest">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              Transplant / Import Forest
-            </button>
-          `;
-          document.getElementById('btn-save-forest').addEventListener('click', exportForestJSON);
-          document.getElementById('btn-transplant-forest').addEventListener('click', triggerImportFile);
-        } else {
-          container.innerHTML = `
-            <button class="btn btn-accent" id="btn-save-branch">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/></svg>
-              Save Active Branch (.json)
-            </button>
-            <button class="btn" id="btn-transplant-branch">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              Transplant / Import Branch
-            </button>
-          `;
-          document.getElementById('btn-save-branch').addEventListener('click', exportActiveBranchJSON);
-          document.getElementById('btn-transplant-branch').addEventListener('click', triggerImportFile);
-        }
-      }
-
-      function renderRightDirectories() {
-        const listTemplates = document.getElementById('list-templates');
-        const listPinnedRight = document.getElementById('list-pinned-right');
-        const listAtoZRight = document.getElementById('list-atoz-right');
-        listTemplates.innerHTML = '';
-        listPinnedRight.innerHTML = '';
-        listAtoZRight.innerHTML = '';
-
-        // Templates
-        TEMPLATES.forEach(tmpl => {
-          const li = document.createElement('li');
-          li.className = 'directory-item';
-          li.innerHTML = `
-            <div class="directory-item-left">
-              <span style="display:inline-flex; width:16px;">${getTreeBotanicalIcon(tmpl.type)}</span>
-              <span>${tmpl.name}</span>
-            </div>
-            <span style="font-size:10px; color:var(--text-muted);">Seed</span>
-          `;
-          li.addEventListener('click', () => loadTemplate(tmpl));
-          listTemplates.appendChild(li);
+        viewport.addEventListener('pointerdown', (e) => {
+          activePointers.set(e.pointerId, e);
+          if (activePointers.size === 1) {
+            panStartClientX = e.clientX;
+            panStartClientY = e.clientY;
+            initialPanX = state.panX;
+            initialPanY = state.panY;
+          }
         });
 
-        // Forests
-        const sortedForests = [...state.forests].sort((a,b) => a.title.localeCompare(b.title));
-        sortedForests.forEach(f => {
-          const li = createDirItem(f.title, `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, f.pinned, () => {
-            state.activeForestId = f.id;
-            state.activeTreeId = f.trees[0].id;
-            render();
-          }, () => {
-            f.pinned = !f.pinned;
-            saveLocalStore();
-            renderDrawers();
-          });
+        window.addEventListener('pointermove', (e) => {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, e);
 
-          if (f.pinned) listPinnedRight.appendChild(li.cloneNode(true));
-          listAtoZRight.appendChild(li);
-        });
-      }
+          // 2-Finger Pinch Zoom
+          if (activePointers.size === 2) {
+            const pts = Array.from(activePointers.values());
+            const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
 
-      function renderHistoryList() {
-        const listHistory = document.getElementById('list-history');
-        listHistory.innerHTML = '';
-        state.history.forEach(h => {
-          const li = document.createElement('li');
-          li.className = 'directory-item';
-          li.style.cursor = 'default';
-          li.innerHTML = `
-            <span style="font-size:11px;">${escapeHTML(h.label)}</span>
-            <span style="font-size:9px; font-family:var(--font-mono); color:var(--text-faint);">${h.time}</span>
-          `;
-          listHistory.appendChild(li);
-        });
-      }
-
-      // Modals: Inspector
-      function openNodeInspector(node) {
-        if (!state.isCanvasLocked) return;
-        document.getElementById('modal-title').innerText = `Inspect ${node.type.toUpperCase()}`;
-        const body = document.getElementById('modal-form-body');
-        const footer = document.getElementById('modal-action-footer');
-
-        body.innerHTML = `
-          <div class="field-group">
-            <label>Title</label>
-            <input type="text" id="inspect-title" value="${escapeHTML(node.title)}">
-          </div>
-          <div class="field-group">
-            <label>Description & Ponderances</label>
-            <textarea id="inspect-desc" rows="4">${escapeHTML(node.desc || '')}</textarea>
-          </div>
-          <div class="field-group">
-            <label>Structural Category</label>
-            <select id="inspect-type" ${node.type === 'trunk' ? 'disabled' : ''}>
-              <option value="branch" ${node.type === 'branch' ? 'selected' : ''}>Branch (Sub-cluster)</option>
-              <option value="leaf" ${node.type === 'leaf' ? 'selected' : ''}>Leaf (Note & Concept)</option>
-              <option value="fruit" ${node.type === 'fruit' ? 'selected' : ''}>Fruit (Milestone Target)</option>
-              <option value="seed" ${node.type === 'seed' ? 'selected' : ''}>Seed (Exploratory Vector)</option>
-            </select>
-          </div>
-        `;
-
-        footer.innerHTML = `
-          <button class="btn btn-danger" id="btn-delete-node" ${node.type === 'trunk' ? 'disabled' : ''}>Delete</button>
-          <button class="btn btn-accent" id="btn-save-node">Save Changes</button>
-        `;
-
-        document.getElementById('btn-save-node').addEventListener('click', () => {
-          node.title = document.getElementById('inspect-title').value;
-          node.desc = document.getElementById('inspect-desc').value;
-          if (node.type !== 'trunk') node.type = document.getElementById('inspect-type').value;
-          recordHistory(`Updated node: ${node.title}`);
-          modalInspector.classList.remove('open');
-          render();
-        });
-
-        const btnDel = document.getElementById('btn-delete-node');
-        if (node.type !== 'trunk') {
-          btnDel.addEventListener('click', () => {
-            const tree = getActiveTree();
-            tree.nodes = tree.nodes.filter(n => n.id !== node.id && n.parentId !== node.id);
-            recordHistory(`Deleted node and subtree: ${node.title}`);
-            modalInspector.classList.remove('open');
-            render();
-          });
-        }
-
-        modalInspector.classList.add('open');
-      }
-
-      // Modals: Seasonal Management
-      function openSeasonModal() {
-        if (!state.isCanvasLocked) return;
-        const tree = getActiveTree();
-        document.getElementById('season-selector').value = tree.season;
-
-        const basketList = document.getElementById('list-harvest-basket');
-        basketList.innerHTML = '';
-        const ripeFruits = tree.nodes.filter(n => n.type === 'fruit');
-        document.getElementById('harvest-count').innerText = ripeFruits.length;
-
-        ripeFruits.forEach(fruit => {
-          const li = document.createElement('li');
-          li.className = 'directory-item';
-          li.innerHTML = `
-            <div class="directory-item-left">
-              <span>${getNodeTypeIcon('fruit')}</span>
-              <span>${escapeHTML(fruit.title)}</span>
-            </div>
-            <button class="btn" style="padding: 2px 6px; font-size:10px;">Inspect</button>
-          `;
-          li.addEventListener('click', () => {
-            modalSeason.classList.remove('open');
-            openNodeInspector(fruit);
-          });
-          basketList.appendChild(li);
-        });
-
-        modalSeason.classList.add('open');
-      }
-
-      // Minimap Picture-in-Picture
-      function renderMinimap() {
-        const ctx = pipCanvas.getContext('2d');
-        pipCanvas.width = 180;
-        pipCanvas.height = 130;
-        ctx.fillStyle = '#070B0E';
-        ctx.fillRect(0, 0, 180, 130);
-
-        if (state.viewMode === 'tree') {
-          const tree = getActiveTree();
-          ctx.strokeStyle = '#33485E';
-          ctx.lineWidth = 1;
-          tree.nodes.forEach(n => {
-            if (n.parentId) {
-              const p = tree.nodes.find(pn => pn.id === n.parentId);
-              if (p) {
-                ctx.beginPath();
-                ctx.moveTo(p.x * 0.15 + 20, p.y * 0.15 + 20);
-                ctx.lineTo(n.x * 0.15 + 20, n.y * 0.15 + 20);
-                ctx.stroke();
-              }
+            if (prevPinchDist) {
+              const ratio = dist / prevPinchDist;
+              state.scale = Math.min(Math.max(state.scale * ratio, 0.3), 2.5);
+              updateWorldTransform();
             }
-          });
-          tree.nodes.forEach(n => {
-            ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : n.type === 'leaf' ? '#10B981' : '#38BDF8';
-            ctx.fillRect(n.x * 0.15 + 16, n.y * 0.15 + 16, 8, 5);
-          });
-        } else {
-          const forest = getActiveForest();
-          forest.trees.forEach(t => {
-            ctx.fillStyle = '#2DD4BF';
-            ctx.beginPath();
-            ctx.arc(t.x * 0.15 + 20, t.y * 0.15 + 20, 6, 0, Math.PI * 2);
-            ctx.fill();
-          });
-        }
-      }
+            prevPinchDist = dist;
+          }
+          // 1-Finger Pan
+          else if (activePointers.size === 1) {
+            const dx = e.clientX - panStartClientX;
+            const dy = e.clientY - panStartClientY;
+            state.panX = initialPanX + dx;
+            state.panY = initialPanY + dy;
+            updateWorldTransform();
+          }
+        });
 
-      // Import / Export Enterprise File Handlers
-      function exportForestJSON() {
-        const forest = getActiveForest();
-        const payload = {
-          version: '0.3.0-alpha',
-          timestamp: new Date().toISOString(),
-          type: 'Sylva-Forest-Sovereign-Package',
-          data: forest
+        const endPointer = (e) => {
+          activePointers.delete(e.pointerId);
+          if (activePointers.size < 2) prevPinchDist = null;
         };
-        triggerDownload(`${forest.title.toLowerCase().replace(/\s+/g, '_')}.sylva.json`, JSON.stringify(payload, null, 2));
-      }
 
-      function exportActiveBranchJSON() {
-        const tree = getActiveTree();
-        const payload = {
-          version: '0.3.0-alpha',
-          timestamp: new Date().toISOString(),
-          type: 'Sylva-Branch-Sovereign-Package',
-          data: tree
-        };
-        triggerDownload(`${tree.title.toLowerCase().replace(/\s+/g, '_')}.branch.json`, JSON.stringify(payload, null, 2));
-      }
+        window.addEventListener('pointerup', endPointer);
+        window.addEventListener('pointercancel', endPointer);
 
-      function triggerDownload(filename, text) {
-        const a = document.createElement('a');
-        a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(text);
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        recordHistory(`Exported sovereign bundle: ${filename}`);
-      }
+        // Mouse Wheel Zoom
+        viewport.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const zoom = e.deltaY < 0 ? 1.08 : 0.92;
+          state.scale = Math.min(Math.max(state.scale * zoom, 0.3), 2.5);
+          updateWorldTransform();
+        }, { passive: false });
 
-      function triggerImportFile() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (evt) => {
-            try {
-              const parsed = JSON.parse(evt.target.result);
-              if (parsed.data && parsed.type === 'Sylva-Forest-Sovereign-Package') {
-                parsed.data.id = 'forest-' + Date.now();
-                state.forests.push(parsed.data);
-                state.activeForestId = parsed.data.id;
-                recordHistory(`Transplanted Forest: ${parsed.data.title}`);
-              } else if (parsed.data) {
-                const forest = getActiveForest();
-                parsed.data.id = 'tree-' + Date.now();
-                forest.trees.push(parsed.data);
-                state.activeTreeId = parsed.data.id;
-                recordHistory(`Transplanted Tree: ${parsed.data.title}`);
-              }
-              render();
-            } catch (err) {
-              alert('Invalid or corrupted Sylva sovereign package.');
-            }
-          };
-          reader.readAsText(file);
-        };
-        input.click();
-      }
-
-      function loadTemplate(tmpl) {
-        const forest = getActiveForest();
-        const newTree = {
-          id: 'tree-' + Date.now(),
-          title: tmpl.name,
-          type: tmpl.type,
-          season: 'Spring',
-          pinned: false,
-          x: 200 + (forest.trees.length * 150),
-          y: 120,
-          nodes: [
-            { id: 't-' + Date.now(), title: tmpl.name, desc: tmpl.desc, type: 'trunk', parentId: null, x: 260, y: 60, pinned: true },
-            { id: 'b1-' + Date.now(), title: 'Core Vector 1', desc: 'Primary operational line.', type: 'branch', parentId: 't-' + Date.now(), x: 120, y: 220, pinned: false },
-            { id: 'l1-' + Date.now(), title: 'Specification', desc: 'Detailed parameter notes.', type: 'leaf', parentId: 'b1-' + Date.now(), x: 120, y: 380, pinned: false },
-            { id: 'f1-' + Date.now(), title: 'Delivery Milestone', desc: 'Target deliverable.', type: 'fruit', parentId: 'b1-' + Date.now(), x: 260, y: 380, pinned: false }
-          ]
-        };
-        forest.trees.push(newTree);
-        state.activeTreeId = newTree.id;
-        state.viewMode = 'tree';
-        recordHistory(`Instantiated template: ${tmpl.name}`);
-        render();
-      }
-
-      // Event Listeners
-      function setupEvents() {
+        // Header Button Actions
         btnContext.addEventListener('click', () => {
           state.viewMode = state.viewMode === 'tree' ? 'forest' : 'tree';
           render();
         });
 
-        document.getElementById('btn-grow-trigger').addEventListener('click', (e) => {
-          e.stopPropagation();
-          dropdownGrow.classList.toggle('active');
+        btnLock.addEventListener('click', () => {
+          state.isLocked = !state.isLocked;
+          render();
         });
 
-        document.addEventListener('click', () => dropdownGrow.classList.remove('active'));
-
-        btnDirectory.addEventListener('click', () => drawerLeft.classList.toggle('open'));
-        btnNursery.addEventListener('click', () => drawerRight.classList.toggle('open'));
-        document.getElementById('btn-close-left-drawer').addEventListener('click', () => drawerLeft.classList.remove('open'));
-        document.getElementById('btn-close-right-drawer').addEventListener('click', () => drawerRight.classList.remove('open'));
-
-        btnLock.addEventListener('click', () => {
-          state.isCanvasLocked = !state.isCanvasLocked;
-          render();
+        btnGrow.addEventListener('click', () => {
+          if (state.viewMode === 'tree') {
+            const tree = getTree();
+            const parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
+            const node = {
+              id: 'n_' + Date.now(),
+              title: 'New Idea',
+              desc: '',
+              type: 'leaf',
+              parentId: parent.id,
+              x: parent.x + (Math.random() * 60 - 30),
+              y: parent.y + 160,
+              pinned: false
+            };
+            tree.nodes.push(node);
+            state.selectedId = node.id;
+            addHistory(`Added leaf under ${parent.title}`);
+            render();
+            openInspector(node);
+          } else {
+            const forest = getForest();
+            const newTree = {
+              id: 't_' + Date.now(),
+              title: 'New Project Tree',
+              type: 'Pine',
+              season: 'Spring',
+              pinned: false,
+              x: 180 + (forest.trees.length * 140),
+              y: 100,
+              nodes: [
+                { id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }
+              ]
+            };
+            forest.trees.push(newTree);
+            addHistory(`Planted new tree`);
+            render();
+          }
         });
 
         btnSeason.addEventListener('click', openSeasonModal);
-        document.getElementById('btn-close-season-modal').addEventListener('click', () => modalSeason.classList.remove('open'));
-        document.getElementById('btn-close-season-ok').addEventListener('click', () => {
-          const tree = getActiveTree();
-          tree.season = document.getElementById('season-selector').value;
-          modalSeason.classList.remove('open');
+        document.getElementById('btn-close-season').addEventListener('click', () => document.getElementById('modal-season').classList.remove('open'));
+        document.getElementById('btn-season-done').addEventListener('click', () => {
+          getTree().season = document.getElementById('select-tree-season').value;
+          document.getElementById('modal-season').classList.remove('open');
           render();
         });
 
-        document.getElementById('btn-run-prune').addEventListener('click', () => {
-          const tree = getActiveTree();
-          const initialCount = tree.nodes.length;
-          // Prune leaf nodes that have empty descriptions and no children
-          const parentIds = new Set(tree.nodes.map(n => n.parentId).filter(Boolean));
-          tree.nodes = tree.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0));
-          recordHistory(`Pruned deadwood (${initialCount - tree.nodes.length} nodes archived)`);
-          modalSeason.classList.remove('open');
+        document.getElementById('btn-action-prune').addEventListener('click', () => {
+          const t = getTree();
+          const orig = t.nodes.length;
+          const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean));
+          t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0));
+          addHistory(`Cleaned ${orig - t.nodes.length} empty notes`);
+          document.getElementById('modal-season').classList.remove('open');
           render();
         });
 
-        document.getElementById('btn-harvest-all-ripe').addEventListener('click', () => {
-          const tree = getActiveTree();
-          let count = 0;
-          tree.nodes.forEach(n => {
-            if (n.type === 'fruit') { n.harvested = true; count++; }
+        document.getElementById('btn-harvest-all').addEventListener('click', () => {
+          const t = getTree();
+          let c = 0;
+          t.nodes.forEach(n => { if (n.type === 'fruit') { n.harvested = true; c++; } });
+          addHistory(`Harvested ${c} completed fruits`);
+          document.getElementById('modal-season').classList.remove('open');
+          render();
+        });
+
+        document.getElementById('btn-toggle-directory').addEventListener('click', () => drawerLeft.classList.toggle('open'));
+        document.getElementById('btn-close-left').addEventListener('click', () => drawerLeft.classList.remove('open'));
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => drawerRight.classList.toggle('open'));
+        document.getElementById('btn-close-right').addEventListener('click', () => drawerRight.classList.remove('open'));
+        document.getElementById('btn-close-inspector').addEventListener('click', () => document.getElementById('modal-inspector').classList.remove('open'));
+      }
+
+      function centerOn(x, y) {
+        state.scale = 1.0;
+        state.panX = (window.innerWidth / 2) - x - 95;
+        state.panY = (window.innerHeight / 2) - y - 60;
+        updateWorldTransform();
+      }
+
+      function openInspector(node) {
+        document.getElementById('inspect-header-title').innerText = `Inspect ${node.type.toUpperCase()}`;
+        document.getElementById('node-input-title').value = node.title;
+        document.getElementById('node-input-desc').value = node.desc || '';
+        const selectType = document.getElementById('node-input-type');
+        selectType.value = node.type;
+        selectType.disabled = (node.type === 'trunk');
+
+        document.getElementById('btn-save-node').onclick = () => {
+          node.title = document.getElementById('node-input-title').value;
+          node.desc = document.getElementById('node-input-desc').value;
+          if (node.type !== 'trunk') node.type = selectType.value;
+          addHistory(`Saved: ${node.title}`);
+          document.getElementById('modal-inspector').classList.remove('open');
+          render();
+        };
+
+        const btnDel = document.getElementById('btn-delete-node');
+        btnDel.style.display = node.type === 'trunk' ? 'none' : 'inline-flex';
+        btnDel.onclick = () => {
+          const t = getTree();
+          t.nodes = t.nodes.filter(n => n.id !== node.id && n.parentId !== node.id);
+          addHistory(`Deleted: ${node.title}`);
+          document.getElementById('modal-inspector').classList.remove('open');
+          render();
+        };
+
+        document.getElementById('modal-inspector').classList.add('open');
+      }
+
+      function openSeasonModal() {
+        const t = getTree();
+        document.getElementById('select-tree-season').value = t.season;
+        const list = document.getElementById('list-harvest');
+        list.innerHTML = '';
+        const fruits = t.nodes.filter(n => n.type === 'fruit');
+        document.getElementById('harvest-total').innerText = fruits.length;
+
+        fruits.forEach(f => {
+          const li = document.createElement('li');
+          li.className = 'directory-item';
+          li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn" style="height:24px; font-size:10px;">Inspect</button>`;
+          li.addEventListener('click', () => {
+            document.getElementById('modal-season').classList.remove('open');
+            openInspector(f);
           });
-          recordHistory(`Harvested ${count} ripe fruit nodes`);
-          modalSeason.classList.remove('open');
-          render();
+          list.appendChild(li);
         });
 
-        document.getElementById('btn-close-modal').addEventListener('click', () => modalInspector.classList.remove('open'));
+        document.getElementById('modal-season').classList.add('open');
+      }
 
-        // Viewport Panning & Zooming
-        let isPanning = false, startX = 0, startY = 0;
-        viewport.addEventListener('pointerdown', (e) => {
-          if (e.target === viewport || e.target === canvasSvg) {
-            isPanning = true;
-            startX = e.clientX - state.panX;
-            startY = e.clientY - state.panY;
-          }
+      function renderDrawers() {
+        const forest = getForest();
+        const tree = getTree();
+
+        // Left drawer directory
+        const pLeft = document.getElementById('list-pinned-left');
+        const aLeft = document.getElementById('list-atoz-left');
+        pLeft.innerHTML = '';
+        aLeft.innerHTML = '';
+
+        if (state.viewMode === 'tree') {
+          document.getElementById('left-title').innerText = 'Tree Directory';
+          const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title));
+          sorted.forEach(n => {
+            const li = createDirItem(n.title, getNodeIcon(n.type), n.pinned, () => {
+              centerOn(n.x, n.y);
+              openInspector(n);
+            }, () => {
+              n.pinned = !n.pinned;
+              saveData();
+              renderDrawers();
+            });
+            if (n.pinned) pLeft.appendChild(li.cloneNode(true));
+            aLeft.appendChild(li);
+          });
+        } else {
+          document.getElementById('left-title').innerText = 'Forest Directory';
+          const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title));
+          sorted.forEach(t => {
+            const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => {
+              state.activeTreeId = t.id;
+              state.viewMode = 'tree';
+              centerOn(t.x, t.y);
+              render();
+            }, () => {
+              t.pinned = !t.pinned;
+              saveData();
+              renderDrawers();
+            });
+            if (t.pinned) pLeft.appendChild(li.cloneNode(true));
+            aLeft.appendChild(li);
+          });
+        }
+
+        // Right drawer nursery & actions
+        const acts = document.getElementById('nursery-actions');
+        acts.innerHTML = `
+          <button class="btn btn-accent" id="btn-export-backup">Export Backup (.json)</button>
+          <button class="btn" id="btn-import-backup">Import Backup File</button>
+        `;
+        document.getElementById('btn-export-backup').onclick = () => {
+          const payload = { version: '0.3.1', forest: getForest() };
+          const a = document.createElement('a');
+          a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(payload, null, 2));
+          a.download = `sylva_backup.json`;
+          a.click();
+          addHistory('Exported JSON backup');
+        };
+        document.getElementById('btn-import-backup').onclick = () => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.json';
+          input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const r = new FileReader();
+            r.onload = (evt) => {
+              try {
+                const parsed = JSON.parse(evt.target.result);
+                if (parsed.forest) {
+                  parsed.forest.id = 'f_' + Date.now();
+                  state.forests.push(parsed.forest);
+                  state.activeForestId = parsed.forest.id;
+                  addHistory(`Imported forest`);
+                  render();
+                }
+              } catch (err) { alert('Invalid backup file format.'); }
+            };
+            r.readAsText(file);
+          };
+          input.click();
+        };
+
+        const lTmpl = document.getElementById('list-templates');
+        lTmpl.innerHTML = '';
+        TEMPLATES.forEach(tmpl => {
+          const li = document.createElement('li');
+          li.className = 'directory-item';
+          li.innerHTML = `<span>${tmpl.name}</span><span style="font-size:10px; color:var(--text-muted);">Use</span>`;
+          li.onclick = () => {
+            const f = getForest();
+            const newT = {
+              id: 't_' + Date.now(),
+              title: tmpl.name,
+              type: tmpl.type,
+              season: 'Spring',
+              pinned: false,
+              x: 180 + (f.trees.length * 140),
+              y: 100,
+              nodes: [
+                { id: 'r_' + Date.now(), title: tmpl.name, desc: tmpl.desc, type: 'trunk', parentId: null, x: 260, y: 60, pinned: true }
+              ]
+            };
+            f.trees.push(newT);
+            state.activeTreeId = newT.id;
+            state.viewMode = 'tree';
+            addHistory(`Created template tree`);
+            render();
+          };
+          lTmpl.appendChild(li);
         });
 
-        window.addEventListener('pointermove', (e) => {
-          if (isPanning) {
-            state.panX = e.clientX - startX;
-            state.panY = e.clientY - startY;
-            if (state.viewMode === 'tree') updateLayerTransform(treeLayer);
-            else updateLayerTransform(forestLayer);
-          }
-        });
-
-        window.addEventListener('pointerup', () => isPanning = false);
-
-        viewport.addEventListener('wheel', (e) => {
-          e.preventDefault();
-          const factor = 1.08;
-          if (e.deltaY < 0) state.scale = Math.min(state.scale * factor, 3.0);
-          else state.scale = Math.max(state.scale / factor, 0.25);
-          if (state.viewMode === 'tree') updateLayerTransform(treeLayer);
-          else updateLayerTransform(forestLayer);
-        }, { passive: false });
-
-        // Minimap Click Navigation
-        pipCanvas.addEventListener('click', (e) => {
-          const rect = pipCanvas.getBoundingClientRect();
-          const clickX = (e.clientX - rect.left) / 0.15;
-          const clickY = (e.clientY - rect.top) / 0.15;
-          focusEntityCoordinates(clickX, clickY);
+        // Recent edits
+        const lHist = document.getElementById('list-history');
+        lHist.innerHTML = '';
+        state.history.forEach(h => {
+          const li = document.createElement('li');
+          li.className = 'directory-item';
+          li.style.cursor = 'default';
+          li.innerHTML = `<span>${escapeHTML(h.text)}</span><span style="font-size:10px; color:var(--text-muted);">${h.time}</span>`;
+          lHist.appendChild(li);
         });
       }
 
-      // First-Run Walkthrough Logic
-      const WALKTHROUGH_STEPS = [
-        { title: 'Deterministic Spatial Hierarchy', text: 'Welcome to Sylva. Unlike endless messy whiteboards, Sylva structures thought using an intuitive botanical model: Root Trunks branch outward into nested Leaves, Seeds, and harvestable Milestone Fruits.' },
-        { title: 'The Canopy Lock Mechanism', text: 'To reorganize or position nodes, click the Lock icon in the header to unlock the canvas. When locked, nodes are protected against accidental dragging, enabling instant tap-to-inspect and smooth navigation.' },
-        { title: 'Sovereign File Nursery', text: 'Sylva operates completely offline with zero telemetry. Use the Nursery panel to export human-readable .sylva.json bundles, instantiate turn-key templates, or transplant sub-branches across enterprise teams.' }
+      function createDirItem(title, iconHtml, isPinned, onClick, onPin) {
+        const li = document.createElement('li');
+        li.className = 'directory-item';
+        li.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+            ${iconHtml}
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${escapeHTML(title)}</span>
+          </div>
+          <span style="cursor:pointer; color:${isPinned ? 'var(--node-fruit)' : 'var(--text-faint)'};">★</span>
+        `;
+        li.firstElementChild.onclick = onClick;
+        li.lastElementChild.onclick = (e) => { e.stopPropagation(); onPin(); };
+        return li;
+      }
+
+      function getNodeIcon(type) {
+        switch (type) {
+          case 'trunk': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M6 3v18M18 3v18M6 12h12"/></svg>`;
+          case 'branch': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.5"><path d="M6 3v12a3 3 0 0 0 3 3h12M18 9l3 9-9-3"/></svg>`;
+          case 'fruit': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><circle cx="12" cy="12" r="8"/></svg>`;
+          case 'seed': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+          case 'leaf':
+          default: return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.5"><path d="M11 20A7 7 0 0 1 4 13C4 6 11 3 20 3c0 9-3 16-9 17Z"/></svg>`;
+        }
+      }
+
+      function getTreeIcon(type) {
+        return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`;
+      }
+
+      function renderMinimap() {
+        const ctx = pipCanvas.getContext('2d');
+        pipCanvas.width = 140;
+        pipCanvas.height = 95;
+        ctx.fillStyle = '#070B0E';
+        ctx.fillRect(0, 0, 140, 95);
+
+        if (state.viewMode === 'tree') {
+          const t = getTree();
+          ctx.strokeStyle = '#33485E';
+          t.nodes.forEach(n => {
+            if (n.parentId) {
+              const p = t.nodes.find(pn => pn.id === n.parentId);
+              if (p) {
+                ctx.beginPath();
+                ctx.moveTo(p.x * 0.12 + 15, p.y * 0.12 + 10);
+                ctx.lineTo(n.x * 0.12 + 15, n.y * 0.12 + 10);
+                ctx.stroke();
+              }
+            }
+          });
+          t.nodes.forEach(n => {
+            ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : '#10B981';
+            ctx.fillRect(n.x * 0.12 + 12, n.y * 0.12 + 8, 6, 4);
+          });
+        }
+      }
+
+      // First-Run Walkthrough
+      const STEPS = [
+        { title: 'Think in Growth Trees', text: 'Welcome to Sylva. Instead of static lists or messy blank canvases, Sylva organizes your goals, notes, and research into living trees with branches, leaves, and harvestable milestone fruits.' },
+        { title: 'Lock to Protect, Unlock to Move', text: 'Tap the Lock icon in the header when you want to drag notes around to organize them. Keep it locked during regular use for smooth, accidental-drag-free reading and note-taking.' },
+        { title: 'Zero Tracking & Total Privacy', text: 'Sylva runs entirely on your device with 100% offline persistence. Use the Nursery panel to export clean JSON backups anytime.' }
       ];
-      let currentWalkStep = 0;
+      let stepIdx = 0;
 
       function checkFirstRun() {
-        if (!localStorage.getItem('sylva_walkthrough_completed')) {
-          showWalkthroughStep(0);
+        // Only run walkthrough if launched directly as installed PWA or first web visit
+        if (!localStorage.getItem('sylva_v3_onboarded')) {
+          showStep(0);
         }
       }
 
-      function showWalkthroughStep(index) {
-        currentWalkStep = index;
-        const step = WALKTHROUGH_STEPS[index];
-        document.getElementById('walkthrough-title').innerText = step.title;
-        document.getElementById('walkthrough-body-text').innerText = step.text;
-        document.getElementById('walkthrough-step-counter').innerText = `${index + 1} / ${WALKTHROUGH_STEPS.length}`;
-        walkthroughModal.classList.add('open');
+      function showStep(idx) {
+        stepIdx = idx;
+        document.getElementById('walk-title').innerText = STEPS[idx].title;
+        document.getElementById('walk-body').innerText = STEPS[idx].text;
+        document.getElementById('walk-step').innerText = `${idx + 1} / ${STEPS.length}`;
+        document.getElementById('modal-walkthrough').classList.add('open');
       }
 
-      document.getElementById('btn-next-walkthrough').addEventListener('click', () => {
-        if (currentWalkStep < WALKTHROUGH_STEPS.length - 1) {
-          showWalkthroughStep(currentWalkStep + 1);
-        } else {
-          localStorage.setItem('sylva_walkthrough_completed', 'true');
-          walkthroughModal.classList.remove('open');
+      document.getElementById('btn-walk-next').onclick = () => {
+        if (stepIdx < STEPS.length - 1) showStep(stepIdx + 1);
+        else {
+          localStorage.setItem('sylva_v3_onboarded', 'true');
+          document.getElementById('modal-walkthrough').classList.remove('open');
         }
-      });
+      };
 
-      document.getElementById('btn-skip-walkthrough').addEventListener('click', () => {
-        localStorage.setItem('sylva_walkthrough_completed', 'true');
-        walkthroughModal.classList.remove('open');
-      });
+      document.getElementById('btn-walk-skip').onclick = () => {
+        localStorage.setItem('sylva_v3_onboarded', 'true');
+        document.getElementById('modal-walkthrough').classList.remove('open');
+      };
 
-      function escapeHTML(str) {
-        return (str || '').replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
+      function escapeHTML(s) {
+        return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c));
       }
 
       init();

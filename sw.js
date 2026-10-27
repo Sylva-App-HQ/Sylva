@@ -1,4 +1,6 @@
-const CACHE_NAME = 'sylva-v0.3.0-alpha';
+// This placeholder gets replaced automatically on every push
+const CACHE_NAME = 'sylva-__BUILD_VERSION__';
+
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
