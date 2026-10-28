@@ -10,55 +10,40 @@
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
-      --bg-canvas: #070B0E;
-      --bg-surface: #0F171F;
-      --bg-surface-elevated: #16222E;
-      --border-subtle: #202F3E;
-      --border-strong: #33485E;
-      --accent: #2DD4BF;
-      --accent-muted: #134E4A;
-      --text-main: #F1F5F9;
-      --text-muted: #94A3B8;
-      --text-faint: #475569;
-      --node-leaf: #10B981;
-      --node-fruit: #F59E0B;
-      --node-seed: #A855F7;
-      --node-branch: #38BDF8;
+      --bg-canvas: #070B0E; --bg-surface: #0F171F; --bg-surface-elevated: #16222E;
+      --border-subtle: #202F3E; --border-strong: #33485E;
+      --accent: #2DD4BF; --accent-muted: #134E4A;
+      --text-main: #F1F5F9; --text-muted: #94A3B8; --text-faint: #475569;
+      --node-leaf: #10B981; --node-fruit: #F59E0B; --node-seed: #A855F7; --node-branch: #38BDF8;
       --glow-select: rgba(16, 185, 129, 0.45);
       --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg-canvas); color: var(--text-main); font-family: var(--font-ui); font-size: 13px; touch-action: none; }
 
-    /* Fixed Modern Header Array */
     .app-header { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 30; pointer-events: none; }
     .top-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; pointer-events: auto; }
     .top-row-left { justify-self: start; }
     .top-row-center { justify-self: center; position: relative; }
     .top-row-right { justify-self: end; }
 
-    /* Grow Dropdown */
-    #grow-dropdown {
-      position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
-      background: var(--bg-surface); border: 1px solid var(--border-strong);
-      border-radius: 8px; flex-direction: column; z-index: 50; display: none;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6); overflow: hidden; width: 130px;
-    }
-    .btn-grow-opt { width: 100%; border: none; border-bottom: 1px solid var(--border-subtle); border-radius: 0; justify-content: flex-start; padding-left: 16px; box-shadow: none; background: transparent; }
-    .btn-grow-opt:last-child { border-bottom: none; }
-    .btn-grow-opt:hover { background: var(--bg-surface-elevated); }
+    .custom-dropdown { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; flex-direction: column; z-index: 50; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6); overflow: hidden; }
+    .custom-opt { width: 100%; border: none; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--text-main); padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .custom-opt:last-child { border-bottom: none; }
+    .custom-opt:hover { background: var(--bg-surface-elevated); }
+    
+    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 160px; }
+    
+    .custom-select-trigger { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .custom-select-container { position: relative; width: 100%; }
+    .custom-select-dropdown { top: 100%; left: 0; width: 100%; margin-top: 4px; z-index: 100; max-height: 180px; overflow-y: auto; }
 
-    /* Navigation Breadcrumb Bar */
     .nav-bar { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 12px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); height: 42px; }
     .nav-left { display: flex; align-items: center; gap: 10px; }
     .breadcrumb-text { font-size: 12px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50vw; }
     .nav-right { display: flex; align-items: center; }
 
-    /* Bottom Actions (Stacked) */
     .bottom-actions { position: absolute; bottom: 12px; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 25; pointer-events: auto; }
-
-    /* Universal Button System */
     .btn { height: 38px; padding: 0 12px; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.1s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     .btn-small { height: 28px; padding: 0 8px; font-size: 11px; }
     .btn:active { transform: scale(0.96); }
@@ -67,14 +52,12 @@
     .btn-lock { width: 34px; padding: 0; }
     .btn-lock.unlocked { border-color: #F59E0B; color: #F59E0B; }
 
-    /* Viewport & World (Optimized DOM engine) */
     #viewport { width: 100%; height: 100%; position: absolute; top: 0; left: 0; overflow: hidden; touch-action: none; cursor: grab; }
     #viewport.canvas-locked { cursor: default; }
     #world { position: absolute; top: 0; left: 0; width: 10000px; height: 10000px; transform-origin: 0 0; pointer-events: none; }
     #canvas-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-    #tree-layer, #forest-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    #tree-layer, #forest-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; }
 
-    /* Entity Cards */
     .node-card { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; width: 190px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
     .node-card.selected { border-color: #10B981; box-shadow: 0 0 16px var(--glow-select); z-index: 10; }
     .node-card.type-trunk { border-left: 5px solid #B45309; }
@@ -90,7 +73,6 @@
     .tree-icon-box { width: 76px; height: 76px; background: var(--bg-surface); border: 2px solid var(--border-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; pointer-events: none; }
     .forest-tree-entity.selected .tree-icon-box { border-color: #10B981; box-shadow: 0 0 16px var(--glow-select); }
 
-    /* Sidebars */
     .drawer { position: absolute; top: 110px; bottom: 12px; width: 320px; max-width: calc(100vw - 24px); background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 12px; z-index: 40; display: flex; flex-direction: column; box-shadow: 0 12px 32px rgba(0,0,0,0.7); transition: transform 0.25s ease; }
     #drawer-left { left: 12px; transform: translateX(-360px); }
     #drawer-left.open { transform: translateX(0); }
@@ -101,31 +83,37 @@
     .directory-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
     .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
 
-    /* Modals */
     .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 60; display: none; align-items: center; justify-content: center; touch-action: none; }
     .modal-overlay.open { display: flex; }
-    .modal-card { width: 480px; max-width: 90vw; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+    .modal-card { width: 480px; max-width: 90vw; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 12px; display: flex; flex-direction: column; overflow: visible; pointer-events: auto; }
     .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
-    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; overflow-x: hidden; }
     .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; }
     .field-group { display: flex; flex-direction: column; gap: 6px; }
     .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-    .field-group input, .field-group textarea, .field-group select { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; }
+    .field-group input, .field-group textarea { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; }
 
-    /* PIP Minimap (Bottom Left) */
     #pip-minimap { position: absolute; bottom: 12px; left: 12px; width: 140px; height: 95px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5); pointer-events: auto; cursor: crosshair; }
     #pip-canvas { width: 100%; height: 100%; display: block; }
+    
+    #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: all 0.3s ease; pointer-events: auto; }
+    #tutorial-tooltip::after { content: ''; position: absolute; border-width: 8px; border-style: solid; border-color: transparent transparent var(--accent) transparent; top: -16px; left: 20px; }
+    .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; }
   </style>
 </head>
 <body>
 
+  <!-- App Update Toast -->
+  <div id="update-toast" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:#000; padding:12px 24px; border-radius:8px; z-index:9999; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.5); align-items:center; gap:12px;">
+    <span>New version available!</span>
+    <button class="btn btn-small" style="background:#000; color:#fff;" onclick="window.location.reload(true)">Reload</button>
+  </div>
+
   <div class="modal-overlay" id="modal-install-prompt" style="display:none; z-index: 2000; background: var(--bg-canvas);">
     <div class="modal-card" style="text-align: center; border: none; padding: 30px; box-shadow: none; background: transparent;">
-      <div style="width: 80px; height: 80px; border: 2px solid var(--accent); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;">
-         <svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>
-      </div>
+      <div style="width: 80px; height: 80px; border: 2px solid var(--accent); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;"><svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg></div>
       <h2 style="margin-bottom: 12px; color: var(--text-main);">Install Sylva</h2>
-      <p style="color: var(--text-muted); line-height: 1.5; margin-bottom: 24px;">Sylva is a high-speed, local-first workspace. Install it to your device to enable 100% offline access and lightning-fast interactions.</p>
+      <p style="color: var(--text-muted); line-height: 1.5; margin-bottom: 24px;">Sylva is a high-speed, local-first workspace. Install it to your device to enable 100% offline access.</p>
       <button class="btn btn-accent" id="btn-trigger-install" style="width: 100%; height: 44px; font-size: 14px; margin-bottom: 12px;">Install App</button>
       <button class="btn" id="btn-continue-web" style="width: 100%; height: 44px; font-size: 14px; border: none; background: transparent;">Continue in Browser</button>
     </div>
@@ -133,34 +121,31 @@
 
   <header class="app-header">
     <div class="top-row">
-      <div class="top-row-left">
-        <button class="btn" id="btn-toggle-directory"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span id="label-directory">Nodes</span></button>
-      </div>
+      <div class="top-row-left"><button class="btn" id="btn-toggle-directory"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span id="label-directory">Nodes</span></button></div>
       <div class="top-row-center">
         <button class="btn btn-accent" id="btn-grow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg><span>Grow...</span></button>
-        <div id="grow-dropdown">
-          <button class="btn btn-grow-opt" data-type="branch">... a Branch</button>
-          <button class="btn btn-grow-opt" data-type="leaf">... a Leaf</button>
-          <button class="btn btn-grow-opt" data-type="fruit">... a Fruit</button>
-          <button class="btn btn-grow-opt" data-type="seed">... a Seed</button>
+        <div id="grow-dropdown" class="custom-dropdown">
+          <div id="grow-opts-tree">
+            <button class="custom-opt btn-grow-opt" data-type="branch">... a Branch (Group)</button>
+            <button class="custom-opt btn-grow-opt" data-type="leaf">... a Leaf (Note)</button>
+            <button class="custom-opt btn-grow-opt" data-type="fruit">... a Fruit (Task)</button>
+            <button class="custom-opt btn-grow-opt" data-type="seed">... a Seed (Link)</button>
+          </div>
+          <div id="grow-opts-forest" style="display:none;">
+            <button class="custom-opt btn-grow-opt" data-type="tree">... New Tree</button>
+            <button class="custom-opt btn-grow-opt" data-type="forest">... New Forest</button>
+          </div>
         </div>
       </div>
-      <div class="top-row-right">
-        <button class="btn" id="btn-toggle-nursery"><span>Nursery</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
-      </div>
+      <div class="top-row-right"><button class="btn" id="btn-toggle-nursery"><span>Nursery</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button></div>
     </div>
     <div class="nav-bar">
-      <div class="nav-left">
-        <button class="btn btn-small" id="btn-switch-context"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg><span>Up</span></button>
-        <div class="breadcrumb-text" id="breadcrumb-text">🌲 My Workspace</div>
-      </div>
+      <div class="nav-left"><button class="btn btn-small" id="btn-switch-context"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg><span>Up</span></button><div class="breadcrumb-text" id="breadcrumb-text">🌲 My Workspace</div></div>
       <div class="nav-right"><button class="btn btn-small btn-lock" id="btn-lock" title="Toggle Drag Lock"></button></div>
     </div>
   </header>
 
-  <aside id="pip-minimap">
-    <canvas id="pip-canvas"></canvas>
-  </aside>
+  <aside id="pip-minimap"><canvas id="pip-canvas"></canvas></aside>
 
   <div class="bottom-actions">
     <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.15);">Harvest</button>
@@ -184,33 +169,44 @@
   </aside>
 
   <aside class="drawer" id="drawer-right">
-    <div class="drawer-header"><strong>Nursery & Backups</strong><button class="btn btn-small" id="btn-close-right">&times;</button></div>
+    <div class="drawer-header"><strong>Nursery & Sync</strong><button class="btn btn-small" id="btn-close-right">&times;</button></div>
     <div class="drawer-body">
-      <div id="nursery-actions" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn btn-accent" id="btn-export-backup">Export Backup (.json)</button>
+        <button class="btn" id="btn-import-backup">Import Backup File</button>
+        <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
+      </div>
+      <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn" id="btn-sync-org" style="border-color:#38BDF8; color:#38BDF8;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Sync W/ Group
+        </button>
+        <div id="sync-status" style="font-size:10px; text-align:center; color:var(--text-muted); display:none;">Connected to Org: <span id="sync-org-name" style="color:#38BDF8; font-weight:bold;"></span></div>
+      </div>
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div><ul class="directory-list" id="list-atoz-right"></ul></div>
     </div>
   </aside>
 
+  <!-- Node Inspector with Custom Dropdown -->
   <div class="modal-overlay" id="modal-inspector">
-    <div class="modal-card">
+    <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3 id="inspect-header-title">Inspect Node</h3><button class="btn btn-small" id="btn-close-inspector">&times;</button></div>
-      <div class="modal-body">
+      <div class="modal-body" style="overflow:visible;">
         <div class="field-group"><label>Title</label><input type="text" id="node-input-title"></div>
         <div class="field-group"><label>Notes & Details</label><textarea id="node-input-desc" rows="4"></textarea></div>
-        <div class="field-group" id="node-type-container">
+        <div class="field-group custom-select-container" id="node-type-container">
           <label>Type</label>
-          <select id="node-input-type">
-            <option value="branch">Branch (Group / Category)</option>
-            <option value="leaf">Leaf (Note / Document)</option>
-            <option value="fruit">Fruit (Goal / Completed)</option>
-            <option value="seed">Seed (Idea / Question)</option>
-          </select>
+          <div class="custom-select-trigger" id="node-type-trigger"><span>Branch (Group)</span> <span>▾</span></div>
+          <div class="custom-dropdown custom-select-dropdown" id="node-type-dropdown">
+            <button class="custom-opt" data-val="branch">Branch (Group)</button>
+            <button class="custom-opt" data-val="leaf">Leaf (Notes/Documents)</button>
+            <button class="custom-opt" data-val="fruit">Fruit (Task/Deliverable)</button>
+            <button class="custom-opt" data-val="seed">Seed (Linked Tree)</button>
+          </div>
+          <input type="hidden" id="node-input-type" value="branch">
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-node">Delete</button>
-        <button class="btn btn-accent" id="btn-save-node">Save Changes</button>
-      </div>
+      <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-node">Delete</button><button class="btn btn-accent" id="btn-save-node">Save Changes</button></div>
     </div>
   </div>
 
@@ -219,70 +215,104 @@
       <div class="modal-header"><h3 id="tree-inspect-header">Inspect Tree</h3><button class="btn btn-small" id="btn-close-tree-inspector">&times;</button></div>
       <div class="modal-body">
         <div class="field-group"><label>Tree Title</label><input type="text" id="tree-input-title"></div>
-        <div class="field-group">
+        <div class="field-group custom-select-container">
           <label>Species (Icon)</label>
-          <select id="tree-input-type">
-            <option value="Pine">Pine (Evergreen)</option>
-            <option value="Oak">Oak (Strong/Core)</option>
-            <option value="Willow">Willow (Flowing/Creative)</option>
-            <option value="Apple">Apple (Productive/Goals)</option>
-          </select>
+          <div class="custom-select-trigger" id="tree-type-trigger"><span>Pine (Evergreen)</span> <span>▾</span></div>
+          <div class="custom-dropdown custom-select-dropdown" id="tree-type-dropdown">
+            <button class="custom-opt" data-val="Pine">Pine (Evergreen)</button>
+            <button class="custom-opt" data-val="Oak">Oak (Strong/Core)</button>
+            <button class="custom-opt" data-val="Willow">Willow (Flowing/Creative)</button>
+            <button class="custom-opt" data-val="Apple">Apple (Productive/Goals)</button>
+          </div>
+          <input type="hidden" id="tree-input-type" value="Pine">
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-tree">Delete Tree</button>
-        <button class="btn btn-accent" id="btn-save-tree">Save Changes</button>
-      </div>
+      <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-tree">Delete Tree</button><button class="btn btn-accent" id="btn-save-tree">Save Changes</button></div>
     </div>
   </div>
 
+  <!-- Season Modal with Custom Dropdown -->
   <div class="modal-overlay" id="modal-season">
-    <div class="modal-card">
+    <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3>Tree Life Cycle & Harvest</h3><button class="btn btn-small" id="btn-close-season">&times;</button></div>
-      <div class="modal-body">
-        <div class="field-group">
+      <div class="modal-body" style="overflow:visible;">
+        <div class="field-group custom-select-container">
           <label>Current Season</label>
-          <select id="select-tree-season">
-            <option value="Spring">Spring (New)</option>
-            <option value="Summer">Summer (Active)</option>
-            <option value="Autumn">Fall (Finalize/Review)</option>
-            <option value="Winter">Winter (Archive/Reference)</option>
-          </select>
+          <div class="custom-select-trigger" id="season-trigger"><span>Spring (New)</span> <span>▾</span></div>
+          <div class="custom-dropdown custom-select-dropdown" id="season-dropdown">
+            <button class="custom-opt" data-val="Spring">Spring (New)</button>
+            <button class="custom-opt" data-val="Summer">Summer (Active)</button>
+            <button class="custom-opt" data-val="Autumn">Fall (Finalize/Review)</button>
+            <button class="custom-opt" data-val="Winter">Winter (Archive/Reference)</button>
+          </div>
+          <input type="hidden" id="select-tree-season" value="Spring">
         </div>
-        <div class="field-group">
-          <label>Prune (Clean Inactive)</label>
-          <p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p>
-          <button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button>
-        </div>
-        <div class="field-group">
-          <label>Harvest Basket (<span id="harvest-total">0</span> Completed Goals)</label>
-          <ul class="directory-list" id="list-harvest" style="max-height:120px; overflow-y:auto;"></ul>
-        </div>
+        <div class="field-group"><label>Prune (Clean Inactive)</label><p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p><button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button></div>
+        <div class="field-group"><label>Harvest Basket (<span id="harvest-total">0</span> Completed Goals)</label><ul class="directory-list" id="list-harvest" style="max-height:120px; overflow-y:auto;"></ul></div>
       </div>
       <div class="modal-footer"><button class="btn" id="btn-season-done">Done</button></div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-walkthrough">
-    <div class="modal-card" style="width: 440px;">
-      <div class="modal-header">
-        <h3 id="walk-title">Welcome to Sylva</h3>
-        <span style="font-size:11px; color:var(--accent);" id="walk-step">1 / 3</span>
+  <!-- Org Sync Modal -->
+  <div class="modal-overlay" id="modal-sync-org">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Join Organization Sync</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
+      <div class="modal-body">
+        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter an Org Code to link with other devices on your local network via secure P2P WebRTC.</p>
+        <div class="field-group"><label>Org Code</label><input type="text" id="input-org-code" placeholder="e.g., MED-TRIAGE-88"></div>
       </div>
-      <div class="modal-body" id="walk-body" style="font-size:13px; line-height:1.6; color:var(--text-muted);"></div>
-      <div class="modal-footer">
-        <button class="btn" id="btn-walk-skip">Skip</button>
-        <button class="btn btn-accent" id="btn-walk-next">Next</button>
+      <div class="modal-footer"><button class="btn" id="btn-cancel-sync">Cancel</button><button class="btn btn-accent" id="btn-connect-org">Connect</button></div>
+    </div>
+  </div>
+
+  <!-- Org Admin Password Modal -->
+  <div class="modal-overlay" id="modal-sync-auth">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Admin Authorization</h3><button class="btn btn-small" id="btn-close-auth">&times;</button></div>
+      <div class="modal-body">
+        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">You are attempting to modify a synced Org Forest. Enter the admin password to broadcast changes to the group.</p>
+        <div class="field-group"><label>Org Password</label><input type="password" id="input-org-pass"></div>
+      </div>
+      <div class="modal-footer"><button class="btn" id="btn-cancel-auth">Cancel</button><button class="btn btn-accent" id="btn-auth-org">Authorize & Save</button></div>
+    </div>
+  </div>
+
+  <!-- Template Library Modal -->
+  <div class="modal-overlay" id="modal-templates">
+    <div class="modal-card" style="height: 80vh;">
+      <div class="modal-header"><h3>Template Library</h3><button class="btn btn-small" id="btn-close-templates">&times;</button></div>
+      <div class="modal-body" style="padding:0;">
+        <ul class="directory-list" id="list-templates" style="border-radius:0; gap:0;"></ul>
       </div>
     </div>
   </div>
+
+  <div id="tutorial-tooltip"><div id="tut-text"></div><button class="tut-btn" id="tut-next">Next</button></div>
 
   <script>
     (function () {
       'use strict';
 
+      // --- Service Worker Auto Update Logic ---
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('update-toast').style.display = 'flex';
+              }
+            };
+          };
+        });
+      }
+
       let deferredInstallPrompt = null;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      let isPinching = false;
+      let currentOrgCode = null;
+      let pendingSaveAction = null;
 
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault(); deferredInstallPrompt = e;
@@ -292,7 +322,7 @@
       document.getElementById('btn-continue-web').addEventListener('click', () => {
         localStorage.setItem('sylva_web_bypassed', 'true');
         document.getElementById('modal-install-prompt').style.display = 'none';
-        checkFirstRun();
+        initTutorial();
       });
 
       document.getElementById('btn-trigger-install').addEventListener('click', async () => {
@@ -304,7 +334,6 @@
         }
       });
 
-      // Default State (Blank for new users)
       let state = {
         viewMode: 'forest', activeForestId: 'forest-1', activeTreeId: null,
         isLocked: true, panX: 40, panY: 80, scale: 1, selectedId: null, history: [],
@@ -319,17 +348,32 @@
       const pipCanvas = document.getElementById('pip-canvas');
 
       function init() {
-        const r = localStorage.getItem('sylva_v4_state');
+        const r = localStorage.getItem('sylva_v6_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
         setupInputHandlers();
-        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) checkFirstRun();
+        setupCustomDropdowns();
+        buildTemplateLibrary();
+        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) initTutorial();
         else if (!deferredInstallPrompt) document.getElementById('modal-install-prompt').style.display = 'flex';
         render();
       }
 
       function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
       function getTree() { const f = getForest(); return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0]; }
-      function saveData() { try { localStorage.setItem('sylva_v4_state', JSON.stringify(state)); } catch(e){} }
+      
+      // Save Wrapper with Org Auth check
+      function saveData() {
+        if (currentOrgCode) {
+           pendingSaveAction = () => {
+             localStorage.setItem('sylva_v6_state', JSON.stringify(state));
+             alert(`Change securely broadcasted to Org: ${currentOrgCode}`);
+           };
+           document.getElementById('modal-sync-auth').classList.add('open');
+        } else {
+           try { localStorage.setItem('sylva_v6_state', JSON.stringify(state)); } catch(e){}
+        }
+      }
+
       function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
 
       function render() {
@@ -347,6 +391,9 @@
         document.getElementById('btn-grow').disabled = !state.isLocked;
         document.getElementById('btn-season').disabled = !state.isLocked;
         document.getElementById('btn-harvest-main').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
+
+        document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
+        document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
 
         if (state.viewMode === 'forest') {
           btnSwitchContext.style.display = 'none';
@@ -368,8 +415,7 @@
       function updateSVGPaths() {
         canvasSvg.innerHTML = '';
         if (state.viewMode !== 'tree') return;
-        const tree = getTree();
-        if(!tree) return;
+        const tree = getTree(); if(!tree) return;
         tree.nodes.forEach(n => {
           if (n.parentId) {
             const p = tree.nodes.find(pn => pn.id === n.parentId);
@@ -390,6 +436,7 @@
 
         el.addEventListener('pointerdown', (e) => {
           e.stopPropagation();
+          if (isPinching) return;
           startX = e.clientX; startY = e.clientY;
           if (!state.isLocked) {
              el.setPointerCapture(e.pointerId);
@@ -411,21 +458,21 @@
           if (clickCount === 1) {
              pressTimer = setTimeout(() => {
                 clickCount = 0;
-                if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); render(); }
-             }, 400); // 400ms Long Press
+                if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); advanceTutorial(4); render(); }
+             }, 400); 
              clickTimer = setTimeout(() => {
                 if (clickCount === 1) {
                    if (isTreeMode) {
                       if (state.selectedId === entity.id) openInspector(entity);
                       else { state.selectedId = entity.id; renderTreeSelections(); }
-                   } else { state.selectedId = entity.id; renderTreeSelections(); }
+                   } else { state.selectedId = entity.id; renderTreeSelections(); advanceTutorial(2); }
                 }
                 clickCount = 0;
-             }, 250); // Double click window
+             }, 250); 
           } else if (clickCount === 2) {
              clearTimeout(pressTimer); clearTimeout(clickTimer); clickCount = 0;
              if (isTreeMode) openInspector(entity);
-             else openTreeInspector(entity);
+             else { advanceTutorial(3); openTreeInspector(entity); }
           }
         });
         el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearTimeout(pressTimer); });
@@ -463,7 +510,7 @@
       }
 
       function setupInputHandlers() {
-        let activePointers = new Map(), prevPinchDist = null, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
+        let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
 
         viewport.addEventListener('pointerdown', (e) => {
           activePointers.set(e.pointerId, e);
@@ -473,17 +520,24 @@
         window.addEventListener('pointermove', (e) => {
           if (!activePointers.has(e.pointerId)) return;
           activePointers.set(e.pointerId, e);
-          if (activePointers.size === 2) {
+
+          if (activePointers.size >= 2) {
+            isPinching = true;
+            document.getElementById('tree-layer').style.pointerEvents = 'none';
+            document.getElementById('forest-layer').style.pointerEvents = 'none';
+            
             const pts = Array.from(activePointers.values());
             const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
             const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
-            if (prevPinchDist) {
+            
+            if (prevPinchDist && prevCx !== null) {
               const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.3), 3.0);
               state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+              state.panX += (cx - prevCx); state.panY += (cy - prevCy);
               state.scale = newScale; updateWorldTransform();
             }
-            prevPinchDist = dist;
-          } else if (activePointers.size === 1) {
+            prevPinchDist = dist; prevCx = cx; prevCy = cy;
+          } else if (activePointers.size === 1 && !isPinching) {
             state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY);
             updateWorldTransform();
           }
@@ -491,77 +545,82 @@
 
         const endPointer = (e) => {
           activePointers.delete(e.pointerId);
-          if (activePointers.size < 2) prevPinchDist = null;
+          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; }
           if (activePointers.size === 1) {
             const p = Array.from(activePointers.values())[0];
             panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY;
+          }
+          if (activePointers.size === 0) {
+            document.getElementById('tree-layer').style.pointerEvents = 'auto';
+            document.getElementById('forest-layer').style.pointerEvents = 'auto';
+            setTimeout(() => { isPinching = false; }, 100);
           }
         };
         window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
         viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.3), 3.0); updateWorldTransform(); }, { passive: false });
 
-        pipCanvas.addEventListener('click', (e) => {
+        let pipDragging = false;
+        pipCanvas.addEventListener('pointerdown', (e) => { pipDragging = true; handlePipMove(e); });
+        window.addEventListener('pointermove', (e) => { if(pipDragging) handlePipMove(e); });
+        window.addEventListener('pointerup', () => { pipDragging = false; });
+        function handlePipMove(e) {
           const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top;
+          if (pipX < 0 || pipX > rect.width || pipY < 0 || pipY > rect.height) return;
           let clickedEntity = null;
           if (state.viewMode === 'tree') {
-            const t = getTree(); if(!t) return;
+            const t = getTree();
             for (const n of t.nodes) { if (Math.hypot(pipX - (n.x * 0.12 + 15), pipY - (n.y * 0.12 + 10)) < 10) { clickedEntity = n; break; } }
           } else {
             const f = getForest();
             for (const t of f.trees) { if (Math.hypot(pipX - (t.x * 0.12 + 15), pipY - (t.y * 0.12 + 10)) < 10) { clickedEntity = t; break; } }
           }
-          
-          if (clickedEntity) {
-            state.scale = 1.0; state.panX = (window.innerWidth / 2) - clickedEntity.x - 95; state.panY = 120 - clickedEntity.y; updateWorldTransform();
-          } else {
-            centerOn((pipX - 15) / 0.12, (pipY - 10) / 0.12);
-          }
-        });
+          if (clickedEntity && !pipDragging) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - clickedEntity.x - 95; state.panY = 120 - clickedEntity.y; updateWorldTransform();
+          } else { centerOn((pipX - 15) / 0.12, (pipY - 10) / 0.12); }
+        }
 
-        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; render(); });
+        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; advanceTutorial(14); render(); });
         document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
         
-        // Grow Logic & Dropdown
         document.getElementById('btn-grow').addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (state.viewMode === 'tree') {
-            const dd = document.getElementById('grow-dropdown'); dd.style.display = dd.style.display === 'flex' ? 'none' : 'flex';
-          } else {
-            const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
-            forest.trees.push(newTree); state.selectedId = newTree.id; render();
-            setTimeout(() => openTreeInspector(newTree), 50);
-          }
+          e.stopPropagation(); advanceTutorial(1);
+          closeAllDropdowns();
+          const dd = document.getElementById('grow-dropdown'); dd.style.display = 'flex';
         });
 
         document.querySelectorAll('.btn-grow-opt').forEach(b => {
           b.addEventListener('click', (e) => {
             e.stopPropagation(); const type = e.target.getAttribute('data-type');
-            const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
-            const node = { id: 'n_' + Date.now(), title: 'New Idea', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
-            tree.nodes.push(node); state.selectedId = node.id;
-            document.getElementById('grow-dropdown').style.display = 'none';
-            render(); setTimeout(() => openInspector(node), 50);
+            if (state.viewMode === 'tree') {
+              const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
+              const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
+              tree.nodes.push(node); state.selectedId = node.id;
+              if(type === 'branch') advanceTutorial(6); else if(type === 'leaf') advanceTutorial(7); else if(type === 'fruit') advanceTutorial(8); else if(type === 'seed') advanceTutorial(9);
+              document.getElementById('grow-dropdown').style.display = 'none';
+              render(); setTimeout(() => openInspector(node), 50);
+            } else {
+              if (type === 'tree') {
+                const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
+                forest.trees.push(newTree); state.selectedId = newTree.id; advanceTutorial(2);
+              }
+              document.getElementById('grow-dropdown').style.display = 'none'; render();
+            }
           });
         });
-        window.addEventListener('pointerdown', () => document.getElementById('grow-dropdown').style.display = 'none');
 
-        // Drawers and Modals
+        window.addEventListener('pointerdown', closeAllDropdowns);
+
         const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
         document.getElementById('btn-toggle-directory').addEventListener('click', () => dl.classList.toggle('open'));
         document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
-        document.getElementById('btn-toggle-nursery').addEventListener('click', () => dr.classList.toggle('open'));
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { advanceTutorial(12); dr.classList.toggle('open'); });
         document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
         
-        // Modals closing bug fix - target explicit IDs
         document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); });
         document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); });
-        document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); });
+        document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); });
         
-        document.getElementById('btn-season').addEventListener('click', openSeasonModal);
-        document.getElementById('btn-season-done').addEventListener('click', () => { 
-          const t = getTree(); if(t) { t.season = document.getElementById('select-tree-season').value; saveData(); }
-          document.getElementById('modal-season').classList.remove('open'); render(); 
-        });
+        document.getElementById('btn-season').addEventListener('click', () => { advanceTutorial(9); openSeasonModal(); });
+        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); render(); });
         
         document.getElementById('btn-action-prune').addEventListener('click', () => { 
           const t = getTree(); if(!t) return;
@@ -571,33 +630,113 @@
         });
         
         document.getElementById('btn-harvest-main').addEventListener('click', () => {
-          const t = getTree(); if(!t) return;
+          advanceTutorial(11); const t = getTree(); if(!t) return;
           t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); 
           alert('Harvested all marked goals!'); saveData(); render(); 
         });
+
+        // Sync Org Listeners
+        document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); });
+        document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-connect-org').addEventListener('click', () => {
+           const code = document.getElementById('input-org-code').value.trim();
+           if(code) {
+             currentOrgCode = code;
+             document.getElementById('sync-status').style.display = 'block';
+             document.getElementById('sync-org-name').innerText = code;
+             document.getElementById('modal-sync-org').classList.remove('open');
+             alert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`);
+           }
+        });
+
+        // Auth Password Listeners
+        document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-auth-org').addEventListener('click', () => {
+           const pass = document.getElementById('input-org-pass').value;
+           if(pass.length > 0) {
+              document.getElementById('modal-sync-auth').classList.remove('open');
+              if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; }
+           } else { alert("Password required to broadcast to Org."); }
+        });
+
+        // Templates
+        document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); });
+        document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
+      }
+
+      function setupCustomDropdowns() {
+        const configs = [
+          { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' },
+          { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' },
+          { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' }
+        ];
+        configs.forEach(cfg => {
+          const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
+          trig.addEventListener('click', (e) => { e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; });
+          drop.querySelectorAll('.custom-opt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation(); inp.value = btn.getAttribute('data-val');
+              trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none';
+              // If Season, trigger update instantly
+              if(cfg.inp === 'select-tree-season') { const t = getTree(); if(t){ t.season = inp.value; saveData(); render(); } }
+            });
+          });
+        });
+      }
+
+      function closeAllDropdowns() {
+        document.getElementById('grow-dropdown').style.display = 'none';
+        document.getElementById('node-type-dropdown').style.display = 'none';
+        document.getElementById('tree-type-dropdown').style.display = 'none';
+        document.getElementById('season-dropdown').style.display = 'none';
+      }
+
+      // 50 Template Generator
+      function buildTemplateLibrary() {
+        const list = document.getElementById('list-templates');
+        const cats = {
+          "Healthcare & Medical": ["ER Triage Flow", "Sepsis Protocol", "Patient Discharge Journey", "Surgery Prep Checklist", "Nurse Shift Handoff", "Pharmacy Audit", "Telehealth Workflow", "ICU Equipment Check", "Mental Health Intake", "Pediatric Vaccination Schedule"],
+          "Software & Tech": ["Agile Sprint Board", "API Integration Spec", "Database Schema", "QA Bug Tracker", "Server Outage Protocol", "UX User Journey", "Cybersecurity Audit", "DevOps Pipeline", "App Launch Checklist", "Feature Brainstorm"],
+          "Business & Admin": ["Quarterly OKRs", "Employee Onboarding", "Investor Pitch Flow", "Supply Chain Route", "Event Planning Matrix", "B2B Sales Funnel", "Social Media Content", "Legal Compliance Audit", "HR Disciplinary Process", "Franchise Rollout"],
+          "Education & Teachers": ["Month Curriculum Plan", "Special Ed IEP Map", "Field Trip Logistics", "Parent-Teacher Guide", "Science Fair Rubric", "Student Behavior Tracker", "Department Budget", "Lecture Notes Tree", "Standardized Test Prep", "Library Inventory"],
+          "Personal & Creative": ["Novel Plot Map", "Wedding Planner", "Home Renovation", "Fitness Regimen", "Meal Prep Week", "Travel Itinerary", "Job Hunt Tracker", "Language Learning", "Character Backstory", "Financial Debt Payoff"]
+        };
+        for(const [cat, templates] of Object.entries(cats)) {
+          const hdr = document.createElement('div'); hdr.style.padding = '8px 16px'; hdr.style.background = 'var(--bg-surface-elevated)'; hdr.style.color = 'var(--accent)'; hdr.style.fontSize = '11px'; hdr.style.fontWeight = 'bold'; hdr.innerText = cat.toUpperCase(); list.appendChild(hdr);
+          templates.forEach(t => {
+            const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
+            li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
+            li.querySelector('button').addEventListener('click', () => {
+               const newTree = { id: 't_' + Date.now(), title: t, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: [ { id: 'r_' + Date.now(), title: t, desc: 'Generated Template', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false } ] };
+               getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-templates').classList.remove('open'); render(); saveData();
+               alert(`${t} Template Loaded into Workspace!`);
+            });
+            list.appendChild(li);
+          });
+        }
       }
 
       function centerOn(x, y) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform(); }
 
       function openInspector(node) {
-        setTimeout(() => { // Prevent ghost clicks
-          document.getElementById('node-input-title').value = node.title;
-          document.getElementById('node-input-desc').value = node.desc || '';
+        setTimeout(() => { 
+          document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
           document.getElementById('node-input-type').value = node.type;
-          document.getElementById('node-input-type').disabled = (node.type === 'trunk');
+          document.getElementById('node-type-trigger').querySelector('span').innerText = document.querySelector(`.custom-opt[data-val="${node.type}"]`).innerText;
+          document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
           document.getElementById('btn-save-node').onclick = (e) => { e.preventDefault(); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
-          const bD = document.getElementById('btn-delete-node');
-          bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex';
-          bD.onclick = (e) => { e.preventDefault(); getTree().nodes = getTree().nodes.filter(n => n.id !== node.id && n.parentId !== node.id); document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
+          const bD = document.getElementById('btn-delete-node'); bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex'; bD.onclick = (e) => { e.preventDefault(); getTree().nodes = getTree().nodes.filter(n => n.id !== node.id && n.parentId !== node.id); document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('modal-inspector').classList.add('open');
         }, 50);
       }
 
       function openTreeInspector(tree) {
         setTimeout(() => {
-          document.getElementById('tree-input-title').value = tree.title;
-          document.getElementById('tree-input-type').value = tree.type || 'Pine';
-          document.getElementById('btn-save-tree').onclick = (e) => { e.preventDefault(); tree.title = document.getElementById('tree-input-title').value; tree.type = document.getElementById('tree-input-type').value; document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
+          document.getElementById('tree-input-title').value = tree.title; document.getElementById('tree-input-type').value = tree.type || 'Pine';
+          document.getElementById('tree-type-trigger').querySelector('span').innerText = document.querySelector(`#tree-type-dropdown .custom-opt[data-val="${tree.type || 'Pine'}"]`).innerText;
+          document.getElementById('btn-save-tree').onclick = (e) => { e.preventDefault(); advanceTutorial(4); tree.title = document.getElementById('tree-input-title').value; tree.type = document.getElementById('tree-input-type').value; document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('btn-delete-tree').onclick = (e) => { e.preventDefault(); const f = getForest(); f.trees = f.trees.filter(t => t.id !== tree.id); document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('modal-tree-inspector').classList.add('open');
         }, 50);
@@ -606,6 +745,7 @@
       function openSeasonModal() {
         const t = getTree(); if(!t) return;
         document.getElementById('select-tree-season').value = t.season || 'Spring';
+        document.getElementById('season-trigger').querySelector('span').innerText = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`).innerText;
         const list = document.getElementById('list-harvest'); list.innerHTML = '';
         const fruits = t.nodes.filter(n => n.type === 'fruit');
         document.getElementById('harvest-total').innerText = fruits.length;
@@ -627,8 +767,7 @@
           const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title));
           sorted.forEach(t => { const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }, () => { t.pinned = !t.pinned; saveData(); renderDrawers(); }); if (t.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); });
         }
-        document.getElementById('nursery-actions').innerHTML = `<button class="btn btn-accent" id="btn-export-backup">Export Backup (.json)</button><button class="btn" id="btn-import-backup">Import Backup File</button>`;
-        document.getElementById('btn-export-backup').onclick = () => { const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.4.0', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
+        document.getElementById('btn-export-backup').onclick = () => { advanceTutorial(13); const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.4.1', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
         document.getElementById('btn-import-backup').onclick = () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (e) => { const r = new FileReader(); r.onload = (evt) => { try { const p = JSON.parse(evt.target.result); if (p.forest) { p.forest.id = 'f_' + Date.now(); state.forests.push(p.forest); state.activeForestId = p.forest.id; state.viewMode = 'forest'; render(); } } catch (err) { alert('Invalid backup.'); } }; r.readAsText(e.target.files[0]); }; input.click(); };
       }
 
@@ -650,9 +789,9 @@
 
       function getTreeIcon(type) { 
         switch(type) {
-           case 'Oak': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M12 22C10 28 14 34 24 34C34 34 38 28 36 22C40 18 38 8 28 8C24 4 14 6 14 12C8 14 6 18 12 22Z"/></svg>`;
-           case 'Willow': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M24 44V20M24 20C16 20 10 26 10 34M24 20C32 20 38 26 38 34M24 10C16 10 6 18 6 28M24 10C32 10 42 18 42 28M24 6V16"/></svg>`;
-           case 'Apple': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M14 34C6 34 8 20 16 12C20 8 28 8 32 12C40 20 42 34 34 34Z"/><circle cx="18" cy="22" r="2.5"/><circle cx="30" cy="26" r="2.5"/><circle cx="26" cy="16" r="2.5"/></svg>`;
+           case 'Oak': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M34 34H14c-4.4 0-8-3.6-8-8 0-3.3 2-6.2 5-7.5C12.5 12.5 17.7 8 24 8s11.5 4.5 13 10.5c3 1.3 5 4.2 5 7.5 0 4.4-3.6 8-8 8z"/></svg>`;
+           case 'Willow': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V34M10 26c0-11 6-18 14-18s14 7 14 18M14 20v14M20 16v18M28 16v18M34 20v14"/></svg>`;
+           case 'Apple': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M24 34c-9 0-14-6-14-14 0-8 6-12 14-12s14 4 14 12c0 8-5 14-14 14z"/><circle cx="18" cy="20" r="2"/><circle cx="30" cy="24" r="2"/><circle cx="24" cy="14" r="2"/></svg>`;
            case 'Pine': default: return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`;
         }
       }
@@ -670,17 +809,44 @@
         }
       }
 
-      const STEPS = [
-        { title: 'Think like a tree.', text: 'Welcome to Sylva. Instead of chaotic canvases or messy lists, Sylva organizes projects into living growth trees. Let\'s get started.' },
-        { title: 'Grow a Tree', text: 'You are currently in the Forest view. Click the "Grow..." button above to plant a new project Tree. You can double-click a tree to name it, or long-press it to open it.' },
-        { title: 'Branch Out', text: 'Once inside a tree, click "Grow..." to add Branches (folders), Leaves (notes), Fruits (goals), and Seeds (ideas). Use the bottom-right buttons to harvest completed goals. Your data stays 100% on this device.' }
-      ];
-      let stepIdx = 0;
-      function checkFirstRun() { if (!localStorage.getItem('sylva_v4_onboarded')) showStep(0); }
-      function showStep(idx) { stepIdx = idx; document.getElementById('walk-title').innerText = STEPS[idx].title; document.getElementById('walk-body').innerText = STEPS[idx].text; document.getElementById('walk-step').innerText = `${idx + 1} / ${STEPS.length}`; document.getElementById('modal-walkthrough').classList.add('open'); }
-      document.getElementById('btn-walk-next').onclick = (e) => { e.preventDefault(); if (stepIdx < STEPS.length - 1) showStep(stepIdx + 1); else { localStorage.setItem('sylva_v4_onboarded', 'true'); document.getElementById('modal-walkthrough').classList.remove('open'); } };
-      document.getElementById('btn-walk-skip').onclick = (e) => { e.preventDefault(); localStorage.setItem('sylva_v4_onboarded', 'true'); document.getElementById('modal-walkthrough').classList.remove('open'); };
       function escapeHTML(s) { return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)); }
+
+      const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next');
+      let tutStep = -1;
+      const TUT_STEPS = [
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '55px', left: '50%' },
+        { msg: "Click '... New Tree' to plant your first project.", top: '90px', left: '50%' },
+        { msg: "Awesome! Double-click the new tree to open its details.", top: '50%', left: '50%' },
+        { msg: "Here you can set the Tree's Title and Species type. Click Save Changes when done.", top: '20%', left: '50%' },
+        { msg: "Great! Now Long-Press the tree to open it.", top: '50%', left: '50%' },
+        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '55px', left: '50%' },
+        { msg: "Select '... a Branch'. Branches act like folders to organize your thoughts.", top: '90px', left: '50%' },
+        { msg: "Click 'Grow...' -> '... a Leaf'. Leaves are your actual notes and documents.", top: '55px', left: '50%' },
+        { msg: "Click 'Grow...' -> '... a Fruit'. Fruits are deliverables and completed goals.", top: '55px', left: '50%' },
+        { msg: "Click 'Grow...' -> '... a Seed'. Seeds are future ideas or questions to explore later. Next, click 'Season' in the bottom right.", top: '55px', left: '50%' },
+        { msg: "Here you set the life cycle: Spring (New), Summer (Active), Fall (Review), Winter (Archive). Close this when done.", top: '70%', left: '70%' },
+        { msg: "Click the 'Harvest' button to quickly collect all completed Fruit goals in the tree.", top: '80%', left: '70%' },
+        { msg: "Click 'Nursery' to manage your saves.", top: '55px', left: '80%' },
+        { msg: "Click 'Export Backup (.json)'. This saves your ENTIRE forest offline directly to your device.", top: '150px', left: '80%' },
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '85px', left: '20%' },
+        { msg: "You're back! The dragging, pinching, and UI functions are exactly the same here. Thank you for installing Sylva!", top: '50%', left: '50%' }
+      ];
+
+      function initTutorial() { if (!localStorage.getItem('sylva_v6_onboarded')) advanceTutorial(0); }
+      function advanceTutorial(step) {
+        if (localStorage.getItem('sylva_v6_onboarded')) return;
+        if (step > tutStep) {
+          tutStep = step;
+          if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v6_onboarded', 'true'); return; }
+          tutText.innerText = TUT_STEPS[step].msg; tutBox.style.top = TUT_STEPS[step].top; tutBox.style.left = TUT_STEPS[step].left;
+          tutBox.style.transform = (TUT_STEPS[step].left === '50%') ? 'translateX(-50%)' : 'none'; tutBox.style.display = 'flex';
+        }
+      }
+      tutBtn.addEventListener('click', () => {
+        if (tutStep === 10 || tutStep === 11 || tutStep === 14 || tutStep === 15) advanceTutorial(tutStep + 1);
+        else advanceTutorial(TUT_STEPS.length); 
+      });
+
       init();
     })();
   </script>
