@@ -178,9 +178,7 @@
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn" id="btn-sync-org" style="border-color:#38BDF8; color:#38BDF8;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Sync W/ Group
-        </button>
+        <button class="btn" id="btn-sync-org" style="border-color:#38BDF8; color:#38BDF8;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Sync W/ Group</button>
         <div id="sync-status" style="font-size:10px; text-align:center; color:var(--text-muted); display:none;">Connected to Org: <span id="sync-org-name" style="color:#38BDF8; font-weight:bold;"></span></div>
       </div>
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div><ul class="directory-list" id="list-atoz-right"></ul></div>
@@ -231,7 +229,6 @@
     </div>
   </div>
 
-  <!-- Season Modal with Custom Dropdown -->
   <div class="modal-overlay" id="modal-season">
     <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3>Tree Life Cycle & Harvest</h3><button class="btn btn-small" id="btn-close-season">&times;</button></div>
@@ -320,9 +317,7 @@
       });
 
       document.getElementById('btn-continue-web').addEventListener('click', () => {
-        localStorage.setItem('sylva_web_bypassed', 'true');
-        document.getElementById('modal-install-prompt').style.display = 'none';
-        initTutorial();
+        localStorage.setItem('sylva_web_bypassed', 'true'); document.getElementById('modal-install-prompt').style.display = 'none'; initTutorial();
       });
 
       document.getElementById('btn-trigger-install').addEventListener('click', async () => {
@@ -350,9 +345,7 @@
       function init() {
         const r = localStorage.getItem('sylva_v6_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
-        setupInputHandlers();
-        setupCustomDropdowns();
-        buildTemplateLibrary();
+        setupInputHandlers(); setupCustomDropdowns(); buildTemplateLibrary();
         if (isStandalone || localStorage.getItem('sylva_web_bypassed')) initTutorial();
         else if (!deferredInstallPrompt) document.getElementById('modal-install-prompt').style.display = 'flex';
         render();
@@ -361,55 +354,35 @@
       function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
       function getTree() { const f = getForest(); return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0]; }
       
-      // Save Wrapper with Org Auth check
       function saveData() {
         if (currentOrgCode) {
-           pendingSaveAction = () => {
-             localStorage.setItem('sylva_v6_state', JSON.stringify(state));
-             alert(`Change securely broadcasted to Org: ${currentOrgCode}`);
-           };
+           pendingSaveAction = () => { localStorage.setItem('sylva_v6_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
            document.getElementById('modal-sync-auth').classList.add('open');
-        } else {
-           try { localStorage.setItem('sylva_v6_state', JSON.stringify(state)); } catch(e){}
-        }
+        } else { try { localStorage.setItem('sylva_v6_state', JSON.stringify(state)); } catch(e){} }
       }
 
       function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
 
       function render() {
-        const forest = getForest();
-        const tree = getTree();
-        const btnLock = document.getElementById('btn-lock');
-        const btnSwitchContext = document.getElementById('btn-switch-context');
-        const breadcrumbText = document.getElementById('breadcrumb-text');
+        const forest = getForest(), tree = getTree();
+        const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), breadcrumbText = document.getElementById('breadcrumb-text');
         
         btnLock.className = `btn btn-small btn-lock ${state.isLocked ? '' : 'unlocked'}`;
-        btnLock.innerHTML = state.isLocked
-          ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-          : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+        btnLock.innerHTML = state.isLocked ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
           
-        document.getElementById('btn-grow').disabled = !state.isLocked;
-        document.getElementById('btn-season').disabled = !state.isLocked;
+        document.getElementById('btn-grow').disabled = !state.isLocked; document.getElementById('btn-season').disabled = !state.isLocked;
         document.getElementById('btn-harvest-main').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
-
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
 
         if (state.viewMode === 'forest') {
-          btnSwitchContext.style.display = 'none';
-          document.getElementById('label-directory').innerText = 'Forest';
-          breadcrumbText.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
-          treeLayer.style.display = 'none'; forestLayer.style.display = 'block';
-          renderForest();
+          btnSwitchContext.style.display = 'none'; document.getElementById('label-directory').innerText = 'Forest'; breadcrumbText.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
+          treeLayer.style.display = 'none'; forestLayer.style.display = 'block'; renderForest();
         } else if (tree) {
-          btnSwitchContext.style.display = 'inline-flex';
-          document.getElementById('label-directory').innerText = 'Nodes';
-          breadcrumbText.innerHTML = `🌲 ${escapeHTML(forest.title)} <span style="color:var(--text-faint); margin:0 4px;">&gt;</span> ${escapeHTML(tree.title)}`;
-          forestLayer.style.display = 'none'; treeLayer.style.display = 'block';
-          renderTree();
+          btnSwitchContext.style.display = 'inline-flex'; document.getElementById('label-directory').innerText = 'Nodes'; breadcrumbText.innerHTML = `🌲 ${escapeHTML(forest.title)} <span style="color:var(--text-faint); margin:0 4px;">&gt;</span> ${escapeHTML(tree.title)}`;
+          forestLayer.style.display = 'none'; treeLayer.style.display = 'block'; renderTree();
         }
-        renderDrawers();
-        updateWorldTransform();
+        renderDrawers(); updateWorldTransform();
       }
 
       function updateSVGPaths() {
@@ -431,64 +404,38 @@
       }
 
       function attachGestureEvents(el, entity, isTreeMode) {
-        let pressTimer, clickTimer, clickCount = 0;
-        let startX, startY;
-
+        let pressTimer, clickTimer, clickCount = 0, startX, startY;
         el.addEventListener('pointerdown', (e) => {
-          e.stopPropagation();
-          if (isPinching) return;
+          e.stopPropagation(); if (isPinching) return;
           startX = e.clientX; startY = e.clientY;
           if (!state.isLocked) {
              el.setPointerCapture(e.pointerId);
-             function onMove(evt) {
-                entity.x += (evt.clientX - startX) / state.scale; entity.y += (evt.clientY - startY) / state.scale;
-                startX = evt.clientX; startY = evt.clientY;
-                el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`;
-                if (isTreeMode) updateSVGPaths();
-                renderMinimap();
-             }
-             function onUp(evt) {
-                el.releasePointerCapture(evt.pointerId); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); saveData();
-             }
-             window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp);
-             return;
+             function onMove(evt) { entity.x += (evt.clientX - startX) / state.scale; entity.y += (evt.clientY - startY) / state.scale; startX = evt.clientX; startY = evt.clientY; el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`; if (isTreeMode) updateSVGPaths(); renderMinimap(); }
+             function onUp(evt) { el.releasePointerCapture(evt.pointerId); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); saveData(); }
+             window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); return;
           }
-
           clickCount++;
           if (clickCount === 1) {
-             pressTimer = setTimeout(() => {
-                clickCount = 0;
-                if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); advanceTutorial(4); render(); }
-             }, 400); 
+             pressTimer = setTimeout(() => { clickCount = 0; if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); advanceTutorial(4); render(); } }, 400); 
              clickTimer = setTimeout(() => {
                 if (clickCount === 1) {
-                   if (isTreeMode) {
-                      if (state.selectedId === entity.id) openInspector(entity);
-                      else { state.selectedId = entity.id; renderTreeSelections(); }
-                   } else { state.selectedId = entity.id; renderTreeSelections(); advanceTutorial(2); }
+                   if (isTreeMode) { if (state.selectedId === entity.id) openInspector(entity); else { state.selectedId = entity.id; renderTreeSelections(); } } else { state.selectedId = entity.id; renderTreeSelections(); advanceTutorial(2); }
                 }
                 clickCount = 0;
              }, 250); 
           } else if (clickCount === 2) {
              clearTimeout(pressTimer); clearTimeout(clickTimer); clickCount = 0;
-             if (isTreeMode) openInspector(entity);
-             else { advanceTutorial(3); openTreeInspector(entity); }
+             if (isTreeMode) openInspector(entity); else { advanceTutorial(3); openTreeInspector(entity); }
           }
         });
-        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearTimeout(pressTimer); });
-        el.addEventListener('pointerup', () => clearTimeout(pressTimer));
+        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearTimeout(pressTimer); }); el.addEventListener('pointerup', () => clearTimeout(pressTimer));
       }
 
       function renderTree() {
-        const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths();
-        if(!tree) return;
+        const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if(!tree) return;
         tree.nodes.forEach(node => {
-          const el = document.createElement('div'); el.id = node.id;
-          el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''}`;
-          el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
-          attachGestureEvents(el, node, true);
-          treeLayer.appendChild(el);
+          const el = document.createElement('div'); el.id = node.id; el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''}`; el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`; attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
       }
 
@@ -500,92 +447,47 @@
       function renderForest() {
         const forest = getForest(); forestLayer.innerHTML = ''; canvasSvg.innerHTML = '';
         forest.trees.forEach(t => {
-          const el = document.createElement('div'); el.id = t.id;
-          el.className = `forest-tree-entity ${t.id === state.selectedId ? 'selected' : ''}`;
-          el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
-          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`;
-          attachGestureEvents(el, t, false);
-          forestLayer.appendChild(el);
+          const el = document.createElement('div'); el.id = t.id; el.className = `forest-tree-entity ${t.id === state.selectedId ? 'selected' : ''}`; el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
+          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`; attachGestureEvents(el, t, false); forestLayer.appendChild(el);
         });
       }
 
       function setupInputHandlers() {
         let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
 
-        viewport.addEventListener('pointerdown', (e) => {
-          activePointers.set(e.pointerId, e);
-          if (activePointers.size === 1) { panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY; }
-        });
-
+        viewport.addEventListener('pointerdown', (e) => { activePointers.set(e.pointerId, e); if (activePointers.size === 1) { panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY; } });
         window.addEventListener('pointermove', (e) => {
-          if (!activePointers.has(e.pointerId)) return;
-          activePointers.set(e.pointerId, e);
-
+          if (!activePointers.has(e.pointerId)) return; activePointers.set(e.pointerId, e);
           if (activePointers.size >= 2) {
-            isPinching = true;
-            document.getElementById('tree-layer').style.pointerEvents = 'none';
-            document.getElementById('forest-layer').style.pointerEvents = 'none';
-            
-            const pts = Array.from(activePointers.values());
-            const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
-            const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
-            
-            if (prevPinchDist && prevCx !== null) {
-              const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.3), 3.0);
-              state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
-              state.panX += (cx - prevCx); state.panY += (cy - prevCy);
-              state.scale = newScale; updateWorldTransform();
-            }
+            isPinching = true; document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none';
+            const pts = Array.from(activePointers.values()); const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2; const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+            if (prevPinchDist && prevCx !== null) { const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.3), 3.0); state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale); state.panX += (cx - prevCx); state.panY += (cy - prevCy); state.scale = newScale; updateWorldTransform(); }
             prevPinchDist = dist; prevCx = cx; prevCy = cy;
-          } else if (activePointers.size === 1 && !isPinching) {
-            state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY);
-            updateWorldTransform();
-          }
+          } else if (activePointers.size === 1 && !isPinching) { state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform(); }
         });
 
         const endPointer = (e) => {
-          activePointers.delete(e.pointerId);
-          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; }
-          if (activePointers.size === 1) {
-            const p = Array.from(activePointers.values())[0];
-            panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY;
-          }
-          if (activePointers.size === 0) {
-            document.getElementById('tree-layer').style.pointerEvents = 'auto';
-            document.getElementById('forest-layer').style.pointerEvents = 'auto';
-            setTimeout(() => { isPinching = false; }, 100);
-          }
+          activePointers.delete(e.pointerId); if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; }
+          if (activePointers.size === 1) { const p = Array.from(activePointers.values())[0]; panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; }
+          if (activePointers.size === 0) { document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; setTimeout(() => { isPinching = false; }, 100); }
         };
         window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
         viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.3), 3.0); updateWorldTransform(); }, { passive: false });
 
         let pipDragging = false;
-        pipCanvas.addEventListener('pointerdown', (e) => { pipDragging = true; handlePipMove(e); });
-        window.addEventListener('pointermove', (e) => { if(pipDragging) handlePipMove(e); });
-        window.addEventListener('pointerup', () => { pipDragging = false; });
+        pipCanvas.addEventListener('pointerdown', (e) => { pipDragging = true; handlePipMove(e); }); window.addEventListener('pointermove', (e) => { if(pipDragging) handlePipMove(e); }); window.addEventListener('pointerup', () => { pipDragging = false; });
         function handlePipMove(e) {
-          const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top;
-          if (pipX < 0 || pipX > rect.width || pipY < 0 || pipY > rect.height) return;
+          const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top; if (pipX < 0 || pipX > rect.width || pipY < 0 || pipY > rect.height) return;
           let clickedEntity = null;
-          if (state.viewMode === 'tree') {
-            const t = getTree();
-            for (const n of t.nodes) { if (Math.hypot(pipX - (n.x * 0.12 + 15), pipY - (n.y * 0.12 + 10)) < 10) { clickedEntity = n; break; } }
-          } else {
-            const f = getForest();
-            for (const t of f.trees) { if (Math.hypot(pipX - (t.x * 0.12 + 15), pipY - (t.y * 0.12 + 10)) < 10) { clickedEntity = t; break; } }
-          }
-          if (clickedEntity && !pipDragging) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - clickedEntity.x - 95; state.panY = 120 - clickedEntity.y; updateWorldTransform();
-          } else { centerOn((pipX - 15) / 0.12, (pipY - 10) / 0.12); }
+          if (state.viewMode === 'tree') { const t = getTree(); for (const n of t.nodes) { if (Math.hypot(pipX - (n.x * 0.12 + 15), pipY - (n.y * 0.12 + 10)) < 10) { clickedEntity = n; break; } }
+          } else { const f = getForest(); for (const t of f.trees) { if (Math.hypot(pipX - (t.x * 0.12 + 15), pipY - (t.y * 0.12 + 10)) < 10) { clickedEntity = t; break; } } }
+          if (clickedEntity && !pipDragging) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - clickedEntity.x - 95; state.panY = 120 - clickedEntity.y; updateWorldTransform(); } else { centerOn((pipX - 15) / 0.12, (pipY - 10) / 0.12); }
         }
 
         document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; advanceTutorial(14); render(); });
         document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
         
-        document.getElementById('btn-grow').addEventListener('click', (e) => {
-          e.stopPropagation(); advanceTutorial(1);
-          closeAllDropdowns();
-          const dd = document.getElementById('grow-dropdown'); dd.style.display = 'flex';
-        });
+        document.getElementById('btn-grow').addEventListener('click', (e) => { e.stopPropagation(); advanceTutorial(1); closeAllDropdowns(); const dd = document.getElementById('grow-dropdown'); dd.style.display = 'flex'; });
 
         document.querySelectorAll('.btn-grow-opt').forEach(b => {
           b.addEventListener('click', (e) => {
@@ -595,13 +497,9 @@
               const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
               tree.nodes.push(node); state.selectedId = node.id;
               if(type === 'branch') advanceTutorial(6); else if(type === 'leaf') advanceTutorial(7); else if(type === 'fruit') advanceTutorial(8); else if(type === 'seed') advanceTutorial(9);
-              document.getElementById('grow-dropdown').style.display = 'none';
-              render(); setTimeout(() => openInspector(node), 50);
+              document.getElementById('grow-dropdown').style.display = 'none'; render(); setTimeout(() => openInspector(node), 50);
             } else {
-              if (type === 'tree') {
-                const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
-                forest.trees.push(newTree); state.selectedId = newTree.id; advanceTutorial(2);
-              }
+              if (type === 'tree') { const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] }; forest.trees.push(newTree); state.selectedId = newTree.id; advanceTutorial(2); }
               document.getElementById('grow-dropdown').style.display = 'none'; render();
             }
           });
@@ -610,90 +508,66 @@
         window.addEventListener('pointerdown', closeAllDropdowns);
 
         const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
-        document.getElementById('btn-toggle-directory').addEventListener('click', () => dl.classList.toggle('open'));
-        document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
-        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { advanceTutorial(12); dr.classList.toggle('open'); });
-        document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
-        
-        document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); });
-        document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); });
-        document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); });
-        
-        document.getElementById('btn-season').addEventListener('click', () => { advanceTutorial(9); openSeasonModal(); });
-        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); render(); });
-        
-        document.getElementById('btn-action-prune').addEventListener('click', () => { 
-          const t = getTree(); if(!t) return;
-          const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); 
-          t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); 
-          document.getElementById('modal-season').classList.remove('open'); render(); 
-        });
-        
-        document.getElementById('btn-harvest-main').addEventListener('click', () => {
-          advanceTutorial(11); const t = getTree(); if(!t) return;
-          t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); 
-          alert('Harvested all marked goals!'); saveData(); render(); 
-        });
-
-        // Sync Org Listeners
-        document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); });
-        document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
-        document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
-        document.getElementById('btn-connect-org').addEventListener('click', () => {
-           const code = document.getElementById('input-org-code').value.trim();
-           if(code) {
-             currentOrgCode = code;
-             document.getElementById('sync-status').style.display = 'block';
-             document.getElementById('sync-org-name').innerText = code;
-             document.getElementById('modal-sync-org').classList.remove('open');
-             alert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`);
-           }
-        });
-
-        // Auth Password Listeners
-        document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
-        document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
-        document.getElementById('btn-auth-org').addEventListener('click', () => {
-           const pass = document.getElementById('input-org-pass').value;
-           if(pass.length > 0) {
-              document.getElementById('modal-sync-auth').classList.remove('open');
-              if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; }
-           } else { alert("Password required to broadcast to Org."); }
-        });
-
-        // Templates
-        document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); });
-        document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
+        document.getElementById('btn-toggle-directory').addEventListener('click', () => dl.classList.toggle('open')); document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { advanceTutorial(12); dr.classList.toggle('open'); }); document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
+        document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); }); document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); });
+        document.getElementById('btn-season').addEventListener('click', () => { advanceTutorial(9); openSeasonModal(); }); document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); render(); });
+        document.getElementById('btn-action-prune').addEventListener('click', () => { const t = getTree(); if(!t) return; const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); document.getElementById('modal-season').classList.remove('open'); render(); });
+        document.getElementById('btn-harvest-main').addEventListener('click', () => { advanceTutorial(11); const t = getTree(); if(!t) return; t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); alert('Harvested all marked goals!'); saveData(); render(); });
+        document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); }); document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); }); document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); alert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); } });
+        document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-auth-org').addEventListener('click', () => { const pass = document.getElementById('input-org-pass').value; if(pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } else { alert("Password required to broadcast to Org."); } });
+        document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); }); document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
       }
 
       function setupCustomDropdowns() {
-        const configs = [
-          { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' },
-          { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' },
-          { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' }
-        ];
+        const configs = [ { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' }, { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' }, { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' } ];
         configs.forEach(cfg => {
           const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
           trig.addEventListener('click', (e) => { e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; });
-          drop.querySelectorAll('.custom-opt').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              e.stopPropagation(); inp.value = btn.getAttribute('data-val');
-              trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none';
-              // If Season, trigger update instantly
-              if(cfg.inp === 'select-tree-season') { const t = getTree(); if(t){ t.season = inp.value; saveData(); render(); } }
-            });
-          });
+          drop.querySelectorAll('.custom-opt').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); inp.value = btn.getAttribute('data-val'); trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none'; if(cfg.inp === 'select-tree-season') { const t = getTree(); if(t){ t.season = inp.value; saveData(); render(); } } }); });
         });
       }
+      function closeAllDropdowns() { document.getElementById('grow-dropdown').style.display = 'none'; document.getElementById('node-type-dropdown').style.display = 'none'; document.getElementById('tree-type-dropdown').style.display = 'none'; document.getElementById('season-dropdown').style.display = 'none'; }
 
-      function closeAllDropdowns() {
-        document.getElementById('grow-dropdown').style.display = 'none';
-        document.getElementById('node-type-dropdown').style.display = 'none';
-        document.getElementById('tree-type-dropdown').style.display = 'none';
-        document.getElementById('season-dropdown').style.display = 'none';
+      // --- Template Engine (Dynamic Blueprint Generator) ---
+      function generateTemplateNodes(title, startX, startY) {
+        const nodes = [];
+        const generateId = () => 'n_' + Math.random().toString(36).substring(2, 9);
+        const trunkId = generateId();
+        
+        // Template Dictionary (Hardcoded Blueprints)
+        if (title === "Sepsis Protocol") {
+           const b1 = generateId(), b2 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId(), f2 = generateId();
+           nodes.push({ id: trunkId, title: "Sepsis Alert", desc: "Emergency Protocol", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+           nodes.push({ id: b1, title: "Clinical Indicators", desc: "", type: "branch", parentId: trunkId, x: startX - 150, y: startY + 160, pinned: false });
+           nodes.push({ id: l1, title: "Temp > 101.0F", desc: "", type: "leaf", parentId: b1, x: startX - 250, y: startY + 300, pinned: false });
+           nodes.push({ id: l2, title: "Lactic Acid > 2.0", desc: "", type: "leaf", parentId: b1, x: startX - 50, y: startY + 300, pinned: false });
+           nodes.push({ id: b2, title: "Interventions", desc: "", type: "branch", parentId: trunkId, x: startX + 150, y: startY + 160, pinned: false });
+           nodes.push({ id: f1, title: "Blood Cultures Drawn", desc: "", type: "fruit", parentId: b2, x: startX + 50, y: startY + 300, pinned: false });
+           nodes.push({ id: f2, title: "IV Antibiotics Started", desc: "", type: "fruit", parentId: b2, x: startX + 250, y: startY + 300, pinned: false });
+        } else if (title === "Agile Sprint Board") {
+           const b1 = generateId(), b2 = generateId(), b3 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId();
+           nodes.push({ id: trunkId, title: title, desc: "Current Sprint Cycle", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+           nodes.push({ id: b1, title: "Backlog / To Do", desc: "", type: "branch", parentId: trunkId, x: startX - 220, y: startY + 160, pinned: false });
+           nodes.push({ id: l1, title: "Design DB Schema", desc: "", type: "leaf", parentId: b1, x: startX - 220, y: startY + 300, pinned: false });
+           nodes.push({ id: b2, title: "In Progress", desc: "", type: "branch", parentId: trunkId, x: startX, y: startY + 160, pinned: false });
+           nodes.push({ id: l2, title: "Setup UI Canvas", desc: "", type: "leaf", parentId: b2, x: startX, y: startY + 300, pinned: false });
+           nodes.push({ id: b3, title: "Done", desc: "", type: "branch", parentId: trunkId, x: startX + 220, y: startY + 160, pinned: false });
+           nodes.push({ id: f1, title: "Initialize Repo", desc: "", type: "fruit", parentId: b3, x: startX + 220, y: startY + 300, pinned: false });
+        } else {
+           // Dynamic Fallback for all other 48 templates
+           const b1 = generateId(), b2 = generateId(), l1 = generateId(), f1 = generateId();
+           nodes.push({ id: trunkId, title: title, desc: "Auto-generated structure", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+           nodes.push({ id: b1, title: "Phase 1: Planning", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
+           nodes.push({ id: l1, title: "Core Requirements", desc: "", type: "leaf", parentId: b1, x: startX - 120, y: startY + 300, pinned: false });
+           nodes.push({ id: b2, title: "Phase 2: Execution", desc: "", type: "branch", parentId: trunkId, x: startX + 120, y: startY + 160, pinned: false });
+           nodes.push({ id: f1, title: "Final Deliverable", desc: "", type: "fruit", parentId: b2, x: startX + 120, y: startY + 300, pinned: false });
+        }
+        return nodes;
       }
 
-      // 50 Template Generator
       function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
         const cats = {
@@ -709,7 +583,9 @@
             const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
             li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
             li.querySelector('button').addEventListener('click', () => {
-               const newTree = { id: 't_' + Date.now(), title: t, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: [ { id: 'r_' + Date.now(), title: t, desc: 'Generated Template', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false } ] };
+               const startX = 260, startY = 60;
+               const newNodes = generateTemplateNodes(t, startX, startY);
+               const newTree = { id: 't_' + Date.now(), title: t, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: newNodes };
                getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-templates').classList.remove('open'); render(); saveData();
                alert(`${t} Template Loaded into Workspace!`);
             });
@@ -723,8 +599,7 @@
       function openInspector(node) {
         setTimeout(() => { 
           document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
-          document.getElementById('node-input-type').value = node.type;
-          document.getElementById('node-type-trigger').querySelector('span').innerText = document.querySelector(`.custom-opt[data-val="${node.type}"]`).innerText;
+          document.getElementById('node-input-type').value = node.type; document.getElementById('node-type-trigger').querySelector('span').innerText = document.querySelector(`.custom-opt[data-val="${node.type}"]`).innerText;
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
           document.getElementById('btn-save-node').onclick = (e) => { e.preventDefault(); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
           const bD = document.getElementById('btn-delete-node'); bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex'; bD.onclick = (e) => { e.preventDefault(); getTree().nodes = getTree().nodes.filter(n => n.id !== node.id && n.parentId !== node.id); document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
@@ -743,38 +618,22 @@
       }
 
       function openSeasonModal() {
-        const t = getTree(); if(!t) return;
-        document.getElementById('select-tree-season').value = t.season || 'Spring';
-        document.getElementById('season-trigger').querySelector('span').innerText = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`).innerText;
-        const list = document.getElementById('list-harvest'); list.innerHTML = '';
-        const fruits = t.nodes.filter(n => n.type === 'fruit');
-        document.getElementById('harvest-total').innerText = fruits.length;
-        fruits.forEach(f => {
-          const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`;
-          li.addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); openInspector(f); });
-          list.appendChild(li);
-        });
+        const t = getTree(); if(!t) return; document.getElementById('select-tree-season').value = t.season || 'Spring'; document.getElementById('season-trigger').querySelector('span').innerText = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`).innerText;
+        const list = document.getElementById('list-harvest'); list.innerHTML = ''; const fruits = t.nodes.filter(n => n.type === 'fruit'); document.getElementById('harvest-total').innerText = fruits.length;
+        fruits.forEach(f => { const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`; li.addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); openInspector(f); }); list.appendChild(li); });
         document.getElementById('modal-season').classList.add('open');
       }
 
       function renderDrawers() {
-        const forest = getForest(), tree = getTree(), pLeft = document.getElementById('list-pinned-left'), aLeft = document.getElementById('list-atoz-left');
-        pLeft.innerHTML = ''; aLeft.innerHTML = '';
-        if (state.viewMode === 'tree' && tree) {
-          const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title));
-          sorted.forEach(n => { const li = createDirItem(n.title, getNodeIcon(n.type), n.pinned, () => { centerOn(n.x, n.y); openInspector(n); }, () => { n.pinned = !n.pinned; saveData(); renderDrawers(); }); if (n.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); });
-        } else {
-          const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title));
-          sorted.forEach(t => { const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }, () => { t.pinned = !t.pinned; saveData(); renderDrawers(); }); if (t.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); });
-        }
+        const forest = getForest(), tree = getTree(), pLeft = document.getElementById('list-pinned-left'), aLeft = document.getElementById('list-atoz-left'); pLeft.innerHTML = ''; aLeft.innerHTML = '';
+        if (state.viewMode === 'tree' && tree) { const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title)); sorted.forEach(n => { const li = createDirItem(n.title, getNodeIcon(n.type), n.pinned, () => { centerOn(n.x, n.y); openInspector(n); }, () => { n.pinned = !n.pinned; saveData(); renderDrawers(); }); if (n.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); });
+        } else { const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title)); sorted.forEach(t => { const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }, () => { t.pinned = !t.pinned; saveData(); renderDrawers(); }); if (t.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); }); }
         document.getElementById('btn-export-backup').onclick = () => { advanceTutorial(13); const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.4.1', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
         document.getElementById('btn-import-backup').onclick = () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (e) => { const r = new FileReader(); r.onload = (evt) => { try { const p = JSON.parse(evt.target.result); if (p.forest) { p.forest.id = 'f_' + Date.now(); state.forests.push(p.forest); state.activeForestId = p.forest.id; state.viewMode = 'forest'; render(); } } catch (err) { alert('Invalid backup.'); } }; r.readAsText(e.target.files[0]); }; input.click(); };
       }
 
       function createDirItem(title, iconHtml, isPinned, onClick, onPin) {
-        const li = document.createElement('li'); li.className = 'directory-item';
-        li.innerHTML = `<div style="display:flex; align-items:center; gap:8px; overflow:hidden;">${iconHtml}<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${escapeHTML(title)}</span></div><span style="cursor:pointer; font-size:16px; color:${isPinned ? 'var(--node-fruit)' : 'var(--text-faint)'};">★</span>`;
-        li.firstElementChild.onclick = onClick; li.lastElementChild.onclick = (e) => { e.stopPropagation(); onPin(); }; return li;
+        const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<div style="display:flex; align-items:center; gap:8px; overflow:hidden;">${iconHtml}<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${escapeHTML(title)}</span></div><span style="cursor:pointer; font-size:16px; color:${isPinned ? 'var(--node-fruit)' : 'var(--text-faint)'};">★</span>`; li.firstElementChild.onclick = onClick; li.lastElementChild.onclick = (e) => { e.stopPropagation(); onPin(); }; return li;
       }
 
       function getNodeIcon(type) {
@@ -797,55 +656,33 @@
       }
 
       function renderMinimap() {
-        const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 95;
-        ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 95); ctx.strokeStyle = '#33485E';
-        if (state.viewMode === 'tree') {
-          const t = getTree(); if(!t) return;
-          t.nodes.forEach(n => { if (n.parentId) { const p = t.nodes.find(pn => pn.id === n.parentId); if (p) { ctx.beginPath(); ctx.moveTo(p.x * 0.12 + 15, p.y * 0.12 + 10); ctx.lineTo(n.x * 0.12 + 15, n.y * 0.12 + 10); ctx.stroke(); } } });
-          t.nodes.forEach(n => { ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : (n.type === 'trunk' ? '#B45309' : '#10B981'); ctx.fillRect(n.x * 0.12 + 12, n.y * 0.12 + 8, 6, 4); });
-        } else {
-          const f = getForest();
-          f.trees.forEach(t => { ctx.fillStyle = '#38BDF8'; ctx.fillRect(t.x * 0.12 + 12, t.y * 0.12 + 8, 8, 8); });
-        }
+        const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 95; ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 95); ctx.strokeStyle = '#33485E';
+        if (state.viewMode === 'tree') { const t = getTree(); if(!t) return; t.nodes.forEach(n => { if (n.parentId) { const p = t.nodes.find(pn => pn.id === n.parentId); if (p) { ctx.beginPath(); ctx.moveTo(p.x * 0.12 + 15, p.y * 0.12 + 10); ctx.lineTo(n.x * 0.12 + 15, n.y * 0.12 + 10); ctx.stroke(); } } }); t.nodes.forEach(n => { ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : (n.type === 'trunk' ? '#B45309' : '#10B981'); ctx.fillRect(n.x * 0.12 + 12, n.y * 0.12 + 8, 6, 4); }); } else { const f = getForest(); f.trees.forEach(t => { ctx.fillStyle = '#38BDF8'; ctx.fillRect(t.x * 0.12 + 12, t.y * 0.12 + 8, 8, 8); }); }
       }
-
       function escapeHTML(s) { return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)); }
 
       const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next');
       let tutStep = -1;
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '55px', left: '50%' },
-        { msg: "Click '... New Tree' to plant your first project.", top: '90px', left: '50%' },
-        { msg: "Awesome! Double-click the new tree to open its details.", top: '50%', left: '50%' },
-        { msg: "Here you can set the Tree's Title and Species type. Click Save Changes when done.", top: '20%', left: '50%' },
-        { msg: "Great! Now Long-Press the tree to open it.", top: '50%', left: '50%' },
-        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '55px', left: '50%' },
-        { msg: "Select '... a Branch'. Branches act like folders to organize your thoughts.", top: '90px', left: '50%' },
-        { msg: "Click 'Grow...' -> '... a Leaf'. Leaves are your actual notes and documents.", top: '55px', left: '50%' },
-        { msg: "Click 'Grow...' -> '... a Fruit'. Fruits are deliverables and completed goals.", top: '55px', left: '50%' },
-        { msg: "Click 'Grow...' -> '... a Seed'. Seeds are future ideas or questions to explore later. Next, click 'Season' in the bottom right.", top: '55px', left: '50%' },
-        { msg: "Here you set the life cycle: Spring (New), Summer (Active), Fall (Review), Winter (Archive). Close this when done.", top: '70%', left: '70%' },
-        { msg: "Click the 'Harvest' button to quickly collect all completed Fruit goals in the tree.", top: '80%', left: '70%' },
-        { msg: "Click 'Nursery' to manage your saves.", top: '55px', left: '80%' },
-        { msg: "Click 'Export Backup (.json)'. This saves your ENTIRE forest offline directly to your device.", top: '150px', left: '80%' },
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '85px', left: '20%' },
-        { msg: "You're back! The dragging, pinching, and UI functions are exactly the same here. Thank you for installing Sylva!", top: '50%', left: '50%' }
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '55px', left: '50%' }, { msg: "Click '... New Tree' to plant your first project.", top: '90px', left: '50%' },
+        { msg: "Awesome! Double-click the new tree to open its details.", top: '50%', left: '50%' }, { msg: "Here you can set the Tree's Title and Species type. Click Save Changes when done.", top: '20%', left: '50%' },
+        { msg: "Great! Now Long-Press the tree to open it.", top: '50%', left: '50%' }, { msg: "You're inside! Click 'Grow...' to start branching out.", top: '55px', left: '50%' },
+        { msg: "Select '... a Branch'. Branches act like folders to organize your thoughts.", top: '90px', left: '50%' }, { msg: "Click 'Grow...' -> '... a Leaf'. Leaves are your actual notes and documents.", top: '55px', left: '50%' },
+        { msg: "Click 'Grow...' -> '... a Fruit'. Fruits are deliverables and completed goals.", top: '55px', left: '50%' }, { msg: "Click 'Grow...' -> '... a Seed'. Seeds are future ideas or questions to explore later. Next, click 'Season' in the bottom right.", top: '55px', left: '50%' },
+        { msg: "Here you set the life cycle: Spring (New), Summer (Active), Fall (Review), Winter (Archive). Close this when done.", top: '70%', left: '70%' }, { msg: "Click the 'Harvest' button to quickly collect all completed Fruit goals in the tree.", top: '80%', left: '70%' },
+        { msg: "Click 'Nursery' to manage your saves.", top: '55px', left: '80%' }, { msg: "Click 'Export Backup (.json)'. This saves your ENTIRE forest offline directly to your device.", top: '150px', left: '80%' },
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '85px', left: '20%' }, { msg: "You're back! The dragging, pinching, and UI functions are exactly the same here. Thank you for installing Sylva!", top: '50%', left: '50%' }
       ];
-
       function initTutorial() { if (!localStorage.getItem('sylva_v6_onboarded')) advanceTutorial(0); }
       function advanceTutorial(step) {
         if (localStorage.getItem('sylva_v6_onboarded')) return;
         if (step > tutStep) {
           tutStep = step;
           if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v6_onboarded', 'true'); return; }
-          tutText.innerText = TUT_STEPS[step].msg; tutBox.style.top = TUT_STEPS[step].top; tutBox.style.left = TUT_STEPS[step].left;
-          tutBox.style.transform = (TUT_STEPS[step].left === '50%') ? 'translateX(-50%)' : 'none'; tutBox.style.display = 'flex';
+          tutText.innerText = TUT_STEPS[step].msg; tutBox.style.top = TUT_STEPS[step].top; tutBox.style.left = TUT_STEPS[step].left; tutBox.style.transform = (TUT_STEPS[step].left === '50%') ? 'translateX(-50%)' : 'none'; tutBox.style.display = 'flex';
         }
       }
-      tutBtn.addEventListener('click', () => {
-        if (tutStep === 10 || tutStep === 11 || tutStep === 14 || tutStep === 15) advanceTutorial(tutStep + 1);
-        else advanceTutorial(TUT_STEPS.length); 
-      });
+      tutBtn.addEventListener('click', () => { if (tutStep === 10 || tutStep === 11 || tutStep === 14 || tutStep === 15) advanceTutorial(tutStep + 1); else advanceTutorial(TUT_STEPS.length); });
 
       init();
     })();
