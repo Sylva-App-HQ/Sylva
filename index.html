@@ -233,7 +233,7 @@
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div><ul class="directory-list" id="list-atoz-right"></ul></div>
       <div style="margin-top:auto; padding-top:12px;">
-         <button class="btn" style="width:100%; border-color:#10B981; color:#10B981; background:rgba(16,185,129,0.1);">Become a Tree Hugger ($1)</button>
+         <button class="btn" id="btn-tree-hugger" style="width:100%; border-color:#10B981; color:#10B981; background:rgba(16,185,129,0.1);">Become a Tree Hugger ($1)</button>
       </div>
     </div>
   </aside>
@@ -384,6 +384,25 @@
         <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Would you like to inject <strong id="tpl-prompt-name"></strong> into your current forest, or create a brand new forest for it?</p>
       </div>
       <div class="modal-footer"><button class="btn" id="btn-tpl-current">Current Forest</button><button class="btn btn-accent" id="btn-tpl-new">New Forest</button></div>
+    </div>
+  </div>
+
+  
+  <div class="modal-overlay" id="modal-tree-hugger">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Become a Tree Hugger</h3><button class="btn btn-small" id="btn-close-hugger">&times;</button></div>
+      <div class="modal-body">
+        <p style="font-size:13px; color:var(--text-main); line-height:1.5;">Support Sylva's development and unlock premium features for a one-time payment of $1!</p>
+        <ul style="font-size:12px; color:var(--text-muted); line-height:1.6; margin-left: 20px; margin-bottom: 8px;">
+          <li>Unlock custom visual themes (Midnight Forest, Cherry Blossom)</li>
+          <li>Access to premium advanced templates</li>
+          <li>Our eternal gratitude!</li>
+        </ul>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn" id="btn-pay-stripe" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Pay with Stripe</button>
+          <button class="btn" id="btn-pay-paypal" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M17 10h-2V8a2 2 0 00-2-2H9L7 20h3l1-4h3a4 4 0 000-8z"/></svg> Pay with PayPal</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -860,6 +879,11 @@
         document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
         document.getElementById('btn-auth-org').addEventListener('click', () => { const pass = document.getElementById('input-org-pass').value; if(pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } else { showAppAlert("Password required to broadcast to Org."); } });
         document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); }); document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
+        document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
+        document.getElementById('btn-close-hugger').addEventListener('click', () => { document.getElementById('modal-tree-hugger').classList.remove('open'); });
+        document.getElementById('btn-pay-stripe').addEventListener('click', () => { window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
+        document.getElementById('btn-pay-paypal').addEventListener('click', () => { window.open('YOUR_PAYPAL_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
+
       }
 
       function setupCustomDropdowns() {
