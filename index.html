@@ -27,23 +27,29 @@
     .top-row-center { justify-self: center; position: relative; }
     .top-row-right { justify-self: end; }
 
-    .custom-dropdown { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; flex-direction: column; z-index: 50; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6); overflow: hidden; }
+    /* Custom Dropdowns */
+    .custom-dropdown { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; flex-direction: column; z-index: 9999; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.6); overflow: hidden; }
     .custom-opt { width: 100%; border: none; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--text-main); padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; cursor: pointer; }
     .custom-opt:last-child { border-bottom: none; }
     .custom-opt:hover { background: var(--bg-surface-elevated); }
-    
-    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 160px; }
+    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 160px; z-index: 100; }
     
     .custom-select-trigger { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .custom-select-container { position: relative; width: 100%; }
-    .custom-select-dropdown { top: 100%; left: 0; width: 100%; margin-top: 4px; z-index: 100; max-height: 180px; overflow-y: auto; }
+    .custom-select-dropdown { top: 100%; left: 0; width: 100%; margin-top: 4px; z-index: 9999; max-height: 180px; overflow-y: auto; position: absolute; }
 
-    .nav-bar { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 12px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); height: 42px; }
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 12px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); height: 42px; position: relative; }
     .nav-left { display: flex; align-items: center; gap: 10px; }
-    .breadcrumb-text { font-size: 12px; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50vw; }
-    .nav-right { display: flex; align-items: center; }
+    .breadcrumb-text { font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; }
+    .breadcrumb-crumb { cursor: pointer; position: relative; z-index: 2; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; }
+    .breadcrumb-crumb:hover { background: var(--bg-surface-elevated); }
+    .breadcrumb-fade { position: absolute; right: 40px; width: 30px; height: 100%; background: linear-gradient(to right, transparent, var(--bg-surface)); pointer-events: none; z-index: 3; }
+    .nav-right { display: flex; align-items: center; z-index: 4; position: relative; }
 
-    .bottom-actions { position: absolute; bottom: 12px; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 25; pointer-events: auto; }
+    #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
+    #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
+
+    .bottom-actions { position: absolute; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 25; pointer-events: auto; }
     .btn { height: 38px; padding: 0 12px; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.1s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     .btn-small { height: 28px; padding: 0 8px; font-size: 11px; }
     .btn:active { transform: scale(0.96); }
@@ -65,8 +71,10 @@
     .node-card.type-leaf { border-left: 5px solid var(--node-leaf); }
     .node-card.type-fruit { border-left: 5px solid var(--node-fruit); }
     .node-card.type-seed { border-left: 5px solid var(--node-seed); }
-    .node-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; pointer-events: none; }
-    .node-title { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+    .node-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; pointer-events: none; position: relative; }
+    .acorn-badge { position: absolute; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; color: #B45309; }
+    .node-card.has-acorn .acorn-badge { display: flex; }
+    .node-title { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; flex-grow: 1; }
     .node-desc { font-size: 11px; color: var(--text-muted); line-height: 1.3; max-height: 28px; overflow: hidden; pointer-events: none; }
 
     .forest-tree-entity { position: absolute; display: flex; flex-direction: column; align-items: center; width: 140px; cursor: pointer; pointer-events: auto; text-align: center; }
@@ -83,27 +91,37 @@
     .directory-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
     .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
 
-    .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 60; display: none; align-items: center; justify-content: center; touch-action: none; }
+    .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; touch-action: none; }
     .modal-overlay.open { display: flex; }
     .modal-card { width: 480px; max-width: 90vw; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 12px; display: flex; flex-direction: column; overflow: visible; pointer-events: auto; }
     .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
-    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; overflow-x: hidden; }
+    .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto; overflow-x: hidden; position: relative; } /* Added relative for absolute dropdowns */
     .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; }
-    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; position: relative; }
     .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
     .field-group input, .field-group textarea { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; }
 
-    #pip-minimap { position: absolute; bottom: 12px; left: 12px; width: 140px; height: 95px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5); pointer-events: auto; cursor: crosshair; }
+    #pip-minimap { position: absolute; bottom: 12px; left: 12px; width: 140px; height: 140px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5); pointer-events: auto; cursor: crosshair; display: flex; align-items: center; justify-content: center; }
     #pip-canvas { width: 100%; height: 100%; display: block; }
     
-    /* Click-through tutorial box */
+    /* Tutorial Box */
     #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: all 0.3s ease; pointer-events: none; }
-    .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; pointer-events: auto; }
+    .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; pointer-events: auto; margin-top: 4px; }
+    .tut-arrow { position: absolute; width: 24px; height: 24px; pointer-events: none; }
+    .tut-arrow svg { width: 100%; height: 100%; stroke: var(--accent); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .tut-arrow.down { top: -24px; left: 50%; transform: translateX(-50%); }
+    .tut-arrow.up { bottom: -24px; left: 50%; transform: translateX(-50%) rotate(180deg); }
+
+    .acorn-btn { padding: 4px 8px; background: rgba(180, 83, 9, 0.2); border: 1px solid #B45309; color: #B45309; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+    .willow-btn { padding: 4px 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--node-leaf); color: var(--node-leaf); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; margin-top: 8px; }
+    
+    #overlay-acorn-target { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 55; display: none; align-items: center; justify-content: center; pointer-events: none; }
+    #overlay-acorn-target span { background: var(--bg-surface); padding: 12px 24px; border-radius: 8px; border: 1px solid #B45309; color: #B45309; font-weight: bold; }
+
   </style>
 </head>
 <body>
 
-  <!-- App Update Toast -->
   <div id="update-toast" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:#000; padding:12px 24px; border-radius:8px; z-index:9999; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.5); align-items:center; gap:12px;">
     <span>New version available!</span>
     <button class="btn btn-small" style="background:#000; color:#fff;" onclick="window.location.reload(true)">Reload</button>
@@ -119,6 +137,8 @@
     </div>
   </div>
 
+  <div id="overlay-acorn-target"><span>Select a node to link Acorn... (Tap to cancel)</span></div>
+
   <header class="app-header">
     <div class="top-row">
       <div class="top-row-left"><button class="btn" id="btn-toggle-directory"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span id="label-directory">Nodes</span></button></div>
@@ -128,26 +148,31 @@
           <div id="grow-opts-tree">
             <button class="custom-opt btn-grow-opt" data-type="branch">... a Branch (Group)</button>
             <button class="custom-opt btn-grow-opt" data-type="leaf">... a Leaf (Note)</button>
-            <button class="custom-opt btn-grow-opt" data-type="fruit">... a Fruit (Task)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-fruit" data-type="fruit">... a Fruit (Task)</button>
             <button class="custom-opt btn-grow-opt" data-type="seed">... a Seed (Link)</button>
           </div>
           <div id="grow-opts-forest" style="display:none;">
-            <button class="custom-opt btn-grow-opt" data-type="tree">... New Tree</button>
-            <button class="custom-opt btn-grow-opt" data-type="forest">... New Forest</button>
+            <button class="custom-opt btn-grow-opt" data-type="tree">... a Tree</button>
+            <button class="custom-opt btn-grow-opt" data-type="forest">... a New Forest</button>
           </div>
         </div>
       </div>
       <div class="top-row-right"><button class="btn" id="btn-toggle-nursery"><span>Nursery</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button></div>
     </div>
     <div class="nav-bar">
-      <div class="nav-left"><button class="btn btn-small" id="btn-switch-context"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg><span>Up</span></button><div class="breadcrumb-text" id="breadcrumb-text">🌲 My Workspace</div></div>
+      <div class="nav-left">
+        <button class="btn btn-small" id="btn-switch-context"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg><span>Up</span></button>
+        <div class="breadcrumb-text" id="breadcrumb-text"></div>
+      </div>
+      <div class="breadcrumb-fade"></div>
       <div class="nav-right"><button class="btn btn-small btn-lock" id="btn-lock" title="Toggle Drag Lock"></button></div>
+      <div id="apple-progress-bar"><div id="apple-progress-fill"></div></div>
     </div>
   </header>
 
   <aside id="pip-minimap"><canvas id="pip-canvas"></canvas></aside>
 
-  <div class="bottom-actions">
+  <div class="bottom-actions" id="bottom-actions-container">
     <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.15);">Harvest</button>
     <button class="btn" id="btn-season">Season</button>
   </div>
@@ -163,6 +188,7 @@
   <aside class="drawer" id="drawer-left">
     <div class="drawer-header"><strong id="left-title">Directory</strong><button class="btn btn-small" id="btn-close-left">&times;</button></div>
     <div class="drawer-body">
+      <button class="btn" id="btn-auto-tidy" style="width:100%; border-color:var(--border-strong); margin-bottom:8px;">Auto Tidy Nodes</button>
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">PINNED</div><ul class="directory-list" id="list-pinned-left"></ul></div>
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">ALL ITEMS (A-Z)</div><ul class="directory-list" id="list-atoz-left"></ul></div>
     </div>
@@ -172,8 +198,12 @@
     <div class="drawer-header"><strong>Nursery & Sync</strong><button class="btn btn-small" id="btn-close-right">&times;</button></div>
     <div class="drawer-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn btn-accent" id="btn-export-backup">Export Backup (.json)</button>
-        <button class="btn" id="btn-import-backup">Import Backup File</button>
+        <button class="btn btn-accent" id="btn-export-backup" style="justify-content: flex-start;">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z" stroke-width="1.8"/><path d="M5 12h8c2.8 0 5 2.2 5 5v5M14 18l4 4 4-4" stroke="#10B981"/></svg> Export Backup (.json)
+        </button>
+        <button class="btn" id="btn-import-backup" style="justify-content: flex-start;">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z" stroke-width="1.8"/><path d="M19 12h-8c-2.8 0-5 2.2-5 5v5M10 18l-4 4-4-4" stroke="#10B981"/></svg> Import Backup File
+        </button>
         <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
@@ -181,7 +211,11 @@
         <button class="btn" id="btn-sync-org" style="border-color:#38BDF8; color:#38BDF8;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Sync W/ Group</button>
         <div id="sync-status" style="font-size:10px; text-align:center; color:var(--text-muted); display:none;">Connected to Org: <span id="sync-org-name" style="color:#38BDF8; font-weight:bold;"></span></div>
       </div>
+      <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div><ul class="directory-list" id="list-atoz-right"></ul></div>
+      <div style="margin-top:auto; padding-top:12px;">
+         <button class="btn" style="width:100%; border-color:#10B981; color:#10B981; background:rgba(16,185,129,0.1);">Become a Tree Hugger ($1)</button>
+      </div>
     </div>
   </aside>
 
@@ -198,29 +232,36 @@
           <div class="custom-dropdown custom-select-dropdown" id="node-type-dropdown">
             <button class="custom-opt" data-val="branch">Branch (Group)</button>
             <button class="custom-opt" data-val="leaf">Leaf (Notes/Documents)</button>
-            <button class="custom-opt" data-val="fruit">Fruit (Task/Deliverable)</button>
+            <button class="custom-opt" id="opt-node-fruit" data-val="fruit">Fruit (Task/Deliverable)</button>
             <button class="custom-opt" data-val="seed">Seed (Linked Tree)</button>
           </div>
           <input type="hidden" id="node-input-type" value="branch">
+        </div>
+        <div id="willow-actions" style="display:none;"><button class="willow-btn" id="btn-willow-lengthen">Lengthen Branch</button></div>
+        <div id="oak-actions" style="display:none; margin-top:8px;">
+           <label style="font-size:11px; font-weight:600; color:var(--text-muted); display:block; margin-bottom:4px;">Linked Acorn target</label>
+           <button class="acorn-btn" id="btn-acorn-snap" style="display:none;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg><span id="acorn-target-name">Unknown</span></button>
+           <div id="acorn-no-target" style="font-size:11px; color:var(--text-faint);">None</div>
         </div>
       </div>
       <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-node">Delete</button><button class="btn btn-accent" id="btn-save-node">Save Changes</button></div>
     </div>
   </div>
 
+  <!-- Tree Inspector -->
   <div class="modal-overlay" id="modal-tree-inspector">
-    <div class="modal-card">
+    <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3 id="tree-inspect-header">Inspect Tree</h3><button class="btn btn-small" id="btn-close-tree-inspector">&times;</button></div>
-      <div class="modal-body">
+      <div class="modal-body" style="overflow:visible;">
         <div class="field-group"><label>Tree Title</label><input type="text" id="tree-input-title"></div>
         <div class="field-group custom-select-container">
-          <label>Species (Icon)</label>
-          <div class="custom-select-trigger" id="tree-type-trigger"><span>Pine (Evergreen)</span> <span>▾</span></div>
+          <label>Species (Mechanic)</label>
+          <div class="custom-select-trigger" id="tree-type-trigger"><span>Pine (Persistent Wiki/SOPs)</span> <span>▾</span></div>
           <div class="custom-dropdown custom-select-dropdown" id="tree-type-dropdown">
-            <button class="custom-opt" data-val="Pine">Pine (Evergreen)</button>
-            <button class="custom-opt" data-val="Oak">Oak (Strong/Core)</button>
-            <button class="custom-opt" data-val="Willow">Willow (Flowing/Creative)</button>
-            <button class="custom-opt" data-val="Apple">Apple (Productive/Goals)</button>
+            <button class="custom-opt" data-val="Pine">Pine (Persistent Wiki/SOPs)</button>
+            <button class="custom-opt" data-val="Oak">Oak (Structured Research/Relational)</button>
+            <button class="custom-opt" data-val="Willow">Willow (Fluid Brainstorming)</button>
+            <button class="custom-opt" data-val="Apple">Apple (Agile Goal Tracking)</button>
           </div>
           <input type="hidden" id="tree-input-type" value="Pine">
         </div>
@@ -229,7 +270,6 @@
     </div>
   </div>
   
-  <!-- New Forest Modal -->
   <div class="modal-overlay" id="modal-new-forest">
     <div class="modal-card">
       <div class="modal-header"><h3>Create New Forest</h3><button class="btn btn-small" id="btn-close-new-forest">&times;</button></div>
@@ -257,13 +297,26 @@
           <input type="hidden" id="select-tree-season" value="Spring">
         </div>
         <div class="field-group"><label>Prune (Clean Inactive)</label><p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p><button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button></div>
-        <div class="field-group"><label>Harvest Basket (<span id="harvest-total">0</span> Completed Goals)</label><ul class="directory-list" id="list-harvest" style="max-height:120px; overflow-y:auto;"></ul></div>
+        
+        <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+           <div style="display:flex; align-items:center; gap:8px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>
+              <div style="font-weight:bold; color:var(--text-main);"><span id="harvest-total">0</span> Harvested</div>
+           </div>
+           <button class="btn btn-small" id="btn-inspect-basket">Inspect Basket</button>
+        </div>
       </div>
       <div class="modal-footer"><button class="btn" id="btn-season-done">Done</button></div>
     </div>
   </div>
 
-  <!-- Org Sync Modal -->
+  <div class="modal-overlay" id="modal-basket">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Harvest Basket</h3><button class="btn btn-small" id="btn-close-basket">&times;</button></div>
+      <div class="modal-body"><ul class="directory-list" id="list-harvest" style="max-height:300px; overflow-y:auto;"></ul></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-sync-org">
     <div class="modal-card">
       <div class="modal-header"><h3>Join Organization Sync</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
@@ -275,7 +328,6 @@
     </div>
   </div>
 
-  <!-- Org Admin Password Modal -->
   <div class="modal-overlay" id="modal-sync-auth">
     <div class="modal-card">
       <div class="modal-header"><h3>Admin Authorization</h3><button class="btn btn-small" id="btn-close-auth">&times;</button></div>
@@ -287,7 +339,6 @@
     </div>
   </div>
 
-  <!-- Template Library Modal -->
   <div class="modal-overlay" id="modal-templates">
     <div class="modal-card" style="height: 80vh;">
       <div class="modal-header"><h3>Template Library</h3><button class="btn btn-small" id="btn-close-templates">&times;</button></div>
@@ -296,25 +347,28 @@
       </div>
     </div>
   </div>
+  
+  <div class="modal-overlay" id="modal-template-prompt">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Load Template</h3><button class="btn btn-small" id="btn-close-template-prompt">&times;</button></div>
+      <div class="modal-body">
+        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Would you like to inject <strong id="tpl-prompt-name"></strong> into your current forest, or create a brand new forest for it?</p>
+      </div>
+      <div class="modal-footer"><button class="btn" id="btn-tpl-current">Current Forest</button><button class="btn btn-accent" id="btn-tpl-new">New Forest</button></div>
+    </div>
+  </div>
 
-  <div id="tutorial-tooltip"><div id="tut-text"></div><button class="tut-btn" id="tut-next">Finish</button></div>
+  <div id="tutorial-tooltip">
+     <div class="tut-arrow up" id="tut-arrow" style="display:none;"><svg><path d="M12 2 L12 22 M5 15 L12 22 L19 15"/></svg></div>
+     <div id="tut-text"></div>
+     <button class="tut-btn" id="tut-next">Next</button>
+  </div>
 
   <script>
     (function () {
       'use strict';
 
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-          reg.onupdatefound = () => {
-            const installingWorker = reg.installing;
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                document.getElementById('update-toast').style.display = 'flex';
-              }
-            };
-          };
-        });
-      }
+      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').then(reg => { reg.onupdatefound = () => { const iw = reg.installing; iw.onstatechange = () => { if (iw.state === 'installed' && navigator.serviceWorker.controller) document.getElementById('update-toast').style.display = 'flex'; }; }; }); }
 
       let deferredInstallPrompt = null;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
@@ -322,58 +376,61 @@
       let isPinching = false;
       let currentOrgCode = null;
       let pendingSaveAction = null;
+      let acornTargetMode = false;
+      let draggedNodeId = null;
+      let dragHoverTimer = null;
+      let dragHoverParentId = null;
 
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault(); deferredInstallPrompt = e;
-        if (!isStandalone && !localStorage.getItem('sylva_web_bypassed')) document.getElementById('modal-install-prompt').style.display = 'flex';
-      });
-
-      document.getElementById('btn-continue-web').addEventListener('click', () => {
-        localStorage.setItem('sylva_web_bypassed', 'true'); document.getElementById('modal-install-prompt').style.display = 'none'; initTutorial();
-      });
-
-      document.getElementById('btn-trigger-install').addEventListener('click', async () => {
-        if (deferredInstallPrompt) {
-          deferredInstallPrompt.prompt(); const choice = await deferredInstallPrompt.userChoice;
-          if (choice.outcome === 'accepted') document.getElementById('modal-install-prompt').style.display = 'none';
-          deferredInstallPrompt = null;
-        }
-      });
+      window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; if (!isStandalone && !localStorage.getItem('sylva_web_bypassed')) document.getElementById('modal-install-prompt').style.display = 'flex'; });
+      document.getElementById('btn-continue-web').addEventListener('click', () => { localStorage.setItem('sylva_web_bypassed', 'true'); document.getElementById('modal-install-prompt').style.display = 'none'; initTutorial(); });
+      document.getElementById('btn-trigger-install').addEventListener('click', async () => { if (deferredInstallPrompt) { deferredInstallPrompt.prompt(); const choice = await deferredInstallPrompt.userChoice; if (choice.outcome === 'accepted') document.getElementById('modal-install-prompt').style.display = 'none'; deferredInstallPrompt = null; } });
 
       let state = {
         viewMode: 'forest', activeForestId: 'forest-1', activeTreeId: null,
-        isLocked: true, panX: 40, panY: 80, scale: 1, selectedId: null, history: [],
+        isLocked: true, panX: 40, panY: 80, scale: 1, pipScale: 0.1, selectedId: null,
         forests: [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }]
       };
 
       const viewport = document.getElementById('viewport'); const world = document.getElementById('world');
       const canvasSvg = document.getElementById('canvas-svg'); const treeLayer = document.getElementById('tree-layer');
       const forestLayer = document.getElementById('forest-layer'); const pipCanvas = document.getElementById('pip-canvas');
+      
+      function positionActions() {
+         const pipRect = pipCanvas.getBoundingClientRect();
+         const ac = document.getElementById('bottom-actions-container');
+         ac.style.bottom = (window.innerHeight - pipRect.bottom) + 'px';
+         ac.style.height = pipRect.height + 'px';
+         ac.style.justifyContent = 'space-between';
+      }
+      window.addEventListener('resize', positionActions);
 
       function init() {
-        const r = localStorage.getItem('sylva_v8_state');
+        const r = localStorage.getItem('sylva_v9_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
+        if(!state.pipScale) state.pipScale = 0.1;
         setupInputHandlers(); setupCustomDropdowns(); buildTemplateLibrary();
         if (isStandalone || localStorage.getItem('sylva_web_bypassed')) initTutorial();
         else if (!deferredInstallPrompt) document.getElementById('modal-install-prompt').style.display = 'flex';
+        positionActions();
         render();
       }
 
       function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
       function getTree() { const f = getForest(); return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0]; }
+      function getNode(id) { const t = getTree(); return t ? t.nodes.find(n => n.id === id) : null; }
       
       function saveData() {
         if (currentOrgCode) {
-           pendingSaveAction = () => { localStorage.setItem('sylva_v8_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
+           pendingSaveAction = () => { localStorage.setItem('sylva_v9_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
            document.getElementById('modal-sync-auth').classList.add('open');
-        } else { try { localStorage.setItem('sylva_v8_state', JSON.stringify(state)); } catch(e){} }
+        } else { try { localStorage.setItem('sylva_v9_state', JSON.stringify(state)); } catch(e){} }
       }
 
       function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
 
       function render() {
         const forest = getForest(), tree = getTree();
-        const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), breadcrumbText = document.getElementById('breadcrumb-text');
+        const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), bc = document.getElementById('breadcrumb-text');
         
         btnLock.className = `btn btn-small btn-lock ${state.isLocked ? '' : 'unlocked'}`;
         btnLock.innerHTML = state.isLocked ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
@@ -382,12 +439,38 @@
         document.getElementById('btn-harvest-main').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
+        document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && tree.type === 'Apple') ? 'block' : 'none';
+
+        bc.innerHTML = '';
+        const fCrumb = document.createElement('span'); fCrumb.className = 'breadcrumb-crumb'; fCrumb.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
+        fCrumb.onclick = () => { if(state.viewMode === 'tree') { state.viewMode = 'forest'; render(); } }; bc.appendChild(fCrumb);
 
         if (state.viewMode === 'forest') {
-          btnSwitchContext.style.display = 'none'; document.getElementById('label-directory').innerText = 'Forest'; breadcrumbText.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
+          btnSwitchContext.style.display = 'none'; document.getElementById('label-directory').innerText = 'Forest'; 
           treeLayer.style.display = 'none'; forestLayer.style.display = 'block'; renderForest();
         } else if (tree) {
-          btnSwitchContext.style.display = 'inline-flex'; document.getElementById('label-directory').innerText = 'Nodes'; breadcrumbText.innerHTML = `🌲 ${escapeHTML(forest.title)} <span style="color:var(--text-faint); margin:0 4px;">&gt;</span> ${escapeHTML(tree.title)}`;
+          btnSwitchContext.style.display = 'inline-flex'; document.getElementById('label-directory').innerText = 'Nodes'; 
+          const arrow = document.createElement('span'); arrow.style.color = 'var(--text-faint)'; arrow.innerText = '>'; bc.appendChild(arrow);
+          const tCrumb = document.createElement('span'); tCrumb.className = 'breadcrumb-crumb'; tCrumb.innerText = escapeHTML(tree.title);
+          tCrumb.onclick = () => { centerOn(tree.nodes[0].x, tree.nodes[0].y); }; bc.appendChild(tCrumb);
+          if (state.selectedId) {
+             const selN = getNode(state.selectedId);
+             if (selN) {
+                const a2 = document.createElement('span'); a2.style.color = 'var(--text-faint)'; a2.innerText = '>'; bc.appendChild(a2);
+                const nCrumb = document.createElement('span'); nCrumb.innerText = escapeHTML(selN.title); bc.appendChild(nCrumb);
+             }
+          }
+          
+          if(tree.type === 'Pine') { document.getElementById('btn-grow-fruit').innerText = "... a Pine Cone (Checklist)"; }
+          else if(tree.type === 'Oak') { document.getElementById('btn-grow-fruit').innerText = "... an Acorn (Link)"; }
+          else { document.getElementById('btn-grow-fruit').innerText = "... a Fruit (Task)"; }
+
+          if(tree.type === 'Apple') {
+             const fruits = tree.nodes.filter(n => n.type === 'fruit');
+             const total = fruits.length; const harvested = fruits.filter(n => n.harvested).length;
+             document.getElementById('apple-progress-fill').style.width = total === 0 ? '0%' : `${(harvested/total)*100}%`;
+          }
+
           forestLayer.style.display = 'none'; treeLayer.style.display = 'block'; renderTree();
         }
         renderDrawers(); updateWorldTransform();
@@ -402,8 +485,14 @@
             const p = tree.nodes.find(pn => pn.id === n.parentId);
             if (p) {
               const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              const sx = p.x + 95, sy = p.y + 60, ex = n.x + 95, ey = n.y, my = (sy + ey) / 2;
-              path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
+              const sx = p.x + 95, sy = p.y + 60, ex = n.x + 95, ey = n.y;
+              if (tree.type === 'Willow') {
+                 // Elastic sway curve
+                 path.setAttribute('d', `M ${sx} ${sy} Q ${sx} ${ey}, ${ex} ${ey}`);
+              } else {
+                 const my = (sy + ey) / 2;
+                 path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
+              }
               path.setAttribute('stroke', '#33485E'); path.setAttribute('stroke-width', '2.5'); path.setAttribute('fill', 'none');
               canvasSvg.appendChild(path);
             }
@@ -415,14 +504,27 @@
         let pressTimer, clickTimer, clickCount = 0, startX, startY;
         el.addEventListener('pointerdown', (e) => {
           if (isPinching) return; e.stopPropagation(); 
-          startX = e.clientX; startY = e.clientY;
+          if(acornTargetMode && isTreeMode) { acornTargetMode = false; document.getElementById('overlay-acorn-target').style.display='none'; const tn = getNode(state.selectedId); if(tn) { tn.acornTarget = entity.id; saveData(); render(); alert('Acorn Linked!'); } return; }
+          startX = e.clientX; startY = e.clientY; draggedNodeId = entity.id;
           if (!state.isLocked) {
-             el.setPointerCapture(e.pointerId);
+             el.setPointerCapture(e.pointerId); el.style.zIndex = 50;
              function onMove(evt) { 
                if (isPinching) { onUp(evt); return; }
-               entity.x += (evt.clientX - startX) / state.scale; entity.y += (evt.clientY - startY) / state.scale; startX = evt.clientX; startY = evt.clientY; el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`; if (isTreeMode) updateSVGPaths(); renderMinimap(); 
+               const dx = (evt.clientX - startX) / state.scale; const dy = (evt.clientY - startY) / state.scale;
+               entity.x += dx; entity.y += dy; startX = evt.clientX; startY = evt.clientY; 
+               el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`; if (isTreeMode) updateSVGPaths(); renderMinimap(); 
+               
+               if(isTreeMode && entity.type !== 'trunk') {
+                  const mx = evt.clientX, my = evt.clientY;
+                  const els = document.elementsFromPoint(mx, my);
+                  let hoverNId = null;
+                  for(let hel of els) { if(hel.classList.contains('node-card') && hel.id !== entity.id) { hoverNId = hel.id; break; } }
+                  if(hoverNId) {
+                     if(hoverNId !== dragHoverParentId) { clearTimeout(dragHoverTimer); dragHoverParentId = hoverNId; dragHoverTimer = setTimeout(() => { entity.parentId = hoverNId; el.style.border = '2px solid var(--accent)'; setTimeout(()=>el.style.border='', 500); }, 1500); }
+                  } else { clearTimeout(dragHoverTimer); dragHoverParentId = null; }
+               }
              }
-             function onUp(evt) { el.releasePointerCapture(evt.pointerId); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); saveData(); }
+             function onUp(evt) { el.releasePointerCapture(evt.pointerId); el.style.zIndex = ''; window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); clearTimeout(dragHoverTimer); dragHoverParentId = null; draggedNodeId = null; saveData(); render(); }
              window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); return;
           }
           clickCount++;
@@ -430,23 +532,28 @@
              pressTimer = setTimeout(() => { clickCount = 0; if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); checkTut(3); render(); } }, 400); 
              clickTimer = setTimeout(() => {
                 if (clickCount === 1) {
-                   if (isTreeMode) { if (state.selectedId === entity.id) openInspector(entity); else { state.selectedId = entity.id; renderTreeSelections(); } } else { state.selectedId = entity.id; renderTreeSelections(); }
+                   state.selectedId = entity.id; renderTreeSelections(); 
+                   if(isTreeMode) render(); // update breadcrumbs
                 }
                 clickCount = 0;
              }, 250); 
           } else if (clickCount === 2) {
              clearTimeout(pressTimer); clearTimeout(clickTimer); clickCount = 0;
+             state.selectedId = entity.id; renderTreeSelections(); if(isTreeMode) render();
              if (isTreeMode) openInspector(entity); else { openTreeInspector(entity); }
           }
         });
-        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearTimeout(pressTimer); }); el.addEventListener('pointerup', () => clearTimeout(pressTimer));
+        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); } }); el.addEventListener('pointerup', () => clearTimeout(pressTimer));
       }
 
       function renderTree() {
         const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if(!tree) return;
         tree.nodes.forEach(node => {
-          const el = document.createElement('div'); el.id = node.id; el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''}`; el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`; attachGestureEvents(el, node, true); treeLayer.appendChild(el);
+          const el = document.createElement('div'); el.id = node.id; 
+          el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''}`; 
+          el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`; 
+          attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
       }
 
@@ -463,20 +570,50 @@
         });
       }
 
+      function autoTidyNodes() {
+         const t = getTree(); if(!t) return;
+         const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0]; if(!root) return;
+         const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
+         t.nodes.forEach(n => { if(n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
+         
+         const hSpacing = 220; const vSpacing = 160;
+         function layout(nodeId, depth, xOffset) {
+            const node = getNode(nodeId); if(!node) return 0;
+            node.y = root.y + (depth * vSpacing);
+            const kids = childrenMap[nodeId];
+            if(kids.length === 0) { node.x = xOffset; return hSpacing; }
+            let currX = xOffset; let totalW = 0;
+            for(let k of kids) { const w = layout(k.id, depth+1, currX); currX += w; totalW += w; }
+            node.x = xOffset + (totalW / 2) - (hSpacing/2);
+            return totalW;
+         }
+         layout(root.id, 0, root.x - (hSpacing * childrenMap[root.id].length)/2);
+         saveData(); render();
+      }
+
       function setupInputHandlers() {
         let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null;
         let viewportDragging = false, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
+        let pipPinching = false, prevPipPinchDist = null;
 
         window.addEventListener('pointerdown', (e) => {
           activePointers.set(e.pointerId, e);
           if (activePointers.size >= 2) {
-             isPinching = true; viewportDragging = false;
-             document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none';
+             const pts = Array.from(activePointers.values());
+             const p1Pip = pts[0].target === pipCanvas || pipCanvas.contains(pts[0].target);
+             const p2Pip = pts[1].target === pipCanvas || pipCanvas.contains(pts[1].target);
+             
+             if(p1Pip && p2Pip) { pipPinching = true; } 
+             else {
+                isPinching = true; viewportDragging = false;
+                document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none';
+             }
           }
         }, { capture: true }); 
 
         viewport.addEventListener('pointerdown', (e) => {
-          if (activePointers.size === 1 && !isPinching) {
+          if (activePointers.size === 1 && !isPinching && !pipPinching) {
+            if(acornTargetMode) { acornTargetMode = false; document.getElementById('overlay-acorn-target').style.display='none'; return; }
             viewportDragging = true; panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY;
           }
         });
@@ -484,39 +621,55 @@
         window.addEventListener('pointermove', (e) => {
           if (!activePointers.has(e.pointerId)) return; activePointers.set(e.pointerId, e);
           if (activePointers.size >= 2) {
-            isPinching = true;
-            const pts = Array.from(activePointers.values()); const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2; const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
-            if (prevPinchDist && prevCx !== null) {
-              const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.1), 5.0);
-              state.panX += (cx - prevCx); state.panY += (cy - prevCy); state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
-              state.scale = newScale; updateWorldTransform();
+            const pts = Array.from(activePointers.values());
+            const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+            
+            if(pipPinching) {
+               if(prevPipPinchDist) { const ratio = dist / prevPipPinchDist; state.pipScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 0.5); renderMinimap(); }
+               prevPipPinchDist = dist;
+            } else {
+               isPinching = true; const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
+               if (prevPinchDist && prevCx !== null) {
+                 const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.1), 5.0);
+                 state.panX += (cx - prevCx); state.panY += (cy - prevCy); state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+                 state.scale = newScale; updateWorldTransform();
+               }
+               prevPinchDist = dist; prevCx = cx; prevCy = cy;
             }
-            prevPinchDist = dist; prevCx = cx; prevCy = cy;
-          } else if (activePointers.size === 1 && viewportDragging && !isPinching) {
+          } else if (activePointers.size === 1 && viewportDragging && !isPinching && !pipPinching) {
             state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
           }
         });
 
         const endPointer = (e) => {
           activePointers.delete(e.pointerId);
-          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; }
+          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; prevPipPinchDist = null; }
           if (activePointers.size === 0) {
-            viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; setTimeout(() => { isPinching = false; }, 100);
+            viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; 
+            setTimeout(() => { isPinching = false; pipPinching = false; }, 100);
           } else if (activePointers.size === 1) {
-             const p = Array.from(activePointers.values())[0]; panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; viewportDragging = true; 
+             const p = Array.from(activePointers.values())[0]; panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; viewportDragging = !pipPinching; 
           }
         };
         window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
         viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
 
         let pipDragging = false;
-        pipCanvas.addEventListener('pointerdown', (e) => { pipDragging = true; e.stopPropagation(); handlePipMove(e); }); 
-        window.addEventListener('pointermove', (e) => { if(pipDragging) handlePipMove(e); }); window.addEventListener('pointerup', () => { pipDragging = false; });
+        let pipHoldTimer = null;
+        pipCanvas.addEventListener('pointerdown', (e) => { 
+           if(pipPinching) return;
+           pipDragging = true; e.stopPropagation(); 
+           pipHoldTimer = setTimeout(() => { state.pipScale = 0.1; const t = getTree() || getForest(); if(t) { centerOn(0,0); } pipDragging=false; renderMinimap(); }, 800);
+           handlePipMove(e); 
+        }); 
+        window.addEventListener('pointermove', (e) => { if(pipDragging) { clearTimeout(pipHoldTimer); handlePipMove(e); } }); 
+        window.addEventListener('pointerup', () => { pipDragging = false; clearTimeout(pipHoldTimer); });
         
         function handlePipMove(e) {
+          if(pipPinching) return;
           const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top; 
           if (pipX < 0 || pipX > rect.width || pipY < 0 || pipY > rect.height) return;
-          let clickedEntity = null; const scale = 0.08, offsetX = 70, offsetY = 47; 
+          let clickedEntity = null; const scale = state.pipScale, offsetX = 70, offsetY = 70; 
           
           if (state.viewMode === 'tree') { 
               const t = getTree(); if(!t) return;
@@ -549,16 +702,32 @@
             e.stopPropagation(); const type = e.target.getAttribute('data-type');
             if (state.viewMode === 'tree') {
               const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
+              
+              if(tree.type === 'Oak' && type === 'fruit') {
+                 acornTargetMode = true; document.getElementById('overlay-acorn-target').style.display = 'flex';
+                 document.getElementById('grow-dropdown').style.display = 'none'; return;
+              }
+
               const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
+              if(tree.type === 'Pine' && type === 'fruit') { node.title = "New Task"; node.harvested = false; }
               tree.nodes.push(node); state.selectedId = node.id;
-              if(type === 'branch') checkTut(5); else if(type === 'leaf') checkTut(6); else if(type === 'fruit') checkTut(7); else if(type === 'seed') checkTut(8);
-              document.getElementById('grow-dropdown').style.display = 'none'; render(); setTimeout(() => openInspector(node), 50);
+              
+              if(type === 'branch') {
+                 if(tutStep === 5) {
+                    // Fast forward explaining nodes
+                    setTutStep(6);
+                    setTimeout(()=>setTutStep(7), 3000);
+                    setTimeout(()=>setTutStep(8), 6000);
+                    setTimeout(()=>setTutStep(9), 9000);
+                 }
+              }
+              document.getElementById('grow-dropdown').style.display = 'none'; render(); setTimeout(() => openInspector(node), 150);
             } else {
               if (type === 'tree') {
                 const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
                 forest.trees.push(newTree); state.selectedId = newTree.id; checkTut(1);
                 document.getElementById('grow-dropdown').style.display = 'none'; render();
-                setTimeout(() => openTreeInspector(newTree), 50);
+                setTimeout(() => openTreeInspector(newTree), 150);
               } else if (type === 'forest') {
                 document.getElementById('input-new-forest').value = 'New Forest';
                 document.getElementById('grow-dropdown').style.display = 'none';
@@ -568,11 +737,15 @@
           });
         });
 
+        document.getElementById('btn-auto-tidy').addEventListener('click', () => { autoTidyNodes(); document.getElementById('drawer-left').classList.remove('open'); });
+
         window.addEventListener('pointerdown', closeAllDropdowns);
 
         const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
-        document.getElementById('btn-toggle-directory').addEventListener('click', () => dl.classList.toggle('open')); document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
-        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { checkTut(12); dr.classList.toggle('open'); }); document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
+        document.getElementById('btn-toggle-directory').addEventListener('click', () => { dl.classList.toggle('open'); dr.classList.remove('open'); }); 
+        document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { checkTut(12); dr.classList.toggle('open'); dl.classList.remove('open'); }); 
+        document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
         
         document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); 
         document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); }); 
@@ -594,10 +767,16 @@
         document.getElementById('btn-season').addEventListener('click', () => { checkTut(9); openSeasonModal(); }); 
         document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); checkTut(10); render(); });
         document.getElementById('btn-action-prune').addEventListener('click', () => { const t = getTree(); if(!t) return; const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); document.getElementById('modal-season').classList.remove('open'); render(); });
-        document.getElementById('btn-harvest-main').addEventListener('click', () => { checkTut(11); const t = getTree(); if(!t) return; t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); alert('Harvested all marked goals!'); saveData(); render(); });
+        
+        document.getElementById('btn-inspect-basket').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); document.getElementById('modal-basket').classList.add('open'); });
+        document.getElementById('btn-close-basket').addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); });
+
+        document.getElementById('btn-harvest-main').addEventListener('click', () => { checkTut(11); const t = getTree(); if(!t) return; let count=0; t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested) { n.harvested = true; count++; } }); if(t.type === 'Pine') { t.nodes.forEach(n => { if(n.type === 'fruit') n.harvested = false; }); alert('Pine Cone Checklist Reset!'); } else { alert(`Harvested ${count} goals!`); } saveData(); render(); });
         
         document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); }); document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); }); document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
-        document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); alert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); } });
+        document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); alert(`Connected to Local Peer Network: ${code}
+
+(LNS WebRTC Handshake Established)`); } });
         document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
         document.getElementById('btn-auth-org').addEventListener('click', () => { const pass = document.getElementById('input-org-pass').value; if(pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } else { alert("Password required to broadcast to Org."); } });
         document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); }); document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
@@ -628,34 +807,22 @@
            nodes.push({ id: b2, title: "Interventions", desc: "", type: "branch", parentId: trunkId, x: startX + 150, y: startY + 160, pinned: false });
            nodes.push({ id: f1, title: "Blood Cultures Drawn", desc: "", type: "fruit", parentId: b2, x: startX + 50, y: startY + 300, pinned: false });
            nodes.push({ id: f2, title: "IV Antibiotics Started", desc: "", type: "fruit", parentId: b2, x: startX + 250, y: startY + 300, pinned: false });
-        } else if (title === "Agile Sprint Board") {
-           const b1 = generateId(), b2 = generateId(), b3 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId();
-           nodes.push({ id: trunkId, title: title, desc: "Current Sprint Cycle", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
-           nodes.push({ id: b1, title: "Backlog / To Do", desc: "", type: "branch", parentId: trunkId, x: startX - 220, y: startY + 160, pinned: false });
-           nodes.push({ id: l1, title: "Design DB Schema", desc: "", type: "leaf", parentId: b1, x: startX - 220, y: startY + 300, pinned: false });
-           nodes.push({ id: b2, title: "In Progress", desc: "", type: "branch", parentId: trunkId, x: startX, y: startY + 160, pinned: false });
-           nodes.push({ id: l2, title: "Setup UI Canvas", desc: "", type: "leaf", parentId: b2, x: startX, y: startY + 300, pinned: false });
-           nodes.push({ id: b3, title: "Done", desc: "", type: "branch", parentId: trunkId, x: startX + 220, y: startY + 160, pinned: false });
-           nodes.push({ id: f1, title: "Initialize Repo", desc: "", type: "fruit", parentId: b3, x: startX + 220, y: startY + 300, pinned: false });
         } else {
            const b1 = generateId(), b2 = generateId(), l1 = generateId(), f1 = generateId();
            nodes.push({ id: trunkId, title: title, desc: "Auto-generated structure", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
-           nodes.push({ id: b1, title: "Phase 1: Planning", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
-           nodes.push({ id: l1, title: "Core Requirements", desc: "", type: "leaf", parentId: b1, x: startX - 120, y: startY + 300, pinned: false });
-           nodes.push({ id: b2, title: "Phase 2: Execution", desc: "", type: "branch", parentId: trunkId, x: startX + 120, y: startY + 160, pinned: false });
-           nodes.push({ id: f1, title: "Final Deliverable", desc: "", type: "fruit", parentId: b2, x: startX + 120, y: startY + 300, pinned: false });
+           nodes.push({ id: b1, title: "Phase 1", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
+           nodes.push({ id: l1, title: "Details", desc: "", type: "leaf", parentId: b1, x: startX - 120, y: startY + 300, pinned: false });
+           nodes.push({ id: b2, title: "Phase 2", desc: "", type: "branch", parentId: trunkId, x: startX + 120, y: startY + 160, pinned: false });
+           nodes.push({ id: f1, title: "Goal", desc: "", type: "fruit", parentId: b2, x: startX + 120, y: startY + 300, pinned: false });
         }
         return nodes;
       }
 
+      let pendingTemplateTitle = "";
       function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
         const cats = {
-          "Healthcare & Medical": ["ER Triage Flow", "Sepsis Protocol", "Patient Discharge Journey", "Surgery Prep Checklist", "Nurse Shift Handoff", "Pharmacy Audit", "Telehealth Workflow", "ICU Equipment Check", "Mental Health Intake", "Pediatric Vaccination Schedule"],
-          "Software & Tech": ["Agile Sprint Board", "API Integration Spec", "Database Schema", "QA Bug Tracker", "Server Outage Protocol", "UX User Journey", "Cybersecurity Audit", "DevOps Pipeline", "App Launch Checklist", "Feature Brainstorm"],
-          "Business & Admin": ["Quarterly OKRs", "Employee Onboarding", "Investor Pitch Flow", "Supply Chain Route", "Event Planning Matrix", "B2B Sales Funnel", "Social Media Content", "Legal Compliance Audit", "HR Disciplinary Process", "Franchise Rollout"],
-          "Education & Teachers": ["Month Curriculum Plan", "Special Ed IEP Map", "Field Trip Logistics", "Parent-Teacher Guide", "Science Fair Rubric", "Student Behavior Tracker", "Department Budget", "Lecture Notes Tree", "Standardized Test Prep", "Library Inventory"],
-          "Personal & Creative": ["Novel Plot Map", "Wedding Planner", "Home Renovation", "Fitness Regimen", "Meal Prep Week", "Travel Itinerary", "Job Hunt Tracker", "Language Learning", "Character Backstory", "Financial Debt Payoff"]
+          "Healthcare": ["ER Triage Flow", "Sepsis Protocol"], "Tech": ["Agile Sprint Board", "Database Schema"], "Admin": ["Quarterly OKRs", "Employee Onboarding"]
         };
         for(const [cat, templates] of Object.entries(cats)) {
           const hdr = document.createElement('div'); hdr.style.padding = '8px 16px'; hdr.style.background = 'var(--bg-surface-elevated)'; hdr.style.color = 'var(--accent)'; hdr.style.fontSize = '11px'; hdr.style.fontWeight = 'bold'; hdr.innerText = cat.toUpperCase(); list.appendChild(hdr);
@@ -663,14 +830,26 @@
             const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
             li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
             li.querySelector('button').addEventListener('click', () => {
-               const startX = 260, startY = 60; const newNodes = generateTemplateNodes(t, startX, startY);
-               const newTree = { id: 't_' + Date.now(), title: t, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: newNodes };
-               getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-templates').classList.remove('open'); render(); saveData();
-               alert(`${t} Template Loaded into Workspace!`);
+               pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
+               document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
             });
             list.appendChild(li);
           });
         }
+
+        document.getElementById('btn-close-template-prompt').onclick = () => document.getElementById('modal-template-prompt').classList.remove('open');
+        document.getElementById('btn-tpl-current').onclick = () => {
+           const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 60);
+           const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: newNodes };
+           getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-template-prompt').classList.remove('open'); render(); saveData();
+        };
+        document.getElementById('btn-tpl-new').onclick = () => {
+           const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 60);
+           const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: 'Pine', season: 'Spring', pinned: false, x: 180, y: 100, nodes: newNodes };
+           const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
+           state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = newTree.id; state.viewMode = 'tree';
+           document.getElementById('modal-template-prompt').classList.remove('open'); saveData(); render();
+        };
       }
 
       function centerOn(x, y) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform(); }
@@ -680,10 +859,31 @@
           document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
           document.getElementById('node-input-type').value = node.type; document.getElementById('node-type-trigger').querySelector('span').innerText = document.querySelector(`.custom-opt[data-val="${node.type}"]`).innerText;
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
+          
+          const t = getTree();
+          document.getElementById('willow-actions').style.display = (t.type === 'Willow' && node.type === 'branch') ? 'block' : 'none';
+          document.getElementById('oak-actions').style.display = (t.type === 'Oak' && node.acornTarget) ? 'block' : 'none';
+          if(node.acornTarget) {
+             const tNode = getNode(node.acornTarget);
+             document.getElementById('btn-acorn-snap').style.display = 'inline-flex';
+             document.getElementById('acorn-no-target').style.display = 'none';
+             document.getElementById('acorn-target-name').innerText = tNode ? tNode.title : "Missing Node";
+             document.getElementById('btn-acorn-snap').onclick = () => { if(tNode) { centerOn(tNode.x, tNode.y); document.getElementById('modal-inspector').classList.remove('open'); setTimeout(()=> { state.selectedId = tNode.id; renderTreeSelections(); }, 150); } };
+          }
+          
+          document.getElementById('btn-willow-lengthen').onclick = () => {
+             const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: node.x + (Math.random() * 40 - 20), y: node.y + 160, pinned: false };
+             t.nodes.push(newNode); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; saveData(); render(); openInspector(newNode);
+          };
+
+          if(t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = "Pine Cone (Checklist)"; }
+          else if(t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = "Acorn (Link)"; }
+          else { document.getElementById('opt-node-fruit').innerText = "Fruit (Task/Deliverable)"; }
+
           document.getElementById('btn-save-node').onclick = (e) => { e.preventDefault(); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
           const bD = document.getElementById('btn-delete-node'); bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex'; bD.onclick = (e) => { e.preventDefault(); getTree().nodes = getTree().nodes.filter(n => n.id !== node.id && n.parentId !== node.id); document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('modal-inspector').classList.add('open');
-        }, 50);
+        }, 150);
       }
 
       function openTreeInspector(tree) {
@@ -693,13 +893,13 @@
           document.getElementById('btn-save-tree').onclick = (e) => { e.preventDefault(); checkTut(2); tree.title = document.getElementById('tree-input-title').value; tree.type = document.getElementById('tree-input-type').value; document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('btn-delete-tree').onclick = (e) => { e.preventDefault(); const f = getForest(); f.trees = f.trees.filter(t => t.id !== tree.id); document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('modal-tree-inspector').classList.add('open');
-        }, 50);
+        }, 150);
       }
 
       function openSeasonModal() {
         const t = getTree(); if(!t) return; document.getElementById('select-tree-season').value = t.season || 'Spring'; document.getElementById('season-trigger').querySelector('span').innerText = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`).innerText;
-        const list = document.getElementById('list-harvest'); list.innerHTML = ''; const fruits = t.nodes.filter(n => n.type === 'fruit'); document.getElementById('harvest-total').innerText = fruits.length;
-        fruits.forEach(f => { const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`; li.addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); openInspector(f); }); list.appendChild(li); });
+        const list = document.getElementById('list-harvest'); list.innerHTML = ''; const fruits = t.nodes.filter(n => n.type === 'fruit' && n.harvested); document.getElementById('harvest-total').innerText = fruits.length;
+        fruits.forEach(f => { const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`; li.addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); openInspector(f); }); list.appendChild(li); });
         document.getElementById('modal-season').classList.add('open');
       }
 
@@ -718,25 +918,29 @@
       function getNodeIcon(type) {
         switch (type) {
           case 'trunk': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-          case 'branch': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`;
-          case 'leaf': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
-          case 'fruit': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-          case 'seed': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
+          case 'branch': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.5"><path d="M12 2v20 M12 2l-6 6 M12 2l6 6"/></svg>`;
+          case 'leaf': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.5"><path d="M3 3h14l4 4v14H3z M17 3v4h4 M7 10h10 M7 14h10 M7 18h6"/></svg>`;
+          case 'fruit': 
+             if(getTree() && getTree().type === 'Pine') {
+                return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><path d="M12 2l4 6-2 4 4 4-4 6H10l-4-6 4-4-2-4 4-6z"/></svg>`;
+             }
+             return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><circle cx="12" cy="14" r="8"/><path d="M12 6c0-4 4-4 4-4"/></svg>`;
+          case 'seed': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.5"><path d="M12 22v-6 M12 16c-3 0-6-3-6-6 M12 16c3 0 6-3 6-6 M12 10c0-4 4-6 4-6 M12 10c0-4-4-6-4-6"/></svg>`;
         }
       }
 
       function getTreeIcon(type) { 
         switch(type) {
-           case 'Oak': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M34 34H14c-4.4 0-8-3.6-8-8 0-3.3 2-6.2 5-7.5C12.5 12.5 17.7 8 24 8s11.5 4.5 13 10.5c3 1.3 5 4.2 5 7.5 0 4.4-3.6 8-8 8z"/></svg>`;
+           case 'Oak': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 44 Q 20 28 8 16 M28 44 Q 28 28 40 16 M23 34 Q 20 20 14 8 M25 34 Q 28 20 34 8 M24 38 V 6"/></svg>`;
            case 'Willow': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V34M10 26c0-11 6-18 14-18s14 7 14 18M14 20v14M20 16v18M28 16v18M34 20v14"/></svg>`;
-           case 'Apple': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M24 34c-9 0-14-6-14-14 0-8 6-12 14-12s14 4 14 12c0 8-5 14-14 14z"/><circle cx="18" cy="20" r="2"/><circle cx="30" cy="24" r="2"/><circle cx="24" cy="14" r="2"/></svg>`;
+           case 'Apple': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M12 22C10 28 14 34 24 34C34 34 38 28 36 22C40 18 38 8 28 8C24 4 14 6 14 12C8 14 6 18 12 22Z"/><circle cx="10" cy="26" r="2.5"/><circle cx="38" cy="18" r="2.5"/><circle cx="24" cy="16" r="2.5"/></svg>`;
            case 'Pine': default: return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`;
         }
       }
 
       function renderMinimap() {
-        const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 95; ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 95); ctx.strokeStyle = '#33485E';
-        const scale = 0.08, offsetX = 70, offsetY = 47;
+        const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 140; ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 140); ctx.strokeStyle = '#33485E';
+        const scale = state.pipScale, offsetX = 70, offsetY = 70;
         
         if (state.viewMode === 'tree') { 
           const t = getTree(); if(!t) return; 
@@ -745,7 +949,6 @@
         } else { 
           const f = getForest(); f.trees.forEach(t => { ctx.fillStyle = '#38BDF8'; ctx.fillRect(t.x * scale + offsetX - 4, t.y * scale + offsetY - 4, 8, 8); }); 
         }
-
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1;
         const vw = window.innerWidth / state.scale, vh = window.innerHeight / state.scale;
         const vx = -state.panX / state.scale, vy = -state.panY / state.scale;
@@ -754,50 +957,52 @@
 
       function escapeHTML(s) { return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)); }
 
-      const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next');
+      const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next'), tutArrow = document.getElementById('tut-arrow');
       let tutStep = -1;
       
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", t: '90px', l: '50%', showBtn: false }, 
-        { msg: "Click '... New Tree' to plant your first project.", t: '220px', l: '50%', showBtn: false }, 
-        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", t: '20%', l: '50%', showBtn: false }, 
-        { msg: "Great! Now Long-Press the tree you just made to open it.", t: '30%', l: '50%', showBtn: false }, 
-        { msg: "You're inside! Click 'Grow...' to start branching out.", t: '90px', l: '50%', showBtn: false }, 
-        { msg: "Select '... a Branch (Group)'. Branches act like folders.", t: '220px', l: '50%', showBtn: false }, 
-        { msg: "Now click 'Grow...' again and select '... a Leaf (Note)'.", t: '220px', l: '50%', showBtn: false }, 
-        { msg: "Click 'Grow...' and select '... a Fruit (Task)'. Fruits are deliverables.", t: '220px', l: '50%', showBtn: false }, 
-        { msg: "Click 'Grow...' and select '... a Seed (Link)'. Seeds are ideas.", t: '220px', l: '50%', showBtn: false }, 
-        { msg: "Next, click 'Season' in the bottom right to set the life cycle.", b: '80px', r: '20px', showBtn: false }, 
-        { msg: "Set the season, then click 'Done'.", b: '80px', r: '20px', showBtn: false }, 
-        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", b: '80px', r: '20px', showBtn: false }, 
-        { msg: "Click 'Nursery' to manage your saves.", t: '60px', r: '20px', showBtn: false }, 
-        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", t: '160px', r: '20px', showBtn: false }, 
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", t: '60px', l: '20px', showBtn: false }, 
-        { msg: "You're back! The dragging and zooming works here too. Thank you for installing Sylva!", t: '50%', l: '50%', showBtn: true } 
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '65px', arr: 'up' }, 
+        { msg: "Click '... a Tree' to plant your first project.", top: '100px', arr: 'up' }, 
+        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", showBtn: true }, 
+        { msg: "Great! Now Long-Press the tree you just made to open it.", showBtn: true }, 
+        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '65px', arr: 'up' }, 
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '100px', arr: 'up' }, 
+        { msg: "Leaves act as your individual notes and documents.", showBtn: true }, 
+        { msg: "Fruits act as actionable goals or deliverables.", showBtn: true }, 
+        { msg: "Seeds act as links to other trees or references. Next, click 'Season' in the bottom right.", bottom: '60px', right: '12px', arr: 'down' }, 
+        { msg: "Set the season, then click 'Done'.", showBtn: true }, 
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", bottom: '110px', right: '12px', arr: 'down' }, 
+        { msg: "Click 'Nursery' to manage your saves.", top: '65px', right: '12px', arr: 'up' }, 
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '170px', right: '40px', arr: 'up' }, 
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '90px', left: '12px', arr: 'up' }, 
+        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", showBtn: true, center: true } 
       ];
       
-      function initTutorial() { if (!localStorage.getItem('sylva_v8_onboarded')) setTutStep(0); }
+      function initTutorial() { if (!localStorage.getItem('sylva_v9_onboarded')) setTutStep(0); }
       function setTutStep(step) {
-        if (localStorage.getItem('sylva_v8_onboarded')) return;
+        if (localStorage.getItem('sylva_v9_onboarded')) return;
         tutStep = step;
-        if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v8_onboarded', 'true'); return; }
-        tutText.innerText = TUT_STEPS[step].msg; 
+        if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v9_onboarded', 'true'); return; }
+        const s = TUT_STEPS[step];
+        tutText.innerText = s.msg; 
         
-        tutBox.style.top = TUT_STEPS[step].t || 'auto'; 
-        tutBox.style.bottom = TUT_STEPS[step].b || 'auto'; 
-        tutBox.style.left = TUT_STEPS[step].l || 'auto';
-        tutBox.style.right = TUT_STEPS[step].r || 'auto';
-
-        tutBox.style.transform = (TUT_STEPS[step].l === '50%') ? 'translateX(-50%)' : (TUT_STEPS[step].t === '50%' ? 'translate(-50%, -50%)' : 'none');
-        tutBtn.style.display = TUT_STEPS[step].showBtn ? 'block' : 'none';
+        tutBox.style.top = s.top || 'auto'; tutBox.style.bottom = s.bottom || 'auto'; 
+        tutBox.style.left = s.left || 'auto'; tutBox.style.right = s.right || 'auto';
+        
+        if (s.center) { tutBox.style.top = '50%'; tutBox.style.left = '50%'; tutBox.style.transform = 'translate(-50%, -50%)'; } 
+        else if (s.top && !s.left && !s.right) { tutBox.style.left = '50%'; tutBox.style.transform = 'translateX(-50%)'; } 
+        else { tutBox.style.transform = 'none'; }
+        
+        if(s.arr) { tutArrow.style.display = 'block'; tutArrow.className = 'tut-arrow ' + s.arr; } else { tutArrow.style.display = 'none'; }
+        
+        if (s.showBtn) { tutBtn.style.display = 'block'; tutBtn.innerText = (step === TUT_STEPS.length - 1) ? 'Finish' : 'Next'; } else { tutBtn.style.display = 'none'; }
         tutBox.style.display = 'flex';
       }
       function checkTut(step) { if (tutStep === step) setTutStep(step + 1); }
-      tutBtn.addEventListener('click', () => { setTutStep(TUT_STEPS.length); });
+      tutBtn.addEventListener('click', () => { setTutStep(tutStep + 1); });
 
       init();
     })();
   </script>
 </body>
 </html>
-```<FollowUp>
