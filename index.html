@@ -185,7 +185,7 @@
     </div>
   </aside>
 
-  <!-- Node Inspector with Custom Dropdown -->
+  <!-- Node Inspector -->
   <div class="modal-overlay" id="modal-inspector">
     <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3 id="inspect-header-title">Inspect Node</h3><button class="btn btn-small" id="btn-close-inspector">&times;</button></div>
@@ -226,6 +226,18 @@
         </div>
       </div>
       <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-tree">Delete Tree</button><button class="btn btn-accent" id="btn-save-tree">Save Changes</button></div>
+    </div>
+  </div>
+  
+  <!-- New Forest Modal -->
+  <div class="modal-overlay" id="modal-new-forest">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Create New Forest</h3><button class="btn btn-small" id="btn-close-new-forest">&times;</button></div>
+      <div class="modal-body">
+        <div class="field-group"><label>Forest Name</label><input type="text" id="input-new-forest" placeholder="e.g., Q4 Roadmap"></div>
+        <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Would you like to save this alongside your current workspaces, or open it immediately as a blank workspace?</p>
+      </div>
+      <div class="modal-footer"><button class="btn" id="btn-forest-save">Create & Save</button><button class="btn btn-accent" id="btn-forest-open">Create & Open</button></div>
     </div>
   </div>
 
@@ -285,13 +297,12 @@
     </div>
   </div>
 
-  <div id="tutorial-tooltip"><div id="tut-text"></div><button class="tut-btn" id="tut-next">Next</button></div>
+  <div id="tutorial-tooltip"><div id="tut-text"></div><button class="tut-btn" id="tut-next">Finish</button></div>
 
   <script>
     (function () {
       'use strict';
 
-      // --- Service Worker Auto Update Logic ---
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(reg => {
           reg.onupdatefound = () => {
@@ -307,6 +318,7 @@
 
       let deferredInstallPrompt = null;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      
       let isPinching = false;
       let currentOrgCode = null;
       let pendingSaveAction = null;
@@ -322,8 +334,7 @@
 
       document.getElementById('btn-trigger-install').addEventListener('click', async () => {
         if (deferredInstallPrompt) {
-          deferredInstallPrompt.prompt();
-          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt.prompt(); const choice = await deferredInstallPrompt.userChoice;
           if (choice.outcome === 'accepted') document.getElementById('modal-install-prompt').style.display = 'none';
           deferredInstallPrompt = null;
         }
@@ -335,15 +346,12 @@
         forests: [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }]
       };
 
-      const viewport = document.getElementById('viewport');
-      const world = document.getElementById('world');
-      const canvasSvg = document.getElementById('canvas-svg');
-      const treeLayer = document.getElementById('tree-layer');
-      const forestLayer = document.getElementById('forest-layer');
-      const pipCanvas = document.getElementById('pip-canvas');
+      const viewport = document.getElementById('viewport'); const world = document.getElementById('world');
+      const canvasSvg = document.getElementById('canvas-svg'); const treeLayer = document.getElementById('tree-layer');
+      const forestLayer = document.getElementById('forest-layer'); const pipCanvas = document.getElementById('pip-canvas');
 
       function init() {
-        const r = localStorage.getItem('sylva_v6_state');
+        const r = localStorage.getItem('sylva_v7_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
         setupInputHandlers(); setupCustomDropdowns(); buildTemplateLibrary();
         if (isStandalone || localStorage.getItem('sylva_web_bypassed')) initTutorial();
@@ -356,9 +364,9 @@
       
       function saveData() {
         if (currentOrgCode) {
-           pendingSaveAction = () => { localStorage.setItem('sylva_v6_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
+           pendingSaveAction = () => { localStorage.setItem('sylva_v7_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
            document.getElementById('modal-sync-auth').classList.add('open');
-        } else { try { localStorage.setItem('sylva_v6_state', JSON.stringify(state)); } catch(e){} }
+        } else { try { localStorage.setItem('sylva_v7_state', JSON.stringify(state)); } catch(e){} }
       }
 
       function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
@@ -406,26 +414,29 @@
       function attachGestureEvents(el, entity, isTreeMode) {
         let pressTimer, clickTimer, clickCount = 0, startX, startY;
         el.addEventListener('pointerdown', (e) => {
-          e.stopPropagation(); if (isPinching) return;
+          if (isPinching) return; e.stopPropagation(); 
           startX = e.clientX; startY = e.clientY;
           if (!state.isLocked) {
              el.setPointerCapture(e.pointerId);
-             function onMove(evt) { entity.x += (evt.clientX - startX) / state.scale; entity.y += (evt.clientY - startY) / state.scale; startX = evt.clientX; startY = evt.clientY; el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`; if (isTreeMode) updateSVGPaths(); renderMinimap(); }
+             function onMove(evt) { 
+               if (isPinching) { onUp(evt); return; }
+               entity.x += (evt.clientX - startX) / state.scale; entity.y += (evt.clientY - startY) / state.scale; startX = evt.clientX; startY = evt.clientY; el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`; if (isTreeMode) updateSVGPaths(); renderMinimap(); 
+             }
              function onUp(evt) { el.releasePointerCapture(evt.pointerId); window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); saveData(); }
              window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); return;
           }
           clickCount++;
           if (clickCount === 1) {
-             pressTimer = setTimeout(() => { clickCount = 0; if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); advanceTutorial(4); render(); } }, 400); 
+             pressTimer = setTimeout(() => { clickCount = 0; if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); checkTut(3); render(); } }, 400); 
              clickTimer = setTimeout(() => {
                 if (clickCount === 1) {
-                   if (isTreeMode) { if (state.selectedId === entity.id) openInspector(entity); else { state.selectedId = entity.id; renderTreeSelections(); } } else { state.selectedId = entity.id; renderTreeSelections(); advanceTutorial(2); }
+                   if (isTreeMode) { if (state.selectedId === entity.id) openInspector(entity); else { state.selectedId = entity.id; renderTreeSelections(); } } else { state.selectedId = entity.id; renderTreeSelections(); }
                 }
                 clickCount = 0;
              }, 250); 
           } else if (clickCount === 2) {
              clearTimeout(pressTimer); clearTimeout(clickTimer); clickCount = 0;
-             if (isTreeMode) openInspector(entity); else { advanceTutorial(3); openTreeInspector(entity); }
+             if (isTreeMode) openInspector(entity); else { openTreeInspector(entity); }
           }
         });
         el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) clearTimeout(pressTimer); }); el.addEventListener('pointerup', () => clearTimeout(pressTimer));
@@ -453,41 +464,85 @@
       }
 
       function setupInputHandlers() {
-        let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
+        let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null;
+        let viewportDragging = false, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
 
-        viewport.addEventListener('pointerdown', (e) => { activePointers.set(e.pointerId, e); if (activePointers.size === 1) { panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY; } });
+        window.addEventListener('pointerdown', (e) => {
+          activePointers.set(e.pointerId, e);
+          if (activePointers.size >= 2) {
+             isPinching = true; viewportDragging = false;
+             document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none';
+          }
+        }, { capture: true }); 
+
+        viewport.addEventListener('pointerdown', (e) => {
+          if (activePointers.size === 1 && !isPinching) {
+            viewportDragging = true; panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY;
+          }
+        });
+
         window.addEventListener('pointermove', (e) => {
           if (!activePointers.has(e.pointerId)) return; activePointers.set(e.pointerId, e);
           if (activePointers.size >= 2) {
-            isPinching = true; document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none';
+            isPinching = true;
             const pts = Array.from(activePointers.values()); const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2; const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
-            if (prevPinchDist && prevCx !== null) { const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.3), 3.0); state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale); state.panX += (cx - prevCx); state.panY += (cy - prevCy); state.scale = newScale; updateWorldTransform(); }
+            if (prevPinchDist && prevCx !== null) {
+              const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.1), 5.0);
+              state.panX += (cx - prevCx); state.panY += (cy - prevCy); state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+              state.scale = newScale; updateWorldTransform();
+            }
             prevPinchDist = dist; prevCx = cx; prevCy = cy;
-          } else if (activePointers.size === 1 && !isPinching) { state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform(); }
+          } else if (activePointers.size === 1 && viewportDragging && !isPinching) {
+            state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
+          }
         });
 
         const endPointer = (e) => {
-          activePointers.delete(e.pointerId); if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; }
-          if (activePointers.size === 1) { const p = Array.from(activePointers.values())[0]; panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; }
-          if (activePointers.size === 0) { document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; setTimeout(() => { isPinching = false; }, 100); }
+          activePointers.delete(e.pointerId);
+          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; }
+          if (activePointers.size === 0) {
+            viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; setTimeout(() => { isPinching = false; }, 100);
+          } else if (activePointers.size === 1) {
+             const p = Array.from(activePointers.values())[0]; panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; viewportDragging = true; 
+          }
         };
         window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
-        viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.3), 3.0); updateWorldTransform(); }, { passive: false });
+        viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
 
         let pipDragging = false;
-        pipCanvas.addEventListener('pointerdown', (e) => { pipDragging = true; handlePipMove(e); }); window.addEventListener('pointermove', (e) => { if(pipDragging) handlePipMove(e); }); window.addEventListener('pointerup', () => { pipDragging = false; });
+        pipCanvas.addEventListener('pointerdown', (e) => { pipDragging = true; e.stopPropagation(); handlePipMove(e); }); 
+        window.addEventListener('pointermove', (e) => { if(pipDragging) handlePipMove(e); }); window.addEventListener('pointerup', () => { pipDragging = false; });
+        
         function handlePipMove(e) {
-          const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top; if (pipX < 0 || pipX > rect.width || pipY < 0 || pipY > rect.height) return;
-          let clickedEntity = null;
-          if (state.viewMode === 'tree') { const t = getTree(); for (const n of t.nodes) { if (Math.hypot(pipX - (n.x * 0.12 + 15), pipY - (n.y * 0.12 + 10)) < 10) { clickedEntity = n; break; } }
-          } else { const f = getForest(); for (const t of f.trees) { if (Math.hypot(pipX - (t.x * 0.12 + 15), pipY - (t.y * 0.12 + 10)) < 10) { clickedEntity = t; break; } } }
-          if (clickedEntity && !pipDragging) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - clickedEntity.x - 95; state.panY = 120 - clickedEntity.y; updateWorldTransform(); } else { centerOn((pipX - 15) / 0.12, (pipY - 10) / 0.12); }
+          const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top; 
+          if (pipX < 0 || pipX > rect.width || pipY < 0 || pipY > rect.height) return;
+          let clickedEntity = null; const scale = 0.08, offsetX = 70, offsetY = 47; 
+          
+          if (state.viewMode === 'tree') { 
+              const t = getTree(); if(!t) return;
+              for (const n of t.nodes) { if (Math.hypot(pipX - (n.x * scale + offsetX), pipY - (n.y * scale + offsetY)) < 6) { clickedEntity = n; break; } }
+          } else { 
+              const f = getForest(); for (const t of f.trees) { if (Math.hypot(pipX - (t.x * scale + offsetX), pipY - (t.y * scale + offsetY)) < 6) { clickedEntity = t; break; } } 
+          }
+          if (clickedEntity && !pipDragging) { 
+              state.scale = 1.0; state.panX = (window.innerWidth / 2) - clickedEntity.x - 95; state.panY = 120 - clickedEntity.y; updateWorldTransform(); 
+          } else { 
+              const worldX = (pipX - offsetX) / scale; const worldY = (pipY - offsetY) / scale;
+              state.panX = (window.innerWidth / 2) - (worldX * state.scale); state.panY = (window.innerHeight / 2) - (worldY * state.scale); updateWorldTransform(); 
+          }
         }
 
-        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; advanceTutorial(14); render(); });
+        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; checkTut(14); render(); });
         document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
         
-        document.getElementById('btn-grow').addEventListener('click', (e) => { e.stopPropagation(); advanceTutorial(1); closeAllDropdowns(); const dd = document.getElementById('grow-dropdown'); dd.style.display = 'flex'; });
+        const btnGrow = document.getElementById('btn-grow');
+        btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
+        btnGrow.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            if(state.viewMode === 'forest') checkTut(0);
+            if(state.viewMode === 'tree') checkTut(4);
+            const dd = document.getElementById('grow-dropdown'); const isVis = dd.style.display === 'flex'; closeAllDropdowns(); if (!isVis) dd.style.display = 'flex'; 
+        });
 
         document.querySelectorAll('.btn-grow-opt').forEach(b => {
           b.addEventListener('click', (e) => {
@@ -496,11 +551,19 @@
               const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
               const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
               tree.nodes.push(node); state.selectedId = node.id;
-              if(type === 'branch') advanceTutorial(6); else if(type === 'leaf') advanceTutorial(7); else if(type === 'fruit') advanceTutorial(8); else if(type === 'seed') advanceTutorial(9);
+              if(type === 'branch') checkTut(5); else if(type === 'leaf') checkTut(6); else if(type === 'fruit') checkTut(7); else if(type === 'seed') checkTut(8);
               document.getElementById('grow-dropdown').style.display = 'none'; render(); setTimeout(() => openInspector(node), 50);
             } else {
-              if (type === 'tree') { const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] }; forest.trees.push(newTree); state.selectedId = newTree.id; advanceTutorial(2); }
-              document.getElementById('grow-dropdown').style.display = 'none'; render();
+              if (type === 'tree') {
+                const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
+                forest.trees.push(newTree); state.selectedId = newTree.id; checkTut(1);
+                document.getElementById('grow-dropdown').style.display = 'none'; render();
+                setTimeout(() => openTreeInspector(newTree), 50);
+              } else if (type === 'forest') {
+                document.getElementById('input-new-forest').value = 'New Forest';
+                document.getElementById('grow-dropdown').style.display = 'none';
+                document.getElementById('modal-new-forest').classList.add('open');
+              }
             }
           });
         });
@@ -509,11 +572,31 @@
 
         const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
         document.getElementById('btn-toggle-directory').addEventListener('click', () => dl.classList.toggle('open')); document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
-        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { advanceTutorial(12); dr.classList.toggle('open'); }); document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
-        document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); }); document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); });
-        document.getElementById('btn-season').addEventListener('click', () => { advanceTutorial(9); openSeasonModal(); }); document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); advanceTutorial(10); render(); });
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { checkTut(12); dr.classList.toggle('open'); }); document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
+        
+        document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); 
+        document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); }); 
+        document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); });
+        
+        // New Forest Modal Logic
+        document.getElementById('btn-close-new-forest').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-new-forest').classList.remove('open'); });
+        document.getElementById('btn-forest-save').addEventListener('click', (e) => {
+            e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
+            const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
+            state.forests.push(newF); document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render(); alert('Forest saved to your Nursery!');
+        });
+        document.getElementById('btn-forest-open').addEventListener('click', (e) => {
+            e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
+            const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
+            state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = null; state.viewMode = 'forest';
+            document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render();
+        });
+        
+        document.getElementById('btn-season').addEventListener('click', () => { checkTut(9); openSeasonModal(); }); 
+        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); checkTut(10); render(); });
         document.getElementById('btn-action-prune').addEventListener('click', () => { const t = getTree(); if(!t) return; const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); document.getElementById('modal-season').classList.remove('open'); render(); });
-        document.getElementById('btn-harvest-main').addEventListener('click', () => { advanceTutorial(11); const t = getTree(); if(!t) return; t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); alert('Harvested all marked goals!'); saveData(); render(); });
+        document.getElementById('btn-harvest-main').addEventListener('click', () => { checkTut(11); const t = getTree(); if(!t) return; t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = true; }); alert('Harvested all marked goals!'); saveData(); render(); });
+        
         document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); }); document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); }); document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
         document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); alert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); } });
         document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
@@ -525,19 +608,18 @@
         const configs = [ { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' }, { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' }, { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' } ];
         configs.forEach(cfg => {
           const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
-          trig.addEventListener('click', (e) => { e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; });
+          trig.addEventListener('pointerdown', (e) => e.stopPropagation()); 
+          trig.addEventListener('click', (e) => { 
+              e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; 
+          });
           drop.querySelectorAll('.custom-opt').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); inp.value = btn.getAttribute('data-val'); trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none'; if(cfg.inp === 'select-tree-season') { const t = getTree(); if(t){ t.season = inp.value; saveData(); render(); } } }); });
         });
+        document.querySelectorAll('.custom-dropdown').forEach(dd => { dd.addEventListener('pointerdown', (e) => e.stopPropagation()); });
       }
       function closeAllDropdowns() { document.getElementById('grow-dropdown').style.display = 'none'; document.getElementById('node-type-dropdown').style.display = 'none'; document.getElementById('tree-type-dropdown').style.display = 'none'; document.getElementById('season-dropdown').style.display = 'none'; }
 
-      // --- Template Engine (Dynamic Blueprint Generator) ---
       function generateTemplateNodes(title, startX, startY) {
-        const nodes = [];
-        const generateId = () => 'n_' + Math.random().toString(36).substring(2, 9);
-        const trunkId = generateId();
-        
-        // Template Dictionary (Hardcoded Blueprints)
+        const nodes = []; const generateId = () => 'n_' + Math.random().toString(36).substring(2, 9); const trunkId = generateId();
         if (title === "Sepsis Protocol") {
            const b1 = generateId(), b2 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId(), f2 = generateId();
            nodes.push({ id: trunkId, title: "Sepsis Alert", desc: "Emergency Protocol", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
@@ -557,7 +639,6 @@
            nodes.push({ id: b3, title: "Done", desc: "", type: "branch", parentId: trunkId, x: startX + 220, y: startY + 160, pinned: false });
            nodes.push({ id: f1, title: "Initialize Repo", desc: "", type: "fruit", parentId: b3, x: startX + 220, y: startY + 300, pinned: false });
         } else {
-           // Dynamic Fallback for all other 48 templates
            const b1 = generateId(), b2 = generateId(), l1 = generateId(), f1 = generateId();
            nodes.push({ id: trunkId, title: title, desc: "Auto-generated structure", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
            nodes.push({ id: b1, title: "Phase 1: Planning", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
@@ -583,8 +664,7 @@
             const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
             li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
             li.querySelector('button').addEventListener('click', () => {
-               const startX = 260, startY = 60;
-               const newNodes = generateTemplateNodes(t, startX, startY);
+               const startX = 260, startY = 60; const newNodes = generateTemplateNodes(t, startX, startY);
                const newTree = { id: 't_' + Date.now(), title: t, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: newNodes };
                getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-templates').classList.remove('open'); render(); saveData();
                alert(`${t} Template Loaded into Workspace!`);
@@ -611,7 +691,7 @@
         setTimeout(() => {
           document.getElementById('tree-input-title').value = tree.title; document.getElementById('tree-input-type').value = tree.type || 'Pine';
           document.getElementById('tree-type-trigger').querySelector('span').innerText = document.querySelector(`#tree-type-dropdown .custom-opt[data-val="${tree.type || 'Pine'}"]`).innerText;
-          document.getElementById('btn-save-tree').onclick = (e) => { e.preventDefault(); advanceTutorial(4); tree.title = document.getElementById('tree-input-title').value; tree.type = document.getElementById('tree-input-type').value; document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
+          document.getElementById('btn-save-tree').onclick = (e) => { e.preventDefault(); checkTut(2); tree.title = document.getElementById('tree-input-title').value; tree.type = document.getElementById('tree-input-type').value; document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('btn-delete-tree').onclick = (e) => { e.preventDefault(); const f = getForest(); f.trees = f.trees.filter(t => t.id !== tree.id); document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
           document.getElementById('modal-tree-inspector').classList.add('open');
         }, 50);
@@ -628,7 +708,7 @@
         const forest = getForest(), tree = getTree(), pLeft = document.getElementById('list-pinned-left'), aLeft = document.getElementById('list-atoz-left'); pLeft.innerHTML = ''; aLeft.innerHTML = '';
         if (state.viewMode === 'tree' && tree) { const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title)); sorted.forEach(n => { const li = createDirItem(n.title, getNodeIcon(n.type), n.pinned, () => { centerOn(n.x, n.y); openInspector(n); }, () => { n.pinned = !n.pinned; saveData(); renderDrawers(); }); if (n.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); });
         } else { const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title)); sorted.forEach(t => { const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }, () => { t.pinned = !t.pinned; saveData(); renderDrawers(); }); if (t.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); }); }
-        document.getElementById('btn-export-backup').onclick = () => { advanceTutorial(13); const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.4.1', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
+        document.getElementById('btn-export-backup').onclick = () => { checkTut(13); const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.4.1', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
         document.getElementById('btn-import-backup').onclick = () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (e) => { const r = new FileReader(); r.onload = (evt) => { try { const p = JSON.parse(evt.target.result); if (p.forest) { p.forest.id = 'f_' + Date.now(); state.forests.push(p.forest); state.activeForestId = p.forest.id; state.viewMode = 'forest'; render(); } } catch (err) { alert('Invalid backup.'); } }; r.readAsText(e.target.files[0]); }; input.click(); };
       }
 
@@ -657,32 +737,57 @@
 
       function renderMinimap() {
         const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 95; ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 95); ctx.strokeStyle = '#33485E';
-        if (state.viewMode === 'tree') { const t = getTree(); if(!t) return; t.nodes.forEach(n => { if (n.parentId) { const p = t.nodes.find(pn => pn.id === n.parentId); if (p) { ctx.beginPath(); ctx.moveTo(p.x * 0.12 + 15, p.y * 0.12 + 10); ctx.lineTo(n.x * 0.12 + 15, n.y * 0.12 + 10); ctx.stroke(); } } }); t.nodes.forEach(n => { ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : (n.type === 'trunk' ? '#B45309' : '#10B981'); ctx.fillRect(n.x * 0.12 + 12, n.y * 0.12 + 8, 6, 4); }); } else { const f = getForest(); f.trees.forEach(t => { ctx.fillStyle = '#38BDF8'; ctx.fillRect(t.x * 0.12 + 12, t.y * 0.12 + 8, 8, 8); }); }
+        const scale = 0.08, offsetX = 70, offsetY = 47;
+        
+        if (state.viewMode === 'tree') { 
+          const t = getTree(); if(!t) return; 
+          t.nodes.forEach(n => { if (n.parentId) { const p = t.nodes.find(pn => pn.id === n.parentId); if (p) { ctx.beginPath(); ctx.moveTo(p.x * scale + offsetX, p.y * scale + offsetY); ctx.lineTo(n.x * scale + offsetX, n.y * scale + offsetY); ctx.stroke(); } } }); 
+          t.nodes.forEach(n => { ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : (n.type === 'trunk' ? '#B45309' : '#10B981'); ctx.fillRect(n.x * scale + offsetX - 3, n.y * scale + offsetY - 2, 6, 4); }); 
+        } else { 
+          const f = getForest(); f.trees.forEach(t => { ctx.fillStyle = '#38BDF8'; ctx.fillRect(t.x * scale + offsetX - 4, t.y * scale + offsetY - 4, 8, 8); }); 
+        }
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1;
+        const vw = window.innerWidth / state.scale, vh = window.innerHeight / state.scale;
+        const vx = -state.panX / state.scale, vy = -state.panY / state.scale;
+        ctx.strokeRect(vx * scale + offsetX, vy * scale + offsetY, vw * scale, vh * scale);
       }
+
       function escapeHTML(s) { return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)); }
 
       const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next');
       let tutStep = -1;
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '55px', left: '50%' }, { msg: "Click '... New Tree' to plant your first project.", top: '90px', left: '50%' },
-        { msg: "Awesome! Double-click the new tree to open its details.", top: '50%', left: '50%' }, { msg: "Here you can set the Tree's Title and Species type. Click Save Changes when done.", top: '20%', left: '50%' },
-        { msg: "Great! Now Long-Press the tree to open it.", top: '50%', left: '50%' }, { msg: "You're inside! Click 'Grow...' to start branching out.", top: '55px', left: '50%' },
-        { msg: "Select '... a Branch'. Branches act like folders to organize your thoughts.", top: '90px', left: '50%' }, { msg: "Click 'Grow...' -> '... a Leaf'. Leaves are your actual notes and documents.", top: '55px', left: '50%' },
-        { msg: "Click 'Grow...' -> '... a Fruit'. Fruits are deliverables and completed goals.", top: '55px', left: '50%' }, { msg: "Click 'Grow...' -> '... a Seed'. Seeds are future ideas or questions to explore later. Next, click 'Season' in the bottom right.", top: '55px', left: '50%' },
-        { msg: "Here you set the life cycle: Spring (New), Summer (Active), Fall (Review), Winter (Archive). Close this when done.", top: '70%', left: '70%' }, { msg: "Click the 'Harvest' button to quickly collect all completed Fruit goals in the tree.", top: '80%', left: '70%' },
-        { msg: "Click 'Nursery' to manage your saves.", top: '55px', left: '80%' }, { msg: "Click 'Export Backup (.json)'. This saves your ENTIRE forest offline directly to your device.", top: '150px', left: '80%' },
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '85px', left: '20%' }, { msg: "You're back! The dragging, pinching, and UI functions are exactly the same here. Thank you for installing Sylva!", top: '50%', left: '50%' }
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '55px', left: '50%', showBtn: false }, 
+        { msg: "Click '... New Tree' to plant your first project.", top: '90px', left: '50%', showBtn: false }, 
+        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", top: '20%', left: '50%', showBtn: false }, 
+        { msg: "Great! Now Long-Press the tree you just made to open it.", top: '50%', left: '50%', showBtn: false }, 
+        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '55px', left: '50%', showBtn: false }, 
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '90px', left: '50%', showBtn: false }, 
+        { msg: "Now click 'Grow...' again and select '... a Leaf (Note)'.", top: '90px', left: '50%', showBtn: false }, 
+        { msg: "Click 'Grow...' and select '... a Fruit (Task)'. Fruits are deliverables.", top: '90px', left: '50%', showBtn: false }, 
+        { msg: "Click 'Grow...' and select '... a Seed (Link)'. Seeds are ideas.", top: '90px', left: '50%', showBtn: false }, 
+        { msg: "Next, click 'Season' in the bottom right to set the life cycle.", top: '80%', left: '70%', showBtn: false }, 
+        { msg: "Set the season, then click 'Done'.", top: '70%', left: '70%', showBtn: false }, 
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", top: '80%', left: '70%', showBtn: false }, 
+        { msg: "Click 'Nursery' to manage your saves.", top: '55px', left: '80%', showBtn: false }, 
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '150px', left: '80%', showBtn: false }, 
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '85px', left: '20%', showBtn: false }, 
+        { msg: "You're back! The dragging and zooming works here too. Thank you for installing Sylva!", top: '50%', left: '50%', showBtn: true } 
       ];
-      function initTutorial() { if (!localStorage.getItem('sylva_v6_onboarded')) advanceTutorial(0); }
-      function advanceTutorial(step) {
-        if (localStorage.getItem('sylva_v6_onboarded')) return;
-        if (step > tutStep) {
-          tutStep = step;
-          if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v6_onboarded', 'true'); return; }
-          tutText.innerText = TUT_STEPS[step].msg; tutBox.style.top = TUT_STEPS[step].top; tutBox.style.left = TUT_STEPS[step].left; tutBox.style.transform = (TUT_STEPS[step].left === '50%') ? 'translateX(-50%)' : 'none'; tutBox.style.display = 'flex';
-        }
+      
+      function initTutorial() { if (!localStorage.getItem('sylva_v7_onboarded')) setTutStep(0); }
+      function setTutStep(step) {
+        if (localStorage.getItem('sylva_v7_onboarded')) return;
+        tutStep = step;
+        if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v7_onboarded', 'true'); return; }
+        tutText.innerText = TUT_STEPS[step].msg; tutBox.style.top = TUT_STEPS[step].top; tutBox.style.left = TUT_STEPS[step].left;
+        tutBox.style.transform = (TUT_STEPS[step].left === '50%') ? 'translateX(-50%)' : 'none';
+        tutBtn.style.display = TUT_STEPS[step].showBtn ? 'block' : 'none';
+        tutBox.style.display = 'flex';
       }
-      tutBtn.addEventListener('click', () => { if (tutStep === 10 || tutStep === 11 || tutStep === 14 || tutStep === 15) advanceTutorial(tutStep + 1); else advanceTutorial(TUT_STEPS.length); });
+      function checkTut(step) { if (tutStep === step) setTutStep(step + 1); }
+      tutBtn.addEventListener('click', () => { setTutStep(TUT_STEPS.length); });
 
       init();
     })();
