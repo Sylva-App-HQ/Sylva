@@ -108,11 +108,11 @@
     #pip-canvas { width: 100%; height: 100%; display: block; }
     
     /* Tutorial Box */
-    #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: all 0.3s ease; pointer-events: none; }
+    #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: opacity 0.4s ease; pointer-events: none; }
     .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; pointer-events: auto; margin-top: 4px; }
-    .tut-arrow { position: absolute; width: 0; height: 0; border-style: solid; display: none; }
-    .tut-arrow.up { top: -12px; left: 50%; transform: translateX(-50%); border-width: 0 10px 12px 10px; border-color: transparent transparent var(--accent) transparent; }
-    .tut-arrow.down { bottom: -12px; left: 50%; transform: translateX(-50%); border-width: 12px 10px 0 10px; border-color: var(--accent) transparent transparent transparent; }
+    .tut-arrow { position: absolute; width: 0; height: 0; border-style: solid; display: none; pointer-events: none; }
+    .tut-arrow.up { top: -12px; border-width: 0 10px 12px 10px; border-color: transparent transparent var(--accent) transparent; }
+    .tut-arrow.down { bottom: -12px; border-width: 12px 10px 0 10px; border-color: var(--accent) transparent transparent transparent; }
     .tut-arrow.left { left: -12px; top: 50%; transform: translateY(-50%); border-width: 10px 12px 10px 0; border-color: transparent var(--accent) transparent transparent; }
     .tut-arrow.right { right: -12px; top: 50%; transform: translateY(-50%); border-width: 10px 0 10px 12px; border-color: transparent transparent transparent var(--accent); }
 
@@ -437,7 +437,7 @@
       window.addEventListener('resize', positionActions);
 
       function init() {
-        const r = localStorage.getItem('sylva_v10_state');
+        const r = localStorage.getItem('sylva_v13_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
         if(!state.pipScale) state.pipScale = 0.1;
         if(state.pipPanX === undefined) state.pipPanX = 0;
@@ -455,9 +455,9 @@
       
       function saveData() {
         if (currentOrgCode) {
-           pendingSaveAction = () => { localStorage.setItem('sylva_v10_state', JSON.stringify(state)); showAppAlert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
+           pendingSaveAction = () => { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); showAppAlert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
            document.getElementById('modal-sync-auth').classList.add('open');
-        } else { try { localStorage.setItem('sylva_v10_state', JSON.stringify(state)); } catch(e){} }
+        } else { try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e){} }
       }
 
       function showAppAlert(msg) {
@@ -505,7 +505,7 @@
 
         bc.innerHTML = '';
         const fCrumb = document.createElement('span'); fCrumb.className = 'breadcrumb-crumb'; fCrumb.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
-        fCrumb.onclick = () => { if(state.viewMode !== 'forest') { state.viewMode = 'forest'; render(); } }; bc.appendChild(fCrumb);
+        fCrumb.onclick = () => { if(state.viewMode !== 'forest') { state.viewMode = 'forest'; checkTut(18); render(); } }; bc.appendChild(fCrumb);
 
         if (state.viewMode === 'forest') {
           btnSwitchContext.style.display = 'none'; document.getElementById('label-directory').innerText = 'Forest'; 
@@ -764,10 +764,19 @@
             }
         });
         
-        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; checkTut(13); render(); });
-        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; render(); });
+        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; checkTut(18); render(); });
+        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { 
+            state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; 
+            if(tutStep === 10) setTutStep(11); 
+            else if(tutStep === 11) setTutStep(12); 
+            render(); 
+        });
         document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
-        document.getElementById('btn-critical-path').addEventListener('click', () => { state.showCriticalPath = !state.showCriticalPath; render(); });
+        document.getElementById('btn-critical-path').addEventListener('click', () => { 
+            state.showCriticalPath = !state.showCriticalPath; 
+            checkTut(12); 
+            render(); 
+        });
         
         const btnGrow = document.getElementById('btn-grow');
         btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
@@ -817,7 +826,7 @@
         const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
         document.getElementById('btn-toggle-directory').addEventListener('click', () => { dl.classList.toggle('open'); dr.classList.remove('open'); }); 
         document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
-        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { checkTut(11); dr.classList.toggle('open'); dl.classList.remove('open'); }); 
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { checkTut(16); dr.classList.toggle('open'); dl.classList.remove('open'); }); 
         document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
         
         document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); 
@@ -837,14 +846,14 @@
             document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render();
         });
         
-        document.getElementById('btn-season').addEventListener('click', () => { checkTut(8); openSeasonModal(); }); 
-        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); checkTut(9); render(); });
+        document.getElementById('btn-season').addEventListener('click', () => { checkTut(13); openSeasonModal(); }); 
+        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); checkTut(14); render(); });
         document.getElementById('btn-action-prune').addEventListener('click', () => { const t = getTree(); if(!t) return; const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); document.getElementById('modal-season').classList.remove('open'); render(); });
         
         document.getElementById('btn-inspect-basket').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); document.getElementById('modal-basket').classList.add('open'); });
         document.getElementById('btn-close-basket').addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); });
 
-        document.getElementById('btn-harvest-main').addEventListener('click', () => { checkTut(10); const t = getTree(); if(!t) return; let count=0; t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested) { n.harvested = true; count++; } }); if(t.type === 'Pine') { t.nodes.forEach(n => { if(n.type === 'fruit') n.harvested = false; }); showAppAlert('Pine Cone Checklist Reset!'); } else { showAppAlert(`Harvested ${count} goals!`); } saveData(); render(); });
+        document.getElementById('btn-harvest-main').addEventListener('click', () => { checkTut(15); const t = getTree(); if(!t) return; let count=0; t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested) { n.harvested = true; count++; } }); if(t.type === 'Pine') { t.nodes.forEach(n => { if(n.type === 'fruit') n.harvested = false; }); showAppAlert('Pine Cone Checklist Reset!'); } else { showAppAlert(`Harvested ${count} goals!`); } saveData(); render(); });
         
         document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); }); document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); }); document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
         document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); showAppAlert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); } });
@@ -963,7 +972,8 @@
           else { document.getElementById('opt-node-fruit').innerText = "Fruit (Task/Deliverable)"; }
 
           document.getElementById('btn-save-node').onclick = (e) => { 
-              e.preventDefault(); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; 
+              e.preventDefault(); checkTut(6);
+              node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; 
               node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
               document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
           };
@@ -989,99 +999,89 @@
         document.getElementById('modal-season').classList.add('open');
       }
 
-      function renderDrawers() {
-        const forest = getForest(), tree = getTree(), pLeft = document.getElementById('list-pinned-left'), aLeft = document.getElementById('list-atoz-left'); pLeft.innerHTML = ''; aLeft.innerHTML = '';
-        if (state.viewMode === 'tree' && tree) { const sorted = [...tree.nodes].sort((a,b) => a.title.localeCompare(b.title)); sorted.forEach(n => { const li = createDirItem(n.title, getNodeIcon(n.type), n.pinned, () => { centerOn(n.x, n.y); openInspector(n); }, () => { n.pinned = !n.pinned; saveData(); renderDrawers(); }); if (n.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); });
-        } else { const sorted = [...forest.trees].sort((a,b) => a.title.localeCompare(b.title)); sorted.forEach(t => { const li = createDirItem(t.title, getTreeIcon(t.type), t.pinned, () => { state.activeTreeId = t.id; state.viewMode = 'tree'; centerOn(t.x, t.y); render(); }, () => { t.pinned = !t.pinned; saveData(); renderDrawers(); }); if (t.pinned) pLeft.appendChild(li.cloneNode(true)); aLeft.appendChild(li); }); }
-        document.getElementById('btn-export-backup').onclick = () => { checkTut(12); const a = document.createElement('a'); a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ version: '0.4.1', forest: getForest() }, null, 2)); a.download = `sylva_backup.json`; a.click(); };
-        document.getElementById('btn-import-backup').onclick = () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (e) => { const r = new FileReader(); r.onload = (evt) => { try { const p = JSON.parse(evt.target.result); if (p.forest) { p.forest.id = 'f_' + Date.now(); state.forests.push(p.forest); state.activeForestId = p.forest.id; state.viewMode = 'forest'; render(); } } catch (err) { showAppAlert('Invalid backup.'); } }; r.readAsText(e.target.files[0]); }; input.click(); };
-      }
-
-      function createDirItem(title, iconHtml, isPinned, onClick, onPin) {
-        const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<div style="display:flex; align-items:center; gap:8px; overflow:hidden;">${iconHtml}<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px;">${escapeHTML(title)}</span></div><span style="cursor:pointer; font-size:16px; color:${isPinned ? 'var(--node-fruit)' : 'var(--text-faint)'};">★</span>`; li.firstElementChild.onclick = onClick; li.lastElementChild.onclick = (e) => { e.stopPropagation(); onPin(); }; return li;
-      }
-
-      function getNodeIcon(type) {
-        switch (type) {
-          case 'trunk': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-          case 'branch': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.5"><path d="M12 2v20 M12 2l-6 6 M12 2l6 6"/></svg>`;
-          case 'leaf': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.5"><path d="M5 3h10l5 5v13H5z M15 3v5h5"/></svg>`;
-          case 'fruit': 
-             if(getTree() && getTree().type === 'Pine') {
-                return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><path d="M12 2l4 6-2 4 4 4-4 6H10l-4-6 4-4-2-4 4-6z"/></svg>`;
-             }
-             return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.5"><path d="M12 22C17 22 20 18 20 14C20 9 12 2 12 2C12 2 4 9 4 14C4 18 7 22 12 22Z M12 2v6 M12 8 Q 16 8, 16 4" stroke-linecap="round"/></svg>`;
-          case 'seed': return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.5"><path d="M12 22v-6 M12 16c-3 0-6-3-6-6 M12 16c3 0 6-3 6-6 M12 10c0-4 4-6 4-6 M12 10c0-4-4-6-4-6"/></svg>`;
-        }
-      }
-
-      function getTreeIcon(type) { 
-        switch(type) {
-           case 'Oak': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M 20 44 C 20 30, 10 24, 6 14 M 28 44 C 28 30, 38 24, 42 14 M 24 38 C 24 26, 18 18, 16 8 M 24 38 C 24 26, 30 18, 32 8 M 24 38 V 10 M 15 24 C 10 20, 8 16, 6 14 M 33 24 C 38 20, 40 16, 42 14"/></svg>`;
-           case 'Willow': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V34M10 26c0-11 6-18 14-18s14 7 14 18M14 20v14M20 16v18M28 16v18M34 20v14"/></svg>`;
-           case 'Apple': return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V32" /><path d="M 24 32 C 16 32, 10 28, 8 20 C 6 12, 12 6, 24 6 C 36 6, 42 12, 40 20 C 38 28, 32 32, 24 32 Z" /><circle cx="16" cy="18" r="2.5" /><circle cx="32" cy="22" r="2.5" /><circle cx="24" cy="14" r="2.5" /></svg>`;
-           case 'Pine': default: return `<svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`;
-        }
-      }
-
-      function renderMinimap() {
-        const ctx = pipCanvas.getContext('2d'); pipCanvas.width = 140; pipCanvas.height = 140; ctx.fillStyle = '#070B0E'; ctx.fillRect(0, 0, 140, 140); ctx.strokeStyle = '#33485E';
-        const scale = state.pipScale, offsetX = 70 + state.pipPanX, offsetY = 70 + state.pipPanY;
-        
-        if (state.viewMode === 'tree') { 
-          const t = getTree(); if(!t) return; 
-          t.nodes.forEach(n => { if (n.parentId) { const p = t.nodes.find(pn => pn.id === n.parentId); if (p) { ctx.beginPath(); ctx.moveTo(p.x * scale + offsetX, p.y * scale + offsetY); ctx.lineTo(n.x * scale + offsetX, n.y * scale + offsetY); ctx.stroke(); } } }); 
-          t.nodes.forEach(n => { ctx.fillStyle = n.type === 'fruit' ? '#F59E0B' : (n.type === 'trunk' ? '#B45309' : '#10B981'); ctx.fillRect(n.x * scale + offsetX - 3, n.y * scale + offsetY - 2, 6, 4); }); 
-        } else { 
-          const f = getForest(); f.trees.forEach(t => { ctx.fillStyle = '#38BDF8'; ctx.fillRect(t.x * scale + offsetX - 4, t.y * scale + offsetY - 4, 8, 8); }); 
-        }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1;
-        const vw = window.innerWidth / state.scale, vh = window.innerHeight / state.scale;
-        const vx = -state.panX / state.scale, vy = -state.panY / state.scale;
-        ctx.strokeRect(vx * scale + offsetX, vy * scale + offsetY, vw * scale, vh * scale);
-      }
-
-      function escapeHTML(s) { return (s || '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c] || c)); }
-
-      const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next'), tutArrow = document.getElementById('tut-arrow');
-      let tutStep = -1;
-      
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '65px', arr: 'up' }, 
-        { msg: "Click '... a Tree' to plant your first project.", top: '100px', arr: 'up' }, 
-        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", showBtn: true, center: true }, 
-        { msg: "Great! Now Long-Press the tree you just made to open it.", showBtn: true, center: true }, 
-        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '65px', arr: 'up' }, 
-        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '100px', arr: 'up' }, 
-        { msg: "Leaves act as your individual notes and documents.", showBtn: true, center: true }, 
-        { msg: "Fruits act as actionable goals or deliverables.", showBtn: true, center: true }, 
-        { msg: "Seeds act as links to other trees or references. Next, click 'Season' in the bottom right.", bottom: '60px', right: '12px', arr: 'down' }, 
-        { msg: "Set the season, then click 'Done'.", showBtn: true, center: true }, 
-        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", bottom: '110px', right: '12px', arr: 'down' }, 
-        { msg: "Click 'Nursery' to manage your saves.", top: '65px', right: '12px', arr: 'up' }, 
-        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '170px', right: '40px', arr: 'up' }, 
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '90px', left: '12px', arr: 'up' }, 
-        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", showBtn: true, center: true } 
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '60px', left: '50%', arr: 'up' }, 
+        { msg: "Click '... a Tree' to plant your first project.", top: '55px', left: 'calc(50% + 95px)', arr: 'left' }, 
+        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", hideOnModal: true }, 
+        { msg: "Great! Now Long-Press the tree you just made to open it.", top: '130px', left: '335px', arr: 'left' }, 
+        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '60px', left: '50%', arr: 'up' }, 
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '55px', left: 'calc(50% + 95px)', arr: 'left' }, 
+        { msg: "Name your branch and click 'Save Changes'.", hideOnModal: true }, 
+        { msg: "Leaves act as your individual notes and documents.", center: true, showBtn: true }, 
+        { msg: "Fruits act as actionable goals or deliverables.", center: true, showBtn: true }, 
+        { msg: "Seeds act as links to other trees or references.", center: true, showBtn: true }, 
+        { msg: "Click 'Timeline' in the top left to see the Executive View.", top: '110px', left: '80px', arr: 'up' }, 
+        { msg: "Here is your data formatted for stakeholders! Click 'Timeline' again to return.", top: '110px', left: '80px', arr: 'up' }, 
+        { msg: "Click 'Critical Path' in the bottom right to highlight the longest task chain.", bottom: '65px', right: '150px', arr: 'right' }, 
+        { msg: "Next, click 'Season' in the bottom right.", bottom: '20px', right: '150px', arr: 'right' }, 
+        { msg: "Set the season, then click 'Done'.", hideOnModal: true }, 
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", bottom: '115px', right: '150px', arr: 'right' }, 
+        { msg: "Click 'Nursery' to manage your saves.", top: '60px', right: '20px', arr: 'up' }, 
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '160px', right: '345px', arr: 'right' }, 
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '110px', left: '20px', arr: 'up' }, 
+        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", center: true, showBtn: true } 
       ];
       
-      function initTutorial() { if (!localStorage.getItem('sylva_v10_onboarded')) setTutStep(0); }
+      function initTutorial() { if (!localStorage.getItem('sylva_v13_onboarded')) setTutStep(0); }
       function setTutStep(step) {
-        if (localStorage.getItem('sylva_v10_onboarded')) return;
+        if (localStorage.getItem('sylva_v13_onboarded')) return;
         tutStep = step;
-        if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v10_onboarded', 'true'); return; }
+        tutBox.style.opacity = '1';
+        tutBox.style.pointerEvents = 'auto';
+
+        if (step >= TUT_STEPS.length) { 
+           tutBox.style.display = 'none'; 
+           localStorage.setItem('sylva_v13_onboarded', 'true'); 
+           return; 
+        }
+        
         const s = TUT_STEPS[step];
         tutText.innerText = s.msg; 
         
-        tutBox.style.top = s.top || 'auto'; tutBox.style.bottom = s.bottom || 'auto'; 
-        tutBox.style.left = s.left || 'auto'; tutBox.style.right = s.right || 'auto';
+        tutBox.style.top = s.top || 'auto'; 
+        tutBox.style.bottom = s.bottom || 'auto'; 
+        tutBox.style.left = s.left || 'auto'; 
+        tutBox.style.right = s.right || 'auto';
         
-        if (s.center) { tutBox.style.top = '50%'; tutBox.style.left = '50%'; tutBox.style.transform = 'translate(-50%, -50%)'; } 
-        else if (s.top && !s.left && !s.right) { tutBox.style.left = '50%'; tutBox.style.transform = 'translateX(-50%)'; } 
-        else { tutBox.style.transform = 'none'; }
+        if (s.center) { 
+           tutBox.style.top = '50%'; tutBox.style.left = '50%'; 
+           tutBox.style.transform = 'translate(-50%, -50%)'; 
+        } 
+        else if (s.hideOnModal) {
+           tutBox.style.top = '20px'; tutBox.style.left = '50%'; 
+           tutBox.style.transform = 'translateX(-50%)'; 
+           tutBox.style.pointerEvents = 'none';
+           setTimeout(() => { if (tutStep === step) tutBox.style.opacity = '0'; }, 3500);
+        }
+        else { 
+           tutBox.style.transform = (s.left === '50%') ? 'translateX(-50%)' : 'none'; 
+        }
         
-        if(s.arr) { tutArrow.style.display = 'block'; tutArrow.className = 'tut-arrow ' + s.arr; } else { tutArrow.style.display = 'none'; }
+        if(s.arr && !s.hideOnModal) { 
+           tutArrow.style.display = 'block'; 
+           tutArrow.className = 'tut-arrow ' + s.arr; 
+           
+           // Reset styles before applying new ones to prevent conflict with CSS classes
+           tutArrow.style.left = ''; tutArrow.style.right = ''; tutArrow.style.top = ''; tutArrow.style.bottom = ''; tutArrow.style.transform = '';
+           
+           if (s.arr === 'up' || s.arr === 'down') {
+               tutArrow.style.left = s.arrOffset || '50%';
+               tutArrow.style.transform = s.arrOffset ? 'none' : 'translateX(-50%)';
+           } else {
+               tutArrow.style.top = s.arrOffset || '50%';
+               tutArrow.style.transform = s.arrOffset ? 'none' : 'translateY(-50%)';
+           }
+        } else { 
+           tutArrow.style.display = 'none'; 
+        }
         
-        if (s.showBtn) { tutBtn.style.display = 'block'; tutBtn.innerText = (step === TUT_STEPS.length - 1) ? 'Finish' : 'Next'; } else { tutBtn.style.display = 'none'; }
+        if (s.showBtn) { 
+           tutBtn.style.display = 'block'; 
+           tutBtn.innerText = (step === TUT_STEPS.length - 1) ? 'Finish' : 'Next'; 
+        } else { 
+           tutBtn.style.display = 'none'; 
+        }
+        
         tutBox.style.display = 'flex';
       }
       function checkTut(step) { if (tutStep === step) setTutStep(step + 1); }
