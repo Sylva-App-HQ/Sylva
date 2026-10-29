@@ -97,7 +97,6 @@
     #pip-canvas { width: 100%; height: 100%; display: block; }
     
     #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: all 0.3s ease; pointer-events: auto; }
-    #tutorial-tooltip::after { content: ''; position: absolute; border-width: 8px; border-style: solid; border-color: transparent transparent var(--accent) transparent; top: -16px; left: 20px; }
     .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; }
   </style>
 </head>
@@ -578,7 +577,6 @@
         document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); }); 
         document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); });
         
-        // New Forest Modal Logic
         document.getElementById('btn-close-new-forest').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-new-forest').classList.remove('open'); });
         document.getElementById('btn-forest-save').addEventListener('click', (e) => {
             e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
@@ -758,21 +756,21 @@
       const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next');
       let tutStep = -1;
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '55px', left: '50%', showBtn: false }, 
-        { msg: "Click '... New Tree' to plant your first project.", top: '90px', left: '50%', showBtn: false }, 
-        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", top: '20%', left: '50%', showBtn: false }, 
-        { msg: "Great! Now Long-Press the tree you just made to open it.", top: '50%', left: '50%', showBtn: false }, 
-        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '55px', left: '50%', showBtn: false }, 
-        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '90px', left: '50%', showBtn: false }, 
-        { msg: "Now click 'Grow...' again and select '... a Leaf (Note)'.", top: '90px', left: '50%', showBtn: false }, 
-        { msg: "Click 'Grow...' and select '... a Fruit (Task)'. Fruits are deliverables.", top: '90px', left: '50%', showBtn: false }, 
-        { msg: "Click 'Grow...' and select '... a Seed (Link)'. Seeds are ideas.", top: '90px', left: '50%', showBtn: false }, 
-        { msg: "Next, click 'Season' in the bottom right to set the life cycle.", top: '80%', left: '70%', showBtn: false }, 
-        { msg: "Set the season, then click 'Done'.", top: '70%', left: '70%', showBtn: false }, 
-        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", top: '80%', left: '70%', showBtn: false }, 
-        { msg: "Click 'Nursery' to manage your saves.", top: '55px', left: '80%', showBtn: false }, 
-        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '150px', left: '80%', showBtn: false }, 
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '85px', left: '20%', showBtn: false }, 
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Click '... New Tree' to plant your first project.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", top: '10%', left: '50%', showBtn: false }, 
+        { msg: "Great! Now Long-Press the tree you just made to open it.", top: '80%', left: '50%', showBtn: false }, 
+        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Now click 'Grow...' again and select '... a Leaf (Note)'.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Click 'Grow...' and select '... a Fruit (Task)'. Fruits are deliverables.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Click 'Grow...' and select '... a Seed (Link)'. Seeds are ideas.", top: '60px', left: '10%', showBtn: false }, 
+        { msg: "Next, click 'Season' in the bottom right to set the life cycle.", top: '80%', left: '60%', showBtn: false }, 
+        { msg: "Set the season, then click 'Done'.", top: '10%', left: '50%', showBtn: false }, 
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", top: '80%', left: '60%', showBtn: false }, 
+        { msg: "Click 'Nursery' to manage your saves.", top: '60px', left: '60%', showBtn: false }, 
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '150px', left: '30%', showBtn: false }, 
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '90px', left: '10%', showBtn: false }, 
         { msg: "You're back! The dragging and zooming works here too. Thank you for installing Sylva!", top: '50%', left: '50%', showBtn: true } 
       ];
       
