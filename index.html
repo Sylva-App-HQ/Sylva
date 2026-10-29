@@ -462,8 +462,17 @@
         if(state.pipPanX === undefined) state.pipPanX = 0;
         if(state.pipPanY === undefined) state.pipPanY = 0;
         setupInputHandlers(); setupCustomDropdowns(); buildTemplateLibrary();
-        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) initTutorial();
-        else if (!deferredInstallPrompt) document.getElementById('modal-install-prompt').style.display = 'flex';
+        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) {
+            initTutorial();
+        } else {
+            document.getElementById('modal-install-prompt').style.display = 'flex';
+            setTimeout(() => {
+                if (!deferredInstallPrompt && document.getElementById('modal-install-prompt').style.display !== 'none') {
+                    document.getElementById('modal-install-prompt').style.display = 'none';
+                    initTutorial();
+                }
+            }, 3000);
+        }
         positionActions();
         render();
       }
