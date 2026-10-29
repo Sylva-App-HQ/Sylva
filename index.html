@@ -232,7 +232,8 @@
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">SAVED FORESTS (A-Z)</div><ul class="directory-list" id="list-atoz-right"></ul></div>
-      <div style="margin-top:auto; padding-top:12px;">
+      <div style="margin-top:auto; padding-top:12px; display:flex; flex-direction:column; gap:8px;">
+         <button class="btn" id="btn-enterprise-contact" style="width:100%; border-color:var(--border-strong); color:var(--text-main);">Enterprise User?</button>
          <button class="btn" id="btn-tree-hugger" style="width:100%; border-color:#10B981; color:#10B981; background:rgba(16,185,129,0.1);">Become a Tree Hugger ($1)</button>
       </div>
     </div>
@@ -888,6 +889,7 @@
         document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
         document.getElementById('btn-auth-org').addEventListener('click', () => { const pass = document.getElementById('input-org-pass').value; if(pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } else { showAppAlert("Password required to broadcast to Org."); } });
         document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); }); document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
+        document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
         document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
         document.getElementById('btn-close-hugger').addEventListener('click', () => { document.getElementById('modal-tree-hugger').classList.remove('open'); });
         document.getElementById('btn-pay-stripe').addEventListener('click', () => { window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
