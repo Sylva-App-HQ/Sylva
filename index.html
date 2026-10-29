@@ -96,8 +96,9 @@
     #pip-minimap { position: absolute; bottom: 12px; left: 12px; width: 140px; height: 95px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5); pointer-events: auto; cursor: crosshair; }
     #pip-canvas { width: 100%; height: 100%; display: block; }
     
-    #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: all 0.3s ease; pointer-events: auto; }
-    .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; }
+    /* Click-through tutorial box */
+    #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: all 0.3s ease; pointer-events: none; }
+    .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; pointer-events: auto; }
   </style>
 </head>
 <body>
@@ -350,7 +351,7 @@
       const forestLayer = document.getElementById('forest-layer'); const pipCanvas = document.getElementById('pip-canvas');
 
       function init() {
-        const r = localStorage.getItem('sylva_v7_state');
+        const r = localStorage.getItem('sylva_v8_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
         setupInputHandlers(); setupCustomDropdowns(); buildTemplateLibrary();
         if (isStandalone || localStorage.getItem('sylva_web_bypassed')) initTutorial();
@@ -363,9 +364,9 @@
       
       function saveData() {
         if (currentOrgCode) {
-           pendingSaveAction = () => { localStorage.setItem('sylva_v7_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
+           pendingSaveAction = () => { localStorage.setItem('sylva_v8_state', JSON.stringify(state)); alert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
            document.getElementById('modal-sync-auth').classList.add('open');
-        } else { try { localStorage.setItem('sylva_v7_state', JSON.stringify(state)); } catch(e){} }
+        } else { try { localStorage.setItem('sylva_v8_state', JSON.stringify(state)); } catch(e){} }
       }
 
       function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
@@ -755,32 +756,39 @@
 
       const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next');
       let tutStep = -1;
+      
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Click '... New Tree' to plant your first project.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", top: '10%', left: '50%', showBtn: false }, 
-        { msg: "Great! Now Long-Press the tree you just made to open it.", top: '80%', left: '50%', showBtn: false }, 
-        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Now click 'Grow...' again and select '... a Leaf (Note)'.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Click 'Grow...' and select '... a Fruit (Task)'. Fruits are deliverables.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Click 'Grow...' and select '... a Seed (Link)'. Seeds are ideas.", top: '60px', left: '10%', showBtn: false }, 
-        { msg: "Next, click 'Season' in the bottom right to set the life cycle.", top: '80%', left: '60%', showBtn: false }, 
-        { msg: "Set the season, then click 'Done'.", top: '10%', left: '50%', showBtn: false }, 
-        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", top: '80%', left: '60%', showBtn: false }, 
-        { msg: "Click 'Nursery' to manage your saves.", top: '60px', left: '60%', showBtn: false }, 
-        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '150px', left: '30%', showBtn: false }, 
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '90px', left: '10%', showBtn: false }, 
-        { msg: "You're back! The dragging and zooming works here too. Thank you for installing Sylva!", top: '50%', left: '50%', showBtn: true } 
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", t: '90px', l: '50%', showBtn: false }, 
+        { msg: "Click '... New Tree' to plant your first project.", t: '220px', l: '50%', showBtn: false }, 
+        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", t: '20%', l: '50%', showBtn: false }, 
+        { msg: "Great! Now Long-Press the tree you just made to open it.", t: '30%', l: '50%', showBtn: false }, 
+        { msg: "You're inside! Click 'Grow...' to start branching out.", t: '90px', l: '50%', showBtn: false }, 
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", t: '220px', l: '50%', showBtn: false }, 
+        { msg: "Now click 'Grow...' again and select '... a Leaf (Note)'.", t: '220px', l: '50%', showBtn: false }, 
+        { msg: "Click 'Grow...' and select '... a Fruit (Task)'. Fruits are deliverables.", t: '220px', l: '50%', showBtn: false }, 
+        { msg: "Click 'Grow...' and select '... a Seed (Link)'. Seeds are ideas.", t: '220px', l: '50%', showBtn: false }, 
+        { msg: "Next, click 'Season' in the bottom right to set the life cycle.", b: '80px', r: '20px', showBtn: false }, 
+        { msg: "Set the season, then click 'Done'.", b: '80px', r: '20px', showBtn: false }, 
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", b: '80px', r: '20px', showBtn: false }, 
+        { msg: "Click 'Nursery' to manage your saves.", t: '60px', r: '20px', showBtn: false }, 
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", t: '160px', r: '20px', showBtn: false }, 
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", t: '60px', l: '20px', showBtn: false }, 
+        { msg: "You're back! The dragging and zooming works here too. Thank you for installing Sylva!", t: '50%', l: '50%', showBtn: true } 
       ];
       
-      function initTutorial() { if (!localStorage.getItem('sylva_v7_onboarded')) setTutStep(0); }
+      function initTutorial() { if (!localStorage.getItem('sylva_v8_onboarded')) setTutStep(0); }
       function setTutStep(step) {
-        if (localStorage.getItem('sylva_v7_onboarded')) return;
+        if (localStorage.getItem('sylva_v8_onboarded')) return;
         tutStep = step;
-        if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v7_onboarded', 'true'); return; }
-        tutText.innerText = TUT_STEPS[step].msg; tutBox.style.top = TUT_STEPS[step].top; tutBox.style.left = TUT_STEPS[step].left;
-        tutBox.style.transform = (TUT_STEPS[step].left === '50%') ? 'translateX(-50%)' : 'none';
+        if (step >= TUT_STEPS.length) { tutBox.style.display = 'none'; localStorage.setItem('sylva_v8_onboarded', 'true'); return; }
+        tutText.innerText = TUT_STEPS[step].msg; 
+        
+        tutBox.style.top = TUT_STEPS[step].t || 'auto'; 
+        tutBox.style.bottom = TUT_STEPS[step].b || 'auto'; 
+        tutBox.style.left = TUT_STEPS[step].l || 'auto';
+        tutBox.style.right = TUT_STEPS[step].r || 'auto';
+
+        tutBox.style.transform = (TUT_STEPS[step].l === '50%') ? 'translateX(-50%)' : (TUT_STEPS[step].t === '50%' ? 'translate(-50%, -50%)' : 'none');
         tutBtn.style.display = TUT_STEPS[step].showBtn ? 'block' : 'none';
         tutBox.style.display = 'flex';
       }
@@ -792,3 +800,4 @@
   </script>
 </body>
 </html>
+```<FollowUp>
