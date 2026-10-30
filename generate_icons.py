@@ -26,21 +26,24 @@ def create_pwa_icon(size: int, filename: str):
     draw.line([(root_x, root_y), (right_x, right_y)], fill=line_color, width=line_w)
 
     # Helper to draw centered circular nodes with accent borders
-    def draw_node(x, y, r, border_color):
-        bbox = [x - r, y - r, x + r, y + r]
-        draw.ellipse(bbox, fill=node_fill_color, outline=border_color, width=max(2, int(size * 0.02)))
+    def draw_node(x, y, r):
+        draw.ellipse(
+            [(x - r, y - r), (x + r, y + r)],
+            fill=node_fill_color,
+            outline=accent_color,
+            width=line_w
+        )
 
-    # Child nodes
-    draw_node(left_x, left_y, child_r, accent_color)
-    draw_node(right_x, right_y, child_r, accent_color)
+    # Draw the nodes
+    draw_node(left_x, left_y, child_r)
+    draw_node(right_x, right_y, child_r)
+    draw_node(root_x, root_y, root_r)
 
-    # Root node (highlighted)
-    draw_node(root_x, root_y, root_r, accent_color)
-
-    # Save output
-    img.save(filename, format="PNG")
-    print(f"Generated: {filename} ({size}x{size})")
+    # Save the file
+    img.save(filename)
+    print(f"Generated {filename}")
 
 if __name__ == "__main__":
     create_pwa_icon(192, "icon-192.png")
     create_pwa_icon(512, "icon-512.png")
+    create_pwa_icon(64, "favicon.png")

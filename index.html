@@ -419,11 +419,14 @@
     </div>
   </div>
 
-  <div id="tutorial-tooltip">
-     <div class="tut-arrow" id="tut-arrow"></div>
-     <div id="tut-text"></div>
-     <button class="tut-btn" id="tut-next">Next</button>
+  <div id="tutorial-tooltip" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: var(--bg-surface); color: var(--text-main); border: 2px solid var(--accent); padding: 18px; border-radius: 12px; font-weight: 600; max-width: 280px; box-shadow: 0 12px 32px rgba(0,0,0,0.8); display: none; flex-direction: column; gap: 12px; text-align: center; pointer-events: auto;">
+     <div id="tut-text" style="font-size: 14px; line-height: 1.5;"></div>
+     <button class="tut-btn" id="tut-next" style="background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: center; width: 100%;">Next</button>
   </div>
+  
+  <svg id="standalone-arrow" viewBox="0 0 24 24" fill="var(--accent)" stroke="#070B0E" stroke-width="1.5" style="position: fixed; z-index: 10000; display: none; pointer-events: none; width: 48px; height: 48px; margin-left: -24px; margin-top: -24px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: all 0.3s ease;">
+     <path d="M12 0L24 12H16V24H8V12H0L12 0Z"/>
+  </svg>
 
   <script>
     (function () {
@@ -825,8 +828,8 @@
         btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
         btnGrow.addEventListener('click', (e) => { 
             e.stopPropagation(); 
-            if(state.viewMode === 'forest') checkTut(0);
-            if(state.viewMode === 'tree') checkTut(4);
+            if(state.viewMode === 'forest' && tutStep === 0) { checkTut(0); }
+            else if(state.viewMode === 'tree' && tutStep === 4) { checkTut(4); }
             const dd = document.getElementById('grow-dropdown'); const isVis = dd.style.display === 'flex'; closeAllDropdowns(); if (!isVis) dd.style.display = 'flex'; 
         });
 
@@ -902,6 +905,39 @@
         document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); showAppAlert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); } });
         document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
         document.getElementById('btn-auth-org').addEventListener('click', () => { const pass = document.getElementById('input-org-pass').value; if(pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } else { showAppAlert("Password required to broadcast to Org."); } });
+        
+        document.getElementById('btn-export-backup').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "sylva_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            document.getElementById('drawer-right').classList.remove('open');
+            checkTut(17);
+        });
+        
+        document.getElementById('btn-import-backup').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.readAsText(file,'UTF-8');
+                reader.onload = readerEvent => {
+                    try {
+                        const content = readerEvent.target.result;
+                        state = JSON.parse(content);
+                        saveData(); render();
+                        showAppAlert('Backup imported successfully!');
+                    } catch(err) { showAppAlert('Invalid backup file.'); }
+                }
+            }
+            input.click();
+            document.getElementById('drawer-right').classList.remove('open');
+        });
+
         document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); }); document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
         document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
         document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
@@ -1108,7 +1144,14 @@
       function openInspector(node) {
         setTimeout(() => { 
           document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
-          document.getElementById('node-input-type').value = node.type; document.getElementById('node-type-trigger').querySelector('span').innerText = document.querySelector(`.custom-opt[data-val="${node.type}"]`).innerText;
+          document.getElementById('node-input-type').value = node.type; 
+          const typeOpt = document.querySelector(`#node-type-dropdown .custom-opt[data-val="${node.type}"]`);
+          if (typeOpt) {
+              document.getElementById('node-type-trigger').querySelector('span').innerText = typeOpt.innerText;
+          } else if (node.type === 'trunk') {
+              document.getElementById('node-type-trigger').querySelector('span').innerText = 'Trunk (Root)';
+          }
+
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
           
           document.getElementById('node-input-start').value = node.startDate || '';
@@ -1179,41 +1222,46 @@
         document.getElementById('modal-season').classList.add('open');
       }
 
-      const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next'), tutArrow = document.getElementById('tut-arrow');
+      // Cleaned up duplicate declarations
       let tutStep = -1;
 
       const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '60px', left: '50%', arr: 'up' }, 
-        { msg: "Click '... a Tree' to plant your first project.", top: '55px', left: 'calc(50% + 95px)', arr: 'left' }, 
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", arr: {top: '45px', left: '50%', rot: 0} }, 
+        { msg: "Click '... a Tree' to plant your first project.", arr: {top: '70px', left: 'calc(50% + 20px)', rot: -90} }, 
         { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", hideOnModal: true }, 
-        { msg: "Great! Now Long-Press the tree you just made to open it.", top: '130px', left: '335px', arr: 'left' }, 
-        { msg: "You're inside! Click 'Grow...' to start branching out.", top: '60px', left: '50%', arr: 'up' }, 
-        { msg: "Select '... a Branch (Group)'. Branches act like folders.", top: '55px', left: 'calc(50% + 95px)', arr: 'left' }, 
+        { msg: "Great! Now Double-Click the tree you just made to open it.", arr: {top: '140px', left: '220px', rot: -90} }, 
+        { msg: "You're inside! Click 'Grow...' to start branching out.", arr: {top: '45px', left: '50%', rot: 0} }, 
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", arr: {top: '70px', left: 'calc(50% + 20px)', rot: -90} }, 
         { msg: "Name your branch and click 'Save Changes'.", hideOnModal: true }, 
-        { msg: "Leaves act as your individual notes and documents.", center: true, showBtn: true }, 
-        { msg: "Fruits act as actionable goals or deliverables.", center: true, showBtn: true }, 
-        { msg: "Seeds act as links to other trees or references.", center: true, showBtn: true }, 
-        { msg: "Click 'Timeline' in the top left to see the Executive View.", top: '110px', left: '80px', arr: 'up' }, 
-        { msg: "Here is your data formatted for stakeholders! Click 'Timeline' again to return.", top: '110px', left: '80px', arr: 'up' }, 
-        { msg: "Click 'Critical Path' in the bottom right to highlight the longest task chain.", bottom: '65px', right: '150px', arr: 'right' }, 
-        { msg: "Next, click 'Season' in the bottom right.", bottom: '20px', right: '150px', arr: 'right' }, 
+        { msg: "Leaves act as your individual notes and documents.", showBtn: true }, 
+        { msg: "Fruits act as actionable goals or deliverables.", showBtn: true }, 
+        { msg: "Seeds act as links to other trees or references.", showBtn: true }, 
+        { msg: "Click 'Timeline' in the top left to see the Executive View.", arr: {top: '70px', left: '100px', rot: 0} }, 
+        { msg: "Here is your data formatted for stakeholders! Click 'Timeline' again to return.", arr: {top: '70px', left: '100px', rot: 0} }, 
+        { msg: "Click 'Critical Path' in the bottom right to highlight the longest task chain.", arr: {bottom: '75px', right: '140px', rot: 90} }, 
+        { msg: "Next, click 'Season' in the bottom right.", arr: {bottom: '25px', right: '140px', rot: 90} }, 
         { msg: "Set the season, then click 'Done'.", hideOnModal: true }, 
-        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", bottom: '115px', right: '150px', arr: 'right' }, 
-        { msg: "Click 'Nursery' to manage your saves.", top: '60px', right: '20px', arr: 'up' }, 
-        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", top: '160px', right: '345px', arr: 'right' }, 
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", top: '110px', left: '20px', arr: 'up' }, 
-        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", center: true, showBtn: true } 
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", arr: {bottom: '125px', right: '140px', rot: 90} }, 
+        { msg: "Click 'Nursery' to manage your saves.", arr: {top: '45px', right: '40px', rot: 0} }, 
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", arr: {top: '155px', right: '340px', rot: 90} }, 
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", arr: {top: '70px', left: '25px', rot: 0} }, 
+        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", showBtn: true } 
       ];
       
       function initTutorial() { if (!localStorage.getItem('sylva_v13_onboarded')) setTutStep(0); }
+            const tutArrowEl = document.getElementById('standalone-arrow');
+      const tutBox = document.getElementById('tutorial-tooltip');
+      const tutText = document.getElementById('tut-text');
+      const tutBtn = document.getElementById('tut-next');
+      
       function setTutStep(step) {
         if (localStorage.getItem('sylva_v13_onboarded')) return;
         tutStep = step;
         tutBox.style.opacity = '1';
-        tutBox.style.pointerEvents = 'auto';
 
         if (step >= TUT_STEPS.length) { 
            tutBox.style.display = 'none'; 
+           tutArrowEl.style.display = 'none';
            localStorage.setItem('sylva_v13_onboarded', 'true'); 
            return; 
         }
@@ -1221,41 +1269,30 @@
         const s = TUT_STEPS[step];
         tutText.innerText = s.msg; 
         
-        tutBox.style.top = s.top || 'auto'; 
-        tutBox.style.bottom = s.bottom || 'auto'; 
-        tutBox.style.left = s.left || 'auto'; 
-        tutBox.style.right = s.right || 'auto';
-        
-        if (s.center) { 
-           tutBox.style.top = '50%'; tutBox.style.left = '50%'; 
-           tutBox.style.transform = 'translate(-50%, -50%)'; 
-        } 
-        else if (s.hideOnModal) {
-           tutBox.style.top = '20px'; tutBox.style.left = '50%'; 
+        // BOX POSITIONING - ALWAYS FIXED AND SEPARATE
+        tutBox.style.left = '50%';
+        if (s.hideOnModal) {
+           tutBox.style.top = '20px';
            tutBox.style.transform = 'translateX(-50%)'; 
            tutBox.style.pointerEvents = 'none';
-           setTimeout(() => { if (tutStep === step) tutBox.style.opacity = '0'; }, 3500);
-        }
-        else { 
-           tutBox.style.transform = (s.left === '50%') ? 'translateX(-50%)' : 'none'; 
+           // Give UI time to render modal, then auto-hide tooltip
+           setTimeout(() => { if (tutStep === step && document.querySelector('.modal-overlay.open')) tutBox.style.opacity = '0'; }, 4000);
+        } else {
+           tutBox.style.top = '50%';
+           tutBox.style.transform = 'translate(-50%, -50%)';
+           tutBox.style.pointerEvents = 'auto';
         }
         
-        if(s.arr && !s.hideOnModal) { 
-           tutArrow.style.display = 'block'; 
-           tutArrow.className = 'tut-arrow ' + s.arr; 
-           
-           // Reset styles before applying new ones to prevent conflict with CSS classes
-           tutArrow.style.left = ''; tutArrow.style.right = ''; tutArrow.style.top = ''; tutArrow.style.bottom = ''; tutArrow.style.transform = '';
-           
-           if (s.arr === 'up' || s.arr === 'down') {
-               tutArrow.style.left = s.arrOffset || '50%';
-               tutArrow.style.transform = s.arrOffset ? 'none' : 'translateX(-50%)';
-           } else {
-               tutArrow.style.top = s.arrOffset || '50%';
-               tutArrow.style.transform = s.arrOffset ? 'none' : 'translateY(-50%)';
-           }
-        } else { 
-           tutArrow.style.display = 'none'; 
+        // ARROW POSITIONING (Discrete element pointing to target)
+        if (s.arr) {
+           tutArrowEl.style.display = 'block';
+           tutArrowEl.style.top = s.arr.top || 'auto';
+           tutArrowEl.style.bottom = s.arr.bottom || 'auto';
+           tutArrowEl.style.left = s.arr.left || 'auto';
+           tutArrowEl.style.right = s.arr.right || 'auto';
+           tutArrowEl.style.transform = `rotate(${s.arr.rot}deg)`;
+        } else {
+           tutArrowEl.style.display = 'none';
         }
         
         if (s.showBtn) { 
@@ -1267,7 +1304,12 @@
         
         tutBox.style.display = 'flex';
       }
-      function checkTut(step) { if (tutStep === step) setTutStep(step + 1); }
+      
+      function checkTut(expectedStep) { 
+          if (tutStep === expectedStep) {
+              setTimeout(() => { setTutStep(tutStep + 1); }, 100); // 100ms buffer prevents race conditions
+          }
+      }
       tutBtn.addEventListener('click', () => { setTutStep(tutStep + 1); });
 
       init();
