@@ -32,7 +32,7 @@
     .custom-opt { width: 100%; border: none; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--text-main); padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; cursor: pointer; }
     .custom-opt:last-child { border-bottom: none; }
     .custom-opt:hover { background: var(--bg-surface-elevated); }
-    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 160px; z-index: 100; }
+    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 170px; z-index: 100; }
     
     .custom-select-trigger { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .custom-select-container { position: relative; width: 100%; }
@@ -64,7 +64,7 @@
     #canvas-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
     #tree-layer, #forest-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; }
     
-    #timeline-layer { position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px); background: var(--bg-canvas); pointer-events: auto; z-index: 20; padding: 12px 24px 80px 24px; overflow-y: auto; display: none; }
+    #timeline-layer { position: absolute; top: 110px; left: 0; width: 100%; height: calc(100% - 110px); background: var(--bg-canvas); pointer-events: auto; z-index: 20; padding: 12px 24px 80px 24px; overflow-y: auto; display: none; }
 
     .node-card { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; width: 190px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
     .node-card.selected { border-color: #10B981; box-shadow: 0 0 16px var(--glow-select); z-index: 10; }
@@ -92,7 +92,7 @@
     .drawer-header { padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
     .drawer-body { padding: 14px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 14px; }
     .directory-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-    .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 6px; }
 
     .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; touch-action: none; }
     .modal-overlay.open { display: flex; }
@@ -102,26 +102,64 @@
     .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; flex-shrink: 0; }
     .field-group { display: flex; flex-direction: column; gap: 6px; position: relative; }
     .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-    .field-group input, .field-group textarea { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; }
+    .field-group input, .field-group textarea { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; user-select: text; -webkit-user-select: text; }
 
     #pip-minimap { position: absolute; bottom: 12px; left: 12px; width: 140px; height: 140px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5); pointer-events: auto; cursor: crosshair; display: flex; align-items: center; justify-content: center; }
     #pip-canvas { width: 100%; height: 100%; display: block; }
     
-    /* Tutorial Box */
-    #tutorial-tooltip { position: absolute; z-index: 9999; background: var(--accent); color: #070B0E; padding: 14px; border-radius: 10px; font-weight: 600; max-width: 250px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); display: none; flex-direction: column; gap: 8px; transition: opacity 0.4s ease; pointer-events: none; }
-    .tut-btn { background: #070B0E; color: var(--text-main); border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: flex-end; pointer-events: auto; margin-top: 4px; }
-    .tut-arrow { position: absolute; width: 0; height: 0; border-style: solid; display: none; pointer-events: none; }
-    .tut-arrow.up { top: -12px; border-width: 0 10px 12px 10px; border-color: transparent transparent var(--accent) transparent; }
-    .tut-arrow.down { bottom: -12px; border-width: 12px 10px 0 10px; border-color: var(--accent) transparent transparent transparent; }
-    .tut-arrow.left { left: -12px; top: 50%; transform: translateY(-50%); border-width: 10px 12px 10px 0; border-color: transparent var(--accent) transparent transparent; }
-    .tut-arrow.right { right: -12px; top: 50%; transform: translateY(-50%); border-width: 10px 0 10px 12px; border-color: transparent transparent transparent var(--accent); }
+    /* Tutorial Window & Separate Curved Arrow (Matching Color + Smooth Fade) */
+    #tutorial-tooltip {
+      position: fixed;
+      z-index: 10002;
+      background: var(--accent);
+      color: #070B0E;
+      border: 2px solid #070B0E;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      width: 250px;
+      max-width: calc(100vw - 24px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.75);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+      pointer-events: auto;
+      opacity: 0;
+      transition: opacity 0.24s ease;
+    }
+    #tut-text { font-size: 13px; line-height: 1.45; color: #070B0E; }
+    .tut-btn {
+      background: #070B0E;
+      color: var(--accent);
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      align-self: flex-end;
+      pointer-events: auto;
+    }
+    #standalone-arrow-svg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10001;
+      pointer-events: none;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.24s ease;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.65));
+    }
 
     .acorn-btn { padding: 4px 8px; background: rgba(180, 83, 9, 0.2); border: 1px solid #B45309; color: #B45309; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .willow-btn { padding: 4px 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--node-leaf); color: var(--node-leaf); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; margin-top: 8px; }
     
     #overlay-acorn-target { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 55; display: none; align-items: center; justify-content: center; pointer-events: none; }
     #overlay-acorn-target span { background: var(--bg-surface); padding: 12px 24px; border-radius: 8px; border: 1px solid #B45309; color: #B45309; font-weight: bold; }
-
   </style>
 </head>
 <body>
@@ -159,14 +197,14 @@
         <button class="btn btn-accent" id="btn-grow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg><span>Grow...</span></button>
         <div id="grow-dropdown" class="custom-dropdown">
           <div id="grow-opts-tree">
-            <button class="custom-opt btn-grow-opt" data-type="branch">... a Branch (Group)</button>
-            <button class="custom-opt btn-grow-opt" data-type="leaf">... a Leaf (Note)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-branch" data-type="branch">... a Branch (Group)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-leaf" data-type="leaf">... a Leaf (Note)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-fruit" data-type="fruit">... a Fruit (Task)</button>
-            <button class="custom-opt btn-grow-opt" data-type="seed">... a Seed (Link)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-seed" data-type="seed">... a Seed (Link)</button>
           </div>
           <div id="grow-opts-forest" style="display:none;">
-            <button class="custom-opt btn-grow-opt" data-type="tree">... a Tree</button>
-            <button class="custom-opt btn-grow-opt" data-type="forest">... a New Forest</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-tree" data-type="tree">... a Tree</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-forest" data-type="forest">... a New Forest</button>
           </div>
         </div>
       </div>
@@ -184,7 +222,7 @@
     </div>
   </header>
 
-  <aside id="pip-minimap"><canvas id="pip-canvas"></canvas></aside>
+  <aside id="pip-minimap"><canvas id="pip-canvas" width="140" height="140"></canvas></aside>
 
   <div class="bottom-actions" id="bottom-actions-container">
     <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.15);">Harvest</button>
@@ -336,7 +374,7 @@
            <button class="btn btn-small" id="btn-inspect-basket">Inspect Basket</button>
         </div>
       </div>
-      <div class="modal-footer"><button class="btn" id="btn-season-done">Done</button></div>
+      <div class="modal-footer"><button class="btn btn-accent" id="btn-season-done">Done</button></div>
     </div>
   </div>
 
@@ -388,7 +426,6 @@
     </div>
   </div>
 
-  
   <div class="modal-overlay" id="modal-tree-hugger">
     <div class="modal-card">
       <div class="modal-header"><h3>Become a Tree Hugger</h3><button class="btn btn-small" id="btn-close-hugger">&times;</button></div>
@@ -396,7 +433,7 @@
         <p style="font-size:13px; color:var(--text-main); line-height:1.5;">Support Sylva's development and unlock premium features for a one-time payment of $1!</p>
         <ul style="font-size:12px; color:var(--text-muted); line-height:1.6; margin-left: 20px; margin-bottom: 8px;">
           <li>Unlock custom visual themes (Midnight Forest, Cherry Blossom)</li>
-          <li>Access to premium advanced templates</li>
+          <li>Access to all 50+ industry templates</li>
           <li>Our eternal gratitude!</li>
         </ul>
         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -407,7 +444,6 @@
     </div>
   </div>
 
-  
   <div class="modal-overlay" id="modal-vip">
     <div class="modal-card">
       <div class="modal-header"><h3>Enter VIP Code</h3><button class="btn btn-small" id="btn-close-vip">&times;</button></div>
@@ -415,24 +451,41 @@
         <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter your Tree Hugger VIP code to unlock all premium templates for free.</p>
         <div class="field-group"><input type="password" id="input-vip-code" placeholder="VIP Code"></div>
       </div>
-      <div class="modal-footer"><button class="btn" id="btn-submit-vip">Unlock</button></div>
+      <div class="modal-footer"><button class="btn btn-accent" id="btn-submit-vip">Unlock</button></div>
     </div>
   </div>
 
-  <div id="tutorial-tooltip" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: var(--bg-surface); color: var(--text-main); border: 2px solid var(--accent); padding: 18px; border-radius: 12px; font-weight: 600; max-width: 280px; box-shadow: 0 12px 32px rgba(0,0,0,0.8); display: none; flex-direction: column; gap: 12px; text-align: center; pointer-events: auto;">
-     <div id="tut-text" style="font-size: 14px; line-height: 1.5;"></div>
-     <button class="tut-btn" id="tut-next" style="background: var(--accent); color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; align-self: center; width: 100%;">Next</button>
+  <!-- Decoupled Tutorial Window & Separate Curved Arrow SVG -->
+  <div id="tutorial-tooltip">
+     <div id="tut-text"></div>
+     <button class="tut-btn" id="tut-next">Next</button>
   </div>
   
-  <svg id="standalone-arrow" viewBox="0 0 24 24" fill="var(--accent)" stroke="#070B0E" stroke-width="1.5" style="position: fixed; z-index: 10000; display: none; pointer-events: none; width: 48px; height: 48px; margin-left: -24px; margin-top: -24px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transition: all 0.3s ease;">
-     <path d="M12 0L24 12H16V24H8V12H0L12 0Z"/>
+  <svg id="standalone-arrow-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="tut-arrowhead" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto">
+        <path d="M 0 0.8 L 7 4 L 0 7.2 z" fill="#2DD4BF" />
+      </marker>
+    </defs>
+    <path id="standalone-arrow-path" d="" fill="none" stroke="#2DD4BF" stroke-width="3.2" stroke-linecap="round" marker-end="url(#tut-arrowhead)" />
   </svg>
 
   <script>
     (function () {
       'use strict';
 
-      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').then(reg => { reg.onupdatefound = () => { const iw = reg.installing; iw.onstatechange = () => { if (iw.state === 'installed' && navigator.serviceWorker.controller) document.getElementById('update-toast').style.display = 'flex'; }; }; }); }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          reg.onupdatefound = () => {
+            const iw = reg.installing;
+            iw.onstatechange = () => {
+              if (iw.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('update-toast').style.display = 'flex';
+              }
+            };
+          };
+        }).catch(() => {});
+      }
 
       let deferredInstallPrompt = null;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
@@ -445,31 +498,230 @@
       let dragHoverTimer = null;
       let dragHoverParentId = null;
 
-      window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; if (!isStandalone && !localStorage.getItem('sylva_web_bypassed')) document.getElementById('modal-install-prompt').style.display = 'flex'; });
-      document.getElementById('btn-continue-web').addEventListener('click', () => { localStorage.setItem('sylva_web_bypassed', 'true'); document.getElementById('modal-install-prompt').style.display = 'none'; initTutorial(); });
-      document.getElementById('btn-trigger-install').addEventListener('click', async () => { if (deferredInstallPrompt) { deferredInstallPrompt.prompt(); const choice = await deferredInstallPrompt.userChoice; if (choice.outcome === 'accepted') document.getElementById('modal-install-prompt').style.display = 'none'; deferredInstallPrompt = null; } });
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        if (!isStandalone && !localStorage.getItem('sylva_web_bypassed')) {
+          document.getElementById('modal-install-prompt').style.display = 'flex';
+        }
+      });
+      document.getElementById('btn-continue-web').addEventListener('click', () => {
+        localStorage.setItem('sylva_web_bypassed', 'true');
+        document.getElementById('modal-install-prompt').style.display = 'none';
+        initTutorial();
+      });
+      document.getElementById('btn-trigger-install').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            document.getElementById('modal-install-prompt').style.display = 'none';
+          }
+          deferredInstallPrompt = null;
+        }
+      });
 
       let state = {
         viewMode: 'forest', activeForestId: 'forest-1', activeTreeId: null,
-        isLocked: true, panX: 40, panY: 80, scale: 1, pipScale: 0.1, pipPanX: 0, pipPanY: 0, selectedId: null, showCriticalPath: false,
+        isLocked: true, panX: 40, panY: 120, scale: 1, pipScale: 0.1, pipPanX: 0, pipPanY: 0, selectedId: null, showCriticalPath: false,
         forests: [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }]
       };
       
       let criticalSet = new Set();
 
-      const viewport = document.getElementById('viewport'); const world = document.getElementById('world');
-      const canvasSvg = document.getElementById('canvas-svg'); const treeLayer = document.getElementById('tree-layer');
-      const forestLayer = document.getElementById('forest-layer'); const pipCanvas = document.getElementById('pip-canvas');
+      const viewport = document.getElementById('viewport');
+      const world = document.getElementById('world');
+      const canvasSvg = document.getElementById('canvas-svg');
+      const treeLayer = document.getElementById('tree-layer');
+      const forestLayer = document.getElementById('forest-layer');
+      const pipCanvas = document.getElementById('pip-canvas');
       const timelineLayer = document.getElementById('timeline-layer');
-      
-      function positionActions() {
-         const pipRect = pipCanvas.getBoundingClientRect();
-         const ac = document.getElementById('bottom-actions-container');
-         ac.style.bottom = (window.innerHeight - pipRect.bottom) + 'px';
-         ac.style.height = pipRect.height + 'px';
-         ac.style.justifyContent = 'space-between';
+
+      function escapeHTML(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
-      window.addEventListener('resize', positionActions);
+
+      function getNodeIcon(type) {
+        switch (type) {
+          case 'trunk':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M12 3v18M8 21h8M7 7h10"/></svg>`;
+          case 'branch':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.2"><path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/></svg>`;
+          case 'leaf':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`;
+          case 'fruit':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.2"><circle cx="12" cy="14" r="7"/><path d="M12 7V3m0 0c2 0 4 1 4 3"/></svg>`;
+          case 'seed':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.2"><path d="M12 2C7 7 6 13 12 22c6-9 5-15 0-20z"/></svg>`;
+          default:
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>`;
+        }
+      }
+
+      function getTreeIcon(species) {
+        switch (species) {
+          case 'Oak':
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#38BDF8" stroke-width="2"><path d="M24 42V28M18 42h12"/><circle cx="24" cy="19" r="11"/><circle cx="16" cy="22" r="7"/><circle cx="32" cy="22" r="7"/></svg>`;
+          case 'Willow':
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#10B981" stroke-width="2"><path d="M24 42V22M18 42h12"/><path d="M24 12c-10 0-14 8-14 20M24 12c10 0 14 8 14 20M24 10c-6 4-8 12-8 22M24 10c6 4 8 12 8 22"/></svg>`;
+          case 'Apple':
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M24 42V28M18 42h12"/><circle cx="24" cy="18" r="11"/><circle cx="20" cy="16" r="2" fill="#F59E0B"/><circle cx="28" cy="19" r="2" fill="#F59E0B"/><circle cx="23" cy="23" r="2" fill="#F59E0B"/></svg>`;
+          case 'Pine':
+          default:
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`;
+        }
+      }
+
+      function renderDrawers() {
+        const pinnedLeft = document.getElementById('list-pinned-left');
+        const atozLeft = document.getElementById('list-atoz-left');
+        const atozRight = document.getElementById('list-atoz-right');
+        if (!pinnedLeft || !atozLeft || !atozRight) return;
+
+        pinnedLeft.innerHTML = '';
+        atozLeft.innerHTML = '';
+        atozRight.innerHTML = '';
+
+        const forest = getForest();
+        const tree = getTree();
+
+        if (state.viewMode === 'forest') {
+          document.getElementById('left-title').innerText = 'Forest Directory';
+          const items = [...(forest.trees || [])].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+          items.forEach(t => {
+            const createRow = () => {
+              const li = document.createElement('li');
+              li.className = 'directory-item';
+              li.innerHTML = `<span>${escapeHTML(t.title)}</span><button class="btn btn-small">${t.pinned ? '★' : '☆'}</button>`;
+              li.querySelector('span').onclick = () => {
+                state.selectedId = t.id;
+                centerOn(t.x, t.y);
+                document.getElementById('drawer-left').classList.remove('open');
+                render();
+              };
+              li.querySelector('button').onclick = (e) => {
+                e.stopPropagation();
+                t.pinned = !t.pinned;
+                saveData();
+                renderDrawers();
+              };
+              return li;
+            };
+            if (t.pinned) pinnedLeft.appendChild(createRow());
+            atozLeft.appendChild(createRow());
+          });
+        } else if (tree) {
+          document.getElementById('left-title').innerText = 'Node Directory';
+          const items = [...(tree.nodes || [])].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+          items.forEach(n => {
+            const createRow = () => {
+              const li = document.createElement('li');
+              li.className = 'directory-item';
+              li.innerHTML = `<span>${escapeHTML(n.title)}</span><button class="btn btn-small">${n.pinned ? '★' : '☆'}</button>`;
+              li.querySelector('span').onclick = () => {
+                state.selectedId = n.id;
+                centerOn(n.x, n.y);
+                document.getElementById('drawer-left').classList.remove('open');
+                render();
+              };
+              li.querySelector('button').onclick = (e) => {
+                e.stopPropagation();
+                n.pinned = !n.pinned;
+                saveData();
+                renderDrawers();
+              };
+              return li;
+            };
+            if (n.pinned) pinnedLeft.appendChild(createRow());
+            atozLeft.appendChild(createRow());
+          });
+        }
+
+        const sortedForests = [...state.forests].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        sortedForests.forEach(f => {
+          const li = document.createElement('li');
+          li.className = 'directory-item';
+          li.innerHTML = `<span>${escapeHTML(f.title)} ${f.id === state.activeForestId ? '(Active)' : ''}</span><button class="btn btn-small">Open</button>`;
+          li.onclick = () => {
+            state.activeForestId = f.id;
+            state.activeTreeId = null;
+            state.viewMode = 'forest';
+            document.getElementById('drawer-right').classList.remove('open');
+            render();
+          };
+          atozRight.appendChild(li);
+        });
+      }
+
+      function renderMinimap() {
+        if (!pipCanvas) return;
+        const ctx = pipCanvas.getContext('2d');
+        if (!ctx) return;
+        const w = pipCanvas.width || 140;
+        const h = pipCanvas.height || 140;
+        ctx.clearRect(0, 0, w, h);
+
+        const scale = state.pipScale || 0.1;
+        const ox = 70 + (state.pipPanX || 0);
+        const oy = 70 + (state.pipPanY || 0);
+
+        if (state.viewMode === 'forest') {
+          const forest = getForest();
+          (forest.trees || []).forEach(t => {
+            ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
+            ctx.beginPath();
+            ctx.arc(ox + t.x * scale, oy + t.y * scale, 4, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        } else {
+          const tree = getTree();
+          if (tree) {
+            ctx.strokeStyle = '#33485E';
+            ctx.lineWidth = 1;
+            tree.nodes.forEach(n => {
+              if (n.parentId) {
+                const p = tree.nodes.find(pn => pn.id === n.parentId);
+                if (p) {
+                  ctx.beginPath();
+                  ctx.moveTo(ox + p.x * scale, oy + p.y * scale);
+                  ctx.lineTo(ox + n.x * scale, oy + n.y * scale);
+                  ctx.stroke();
+                }
+              }
+            });
+            tree.nodes.forEach(n => {
+              ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
+              ctx.fillRect(ox + n.x * scale - 3, oy + n.y * scale - 2, 6, 4);
+            });
+          }
+        }
+
+        const vx = (-state.panX / state.scale) * scale + ox;
+        const vy = (-state.panY / state.scale) * scale + oy;
+        const vw = (window.innerWidth / state.scale) * scale;
+        const vh = (window.innerHeight / state.scale) * scale;
+        ctx.strokeStyle = '#F59E0B';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(vx, vy, vw, vh);
+      }
+
+      function positionActions() {
+        const pipRect = pipCanvas.getBoundingClientRect();
+        const ac = document.getElementById('bottom-actions-container');
+        ac.style.bottom = (window.innerHeight - pipRect.bottom) + 'px';
+        ac.style.height = pipRect.height + 'px';
+        ac.style.justifyContent = 'space-between';
+      }
+      window.addEventListener('resize', () => {
+        positionActions();
+        positionTutorialElements();
+      });
 
       function init() {
         const r = localStorage.getItem('sylva_v13_state');
@@ -477,20 +729,23 @@
         if(!state.pipScale) state.pipScale = 0.1;
         if(state.pipPanX === undefined) state.pipPanX = 0;
         if(state.pipPanY === undefined) state.pipPanY = 0;
-        setupInputHandlers(); setupCustomDropdowns(); buildTemplateLibrary();
-        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) {
-            initTutorial();
-        } else {
-            document.getElementById('modal-install-prompt').style.display = 'flex';
-            setTimeout(() => {
-                if (!deferredInstallPrompt && document.getElementById('modal-install-prompt').style.display !== 'none') {
-                    document.getElementById('modal-install-prompt').style.display = 'none';
-                    initTutorial();
-                }
-            }, 3000);
-        }
+        setupInputHandlers();
+        setupCustomDropdowns();
+        buildTemplateLibrary();
         positionActions();
         render();
+
+        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) {
+          initTutorial();
+        } else {
+          document.getElementById('modal-install-prompt').style.display = 'flex';
+          setTimeout(() => {
+            if (!deferredInstallPrompt && document.getElementById('modal-install-prompt').style.display !== 'none') {
+              document.getElementById('modal-install-prompt').style.display = 'none';
+              initTutorial();
+            }
+          }, 3000);
+        }
       }
 
       function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
@@ -499,38 +754,47 @@
       
       function saveData() {
         if (currentOrgCode) {
-           pendingSaveAction = () => { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); showAppAlert(`Change securely broadcasted to Org: ${currentOrgCode}`); };
-           document.getElementById('modal-sync-auth').classList.add('open');
-        } else { try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e){} }
+          pendingSaveAction = () => {
+            localStorage.setItem('sylva_v13_state', JSON.stringify(state));
+            showAppAlert(`Change securely broadcasted to Org: ${currentOrgCode}`);
+          };
+          document.getElementById('modal-sync-auth').classList.add('open');
+        } else {
+          try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e){}
+        }
       }
 
       function showAppAlert(msg) {
-          document.getElementById('alert-message-text').innerText = msg;
-          document.getElementById('modal-alert').classList.add('open');
+        document.getElementById('alert-message-text').innerText = msg;
+        document.getElementById('modal-alert').classList.add('open');
       }
 
-      function updateWorldTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; renderMinimap(); }
+      function updateWorldTransform() {
+        world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        renderMinimap();
+        if (tutStep >= 0) positionTutorialElements();
+      }
       
       function getCriticalPathIds(tree) {
-          const adj = {};
-          tree.nodes.forEach(n => adj[n.id] = []);
-          tree.nodes.forEach(n => {
-              if (n.parentId && adj[n.parentId]) adj[n.parentId].push(n.id);
-              if (n.acornTarget && adj[n.id]) adj[n.id].push(n.acornTarget);
-          });
-          let maxPath = [];
-          function dfs(nodeId, currentPath, visited) {
-              if (visited.has(nodeId)) return; // Prevents infinite loops from Acorn cycles
-              const node = tree.nodes.find(n => n.id === nodeId);
-              if (!node || (node.type === 'fruit' && node.harvested)) return;
-              currentPath.push(nodeId);
-              visited.add(nodeId);
-              if (currentPath.length > maxPath.length) maxPath = [...currentPath];
-              adj[nodeId].forEach(childId => dfs(childId, [...currentPath], new Set(visited)));
-          }
-          const trunk = tree.nodes.find(n => n.type === 'trunk') || tree.nodes[0];
-          if (trunk) dfs(trunk.id, [], new Set());
-          return maxPath;
+        const adj = {};
+        tree.nodes.forEach(n => adj[n.id] = []);
+        tree.nodes.forEach(n => {
+          if (n.parentId && adj[n.parentId]) adj[n.parentId].push(n.id);
+          if (n.acornTarget && adj[n.id]) adj[n.id].push(n.acornTarget);
+        });
+        let maxPath = [];
+        function dfs(nodeId, currentPath, visited) {
+          if (visited.has(nodeId)) return;
+          const node = tree.nodes.find(n => n.id === nodeId);
+          if (!node || (node.type === 'fruit' && node.harvested)) return;
+          currentPath.push(nodeId);
+          visited.add(nodeId);
+          if (currentPath.length > maxPath.length) maxPath = [...currentPath];
+          adj[nodeId].forEach(childId => dfs(childId, [...currentPath], new Set(visited)));
+        }
+        const trunk = tree.nodes.find(n => n.type === 'trunk') || tree.nodes[0];
+        if (trunk) dfs(trunk.id, [], new Set());
+        return maxPath;
       }
 
       function render() {
@@ -540,7 +804,8 @@
         btnLock.className = `btn btn-small btn-lock ${state.isLocked ? '' : 'unlocked'}`;
         btnLock.innerHTML = state.isLocked ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
           
-        document.getElementById('btn-grow').disabled = !state.isLocked; document.getElementById('btn-season').disabled = !state.isLocked;
+        document.getElementById('btn-grow').disabled = !state.isLocked;
+        document.getElementById('btn-season').disabled = !state.isLocked;
         document.getElementById('btn-harvest-main').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
@@ -550,50 +815,87 @@
         document.getElementById('btn-critical-path').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
 
         bc.innerHTML = '';
-        const fCrumb = document.createElement('span'); fCrumb.className = 'breadcrumb-crumb'; fCrumb.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
-        fCrumb.onclick = () => { if(state.viewMode !== 'forest') { state.viewMode = 'forest'; checkTut(18); render(); } }; bc.appendChild(fCrumb);
+        const fCrumb = document.createElement('span');
+        fCrumb.className = 'breadcrumb-crumb';
+        fCrumb.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
+        fCrumb.onclick = () => {
+          if (state.viewMode !== 'forest') {
+            state.viewMode = 'forest';
+            checkTut(18);
+            render();
+          }
+        };
+        bc.appendChild(fCrumb);
 
         if (state.viewMode === 'forest') {
-          btnSwitchContext.style.display = 'none'; document.getElementById('label-directory').innerText = 'Forest'; 
-          treeLayer.style.display = 'none'; timelineLayer.style.display = 'none'; forestLayer.style.display = 'block'; renderForest();
+          btnSwitchContext.style.display = 'none';
+          document.getElementById('label-directory').innerText = 'Forest'; 
+          treeLayer.style.display = 'none';
+          timelineLayer.style.display = 'none';
+          forestLayer.style.display = 'block';
+          renderForest();
         } else if (tree) {
-          btnSwitchContext.style.display = 'inline-flex'; document.getElementById('label-directory').innerText = 'Nodes'; 
-          const arrow = document.createElement('span'); arrow.style.color = 'var(--text-faint)'; arrow.innerText = '>'; bc.appendChild(arrow);
-          const tCrumb = document.createElement('span'); tCrumb.className = 'breadcrumb-crumb'; tCrumb.innerText = escapeHTML(tree.title);
-          tCrumb.onclick = () => { state.viewMode = 'tree'; centerOn(tree.nodes[0].x, tree.nodes[0].y); render(); }; bc.appendChild(tCrumb);
+          btnSwitchContext.style.display = 'inline-flex';
+          document.getElementById('label-directory').innerText = 'Nodes'; 
+          const arrow = document.createElement('span');
+          arrow.style.color = 'var(--text-faint)';
+          arrow.innerText = '>';
+          bc.appendChild(arrow);
+          const tCrumb = document.createElement('span');
+          tCrumb.className = 'breadcrumb-crumb';
+          tCrumb.innerText = escapeHTML(tree.title);
+          tCrumb.onclick = () => {
+            state.viewMode = 'tree';
+            centerOn(tree.nodes[0].x, tree.nodes[0].y);
+            render();
+          };
+          bc.appendChild(tCrumb);
           if (state.selectedId && state.viewMode === 'tree') {
-             const selN = getNode(state.selectedId);
-             if (selN) {
-                const a2 = document.createElement('span'); a2.style.color = 'var(--text-faint)'; a2.innerText = '>'; bc.appendChild(a2);
-                const nCrumb = document.createElement('span'); nCrumb.innerText = escapeHTML(selN.title); bc.appendChild(nCrumb);
-             }
+            const selN = getNode(state.selectedId);
+            if (selN) {
+              const a2 = document.createElement('span');
+              a2.style.color = 'var(--text-faint)';
+              a2.innerText = '>';
+              bc.appendChild(a2);
+              const nCrumb = document.createElement('span');
+              nCrumb.innerText = escapeHTML(selN.title);
+              bc.appendChild(nCrumb);
+            }
           }
           
-          if(tree.type === 'Pine') { document.getElementById('btn-grow-fruit').innerText = "... a Pine Cone (Checklist)"; }
-          else if(tree.type === 'Oak') { document.getElementById('btn-grow-fruit').innerText = "... an Acorn (Link)"; }
+          if (tree.type === 'Pine') { document.getElementById('btn-grow-fruit').innerText = "... a Pine Cone (Checklist)"; }
+          else if (tree.type === 'Oak') { document.getElementById('btn-grow-fruit').innerText = "... an Acorn (Link)"; }
           else { document.getElementById('btn-grow-fruit').innerText = "... a Fruit (Task)"; }
 
-          if(tree.type === 'Apple') {
-             const fruits = tree.nodes.filter(n => n.type === 'fruit');
-             const total = fruits.length; const harvested = fruits.filter(n => n.harvested).length;
-             document.getElementById('apple-progress-fill').style.width = total === 0 ? '0%' : `${(harvested/total)*100}%`;
+          if (tree.type === 'Apple') {
+            const fruits = tree.nodes.filter(n => n.type === 'fruit');
+            const total = fruits.length;
+            const harvested = fruits.filter(n => n.harvested).length;
+            document.getElementById('apple-progress-fill').style.width = total === 0 ? '0%' : `${(harvested/total)*100}%`;
           }
 
-          if(state.viewMode === 'timeline') {
-             treeLayer.style.display = 'none'; forestLayer.style.display = 'none'; timelineLayer.style.display = 'block'; renderTimeline();
+          if (state.viewMode === 'timeline') {
+            treeLayer.style.display = 'none';
+            forestLayer.style.display = 'none';
+            timelineLayer.style.display = 'block';
+            renderTimeline();
           } else {
-             timelineLayer.style.display = 'none'; forestLayer.style.display = 'none'; treeLayer.style.display = 'block'; 
-             criticalSet = state.showCriticalPath ? new Set(getCriticalPathIds(tree)) : new Set();
-             renderTree();
+            timelineLayer.style.display = 'none';
+            forestLayer.style.display = 'none';
+            treeLayer.style.display = 'block'; 
+            criticalSet = state.showCriticalPath ? new Set(getCriticalPathIds(tree)) : new Set();
+            renderTree();
           }
         }
-        renderDrawers(); updateWorldTransform();
+        renderDrawers();
+        updateWorldTransform();
       }
 
       function updateSVGPaths() {
         canvasSvg.innerHTML = '';
         if (state.viewMode !== 'tree') return;
-        const tree = getTree(); if(!tree) return;
+        const tree = getTree();
+        if (!tree) return;
         tree.nodes.forEach(n => {
           if (n.parentId) {
             const p = tree.nodes.find(pn => pn.id === n.parentId);
@@ -601,13 +903,14 @@
               const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
               const sx = p.x + 95, sy = p.y + 60, ex = n.x + 95, ey = n.y;
               if (tree.type === 'Willow') {
-                 path.setAttribute('d', `M ${sx} ${sy} Q ${sx} ${ey}, ${ex} ${ey}`);
+                path.setAttribute('d', `M ${sx} ${sy} Q ${sx} ${ey}, ${ex} ${ey}`);
               } else {
-                 const my = (sy + ey) / 2;
-                 path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
+                const my = (sy + ey) / 2;
+                path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
               }
               path.setAttribute('stroke', (criticalSet.has(p.id) && criticalSet.has(n.id)) ? '#EF4444' : '#33485E'); 
-              path.setAttribute('stroke-width', '2.5'); path.setAttribute('fill', 'none');
+              path.setAttribute('stroke-width', '2.5');
+              path.setAttribute('fill', 'none');
               canvasSvg.appendChild(path);
             }
           }
@@ -617,115 +920,241 @@
       function attachGestureEvents(el, entity, isTreeMode) {
         let pressTimer, clickTimer, clickCount = 0, startX, startY;
         el.addEventListener('pointerdown', (e) => {
-          if (isPinching) return; e.stopPropagation(); 
-          if(acornTargetMode && isTreeMode) { acornTargetMode = false; document.getElementById('overlay-acorn-target').style.display='none'; const tn = getNode(state.selectedId); if(tn) { tn.acornTarget = entity.id; saveData(); render(); showAppAlert('Acorn Linked!'); } return; }
-          startX = e.clientX; startY = e.clientY; draggedNodeId = entity.id;
+          if (isPinching) return;
+          e.stopPropagation(); 
+          if (acornTargetMode && isTreeMode) {
+            acornTargetMode = false;
+            document.getElementById('overlay-acorn-target').style.display = 'none';
+            const tn = getNode(state.selectedId);
+            if (tn) {
+              tn.acornTarget = entity.id;
+              saveData();
+              render();
+              showAppAlert('Acorn Linked!');
+            }
+            return;
+          }
+          startX = e.clientX;
+          startY = e.clientY;
+          draggedNodeId = entity.id;
           if (!state.isLocked) {
-             el.setPointerCapture(e.pointerId); el.style.zIndex = 50;
-             function onMove(evt) { 
-               if (isPinching) { onUp(evt); return; }
-               const dx = (evt.clientX - startX) / state.scale; const dy = (evt.clientY - startY) / state.scale;
-               entity.x += dx; entity.y += dy; startX = evt.clientX; startY = evt.clientY; 
-               el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`; if (isTreeMode) updateSVGPaths(); renderMinimap(); 
-               
-               if(isTreeMode && entity.type !== 'trunk') {
-                  const mx = evt.clientX, my = evt.clientY;
-                  const els = document.elementsFromPoint(mx, my);
-                  let hoverNId = null;
-                  for(let hel of els) { if(hel.classList.contains('node-card') && hel.id !== entity.id) { hoverNId = hel.id; break; } }
-                  if(hoverNId) {
-                     if(hoverNId !== dragHoverParentId) { clearTimeout(dragHoverTimer); dragHoverParentId = hoverNId; dragHoverTimer = setTimeout(() => { entity.parentId = hoverNId; el.style.border = '2px solid var(--accent)'; setTimeout(()=>el.style.border='', 500); }, 1500); }
-                  } else { clearTimeout(dragHoverTimer); dragHoverParentId = null; }
-               }
-             }
-             function onUp(evt) { el.releasePointerCapture(evt.pointerId); el.style.zIndex = ''; window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); clearTimeout(dragHoverTimer); dragHoverParentId = null; draggedNodeId = null; saveData(); render(); }
-             window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); return;
+            el.setPointerCapture(e.pointerId);
+            el.style.zIndex = 50;
+            function onMove(evt) { 
+              if (isPinching) { onUp(evt); return; }
+              const dx = (evt.clientX - startX) / state.scale;
+              const dy = (evt.clientY - startY) / state.scale;
+              entity.x += dx;
+              entity.y += dy;
+              startX = evt.clientX;
+              startY = evt.clientY; 
+              el.style.left = `${entity.x}px`;
+              el.style.top = `${entity.y}px`;
+              if (isTreeMode) updateSVGPaths();
+              renderMinimap();
+              
+              if (isTreeMode && entity.type !== 'trunk') {
+                const mx = evt.clientX, my = evt.clientY;
+                const els = document.elementsFromPoint(mx, my);
+                let hoverNId = null;
+                for (let hel of els) {
+                  if (hel.classList.contains('node-card') && hel.id !== entity.id) {
+                    hoverNId = hel.id;
+                    break;
+                  }
+                }
+                if (hoverNId) {
+                  if (hoverNId !== dragHoverParentId) {
+                    clearTimeout(dragHoverTimer);
+                    dragHoverParentId = hoverNId;
+                    dragHoverTimer = setTimeout(() => {
+                      entity.parentId = hoverNId;
+                      el.style.border = '2px solid var(--accent)';
+                      setTimeout(() => el.style.border = '', 500);
+                    }, 1500);
+                  }
+                } else {
+                  clearTimeout(dragHoverTimer);
+                  dragHoverParentId = null;
+                }
+              }
+            }
+            function onUp(evt) {
+              el.releasePointerCapture(evt.pointerId);
+              el.style.zIndex = '';
+              window.removeEventListener('pointermove', onMove);
+              window.removeEventListener('pointerup', onUp);
+              clearTimeout(dragHoverTimer);
+              dragHoverParentId = null;
+              draggedNodeId = null;
+              saveData();
+              render();
+            }
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+            return;
           }
           clickCount++;
           if (clickCount === 1) {
-             pressTimer = setTimeout(() => { clickCount = 0; if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.x, entity.y); checkTut(3); render(); } }, 400); 
-             clickTimer = setTimeout(() => {
-                if (clickCount === 1) {
-                   state.selectedId = entity.id; renderTreeSelections(); 
-                   if(isTreeMode) render(); 
-                }
-                clickCount = 0;
-             }, 250); 
+            pressTimer = setTimeout(() => {
+              clickCount = 0;
+              if (!isTreeMode) {
+                state.activeTreeId = entity.id;
+                state.viewMode = 'tree';
+                centerOn(entity.nodes[0].x, entity.nodes[0].y);
+                checkTut(3);
+                render();
+              }
+            }, 400); 
+            clickTimer = setTimeout(() => {
+              if (clickCount === 1) {
+                state.selectedId = entity.id;
+                renderTreeSelections(); 
+                if (isTreeMode) render(); 
+              }
+              clickCount = 0;
+            }, 250); 
           } else if (clickCount === 2) {
-             clearTimeout(pressTimer); clearTimeout(clickTimer); clickCount = 0;
-             state.selectedId = entity.id; renderTreeSelections(); if(isTreeMode) render();
-             if (isTreeMode) openInspector(entity); else { openTreeInspector(entity); }
+            clearTimeout(pressTimer);
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            state.selectedId = entity.id;
+            renderTreeSelections();
+            if (!isTreeMode && tutStep === 3) {
+              state.activeTreeId = entity.id;
+              state.viewMode = 'tree';
+              centerOn(entity.nodes[0].x, entity.nodes[0].y);
+              checkTut(3);
+              render();
+              return;
+            }
+            if (isTreeMode) {
+              render();
+              openInspector(entity);
+            } else {
+              openTreeInspector(entity);
+            }
           }
         });
-        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); } }); el.addEventListener('pointerup', () => clearTimeout(pressTimer));
+        el.addEventListener('pointermove', (e) => {
+          if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) {
+            clearTimeout(pressTimer);
+          }
+        });
+        el.addEventListener('pointerup', () => clearTimeout(pressTimer));
       }
 
       function renderTree() {
-        const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if(!tree) return;
+        const tree = getTree();
+        treeLayer.innerHTML = '';
+        updateSVGPaths();
+        if (!tree) return;
         tree.nodes.forEach(node => {
-          const el = document.createElement('div'); el.id = node.id; 
+          const el = document.createElement('div');
+          el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
-          el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+          el.style.left = `${node.x}px`;
+          el.style.top = `${node.y}px`;
           el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`; 
-          attachGestureEvents(el, node, true); treeLayer.appendChild(el);
+          attachGestureEvents(el, node, true);
+          treeLayer.appendChild(el);
         });
       }
 
       function renderTreeSelections() {
-        Array.from(treeLayer.children).forEach(el => { if (el.id === state.selectedId) el.classList.add('selected'); else el.classList.remove('selected'); });
-        Array.from(forestLayer.children).forEach(el => { if (el.id === state.selectedId) el.classList.add('selected'); else el.classList.remove('selected'); });
+        Array.from(treeLayer.children).forEach(el => {
+          if (el.id === state.selectedId) el.classList.add('selected');
+          else el.classList.remove('selected');
+        });
+        Array.from(forestLayer.children).forEach(el => {
+          if (el.id === state.selectedId) el.classList.add('selected');
+          else el.classList.remove('selected');
+        });
       }
 
       function renderForest() {
-        const forest = getForest(); forestLayer.innerHTML = ''; canvasSvg.innerHTML = '';
+        const forest = getForest();
+        forestLayer.innerHTML = '';
+        canvasSvg.innerHTML = '';
         forest.trees.forEach(t => {
-          const el = document.createElement('div'); el.id = t.id; el.className = `forest-tree-entity ${t.id === state.selectedId ? 'selected' : ''}`; el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
-          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`; attachGestureEvents(el, t, false); forestLayer.appendChild(el);
+          const el = document.createElement('div');
+          el.id = t.id;
+          el.className = `forest-tree-entity ${t.id === state.selectedId ? 'selected' : ''}`;
+          el.style.left = `${t.x}px`;
+          el.style.top = `${t.y}px`;
+          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`;
+          attachGestureEvents(el, t, false);
+          forestLayer.appendChild(el);
         });
       }
 
       function renderTimeline() {
-          const tc = document.getElementById('timeline-content'); tc.innerHTML = '';
-          const tree = getTree(); if(!tree) return;
-          const header = document.createElement('h2'); header.innerText = `Executive Timeline: ${tree.title}`; header.style.marginBottom = '16px'; tc.appendChild(header);
+        const tc = document.getElementById('timeline-content');
+        tc.innerHTML = '';
+        const tree = getTree();
+        if (!tree) return;
+        const header = document.createElement('h2');
+        header.innerText = `Executive Timeline: ${tree.title}`;
+        header.style.marginBottom = '16px';
+        tc.appendChild(header);
 
-          const tasks = tree.nodes.filter(n => n.type !== 'trunk').sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
-          tasks.forEach(n => {
-             const card = document.createElement('div'); card.style.background = 'var(--bg-surface)'; card.style.padding = '16px'; card.style.borderRadius = '8px'; card.style.border = '1px solid var(--border-subtle)';
-             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-                   <strong style="font-size:14px;">${escapeHTML(n.title)}</strong>
-                   <span style="font-size:10px; padding:2px 6px; background:var(--bg-surface-elevated); border-radius:4px; color:var(--text-muted);">${n.type.toUpperCase()}</span>
-                </div>
-                <div style="display:flex; gap: 24px; font-size:12px; color:var(--text-muted);">
-                   <div><strong>Start:</strong> ${n.startDate || 'Unscheduled'}</div>
-                   <div><strong>Est. Hours:</strong> ${n.estHours || '0'}</div>
-                   <div><strong>Assignee:</strong> ${escapeHTML(n.assignee || 'Unassigned')}</div>
-                </div>
-             `;
-             tc.appendChild(card);
-          });
+        const tasks = tree.nodes.filter(n => n.type !== 'trunk').sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
+        tasks.forEach(n => {
+          const card = document.createElement('div');
+          card.style.background = 'var(--bg-surface)';
+          card.style.padding = '16px';
+          card.style.borderRadius = '8px';
+          card.style.border = '1px solid var(--border-subtle)';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+              <strong style="font-size:14px;">${escapeHTML(n.title)}</strong>
+              <span style="font-size:10px; padding:2px 6px; background:var(--bg-surface-elevated); border-radius:4px; color:var(--text-muted);">${escapeHTML(n.type.toUpperCase())}</span>
+            </div>
+            <div style="display:flex; gap: 24px; font-size:12px; color:var(--text-muted);">
+              <div><strong>Start:</strong> ${escapeHTML(n.startDate || 'Unscheduled')}</div>
+              <div><strong>Est. Hours:</strong> ${escapeHTML(n.estHours || '0')}</div>
+              <div><strong>Assignee:</strong> ${escapeHTML(n.assignee || 'Unassigned')}</div>
+            </div>
+          `;
+          tc.appendChild(card);
+        });
       }
 
       function autoTidyNodes() {
-         const t = getTree(); if(!t) return;
-         const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0]; if(!root) return;
-         const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
-         t.nodes.forEach(n => { if(n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
-         
-         const hSpacing = 220; const vSpacing = 160;
-         function layout(nodeId, depth, xOffset) {
-            const node = getNode(nodeId); if(!node) return 0;
-            node.y = root.y + (depth * vSpacing);
-            const kids = childrenMap[nodeId];
-            if(kids.length === 0) { node.x = xOffset; return hSpacing; }
-            let currX = xOffset; let totalW = 0;
-            for(let k of kids) { const w = layout(k.id, depth+1, currX); currX += w; totalW += w; }
-            node.x = xOffset + (totalW / 2) - (hSpacing/2);
-            return totalW;
-         }
-         layout(root.id, 0, root.x - (hSpacing * childrenMap[root.id].length)/2);
-         saveData(); render();
+        const t = getTree();
+        if (!t) return;
+        const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0];
+        if (!root) return;
+        const childrenMap = {};
+        t.nodes.forEach(n => childrenMap[n.id] = []);
+        t.nodes.forEach(n => {
+          if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n);
+        });
+        
+        const hSpacing = 220;
+        const vSpacing = 160;
+        function layout(nodeId, depth, xOffset) {
+          const node = getNode(nodeId);
+          if (!node) return 0;
+          node.y = root.y + (depth * vSpacing);
+          const kids = childrenMap[nodeId];
+          if (kids.length === 0) {
+            node.x = xOffset;
+            return hSpacing;
+          }
+          let currX = xOffset;
+          let totalW = 0;
+          for (let k of kids) {
+            const w = layout(k.id, depth + 1, currX);
+            currX += w;
+            totalW += w;
+          }
+          node.x = xOffset + (totalW / 2) - (hSpacing / 2);
+          return totalW;
+        }
+        layout(root.id, 0, root.x - (hSpacing * childrenMap[root.id].length) / 2);
+        saveData();
+        render();
       }
 
       function setupInputHandlers() {
@@ -736,45 +1165,70 @@
         window.addEventListener('pointerdown', (e) => {
           activePointers.set(e.pointerId, e);
           if (activePointers.size >= 2) {
-             const pts = Array.from(activePointers.values());
-             const p1Pip = pts[0].target === pipCanvas || pipCanvas.contains(pts[0].target);
-             const p2Pip = pts[1].target === pipCanvas || pipCanvas.contains(pts[1].target);
-             
-             if(p1Pip && p2Pip) { pipPinching = true; } 
-             else {
-                isPinching = true; viewportDragging = false;
-                document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none';
-             }
+            const pts = Array.from(activePointers.values());
+            const p1Pip = pts[0].target === pipCanvas || pipCanvas.contains(pts[0].target);
+            const p2Pip = pts[1].target === pipCanvas || pipCanvas.contains(pts[1].target);
+            
+            if (p1Pip && p2Pip) { pipPinching = true; } 
+            else {
+              isPinching = true;
+              viewportDragging = false;
+              document.getElementById('tree-layer').style.pointerEvents = 'none';
+              document.getElementById('forest-layer').style.pointerEvents = 'none';
+            }
           }
         }, { capture: true }); 
 
         viewport.addEventListener('pointerdown', (e) => {
           if (activePointers.size === 1 && !isPinching && !pipPinching) {
-            if(acornTargetMode) { acornTargetMode = false; document.getElementById('overlay-acorn-target').style.display='none'; return; }
-            viewportDragging = true; panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY;
+            if (acornTargetMode) {
+              acornTargetMode = false;
+              document.getElementById('overlay-acorn-target').style.display = 'none';
+              return;
+            }
+            viewportDragging = true;
+            panStartCX = e.clientX;
+            panStartCY = e.clientY;
+            initPanX = state.panX;
+            initPanY = state.panY;
           }
         });
 
         window.addEventListener('pointermove', (e) => {
-          if (!activePointers.has(e.pointerId)) return; activePointers.set(e.pointerId, e);
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, e);
           if (activePointers.size >= 2) {
             const pts = Array.from(activePointers.values());
             const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
             
-            if(pipPinching) {
-               if(prevPipPinchDist) { const ratio = dist / prevPipPinchDist; state.pipScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 0.5); renderMinimap(); }
-               prevPipPinchDist = dist;
+            if (pipPinching) {
+              if (prevPipPinchDist) {
+                const ratio = dist / prevPipPinchDist;
+                state.pipScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 0.5);
+                renderMinimap();
+              }
+              prevPipPinchDist = dist;
             } else {
-               isPinching = true; const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
-               if (prevPinchDist && prevCx !== null) {
-                 const ratio = dist / prevPinchDist; const newScale = Math.min(Math.max(state.scale * ratio, 0.1), 5.0);
-                 state.panX += (cx - prevCx); state.panY += (cy - prevCy); state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
-                 state.scale = newScale; updateWorldTransform();
-               }
-               prevPinchDist = dist; prevCx = cx; prevCy = cy;
+              isPinching = true;
+              const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
+              if (prevPinchDist && prevCx !== null) {
+                const ratio = dist / prevPinchDist;
+                const newScale = Math.min(Math.max(state.scale * ratio, 0.1), 5.0);
+                state.panX += (cx - prevCx);
+                state.panY += (cy - prevCy);
+                state.panX = cx - (cx - state.panX) * (newScale / state.scale);
+                state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+                state.scale = newScale;
+                updateWorldTransform();
+              }
+              prevPinchDist = dist;
+              prevCx = cx;
+              prevCy = cy;
             }
           } else if (activePointers.size === 1 && viewportDragging && !isPinching && !pipPinching) {
-            state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
+            state.panX = initPanX + (e.clientX - panStartCX);
+            state.panY = initPanY + (e.clientY - panStartCY);
+            updateWorldTransform();
           }
         });
 
@@ -782,80 +1236,146 @@
           activePointers.delete(e.pointerId);
           if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; prevPipPinchDist = null; }
           if (activePointers.size === 0) {
-            viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; 
+            viewportDragging = false;
+            document.getElementById('tree-layer').style.pointerEvents = 'auto';
+            document.getElementById('forest-layer').style.pointerEvents = 'auto'; 
             setTimeout(() => { isPinching = false; pipPinching = false; }, 100);
           } else if (activePointers.size === 1) {
-             const p = Array.from(activePointers.values())[0]; panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; viewportDragging = !pipPinching; 
+            const p = Array.from(activePointers.values())[0];
+            panStartCX = p.clientX;
+            panStartCY = p.clientY;
+            initPanX = state.panX;
+            initPanY = state.panY;
+            viewportDragging = !pipPinching; 
           }
         };
-        window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
-        viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
+        window.addEventListener('pointerup', endPointer);
+        window.addEventListener('pointercancel', endPointer);
+        viewport.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const zoom = e.deltaY < 0 ? 1.08 : 0.92;
+          state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0);
+          updateWorldTransform();
+        }, { passive: false });
 
         let pipDragging = false, pipHoldTimer = null;
         pipCanvas.addEventListener('pointerdown', (e) => { 
-           if(pipPinching) return;
-           pipDragging = true; e.stopPropagation(); 
-           pipHoldTimer = setTimeout(() => { state.pipScale = 0.1; state.pipPanX = 0; state.pipPanY = 0; const t = getTree() || getForest(); if(t) { centerOn(0,0); } pipDragging=false; renderMinimap(); }, 800);
+          if (pipPinching) return;
+          pipDragging = true;
+          e.stopPropagation(); 
+          pipHoldTimer = setTimeout(() => {
+            state.pipScale = 0.1;
+            state.pipPanX = 0;
+            state.pipPanY = 0;
+            const t = getTree() || getForest();
+            if (t) { centerOn(0, 0); }
+            pipDragging = false;
+            renderMinimap();
+          }, 800);
         }); 
-        window.addEventListener('pointermove', (e) => { if(pipDragging) { clearTimeout(pipHoldTimer); state.pipPanX += e.movementX; state.pipPanY += e.movementY; renderMinimap(); } }); 
+        window.addEventListener('pointermove', (e) => {
+          if (pipDragging) {
+            clearTimeout(pipHoldTimer);
+            state.pipPanX += e.movementX;
+            state.pipPanY += e.movementY;
+            renderMinimap();
+          }
+        }); 
         window.addEventListener('pointerup', (e) => { 
-            if(pipDragging) {
-               clearTimeout(pipHoldTimer); pipDragging = false;
-               if(e.movementX === 0 && e.movementY === 0) {
-                   const rect = pipCanvas.getBoundingClientRect(); const pipX = e.clientX - rect.left; const pipY = e.clientY - rect.top; 
-                   const scale = state.pipScale, offsetX = 70 + state.pipPanX, offsetY = 70 + state.pipPanY; 
-                   const worldX = (pipX - offsetX) / scale; const worldY = (pipY - offsetY) / scale;
-                   state.panX = (window.innerWidth / 2) - (worldX * state.scale); state.panY = (window.innerHeight / 2) - (worldY * state.scale); updateWorldTransform();
-               }
+          if (pipDragging) {
+            clearTimeout(pipHoldTimer);
+            pipDragging = false;
+            if (e.movementX === 0 && e.movementY === 0) {
+              const rect = pipCanvas.getBoundingClientRect();
+              const pipX = e.clientX - rect.left;
+              const pipY = e.clientY - rect.top; 
+              const scale = state.pipScale, offsetX = 70 + state.pipPanX, offsetY = 70 + state.pipPanY; 
+              const worldX = (pipX - offsetX) / scale;
+              const worldY = (pipY - offsetY) / scale;
+              state.panX = (window.innerWidth / 2) - (worldX * state.scale);
+              state.panY = (window.innerHeight / 2) - (worldY * state.scale);
+              updateWorldTransform();
             }
+          }
         });
         
-        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; checkTut(18); render(); });
-        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { 
-            state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; 
-            if(tutStep === 10) setTutStep(11); 
-            else if(tutStep === 11) setTutStep(12); 
-            render(); 
+        document.getElementById('btn-switch-context').addEventListener('click', () => {
+          state.viewMode = 'forest';
+          checkTut(18);
+          render();
         });
-        document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
+        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { 
+          state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; 
+          if (tutStep === 10) checkTut(10); 
+          else if (tutStep === 11) checkTut(11); 
+          render(); 
+        });
+        document.getElementById('btn-lock').addEventListener('click', () => {
+          state.isLocked = !state.isLocked;
+          render();
+        });
         document.getElementById('btn-critical-path').addEventListener('click', () => { 
-            state.showCriticalPath = !state.showCriticalPath; 
-            checkTut(12); 
-            render(); 
+          state.showCriticalPath = !state.showCriticalPath; 
+          checkTut(12); 
+          render(); 
         });
         
         const btnGrow = document.getElementById('btn-grow');
         btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
         btnGrow.addEventListener('click', (e) => { 
-            e.stopPropagation(); 
-            if(state.viewMode === 'forest' && tutStep === 0) { checkTut(0); }
-            else if(state.viewMode === 'tree' && tutStep === 4) { checkTut(4); }
-            const dd = document.getElementById('grow-dropdown'); const isVis = dd.style.display === 'flex'; closeAllDropdowns(); if (!isVis) dd.style.display = 'flex'; 
+          e.stopPropagation(); 
+          const dd = document.getElementById('grow-dropdown');
+          const isVis = dd.style.display === 'flex';
+          closeAllDropdowns();
+          if (!isVis) {
+            dd.style.display = 'flex';
+            if (state.viewMode === 'forest' && tutStep === 0) { checkTut(0); }
+            else if (state.viewMode === 'tree' && tutStep === 4) { checkTut(4); }
+          }
         });
 
         document.querySelectorAll('.btn-grow-opt').forEach(b => {
           b.addEventListener('click', (e) => {
-            e.stopPropagation(); const type = e.target.getAttribute('data-type');
+            e.stopPropagation();
+            const type = e.currentTarget.getAttribute('data-type');
             if (state.viewMode === 'tree') {
               const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
               
-              if(tree.type === 'Oak' && type === 'fruit') {
-                 acornTargetMode = true; document.getElementById('overlay-acorn-target').style.display = 'flex';
-                 document.getElementById('grow-dropdown').style.display = 'none'; return;
+              if (tree.type === 'Oak' && type === 'fruit') {
+                acornTargetMode = true;
+                document.getElementById('overlay-acorn-target').style.display = 'flex';
+                document.getElementById('grow-dropdown').style.display = 'none';
+                return;
               }
 
               const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
-              if(tree.type === 'Pine' && type === 'fruit') { node.title = "New Task"; node.harvested = false; }
-              tree.nodes.push(node); state.selectedId = node.id;
+              if (tree.type === 'Pine' && type === 'fruit') { node.title = "New Task"; node.harvested = false; }
+              tree.nodes.push(node);
+              state.selectedId = node.id;
               
-              if(type === 'branch') checkTut(5); 
-              document.getElementById('grow-dropdown').style.display = 'none'; render(); setTimeout(() => openInspector(node), 150);
+              document.getElementById('grow-dropdown').style.display = 'none';
+              render();
+              openInspector(node);
+              if (type === 'branch') checkTut(5); 
             } else {
               if (type === 'tree') {
-                const forest = getForest(), newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 180 + (forest.trees.length * 140), y: 100, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 60, pinned: false }] };
-                forest.trees.push(newTree); state.selectedId = newTree.id; checkTut(1);
-                document.getElementById('grow-dropdown').style.display = 'none'; render();
-                setTimeout(() => openTreeInspector(newTree), 150);
+                const forest = getForest();
+                const newTree = {
+                  id: 't_' + Date.now(),
+                  title: 'New Tree',
+                  type: 'Pine',
+                  season: 'Spring',
+                  pinned: false,
+                  x: 160 + (forest.trees.length * 150),
+                  y: 160,
+                  nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 120, pinned: false }]
+                };
+                forest.trees.push(newTree);
+                state.selectedId = newTree.id;
+                document.getElementById('grow-dropdown').style.display = 'none';
+                render();
+                openTreeInspector(newTree);
+                checkTut(1);
               } else if (type === 'forest') {
                 document.getElementById('input-new-forest').value = 'New Forest';
                 document.getElementById('grow-dropdown').style.display = 'none';
@@ -865,14 +1385,24 @@
           });
         });
 
-        document.getElementById('btn-auto-tidy').addEventListener('click', () => { autoTidyNodes(); document.getElementById('drawer-left').classList.remove('open'); });
+        document.getElementById('btn-auto-tidy').addEventListener('click', () => {
+          autoTidyNodes();
+          document.getElementById('drawer-left').classList.remove('open');
+        });
 
-        window.addEventListener('pointerdown', closeAllDropdowns);
+        window.addEventListener('pointerdown', (e) => {
+          if (tutStep === 1 || tutStep === 5) return;
+          closeAllDropdowns();
+        });
 
         const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
         document.getElementById('btn-toggle-directory').addEventListener('click', () => { dl.classList.toggle('open'); dr.classList.remove('open'); }); 
         document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
-        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { checkTut(16); dr.classList.toggle('open'); dl.classList.remove('open'); }); 
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => {
+          dr.classList.toggle('open');
+          dl.classList.remove('open');
+          if (dr.classList.contains('open')) checkTut(16);
+        }); 
         document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
         
         document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); 
@@ -881,126 +1411,262 @@
         
         document.getElementById('btn-close-new-forest').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-new-forest').classList.remove('open'); });
         document.getElementById('btn-forest-save').addEventListener('click', (e) => {
-            e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
-            const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
-            state.forests.push(newF); document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render(); showAppAlert('Forest saved to your Nursery!');
+          e.preventDefault();
+          const title = document.getElementById('input-new-forest').value || 'New Forest';
+          const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
+          state.forests.push(newF);
+          document.getElementById('modal-new-forest').classList.remove('open');
+          saveData();
+          render();
+          showAppAlert('Forest saved to your Nursery!');
         });
         document.getElementById('btn-forest-open').addEventListener('click', (e) => {
-            e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
-            const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
-            state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = null; state.viewMode = 'forest';
-            document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render();
+          e.preventDefault();
+          const title = document.getElementById('input-new-forest').value || 'New Forest';
+          const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
+          state.forests.push(newF);
+          state.activeForestId = newF.id;
+          state.activeTreeId = null;
+          state.viewMode = 'forest';
+          document.getElementById('modal-new-forest').classList.remove('open');
+          saveData();
+          render();
         });
         
-        document.getElementById('btn-season').addEventListener('click', () => { checkTut(13); openSeasonModal(); }); 
-        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); checkTut(14); render(); });
-        document.getElementById('btn-action-prune').addEventListener('click', () => { const t = getTree(); if(!t) return; const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean)); t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0)); document.getElementById('modal-season').classList.remove('open'); render(); });
+        document.getElementById('btn-season').addEventListener('click', () => {
+          openSeasonModal();
+          checkTut(13);
+        }); 
+        document.getElementById('btn-season-done').addEventListener('click', () => {
+          document.getElementById('modal-season').classList.remove('open');
+          checkTut(14);
+          render();
+        });
+        document.getElementById('btn-action-prune').addEventListener('click', () => {
+          const t = getTree();
+          if (!t) return;
+          const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean));
+          t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0));
+          document.getElementById('modal-season').classList.remove('open');
+          render();
+        });
         
-        document.getElementById('btn-inspect-basket').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); document.getElementById('modal-basket').classList.add('open'); });
-        document.getElementById('btn-close-basket').addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); });
+        document.getElementById('btn-inspect-basket').addEventListener('click', () => {
+          document.getElementById('modal-season').classList.remove('open');
+          document.getElementById('modal-basket').classList.add('open');
+        });
+        document.getElementById('btn-close-basket').addEventListener('click', () => {
+          document.getElementById('modal-basket').classList.remove('open');
+        });
 
-        document.getElementById('btn-harvest-main').addEventListener('click', () => { checkTut(15); const t = getTree(); if(!t) return; let count=0; t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested) { n.harvested = true; count++; } }); if(t.type === 'Pine') { t.nodes.forEach(n => { if(n.type === 'fruit') n.harvested = false; }); showAppAlert('Pine Cone Checklist Reset!'); } else { showAppAlert(`Harvested ${count} goals!`); } saveData(); render(); });
+        document.getElementById('btn-harvest-main').addEventListener('click', () => {
+          checkTut(15);
+          const t = getTree();
+          if (!t) return;
+          let count = 0;
+          t.nodes.forEach(n => {
+            if (n.type === 'fruit' && !n.harvested) {
+              n.harvested = true;
+              count++;
+            }
+          });
+          if (t.type === 'Pine') {
+            t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = false; });
+            showAppAlert('Pine Cone Checklist Reset!');
+          } else {
+            showAppAlert(`Harvested ${count} goals!`);
+          }
+          saveData();
+          render();
+        });
         
-        document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); }); document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); }); document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
-        document.getElementById('btn-connect-org').addEventListener('click', () => { const code = document.getElementById('input-org-code').value.trim(); if(code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); showAppAlert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); } });
-        document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); }); document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
-        document.getElementById('btn-auth-org').addEventListener('click', () => { const pass = document.getElementById('input-org-pass').value; if(pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if(pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } else { showAppAlert("Password required to broadcast to Org."); } });
+        document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); });
+        document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-connect-org').addEventListener('click', () => {
+          const code = document.getElementById('input-org-code').value.trim();
+          if (code) {
+            currentOrgCode = code;
+            document.getElementById('sync-status').style.display = 'block';
+            document.getElementById('sync-org-name').innerText = code;
+            document.getElementById('modal-sync-org').classList.remove('open');
+            showAppAlert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`);
+          }
+        });
+        document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-auth-org').addEventListener('click', () => {
+          const pass = document.getElementById('input-org-pass').value;
+          if (pass.length > 0) {
+            document.getElementById('modal-sync-auth').classList.remove('open');
+            if (pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; }
+          } else {
+            showAppAlert("Password required to broadcast to Org.");
+          }
+        });
         
         document.getElementById('btn-export-backup').addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "sylva_backup.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            document.getElementById('drawer-right').classList.remove('open');
-            checkTut(17);
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+          const downloadAnchorNode = document.createElement('a');
+          downloadAnchorNode.setAttribute("href", dataStr);
+          downloadAnchorNode.setAttribute("download", "sylva_backup.json");
+          document.body.appendChild(downloadAnchorNode);
+          downloadAnchorNode.click();
+          downloadAnchorNode.remove();
+          document.getElementById('drawer-right').classList.remove('open');
+          checkTut(17);
         });
         
         document.getElementById('btn-import-backup').addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file'; input.accept = '.json';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.readAsText(file,'UTF-8');
-                reader.onload = readerEvent => {
-                    try {
-                        const content = readerEvent.target.result;
-                        state = JSON.parse(content);
-                        saveData(); render();
-                        showAppAlert('Backup imported successfully!');
-                    } catch(err) { showAppAlert('Invalid backup file.'); }
-                }
-            }
-            input.click();
-            document.getElementById('drawer-right').classList.remove('open');
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = '.json';
+          input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.readAsText(file, 'UTF-8');
+            reader.onload = readerEvent => {
+              try {
+                const content = readerEvent.target.result;
+                state = Object.assign(state, JSON.parse(content));
+                saveData();
+                render();
+                showAppAlert('Backup imported successfully!');
+              } catch(err) {
+                showAppAlert('Invalid backup file.');
+              }
+            };
+          };
+          input.click();
+          document.getElementById('drawer-right').classList.remove('open');
         });
 
-        document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); }); document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
-        document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
-        document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
-        document.getElementById('btn-close-hugger').addEventListener('click', () => { document.getElementById('modal-tree-hugger').classList.remove('open'); });
-        document.getElementById('btn-close-vip').addEventListener('click', () => { document.getElementById('modal-vip').classList.remove('open'); });
+        document.getElementById('btn-open-templates').addEventListener('click', () => {
+          document.getElementById('modal-templates').classList.add('open');
+          document.getElementById('drawer-right').classList.remove('open');
+        });
+        document.getElementById('btn-close-templates').addEventListener('click', () => {
+          document.getElementById('modal-templates').classList.remove('open');
+        });
+        document.getElementById('btn-enterprise-contact').addEventListener('click', () => {
+          window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry';
+        });
+        document.getElementById('btn-tree-hugger').addEventListener('click', () => {
+          document.getElementById('drawer-right').classList.remove('open');
+          document.getElementById('modal-tree-hugger').classList.add('open');
+        });
+        document.getElementById('btn-close-hugger').addEventListener('click', () => {
+          document.getElementById('modal-tree-hugger').classList.remove('open');
+        });
+        document.getElementById('btn-close-vip').addEventListener('click', () => {
+          document.getElementById('modal-vip').classList.remove('open');
+        });
         document.getElementById('btn-submit-vip').addEventListener('click', () => { 
-            const code = document.getElementById('input-vip-code').value.trim();
-            if(code === 'SYLVA-VIP-2026') {
-                localStorage.setItem('sylva_is_vip', 'true');
-                document.getElementById('modal-vip').classList.remove('open');
-                showAppAlert('VIP Access Granted! All premium templates are now unlocked forever.');
-                // Rebuild the library to show unlocked state
-                document.getElementById('list-templates').innerHTML = '';
-                buildTemplateLibrary();
-            } else {
-                showAppAlert('Invalid VIP Code.');
-            }
+          const code = document.getElementById('input-vip-code').value.trim();
+          if (code === 'SYLVA-VIP-2026') {
+            localStorage.setItem('sylva_is_vip', 'true');
+            document.getElementById('modal-vip').classList.remove('open');
+            showAppAlert('VIP Access Granted! All premium templates are now unlocked forever.');
+            document.getElementById('list-templates').innerHTML = '';
+            buildTemplateLibrary();
+          } else {
+            showAppAlert('Invalid VIP Code.');
+          }
         });
 
-        document.getElementById('btn-pay-stripe').addEventListener('click', () => { window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
-        document.getElementById('btn-pay-paypal').addEventListener('click', () => { window.open('YOUR_PAYPAL_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
+        document.getElementById('btn-pay-stripe').addEventListener('click', () => {
+          window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank');
+          document.getElementById('modal-tree-hugger').classList.remove('open');
+        });
+        document.getElementById('btn-pay-paypal').addEventListener('click', () => {
+          window.open('YOUR_PAYPAL_PAYMENT_LINK', '_blank');
+          document.getElementById('modal-tree-hugger').classList.remove('open');
+        });
 
+        // Reposition tutorial arrow from input field to Save button once user types
+        document.getElementById('tree-input-title').addEventListener('input', () => {
+          if (tutStep === 2) positionTutorialElements();
+        });
+        document.getElementById('node-input-title').addEventListener('input', () => {
+          if (tutStep === 6) positionTutorialElements();
+        });
       }
 
       function setupCustomDropdowns() {
-        const configs = [ { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' }, { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' }, { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' } ];
+        const configs = [
+          { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' },
+          { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' },
+          { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' }
+        ];
         configs.forEach(cfg => {
           const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
           trig.addEventListener('pointerdown', (e) => e.stopPropagation()); 
           trig.addEventListener('click', (e) => { 
-              e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; 
+            e.stopPropagation();
+            const isVis = drop.style.display === 'flex';
+            closeAllDropdowns();
+            if (!isVis) drop.style.display = 'flex'; 
           });
-          drop.querySelectorAll('.custom-opt').forEach(btn => { btn.addEventListener('click', (e) => { e.stopPropagation(); inp.value = btn.getAttribute('data-val'); trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none'; if(cfg.inp === 'select-tree-season') { const t = getTree(); if(t){ t.season = inp.value; saveData(); render(); } } }); });
+          drop.querySelectorAll('.custom-opt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              inp.value = btn.getAttribute('data-val');
+              trig.querySelector('span').innerText = btn.innerText;
+              drop.style.display = 'none';
+              if (cfg.inp === 'select-tree-season') {
+                const t = getTree();
+                if (t) { t.season = inp.value; saveData(); render(); }
+              }
+            });
+          });
         });
-        document.querySelectorAll('.custom-dropdown').forEach(dd => { dd.addEventListener('pointerdown', (e) => e.stopPropagation()); });
+        document.querySelectorAll('.custom-dropdown').forEach(dd => {
+          dd.addEventListener('pointerdown', (e) => e.stopPropagation());
+        });
         
         let advOpen = false;
         document.getElementById('btn-toggle-advanced').addEventListener('click', (e) => {
-            e.preventDefault(); advOpen = !advOpen; 
-            document.getElementById('advanced-metadata-panel').style.display = advOpen ? 'flex' : 'none';
-            document.getElementById('adv-arrow').innerText = advOpen ? '▴' : '▾';
+          e.preventDefault();
+          advOpen = !advOpen; 
+          document.getElementById('advanced-metadata-panel').style.display = advOpen ? 'flex' : 'none';
+          document.getElementById('adv-arrow').innerText = advOpen ? '▴' : '▾';
         });
       }
-      function closeAllDropdowns() { document.getElementById('grow-dropdown').style.display = 'none'; document.getElementById('node-type-dropdown').style.display = 'none'; document.getElementById('tree-type-dropdown').style.display = 'none'; document.getElementById('season-dropdown').style.display = 'none'; }
+
+      function closeAllDropdowns() {
+        document.getElementById('grow-dropdown').style.display = 'none';
+        document.getElementById('node-type-dropdown').style.display = 'none';
+        document.getElementById('tree-type-dropdown').style.display = 'none';
+        document.getElementById('season-dropdown').style.display = 'none';
+      }
+
+      function getTemplateSpecies(title) {
+        if (title === "Beginner Guitar Mastery" || title === "Beginner Vocal Training") return "Apple";
+        if (title === "Music Theory Fundamentals") return "Oak";
+        return "Pine";
+      }
 
       function generateTemplateNodes(title, startX, startY) {
-        const nodes = []; const generateId = () => 'n_' + Math.random().toString(36).substring(2, 9); const trunkId = generateId();
-        if (title === "Sepsis Protocol") {
-           const b1 = generateId(), b2 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId(), f2 = generateId();
-           nodes.push({ id: trunkId, title: "Sepsis Alert", desc: "Emergency Protocol", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
-           nodes.push({ id: b1, title: "Clinical Indicators", desc: "", type: "branch", parentId: trunkId, x: startX - 150, y: startY + 160, pinned: false });
-           nodes.push({ id: l1, title: "Temp > 101.0F", desc: "", type: "leaf", parentId: b1, x: startX - 250, y: startY + 300, pinned: false });
-           nodes.push({ id: l2, title: "Lactic Acid > 2.0", desc: "", type: "leaf", parentId: b1, x: startX - 50, y: startY + 300, pinned: false });
-           nodes.push({ id: b2, title: "Interventions", desc: "", type: "branch", parentId: trunkId, x: startX + 150, y: startY + 160, pinned: false });
-           nodes.push({ id: f1, title: "Blood Cultures Drawn", desc: "", type: "fruit", parentId: b2, x: startX + 50, y: startY + 300, pinned: false });
-           nodes.push({ id: f2, title: "IV Antibiotics Started", desc: "", type: "fruit", parentId: b2, x: startX + 250, y: startY + 300, pinned: false });
+        const nodes = [];
+        const generateId = () => 'n_' + Math.random().toString(36).substring(2, 9);
+        const trunkId = generateId();
+        if (title === "Clinical Sepsis Protocol" || title === "Sepsis Protocol") {
+          const b1 = generateId(), b2 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId(), f2 = generateId();
+          nodes.push({ id: trunkId, title: "Sepsis Alert", desc: "Emergency Protocol", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+          nodes.push({ id: b1, title: "Clinical Indicators", desc: "", type: "branch", parentId: trunkId, x: startX - 150, y: startY + 160, pinned: false });
+          nodes.push({ id: l1, title: "Temp > 101.0F", desc: "", type: "leaf", parentId: b1, x: startX - 250, y: startY + 300, pinned: false });
+          nodes.push({ id: l2, title: "Lactic Acid > 2.0", desc: "", type: "leaf", parentId: b1, x: startX - 50, y: startY + 300, pinned: false });
+          nodes.push({ id: b2, title: "Interventions", desc: "", type: "branch", parentId: trunkId, x: startX + 150, y: startY + 160, pinned: false });
+          nodes.push({ id: f1, title: "Blood Cultures Drawn", desc: "", type: "fruit", parentId: b2, x: startX + 50, y: startY + 300, pinned: false, harvested: false });
+          nodes.push({ id: f2, title: "IV Antibiotics Started", desc: "", type: "fruit", parentId: b2, x: startX + 250, y: startY + 300, pinned: false, harvested: false });
         } else {
-           const b1 = generateId(), b2 = generateId(), l1 = generateId(), f1 = generateId();
-           nodes.push({ id: trunkId, title: title, desc: "Auto-generated structure", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
-           nodes.push({ id: b1, title: "Phase 1", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
-           nodes.push({ id: l1, title: "Details", desc: "", type: "leaf", parentId: b1, x: startX - 120, y: startY + 300, pinned: false });
-           nodes.push({ id: b2, title: "Phase 2", desc: "", type: "branch", parentId: trunkId, x: startX + 120, y: startY + 160, pinned: false });
-           nodes.push({ id: f1, title: "Goal", desc: "", type: "fruit", parentId: b2, x: startX + 120, y: startY + 300, pinned: false });
+          const b1 = generateId(), b2 = generateId(), l1 = generateId(), f1 = generateId();
+          nodes.push({ id: trunkId, title: title, desc: "Auto-generated structure", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+          nodes.push({ id: b1, title: "Phase 1", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
+          nodes.push({ id: l1, title: "Details", desc: "", type: "leaf", parentId: b1, x: startX - 120, y: startY + 300, pinned: false });
+          nodes.push({ id: b2, title: "Phase 2", desc: "", type: "branch", parentId: trunkId, x: startX + 120, y: startY + 160, pinned: false });
+          nodes.push({ id: f1, title: "Milestone Deliverable", desc: "", type: "fruit", parentId: b2, x: startX + 120, y: startY + 300, pinned: false, harvested: false });
         }
         return nodes;
       }
@@ -1008,148 +1674,135 @@
       let pendingTemplateTitle = "";
       function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
+        list.innerHTML = '';
         const cats = {
           "Software & Product Development": [
-             "Software Launch Roadmap", 
-             "Technical Debt Backlog", 
-             "Bug Triage & Post-Mortem", 
-             "Design System Architecture", 
-             "API Integration Audit"
+            "Software Launch Roadmap", "Technical Debt Backlog", "Bug Triage & Post-Mortem", "Design System Architecture", "API Integration Audit"
           ],
           "Business, Strategy & Operations": [
-             "Startup Pitch & Fundraising", 
-             "Quarterly OKR Planning", 
-             "Competitor Landscape Matrix", 
-             "Client Onboarding Journey", 
-             "Freelance Agency Operations"
+            "Startup Pitch & Fundraising", "Quarterly OKR Planning", "Competitor Landscape Matrix", "Client Onboarding Journey", "Freelance Agency Operations"
           ],
           "Writing, Content & Media": [
-             "Novel Story Architecture", 
-             "Multi-Channel Content Calendar", 
-             "Video & Podcast Pipeline", 
-             "SEO Pillar & Topic Map", 
-             "Product Documentation KB"
+            "Novel Story Architecture", "Multi-Channel Content Calendar", "Video & Podcast Pipeline", "SEO Pillar & Topic Map", "Product Documentation KB"
           ],
           "Gaming & Worldbuilding": [
-             "D&D Campaign Builder", 
-             "Video Game Level Design", 
-             "Tabletop Balance Matrix", 
-             "Fantasy Geography System", 
-             "Character Backstory Matrix"
+            "D&D Campaign Builder", "Video Game Level Design", "Tabletop Balance Matrix", "Fantasy Geography System", "Character Backstory Matrix"
           ],
           "Specialized Life Events": [
-             "Clinical Sepsis Protocol", 
-             "Major Event Timeline", 
-             "Wedding Planning Master", 
-             "Home Relocation Logistics", 
-             "Academic Thesis Tracker"
+            "Clinical Sepsis Protocol", "Major Event Timeline", "Wedding Planning Master", "Home Relocation Logistics", "Academic Thesis Tracker"
           ],
           "Architecture & PM": [
-             "BIM Execution Plan",
-             "LEED Certification Tracker",
-             "Enterprise Risk Matrix"
+            "BIM Execution Plan", "LEED Certification Tracker", "Enterprise Risk Matrix"
           ],
           "Education & Business": [
-             "IEP Compliance Tracker",
-             "Master Curriculum Map",
-             "M&A Due Diligence",
-             "Supply Chain Resiliency"
+            "IEP Compliance Tracker", "Master Curriculum Map", "M&A Due Diligence", "Supply Chain Resiliency"
           ],
           "Agriculture & Academia": [
-             "Precision Ag Yield Plan",
-             "Federal Grant Pipeline",
-             "Lab Protocol Matrix"
+            "Precision Ag Yield Plan", "Federal Grant Pipeline", "Lab Protocol Matrix"
           ],
           "Large-Scale Agriculture": [
-             "Farm-to-Packinghouse Pipeline",
-             "Cellar & Cold Storage QA",
-             "Irrigation & Pivot Schedule",
-             "Agronomy & Chemical Input Log",
-             "Equipment Maintenance Tracker",
-             "Breakdown Triage & Parts",
-             "Seasonal Labor & Visa Workflow"
+            "Farm-to-Packinghouse Pipeline", "Cellar & Cold Storage QA", "Irrigation & Pivot Schedule", "Agronomy & Chemical Input Log", "Equipment Maintenance Tracker", "Breakdown Triage & Parts", "Seasonal Labor & Visa Workflow"
           ],
           "Music & Audio Production": [
-             "Beginner Guitar Mastery",
-             "Beginner Vocal Training",
-             "Album Release Strategy",
-             "Music Theory Fundamentals",
-             "Live Gig & Tour Logistics",
-             "Songwriting & Composition",
-             "Mixing & Mastering Workflow",
-             "Band Operations & Rehearsal"
+            "Beginner Guitar Mastery", "Beginner Vocal Training", "Album Release Strategy", "Music Theory Fundamentals", "Live Gig & Tour Logistics", "Songwriting & Composition", "Mixing & Mastering Workflow", "Band Operations & Rehearsal"
           ]
         };
-        for(const [cat, templates] of Object.entries(cats)) {
-          const hdr = document.createElement('div'); hdr.style.padding = '8px 16px'; hdr.style.background = 'var(--bg-surface-elevated)'; hdr.style.color = 'var(--accent)'; hdr.style.fontSize = '11px'; hdr.style.fontWeight = 'bold'; hdr.innerText = cat.toUpperCase(); list.appendChild(hdr);
+
+        const isVip = localStorage.getItem('sylva_is_vip') === 'true';
+
+        for (const [cat, templates] of Object.entries(cats)) {
+          const hdr = document.createElement('div');
+          hdr.style.padding = '8px 16px';
+          hdr.style.background = 'var(--bg-surface-elevated)';
+          hdr.style.color = 'var(--accent)';
+          hdr.style.fontSize = '11px';
+          hdr.style.fontWeight = 'bold';
+          hdr.innerText = cat.toUpperCase();
+          list.appendChild(hdr);
+
           templates.forEach(t => {
-            const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
+            const li = document.createElement('li');
+            li.className = 'directory-item';
+            li.style.borderRadius = '0';
+            li.style.borderLeft = 'none';
+            li.style.borderRight = 'none';
             
-            // Check if user is already a VIP
-            const isVip = localStorage.getItem('sylva_is_vip') === 'true';
-            
-            // Premium vs Free Logic (All 25 of these launch templates are premium)
             const isPremium = true;
-            
-            if(isPremium && !isVip) {
-                li.innerHTML = `<span>${t} <span style="font-size:10px; color:#F59E0B;">(Premium)</span></span><button class="btn btn-small" style="border-color:#F59E0B; color:#F59E0B;">$0.25</button>`;
-                li.querySelector('button').addEventListener('click', () => {
-                    alert("This would open a Stripe link for $0.25.\n\nBut you can get this and ALL templates free forever by becoming a Tree Hugger for just $1!");
-                });
+            if (isPremium && !isVip) {
+              li.innerHTML = `<span>${escapeHTML(t)} <span style="font-size:10px; color:#F59E0B;">(Premium)</span></span><button class="btn btn-small" style="border-color:#F59E0B; color:#F59E0B;">$0.25</button>`;
+              li.querySelector('button').addEventListener('click', () => {
+                showAppAlert("Get this and ALL 50+ templates free forever by becoming a Tree Hugger for just $1, or enter your VIP code below!");
+              });
             } else {
-                li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
-                li.querySelector('button').addEventListener('click', () => {
-                   pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
-                   document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
-                });
+              li.innerHTML = `<span>${escapeHTML(t)}</span><button class="btn btn-small btn-accent">Load</button>`;
+              li.querySelector('button').addEventListener('click', () => {
+                pendingTemplateTitle = t;
+                document.getElementById('modal-templates').classList.remove('open');
+                document.getElementById('tpl-prompt-name').innerText = t;
+                document.getElementById('modal-template-prompt').classList.add('open');
+              });
             }
             list.appendChild(li);
           });
-          
-          // Add VIP Entry button at the bottom of the template list if not VIP
-          if(!localStorage.getItem('sylva_is_vip')) {
-             const vipBtn = document.createElement('div');
-             vipBtn.style.padding = '12px'; vipBtn.style.textAlign = 'center'; vipBtn.style.marginTop = 'auto';
-             vipBtn.innerHTML = `<button class="btn btn-small" id="btn-open-vip">I have a VIP Code</button>`;
-             list.appendChild(vipBtn);
-             
-             // Setup listener for the new dynamic button
-             setTimeout(() => {
-                 const vBtn = document.getElementById('btn-open-vip');
-                 if(vBtn) vBtn.addEventListener('click', () => {
-                     document.getElementById('modal-vip').classList.add('open');
-                 });
-             }, 100);
-          }
+        }
 
+        if (!isVip) {
+          const vipBtn = document.createElement('div');
+          vipBtn.style.padding = '14px';
+          vipBtn.style.textAlign = 'center';
+          vipBtn.innerHTML = `<button class="btn btn-small" id="btn-open-vip">I have a VIP Code</button>`;
+          list.appendChild(vipBtn);
+          const vBtn = vipBtn.querySelector('#btn-open-vip');
+          if (vBtn) {
+            vBtn.addEventListener('click', () => {
+              document.getElementById('modal-vip').classList.add('open');
+            });
+          }
         }
 
         document.getElementById('btn-close-template-prompt').onclick = () => document.getElementById('modal-template-prompt').classList.remove('open');
         document.getElementById('btn-tpl-current').onclick = () => {
-           const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 60);
-           const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: 'Pine', season: 'Spring', pinned: false, x: 180 + (getForest().trees.length * 140), y: 100, nodes: newNodes };
-           getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-template-prompt').classList.remove('open'); render(); saveData();
+          const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 120);
+          const species = getTemplateSpecies(pendingTemplateTitle);
+          const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160 + (getForest().trees.length * 150), y: 160, nodes: newNodes };
+          getForest().trees.push(newTree);
+          state.selectedId = newTree.id;
+          document.getElementById('modal-template-prompt').classList.remove('open');
+          render();
+          saveData();
         };
         document.getElementById('btn-tpl-new').onclick = () => {
-           const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 60);
-           const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: 'Pine', season: 'Spring', pinned: false, x: 180, y: 100, nodes: newNodes };
-           const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
-           state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = newTree.id; state.viewMode = 'tree';
-           document.getElementById('modal-template-prompt').classList.remove('open'); saveData(); render();
+          const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 120);
+          const species = getTemplateSpecies(pendingTemplateTitle);
+          const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160, y: 160, nodes: newNodes };
+          const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
+          state.forests.push(newF);
+          state.activeForestId = newF.id;
+          state.activeTreeId = newTree.id;
+          state.viewMode = 'tree';
+          document.getElementById('modal-template-prompt').classList.remove('open');
+          saveData();
+          render();
         };
       }
 
-      function centerOn(x, y) { state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform(); }
+      function centerOn(x, y) {
+        state.scale = 1.0;
+        state.panX = (window.innerWidth / 2) - x - 95;
+        state.panY = (window.innerHeight / 2) - y - 60;
+        updateWorldTransform();
+      }
 
       function openInspector(node) {
         setTimeout(() => { 
-          document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
+          document.getElementById('node-input-title').value = node.title;
+          document.getElementById('node-input-desc').value = node.desc || '';
           document.getElementById('node-input-type').value = node.type; 
           const typeOpt = document.querySelector(`#node-type-dropdown .custom-opt[data-val="${node.type}"]`);
           if (typeOpt) {
-              document.getElementById('node-type-trigger').querySelector('span').innerText = typeOpt.innerText;
+            document.getElementById('node-type-trigger').querySelector('span').innerText = typeOpt.innerText;
           } else if (node.type === 'trunk') {
-              document.getElementById('node-type-trigger').querySelector('span').innerText = 'Trunk (Root)';
+            document.getElementById('node-type-trigger').querySelector('span').innerText = 'Trunk (Root)';
           }
 
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
@@ -1161,156 +1814,347 @@
           const t = getTree();
           document.getElementById('willow-actions').style.display = (t.type === 'Willow' && node.type === 'branch') ? 'block' : 'none';
           document.getElementById('oak-actions').style.display = (t.type === 'Oak' && node.acornTarget) ? 'block' : 'none';
-          if(node.acornTarget) {
-             const tNode = getNode(node.acornTarget);
-             document.getElementById('btn-acorn-snap').style.display = 'inline-flex';
-             document.getElementById('acorn-no-target').style.display = 'none';
-             document.getElementById('acorn-target-name').innerText = tNode ? tNode.title : "Missing Node";
-             document.getElementById('btn-acorn-snap').onclick = () => { if(tNode) { centerOn(tNode.x, tNode.y); document.getElementById('modal-inspector').classList.remove('open'); setTimeout(()=> { state.selectedId = tNode.id; renderTreeSelections(); }, 150); } };
+          if (node.acornTarget) {
+            const tNode = getNode(node.acornTarget);
+            document.getElementById('btn-acorn-snap').style.display = 'inline-flex';
+            document.getElementById('acorn-no-target').style.display = 'none';
+            document.getElementById('acorn-target-name').innerText = tNode ? tNode.title : "Missing Node";
+            document.getElementById('btn-acorn-snap').onclick = () => {
+              if (tNode) {
+                centerOn(tNode.x, tNode.y);
+                document.getElementById('modal-inspector').classList.remove('open');
+                setTimeout(() => { state.selectedId = tNode.id; renderTreeSelections(); }, 150);
+              }
+            };
           }
           
           document.getElementById('btn-willow-lengthen').onclick = () => {
-             const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: node.x + (Math.random() * 40 - 20), y: node.y + 160, pinned: false };
-             t.nodes.push(newNode); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; saveData(); render(); openInspector(newNode);
+            const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: node.x + (Math.random() * 40 - 20), y: node.y + 160, pinned: false };
+            t.nodes.push(newNode);
+            node.title = document.getElementById('node-input-title').value;
+            node.desc = document.getElementById('node-input-desc').value;
+            if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
+            saveData();
+            render();
+            openInspector(newNode);
           };
 
-          if(t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = "Pine Cone (Checklist)"; }
-          else if(t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = "Acorn (Link)"; }
+          if (t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = "Pine Cone (Checklist)"; }
+          else if (t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = "Acorn (Link)"; }
           else { document.getElementById('opt-node-fruit').innerText = "Fruit (Task/Deliverable)"; }
 
           document.getElementById('btn-save-node').onclick = (e) => { 
-              e.preventDefault(); checkTut(6);
-              node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value; if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; 
-              node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
-              document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+            e.preventDefault();
+            node.title = document.getElementById('node-input-title').value.trim() || node.title;
+            node.desc = document.getElementById('node-input-desc').value;
+            if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; 
+            node.startDate = document.getElementById('node-input-start').value;
+            node.estHours = document.getElementById('node-input-hours').value;
+            node.assignee = document.getElementById('node-input-assignee').value;
+            document.getElementById('modal-inspector').classList.remove('open');
+            render();
+            saveData();
+            checkTut(6);
           };
-          const bD = document.getElementById('btn-delete-node'); bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex'; bD.onclick = (e) => { 
-              e.preventDefault(); 
-              const treeToEdit = getTree();
-              const idsToDelete = new Set([node.id]);
-              let added = true;
-              while(added) {
-                  added = false;
-                  treeToEdit.nodes.forEach(n => {
-                      if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) {
-                          idsToDelete.add(n.id);
-                          added = true;
-                      }
-                  });
-              }
-              treeToEdit.nodes = treeToEdit.nodes.filter(n => !idsToDelete.has(n.id)); 
-              document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+          const bD = document.getElementById('btn-delete-node');
+          bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex';
+          bD.onclick = (e) => { 
+            e.preventDefault(); 
+            const treeToEdit = getTree();
+            const idsToDelete = new Set([node.id]);
+            let added = true;
+            while (added) {
+              added = false;
+              treeToEdit.nodes.forEach(n => {
+                if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) {
+                  idsToDelete.add(n.id);
+                  added = true;
+                }
+              });
+            }
+            treeToEdit.nodes = treeToEdit.nodes.filter(n => !idsToDelete.has(n.id)); 
+            document.getElementById('modal-inspector').classList.remove('open');
+            render();
+            saveData(); 
           };
           document.getElementById('modal-inspector').classList.add('open');
-        }, 150);
+          if (tutStep === 6) positionTutorialElements();
+        }, 120);
       }
 
       function openTreeInspector(tree) {
         setTimeout(() => {
-          document.getElementById('tree-input-title').value = tree.title; document.getElementById('tree-input-type').value = tree.type || 'Pine';
-          document.getElementById('tree-type-trigger').querySelector('span').innerText = document.querySelector(`#tree-type-dropdown .custom-opt[data-val="${tree.type || 'Pine'}"]`).innerText;
-          document.getElementById('btn-save-tree').onclick = (e) => { e.preventDefault(); checkTut(2); tree.title = document.getElementById('tree-input-title').value; tree.type = document.getElementById('tree-input-type').value; document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
-          document.getElementById('btn-delete-tree').onclick = (e) => { e.preventDefault(); const f = getForest(); f.trees = f.trees.filter(t => t.id !== tree.id); document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData(); };
+          document.getElementById('tree-input-title').value = tree.title;
+          document.getElementById('tree-input-type').value = tree.type || 'Pine';
+          const speciesOpt = document.querySelector(`#tree-type-dropdown .custom-opt[data-val="${tree.type || 'Pine'}"]`);
+          if (speciesOpt) {
+            document.getElementById('tree-type-trigger').querySelector('span').innerText = speciesOpt.innerText;
+          }
+          document.getElementById('btn-save-tree').onclick = (e) => {
+            e.preventDefault();
+            tree.title = document.getElementById('tree-input-title').value.trim() || tree.title;
+            tree.type = document.getElementById('tree-input-type').value;
+            document.getElementById('modal-tree-inspector').classList.remove('open');
+            render();
+            saveData();
+            checkTut(2);
+          };
+          document.getElementById('btn-delete-tree').onclick = (e) => {
+            e.preventDefault();
+            const f = getForest();
+            f.trees = f.trees.filter(t => t.id !== tree.id);
+            document.getElementById('modal-tree-inspector').classList.remove('open');
+            render();
+            saveData();
+          };
           document.getElementById('modal-tree-inspector').classList.add('open');
-        }, 150);
+          if (tutStep === 2) positionTutorialElements();
+        }, 120);
       }
 
       function openSeasonModal() {
-        const t = getTree(); if(!t) return; document.getElementById('select-tree-season').value = t.season || 'Spring'; document.getElementById('season-trigger').querySelector('span').innerText = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`).innerText;
-        const list = document.getElementById('list-harvest'); list.innerHTML = ''; const fruits = t.nodes.filter(n => n.type === 'fruit' && n.harvested); document.getElementById('harvest-total').innerText = fruits.length;
-        fruits.forEach(f => { const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`; li.addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); openInspector(f); }); list.appendChild(li); });
+        const t = getTree();
+        if (!t) return;
+        document.getElementById('select-tree-season').value = t.season || 'Spring';
+        const sOpt = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`);
+        if (sOpt) {
+          document.getElementById('season-trigger').querySelector('span').innerText = sOpt.innerText;
+        }
+        const list = document.getElementById('list-harvest');
+        list.innerHTML = '';
+        const fruits = t.nodes.filter(n => n.type === 'fruit' && n.harvested);
+        document.getElementById('harvest-total').innerText = fruits.length;
+        fruits.forEach(f => {
+          const li = document.createElement('li');
+          li.className = 'directory-item';
+          li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`;
+          li.addEventListener('click', () => {
+            document.getElementById('modal-basket').classList.remove('open');
+            openInspector(f);
+          });
+          list.appendChild(li);
+        });
         document.getElementById('modal-season').classList.add('open');
+        if (tutStep === 14) setTimeout(positionTutorialElements, 60);
       }
 
-      // Cleaned up duplicate declarations
-      let tutStep = -1;
-
-      const TUT_STEPS = [
-        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", arr: {top: '45px', left: '50%', rot: 0} }, 
-        { msg: "Click '... a Tree' to plant your first project.", arr: {top: '70px', left: 'calc(50% + 20px)', rot: -90} }, 
-        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", hideOnModal: true }, 
-        { msg: "Great! Now Double-Click the tree you just made to open it.", arr: {top: '140px', left: '220px', rot: -90} }, 
-        { msg: "You're inside! Click 'Grow...' to start branching out.", arr: {top: '45px', left: '50%', rot: 0} }, 
-        { msg: "Select '... a Branch (Group)'. Branches act like folders.", arr: {top: '70px', left: 'calc(50% + 20px)', rot: -90} }, 
-        { msg: "Name your branch and click 'Save Changes'.", hideOnModal: true }, 
-        { msg: "Leaves act as your individual notes and documents.", showBtn: true }, 
-        { msg: "Fruits act as actionable goals or deliverables.", showBtn: true }, 
-        { msg: "Seeds act as links to other trees or references.", showBtn: true }, 
-        { msg: "Click 'Timeline' in the top left to see the Executive View.", arr: {top: '70px', left: '100px', rot: 0} }, 
-        { msg: "Here is your data formatted for stakeholders! Click 'Timeline' again to return.", arr: {top: '70px', left: '100px', rot: 0} }, 
-        { msg: "Click 'Critical Path' in the bottom right to highlight the longest task chain.", arr: {bottom: '75px', right: '140px', rot: 90} }, 
-        { msg: "Next, click 'Season' in the bottom right.", arr: {bottom: '25px', right: '140px', rot: 90} }, 
-        { msg: "Set the season, then click 'Done'.", hideOnModal: true }, 
-        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", arr: {bottom: '125px', right: '140px', rot: 90} }, 
-        { msg: "Click 'Nursery' to manage your saves.", arr: {top: '45px', right: '40px', rot: 0} }, 
-        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", arr: {top: '155px', right: '340px', rot: 90} }, 
-        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", arr: {top: '70px', left: '25px', rot: 0} }, 
-        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", showBtn: true } 
-      ];
-      
-      function initTutorial() { if (!localStorage.getItem('sylva_v13_onboarded')) setTutStep(0); }
-            const tutArrowEl = document.getElementById('standalone-arrow');
+      /* =========================================================================
+         DYNAMIC, NON-OVERLAPPING TUTORIAL & CURVED BEZIER ARROW ENGINE
+         ========================================================================= */
       const tutBox = document.getElementById('tutorial-tooltip');
       const tutText = document.getElementById('tut-text');
       const tutBtn = document.getElementById('tut-next');
-      
+      const tutArrowSvg = document.getElementById('standalone-arrow-svg');
+      const tutArrowPath = document.getElementById('standalone-arrow-path');
+      let tutStep = -1;
+      let tutTransitionTimer = null;
+
+      const TUT_STEPS = [
+        { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", target: () => document.getElementById('btn-grow'), prefer: 'bottom' },
+        { msg: "Click '... a Tree' to plant your first project.", target: () => document.getElementById('btn-grow-tree'), prefer: 'bottom' },
+        { msg: "Awesome! Name your tree and set its species, then click 'Save Changes'.", target: () => {
+            const inp = document.getElementById('tree-input-title');
+            const btn = document.getElementById('btn-save-tree');
+            return (inp && (inp.value.trim() === '' || inp.value === 'New Tree')) ? inp : btn;
+          }, modalCard: () => document.querySelector('#modal-tree-inspector .modal-card'), prefer: 'top' },
+        { msg: "Great! Now Long-Press (or Double-Click) the tree you just made to open it.", target: () => document.querySelector('#forest-layer .forest-tree-entity'), prefer: 'right' },
+        { msg: "You're inside! Click 'Grow...' to start branching out.", target: () => document.getElementById('btn-grow'), prefer: 'bottom' },
+        { msg: "Select '... a Branch (Group)'. Branches act like folders.", target: () => document.getElementById('btn-grow-branch'), prefer: 'bottom' },
+        { msg: "Name your branch and click 'Save Changes'.", target: () => {
+            const inp = document.getElementById('node-input-title');
+            const btn = document.getElementById('btn-save-node');
+            return (inp && (inp.value.trim() === '' || inp.value === 'New Node')) ? inp : btn;
+          }, modalCard: () => document.querySelector('#modal-inspector .modal-card'), prefer: 'top' },
+        { msg: "Leaves act as your individual notes and documents.", target: () => document.querySelector('#tree-layer .node-card.type-branch') || document.querySelector('#tree-layer .node-card'), prefer: 'right', showBtn: true },
+        { msg: "Fruits act as actionable goals or deliverables.", target: () => document.getElementById('btn-harvest-main'), prefer: 'left', showBtn: true },
+        { msg: "Seeds act as links to other trees or references.", target: () => document.getElementById('btn-grow'), prefer: 'bottom', showBtn: true },
+        { msg: "Click 'Timeline' in the top left to see the Executive View.", target: () => document.getElementById('btn-toggle-timeline'), prefer: 'bottom' },
+        { msg: "Here is your data formatted for stakeholders! Click 'Timeline' again to return.", target: () => document.getElementById('btn-toggle-timeline'), prefer: 'bottom' },
+        { msg: "Click 'Critical Path' in the bottom right to highlight the longest task chain.", target: () => document.getElementById('btn-critical-path'), prefer: 'left' },
+        { msg: "Next, click 'Season' in the bottom right.", target: () => document.getElementById('btn-season'), prefer: 'left' },
+        { msg: "Set the season, then click 'Done'.", target: () => document.getElementById('btn-season-done'), modalCard: () => document.querySelector('#modal-season .modal-card'), prefer: 'top' },
+        { msg: "Click the 'Harvest' button to collect completed Fruit goals.", target: () => document.getElementById('btn-harvest-main'), prefer: 'left' },
+        { msg: "Click 'Nursery' to manage your saves.", target: () => document.getElementById('btn-toggle-nursery'), prefer: 'bottom' },
+        { msg: "Click 'Export Backup (.json)' to save your entire forest offline.", target: () => document.getElementById('btn-export-backup'), prefer: 'left' },
+        { msg: "Click 'Up' in the breadcrumb bar to return to the Forest View.", target: () => document.getElementById('btn-switch-context'), prefer: 'bottom' },
+        { msg: "And you're back to where you started! Everything is connected at the root of your project. See! Think like a tree! Thank you for using Sylva!", target: () => document.querySelector('#forest-layer .forest-tree-entity'), prefer: 'bottom', showBtn: true }
+      ];
+
+      function rectsOverlap(r1, r2, pad) {
+        return !(
+          r1.right + pad < r2.left ||
+          r1.left - pad > r2.right ||
+          r1.bottom + pad < r2.top ||
+          r1.top - pad > r2.bottom
+        );
+      }
+
+      function getClosestPointOnRect(rect, px, py, margin) {
+        const left = rect.left - margin;
+        const right = rect.right + margin;
+        const top = rect.top - margin;
+        const bottom = rect.bottom + margin;
+        const cx = (left + right) / 2;
+        const cy = (top + bottom) / 2;
+        const dx = px - cx;
+        const dy = py - cy;
+        if (dx === 0 && dy === 0) return { x: cx, y: top };
+        const halfW = (right - left) / 2;
+        const halfH = (bottom - top) / 2;
+        const scaleX = Math.abs(dx) > 0.001 ? halfW / Math.abs(dx) : Infinity;
+        const scaleY = Math.abs(dy) > 0.001 ? halfH / Math.abs(dy) : Infinity;
+        const scale = Math.min(scaleX, scaleY);
+        return { x: cx + dx * scale, y: cy + dy * scale };
+      }
+
+      function positionTutorialElements() {
+        if (tutStep < 0 || tutStep >= TUT_STEPS.length) return;
+        const s = TUT_STEPS[tutStep];
+        const targetEl = s.target ? s.target() : null;
+
+        if (!targetEl) return;
+        const tRect = targetEl.getBoundingClientRect();
+        if (tRect.width === 0 && tRect.height === 0) return;
+
+        // Avoid covering open dropdown or modal card if applicable
+        const avoidRect = s.modalCard && s.modalCard() ? s.modalCard().getBoundingClientRect() : tRect;
+        const bRect = tutBox.getBoundingClientRect();
+        const bw = bRect.width || 250;
+        const bh = bRect.height || 100;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const gap = 72; // Minimum gap for the separate curved arrow
+
+        const candidates = [
+          { dir: 'bottom', left: tRect.left + tRect.width / 2 - bw / 2, top: avoidRect.bottom + gap },
+          { dir: 'top', left: tRect.left + tRect.width / 2 - bw / 2, top: avoidRect.top - bh - gap },
+          { dir: 'left', left: avoidRect.left - bw - gap, top: tRect.top + tRect.height / 2 - bh / 2 },
+          { dir: 'right', left: avoidRect.right + gap, top: tRect.top + tRect.height / 2 - bh / 2 },
+          { dir: 'bottom-left', left: 16, top: avoidRect.bottom + gap },
+          { dir: 'top-left', left: 16, top: 16 }
+        ];
+
+        // Sort preferred direction first
+        candidates.sort((a, b) => (a.dir === s.prefer ? -1 : b.dir === s.prefer ? 1 : 0));
+
+        let chosen = null;
+        for (const c of candidates) {
+          const clampedLeft = Math.min(Math.max(12, c.left), vw - bw - 12);
+          const clampedTop = Math.min(Math.max(12, c.top), vh - bh - 12);
+          const candidateRect = {
+            left: clampedLeft,
+            top: clampedTop,
+            right: clampedLeft + bw,
+            bottom: clampedTop + bh
+          };
+          if (!rectsOverlap(candidateRect, tRect, 28) && !rectsOverlap(candidateRect, avoidRect, 14)) {
+            chosen = candidateRect;
+            break;
+          }
+        }
+
+        if (!chosen) {
+          // Fallback corner farthest from target center
+          const tcx = tRect.left + tRect.width / 2;
+          const tcy = tRect.top + tRect.height / 2;
+          const cl = tcx > vw / 2 ? 16 : Math.max(12, vw - bw - 16);
+          const ct = tcy > vh / 2 ? 16 : Math.max(12, vh - bh - 16);
+          chosen = { left: cl, top: ct, right: cl + bw, bottom: ct + bh };
+        }
+
+        tutBox.style.left = `${chosen.left}px`;
+        tutBox.style.top = `${chosen.top}px`;
+        tutBox.style.transform = 'none';
+
+        // Compute curved arrow from tutorial box edge toward target edge (stopping 14px short of target)
+        const boxCx = (chosen.left + chosen.right) / 2;
+        const boxCy = (chosen.top + chosen.bottom) / 2;
+        const targetCx = tRect.left + tRect.width / 2;
+        const targetCy = tRect.top + tRect.height / 2;
+
+        const startPt = getClosestPointOnRect(chosen, targetCx, targetCy, 8);
+        const endPt = getClosestPointOnRect(tRect, boxCx, boxCy, 14);
+
+        const dx = endPt.x - startPt.x;
+        const dy = endPt.y - startPt.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < 16) {
+          tutArrowPath.setAttribute('d', '');
+          return;
+        }
+
+        // Perpendicular offset for a clean, discreet curve
+        const midX = (startPt.x + endPt.x) / 2;
+        const midY = (startPt.y + endPt.y) / 2;
+        const bend = Math.min(32, dist * 0.22);
+        const nx = -dy / dist;
+        const ny = dx / dist;
+        const curveSign = dx >= 0 ? 1 : -1;
+        const ctrlX = midX + nx * bend * curveSign;
+        const ctrlY = midY + ny * bend * curveSign;
+
+        tutArrowPath.setAttribute(
+          'd',
+          `M ${startPt.x.toFixed(1)} ${startPt.y.toFixed(1)} Q ${ctrlX.toFixed(1)} ${ctrlY.toFixed(1)} ${endPt.x.toFixed(1)} ${endPt.y.toFixed(1)}`
+        );
+      }
+
+      function initTutorial() {
+        if (!localStorage.getItem('sylva_v13_onboarded')) {
+          setTutStep(0);
+        }
+      }
+
       function setTutStep(step) {
         if (localStorage.getItem('sylva_v13_onboarded')) return;
-        tutStep = step;
-        tutBox.style.opacity = '1';
+        clearTimeout(tutTransitionTimer);
 
-        if (step >= TUT_STEPS.length) { 
-           tutBox.style.display = 'none'; 
-           tutArrowEl.style.display = 'none';
-           localStorage.setItem('sylva_v13_onboarded', 'true'); 
-           return; 
-        }
-        
-        const s = TUT_STEPS[step];
-        tutText.innerText = s.msg; 
-        
-        // BOX POSITIONING - ALWAYS FIXED AND SEPARATE
-        tutBox.style.left = '50%';
-        if (s.hideOnModal) {
-           tutBox.style.top = '20px';
-           tutBox.style.transform = 'translateX(-50%)'; 
-           tutBox.style.pointerEvents = 'none';
-           // Give UI time to render modal, then auto-hide tooltip
-           setTimeout(() => { if (tutStep === step && document.querySelector('.modal-overlay.open')) tutBox.style.opacity = '0'; }, 4000);
-        } else {
-           tutBox.style.top = '50%';
-           tutBox.style.transform = 'translate(-50%, -50%)';
-           tutBox.style.pointerEvents = 'auto';
-        }
-        
-        // ARROW POSITIONING (Discrete element pointing to target)
-        if (s.arr) {
-           tutArrowEl.style.display = 'block';
-           tutArrowEl.style.top = s.arr.top || 'auto';
-           tutArrowEl.style.bottom = s.arr.bottom || 'auto';
-           tutArrowEl.style.left = s.arr.left || 'auto';
-           tutArrowEl.style.right = s.arr.right || 'auto';
-           tutArrowEl.style.transform = `rotate(${s.arr.rot}deg)`;
-        } else {
-           tutArrowEl.style.display = 'none';
-        }
-        
-        if (s.showBtn) { 
-           tutBtn.style.display = 'block'; 
-           tutBtn.innerText = (step === TUT_STEPS.length - 1) ? 'Finish' : 'Next'; 
-        } else { 
-           tutBtn.style.display = 'none'; 
-        }
-        
-        tutBox.style.display = 'flex';
-      }
-      
-      function checkTut(expectedStep) { 
-          if (tutStep === expectedStep) {
-              setTimeout(() => { setTutStep(tutStep + 1); }, 100); // 100ms buffer prevents race conditions
+        // Fade out current step before switching
+        tutBox.style.opacity = '0';
+        tutArrowSvg.style.opacity = '0';
+
+        tutTransitionTimer = setTimeout(() => {
+          tutStep = step;
+          if (step >= TUT_STEPS.length) {
+            tutBox.style.display = 'none';
+            tutArrowSvg.style.display = 'none';
+            localStorage.setItem('sylva_v13_onboarded', 'true');
+            return;
           }
+
+          const s = TUT_STEPS[step];
+          tutText.innerText = s.msg;
+          if (s.showBtn) {
+            tutBtn.style.display = 'inline-block';
+            tutBtn.innerText = (step === TUT_STEPS.length - 1) ? 'Finish' : 'Next';
+          } else {
+            tutBtn.style.display = 'none';
+          }
+
+          tutBox.style.display = 'flex';
+          tutArrowSvg.style.display = 'block';
+
+          requestAnimationFrame(() => {
+            positionTutorialElements();
+            requestAnimationFrame(() => {
+              tutBox.style.opacity = '1';
+              tutArrowSvg.style.opacity = '1';
+            });
+          });
+        }, tutStep === -1 ? 20 : 220);
       }
-      tutBtn.addEventListener('click', () => { setTutStep(tutStep + 1); });
+
+      function checkTut(expectedStep) {
+        if (tutStep === expectedStep) {
+          setTimeout(() => { setTutStep(tutStep + 1); }, 80);
+        }
+      }
+
+      tutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setTutStep(tutStep + 1);
+      });
 
       init();
     })();
