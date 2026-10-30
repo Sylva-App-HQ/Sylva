@@ -429,39 +429,64 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-tutorial-animation">
+    <div class="modal-overlay" id="modal-tutorial-animation">
     <div class="modal-card" style="width: 500px; max-width: 95vw;">
       <div class="modal-header"><h3>How to use Sylva</h3><button class="btn btn-small" id="btn-close-tut-anim">&times;</button></div>
       <div class="modal-body" style="text-align: center; padding: 12px;">
         <div style="width: 100%; aspect-ratio: 1/1; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; overflow: hidden; position: relative;">
            <style>
              /* Base animations */
-             @keyframes animGrowTree { 0%, 2% { transform: scale(0); opacity: 0; } 5% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-             @keyframes animPan { 0%, 15% { transform: translate(0, 0); } 18%, 23% { transform: translate(-30px, -20px); } 25%, 100% { transform: translate(0, 0); } }
-             @keyframes animHarvest { 0%, 30% { transform: scale(1); } 32% { transform: scale(1.3); opacity: 1; } 35%, 100% { transform: scale(0); opacity: 0; } }
-             @keyframes animTimeline { 0%, 39% { opacity: 0; pointer-events: none; } 40%, 48% { opacity: 1; pointer-events: auto; } 50%, 100% { opacity: 0; pointer-events: none; } }
-             @keyframes animCP { 0%, 53% { border-color: #33485E; } 54%, 60% { border-color: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); } 62%, 100% { border-color: #33485E; } }
-             @keyframes animBreadcrumb { 0%, 65% { background: transparent; } 66%, 70% { background: var(--bg-surface-elevated); } 72%, 100% { background: transparent; } }
-             @keyframes animDrawerL { 0%, 77% { transform: translateX(-100%); } 79%, 85% { transform: translateX(0); } 87%, 100% { transform: translateX(-100%); } }
-             @keyframes animDrawerR { 0%, 90% { transform: translateX(100%); } 92%, 97% { transform: translateX(0); } 99%, 100% { transform: translateX(100%); } }
+             @keyframes animGrowTree { 
+                 0%, 1% { transform: scale(0); opacity: 0; } 
+                 3%, 23% { transform: scale(1); opacity: 1; } 
+                 25%, 29% { transform: scale(1.4); opacity: 1; } 
+                 30%, 100% { transform: scale(1); opacity: 1; } 
+             }
+             @keyframes animPan { 0%, 31% { transform: translate(0, 0); } 34%, 37% { transform: translate(-30px, -20px); } 40%, 100% { transform: translate(0, 0); } }
+             @keyframes animHarvest { 
+                 0%, 5% { transform: scale(0); opacity: 0; } 
+                 8% { transform: scale(1.2); opacity: 1; } 
+                 10%, 43% { transform: scale(1); opacity: 1; } 
+                 45% { transform: scale(1.3); opacity: 1; } 
+                 47%, 100% { transform: scale(0); opacity: 0; } 
+             }
+             @keyframes growTrunk { 0%, 1% { height: 0; opacity: 0; } 4% { height: 30px; opacity: 1; } 100% { height: 30px; opacity: 1; } }
+             @keyframes growBranch { 0%, 4% { width: 0; opacity: 0; } 7% { width: 50px; opacity: 1; } 100% { width: 50px; opacity: 1; } }
+             @keyframes popLeaf { 0%, 7% { transform: scale(0); opacity: 0; } 9% { transform: scale(1.2); opacity: 1; } 11%, 100% { transform: scale(1); opacity: 1; } }
+             
+             @keyframes animTimeline { 0%, 53% { opacity: 0; pointer-events: none; } 54%, 58% { opacity: 1; pointer-events: auto; } 60%, 100% { opacity: 0; pointer-events: none; } }
+             @keyframes animCP { 0%, 63% { border-color: #33485E; } 64%, 68% { border-color: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); } 70%, 100% { border-color: #33485E; } }
+             @keyframes animBreadcrumb { 0%, 73% { background: transparent; } 74%, 78% { background: var(--bg-surface-elevated); } 80%, 100% { background: transparent; } }
+             @keyframes animDrawerL { 0%, 83% { transform: translateX(-100%); } 84%, 88% { transform: translateX(0); } 90%, 100% { transform: translateX(-100%); } }
+             @keyframes animDrawerR { 0%, 93% { transform: translateX(100%); } 94%, 98% { transform: translateX(0); } 100% { transform: translateX(100%); } }
+             
+             @keyframes animInspector { 0%, 13% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } 14%, 19% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 20%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } }
+
              @keyframes animCursor {
                0% { top: 50%; left: 50%; opacity: 0; } 1% { opacity: 1; }
-               /* Grow (0-4s) */
+               /* 1. Grow (0-4s) 0-10% */
                3% { top: 7%; left: 50%; transform: scale(0.8); } 5% { transform: scale(1); }
-               /* PIP (4-8s) */
-               14% { top: 92%; left: 7%; transform: scale(1); } 16% { top: 90%; left: 10%; transform: scale(0.8); } 18% { transform: scale(1); }
-               /* Harvest (8-12s) */
-               27% { top: 88%; left: 93%; transform: scale(1); } 29% { transform: scale(0.8); } 31% { transform: scale(1); }
-               /* Timeline (12-16s) */
-               39% { top: 18%; left: 50%; transform: scale(1); } 41% { transform: scale(0.8); } 43% { transform: scale(1); }
-               /* Critical Path (16-20s) */
-               52% { top: 93%; left: 93%; transform: scale(1); } 54% { transform: scale(0.8); } 56% { transform: scale(1); }
-               /* Breadcrumbs (20-24s) */
-               64% { top: 18%; left: 7%; transform: scale(1); } 66% { transform: scale(0.8); } 68% { transform: scale(1); }
-               /* Left Drawer (24-28s) */
-               76% { top: 7%; left: 7%; transform: scale(1); } 78% { transform: scale(0.8); } 80% { transform: scale(1); }
-               /* Right Drawer (28-32s) */
-               89% { top: 7%; left: 93%; transform: scale(1); } 91% { transform: scale(0.8); } 93% { transform: scale(1); }
+               /* 2. Double Click Inspector (4-8s) 10-20% */
+               12% { top: 50%; left: 50%; transform: scale(1); } 
+               14% { transform: scale(0.7); } 15% { transform: scale(1); } 
+               16% { transform: scale(0.7); } 17% { transform: scale(1); }
+               /* 3. Long Press Open (8-12s) 20-30% */
+               22% { top: 50%; left: 50%; transform: scale(1); }
+               24% { transform: scale(0.7); } 28% { transform: scale(1); }
+               /* 4. PIP (12-16s) 30-40% */
+               32% { top: 92%; left: 7%; transform: scale(1); } 34% { top: 90%; left: 10%; transform: scale(0.8); } 38% { transform: scale(1); }
+               /* 5. Harvest (16-20s) 40-50% */
+               42% { top: 88%; left: 93%; transform: scale(1); } 44% { transform: scale(0.8); } 46% { transform: scale(1); }
+               /* 6. Timeline (20-24s) 50-60% */
+               52% { top: 18%; left: 50%; transform: scale(1); } 54% { transform: scale(0.8); } 56% { transform: scale(1); }
+               /* 7. Critical Path (24-28s) 60-70% */
+               62% { top: 93%; left: 93%; transform: scale(1); } 64% { transform: scale(0.8); } 66% { transform: scale(1); }
+               /* 8. Breadcrumbs (28-32s) 70-80% */
+               72% { top: 18%; left: 7%; transform: scale(1); } 74% { transform: scale(0.8); } 76% { transform: scale(1); }
+               /* 9. Left Drawer (32-36s) 80-90% */
+               82% { top: 7%; left: 7%; transform: scale(1); } 84% { transform: scale(0.8); } 86% { transform: scale(1); }
+               /* 10. Right Drawer (36-40s) 90-100% */
+               92% { top: 7%; left: 93%; transform: scale(1); } 94% { transform: scale(0.8); } 96% { transform: scale(1); }
                99% { opacity: 1; } 100% { top: 50%; left: 50%; opacity: 0; }
              }
 
@@ -471,7 +496,7 @@
              .mini-btn { background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; height: 16px; width: 24px; }
              .mini-btn-grow { background: var(--accent-muted); border-color: var(--accent); width: 40px; }
              .mini-nav-bar { position: absolute; top: 15%; left: 5%; width: 90%; display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px; }
-             .mini-bc { width: 50px; height: 8px; background: var(--border-subtle); border-radius: 2px; animation: animBreadcrumb 32s infinite; }
+             .mini-bc { width: 50px; height: 8px; background: var(--border-subtle); border-radius: 2px; animation: animBreadcrumb 40s infinite; }
              .mini-timeline-btn { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); width: 35px; height: 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 3px; }
              .mini-pip { position: absolute; bottom: 5%; left: 5%; width: 40px; height: 40px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 4px; }
              .mini-actions { position: absolute; bottom: 5%; right: 5%; display: flex; flex-direction: column; gap: 4px; }
@@ -479,23 +504,27 @@
              .mini-act-harvest { border-color: #F59E0B !important; }
              .mini-act-cp { border-color: #EF4444 !important; }
              
-             .mini-drawer-l { position: absolute; top: 25%; bottom: 5%; left: 5%; width: 30%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translateX(-100%); animation: animDrawerL 32s infinite ease-in-out; }
-             .mini-drawer-r { position: absolute; top: 25%; bottom: 5%; right: 5%; width: 30%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translateX(100%); animation: animDrawerR 32s infinite ease-in-out; }
+             .mini-drawer-l { position: absolute; top: 25%; bottom: 5%; left: 5%; width: 30%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translateX(-100%); animation: animDrawerL 40s infinite ease-in-out; }
+             .mini-drawer-r { position: absolute; top: 25%; bottom: 5%; right: 5%; width: 30%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translateX(100%); animation: animDrawerR 40s infinite ease-in-out; }
              
+             .mini-inspector { position: absolute; top: 50%; left: 50%; width: 100px; height: 120px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translate(-50%, -50%); animation: animInspector 40s infinite ease-out; z-index: 15; opacity: 0; padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+             .mi-row { width: 100%; height: 8px; background: var(--bg-canvas); border-radius: 2px; }
+             .mi-row:nth-child(2) { height: 24px; }
+
              /* World & Tree */
              .mini-world { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-             .mini-world-pan { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: animPan 32s infinite ease-in-out; display: flex; align-items: center; justify-content: center; }
-             .mini-tree-wrapper { position: relative; width: 120px; height: 120px; animation: animGrowTree 32s infinite ease-out; }
-             .mt-trunk { position: absolute; bottom: 10%; left: 50%; width: 6px; height: 30px; background: #B45309; transform: translateX(-50%); border-radius: 3px; }
-             .mt-branch { position: absolute; bottom: 40px; left: 50%; width: 50px; height: 50px; border: 2px solid #33485E; border-bottom: 0; border-right: 0; border-radius: 10px 0 0 0; animation: animCP 32s infinite; }
-             .mt-leaf { position: absolute; top: 20px; left: 0px; width: 16px; height: 16px; background: var(--node-leaf); border-radius: 8px 0 8px 0; }
-             .mt-fruit { position: absolute; top: 40px; right: -20px; width: 14px; height: 14px; background: var(--node-fruit); border-radius: 50%; animation: animHarvest 32s infinite; }
+             .mini-world-pan { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: animPan 40s infinite ease-in-out; display: flex; align-items: center; justify-content: center; }
+             .mini-tree-wrapper { position: relative; width: 120px; height: 120px; animation: animGrowTree 40s infinite ease-out; }
+             .mt-trunk { position: absolute; bottom: 10%; left: 50%; width: 6px; height: 30px; background: #B45309; transform: translateX(-50%); border-radius: 3px; animation: growTrunk 40s infinite ease-out; }
+             .mt-branch { position: absolute; bottom: 40px; left: 50%; width: 50px; height: 50px; border: 2px solid #33485E; border-bottom: 0; border-right: 0; border-radius: 10px 0 0 0; animation: animCP 40s infinite; }
+             .mt-leaf { position: absolute; top: 20px; left: 0px; width: 16px; height: 16px; background: var(--node-leaf); border-radius: 8px 0 8px 0; animation: popLeaf 40s infinite ease-out; }
+             .mt-fruit { position: absolute; top: 40px; right: -20px; width: 14px; height: 14px; background: var(--node-fruit); border-radius: 50%; animation: animHarvest 40s infinite ease-out; }
 
              /* Timeline Overlay */
-             .mini-timeline-overlay { position: absolute; top: 25%; left: 10%; width: 80%; height: 60%; background: var(--bg-canvas); z-index: 10; animation: animTimeline 32s infinite; padding: 10px; display:flex; flex-direction: column; gap:6px; opacity: 0; pointer-events: none; border: 1px solid var(--border-strong); border-radius: 6px; }
+             .mini-timeline-overlay { position: absolute; top: 25%; left: 10%; width: 80%; height: 60%; background: var(--bg-canvas); z-index: 10; animation: animTimeline 40s infinite; padding: 10px; display:flex; flex-direction: column; gap:6px; opacity: 0; pointer-events: none; border: 1px solid var(--border-strong); border-radius: 6px; }
              .mt-row { width: 100%; height: 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; }
              
-             .anim-cursor-svg { position: absolute; width: 24px; height: 24px; z-index: 50; animation: animCursor 32s infinite cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transform: translate(-12px, -2px); opacity: 0; }
+             .anim-cursor-svg { position: absolute; width: 24px; height: 24px; z-index: 50; animation: animCursor 40s infinite cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transform: translate(-12px, -2px); opacity: 0; }
            </style>
            
            <div class="mini-world">
@@ -533,6 +562,10 @@
               
               <div class="mini-drawer-l"></div>
               <div class="mini-drawer-r"></div>
+              
+              <div class="mini-inspector">
+                 <div class="mi-row"></div><div class="mi-row"></div><div class="mi-row"></div>
+              </div>
            </div>
            
            <svg class="anim-cursor-svg" viewBox="0 0 24 24" fill="#F1F5F9" stroke="#000" stroke-width="1.5">
@@ -545,15 +578,17 @@
                 setInterval(() => {
                    const t = document.getElementById('anim-text');
                    if(t) {
-                      const time = (Date.now() % 32000) / 1000;
+                      const time = (Date.now() % 40000) / 1000;
                       if(time < 4.0) t.innerText = "1. Use 'Grow' to plant Trees and Nodes.";
-                      else if(time < 8.0) t.innerText = "2. Drag the PIP Minimap to navigate large workspaces.";
-                      else if(time < 12.0) t.innerText = "3. Set Season and Harvest completed tasks.";
-                      else if(time < 16.0) t.innerText = "4. View chronological Executive Timeline.";
-                      else if(time < 20.0) t.innerText = "5. Highlight Critical Paths.";
-                      else if(time < 24.0) t.innerText = "6. Navigate deeply nested trees via Breadcrumbs.";
-                      else if(time < 28.0) t.innerText = "7. Open Left Directory for saved files & Auto-Tidy.";
-                      else t.innerText = "8. Open Right Nursery for JSON Backup/Sync.";
+                      else if(time < 8.0) t.innerText = "2. Double-Click a Tree or Node to open details.";
+                      else if(time < 12.0) t.innerText = "3. Long-Press a Tree to enter its workspace.";
+                      else if(time < 16.0) t.innerText = "4. Drag the PIP Minimap to navigate fast.";
+                      else if(time < 20.0) t.innerText = "5. Set Season and Harvest completed tasks.";
+                      else if(time < 24.0) t.innerText = "6. View chronological Executive Timeline.";
+                      else if(time < 28.0) t.innerText = "7. Highlight Critical Paths.";
+                      else if(time < 32.0) t.innerText = "8. Navigate nested trees via Breadcrumbs.";
+                      else if(time < 36.0) t.innerText = "9. Open Left Directory for saved files & Tidy.";
+                      else t.innerText = "10. Open Right Nursery for JSON Backup/Sync.";
                    }
                 }, 100);
              </script>
@@ -562,7 +597,6 @@
       </div>
     </div>
   </div>
-
   <div class="modal-overlay" id="modal-help">
     <div class="modal-card">
       <div class="modal-header"><h3>Help & Features</h3><button class="btn btn-small" id="btn-close-help">&times;</button></div>
