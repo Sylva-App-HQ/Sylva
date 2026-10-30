@@ -407,6 +407,18 @@
     </div>
   </div>
 
+  
+  <div class="modal-overlay" id="modal-vip">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Enter VIP Code</h3><button class="btn btn-small" id="btn-close-vip">&times;</button></div>
+      <div class="modal-body">
+        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter your Tree Hugger VIP code to unlock all premium templates for free.</p>
+        <div class="field-group"><input type="password" id="input-vip-code" placeholder="VIP Code"></div>
+      </div>
+      <div class="modal-footer"><button class="btn" id="btn-submit-vip">Unlock</button></div>
+    </div>
+  </div>
+
   <div id="tutorial-tooltip">
      <div class="tut-arrow" id="tut-arrow"></div>
      <div id="tut-text"></div>
@@ -504,15 +516,17 @@
               if (n.acornTarget && adj[n.id]) adj[n.id].push(n.acornTarget);
           });
           let maxPath = [];
-          function dfs(nodeId, currentPath) {
+          function dfs(nodeId, currentPath, visited) {
+              if (visited.has(nodeId)) return; // Prevents infinite loops from Acorn cycles
               const node = tree.nodes.find(n => n.id === nodeId);
               if (!node || (node.type === 'fruit' && node.harvested)) return;
               currentPath.push(nodeId);
+              visited.add(nodeId);
               if (currentPath.length > maxPath.length) maxPath = [...currentPath];
-              adj[nodeId].forEach(childId => dfs(childId, [...currentPath]));
+              adj[nodeId].forEach(childId => dfs(childId, [...currentPath], new Set(visited)));
           }
           const trunk = tree.nodes.find(n => n.type === 'trunk') || tree.nodes[0];
-          if (trunk) dfs(trunk.id, []);
+          if (trunk) dfs(trunk.id, [], new Set());
           return maxPath;
       }
 
@@ -892,6 +906,21 @@
         document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
         document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
         document.getElementById('btn-close-hugger').addEventListener('click', () => { document.getElementById('modal-tree-hugger').classList.remove('open'); });
+        document.getElementById('btn-close-vip').addEventListener('click', () => { document.getElementById('modal-vip').classList.remove('open'); });
+        document.getElementById('btn-submit-vip').addEventListener('click', () => { 
+            const code = document.getElementById('input-vip-code').value.trim();
+            if(code === 'SYLVA-VIP-2026') {
+                localStorage.setItem('sylva_is_vip', 'true');
+                document.getElementById('modal-vip').classList.remove('open');
+                showAppAlert('VIP Access Granted! All premium templates are now unlocked forever.');
+                // Rebuild the library to show unlocked state
+                document.getElementById('list-templates').innerHTML = '';
+                buildTemplateLibrary();
+            } else {
+                showAppAlert('Invalid VIP Code.');
+            }
+        });
+
         document.getElementById('btn-pay-stripe').addEventListener('click', () => { window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
         document.getElementById('btn-pay-paypal').addEventListener('click', () => { window.open('YOUR_PAYPAL_PAYMENT_LINK', '_blank'); document.getElementById('modal-tree-hugger').classList.remove('open'); });
 
@@ -944,19 +973,119 @@
       function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
         const cats = {
-          "Healthcare": ["ER Triage Flow", "Sepsis Protocol"], "Tech": ["Agile Sprint Board", "Database Schema"], "Admin": ["Quarterly OKRs", "Employee Onboarding"]
+          "Software & Product Development": [
+             "Software Launch Roadmap", 
+             "Technical Debt Backlog", 
+             "Bug Triage & Post-Mortem", 
+             "Design System Architecture", 
+             "API Integration Audit"
+          ],
+          "Business, Strategy & Operations": [
+             "Startup Pitch & Fundraising", 
+             "Quarterly OKR Planning", 
+             "Competitor Landscape Matrix", 
+             "Client Onboarding Journey", 
+             "Freelance Agency Operations"
+          ],
+          "Writing, Content & Media": [
+             "Novel Story Architecture", 
+             "Multi-Channel Content Calendar", 
+             "Video & Podcast Pipeline", 
+             "SEO Pillar & Topic Map", 
+             "Product Documentation KB"
+          ],
+          "Gaming & Worldbuilding": [
+             "D&D Campaign Builder", 
+             "Video Game Level Design", 
+             "Tabletop Balance Matrix", 
+             "Fantasy Geography System", 
+             "Character Backstory Matrix"
+          ],
+          "Specialized Life Events": [
+             "Clinical Sepsis Protocol", 
+             "Major Event Timeline", 
+             "Wedding Planning Master", 
+             "Home Relocation Logistics", 
+             "Academic Thesis Tracker"
+          ],
+          "Architecture & PM": [
+             "BIM Execution Plan",
+             "LEED Certification Tracker",
+             "Enterprise Risk Matrix"
+          ],
+          "Education & Business": [
+             "IEP Compliance Tracker",
+             "Master Curriculum Map",
+             "M&A Due Diligence",
+             "Supply Chain Resiliency"
+          ],
+          "Agriculture & Academia": [
+             "Precision Ag Yield Plan",
+             "Federal Grant Pipeline",
+             "Lab Protocol Matrix"
+          ],
+          "Large-Scale Agriculture": [
+             "Farm-to-Packinghouse Pipeline",
+             "Cellar & Cold Storage QA",
+             "Irrigation & Pivot Schedule",
+             "Agronomy & Chemical Input Log",
+             "Equipment Maintenance Tracker",
+             "Breakdown Triage & Parts",
+             "Seasonal Labor & Visa Workflow"
+          ],
+          "Music & Audio Production": [
+             "Beginner Guitar Mastery",
+             "Beginner Vocal Training",
+             "Album Release Strategy",
+             "Music Theory Fundamentals",
+             "Live Gig & Tour Logistics",
+             "Songwriting & Composition",
+             "Mixing & Mastering Workflow",
+             "Band Operations & Rehearsal"
+          ]
         };
         for(const [cat, templates] of Object.entries(cats)) {
           const hdr = document.createElement('div'); hdr.style.padding = '8px 16px'; hdr.style.background = 'var(--bg-surface-elevated)'; hdr.style.color = 'var(--accent)'; hdr.style.fontSize = '11px'; hdr.style.fontWeight = 'bold'; hdr.innerText = cat.toUpperCase(); list.appendChild(hdr);
           templates.forEach(t => {
             const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
-            li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
-            li.querySelector('button').addEventListener('click', () => {
-               pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
-               document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
-            });
+            
+            // Check if user is already a VIP
+            const isVip = localStorage.getItem('sylva_is_vip') === 'true';
+            
+            // Premium vs Free Logic (All 25 of these launch templates are premium)
+            const isPremium = true;
+            
+            if(isPremium && !isVip) {
+                li.innerHTML = `<span>${t} <span style="font-size:10px; color:#F59E0B;">(Premium)</span></span><button class="btn btn-small" style="border-color:#F59E0B; color:#F59E0B;">$0.25</button>`;
+                li.querySelector('button').addEventListener('click', () => {
+                    alert("This would open a Stripe link for $0.25.\n\nBut you can get this and ALL templates free forever by becoming a Tree Hugger for just $1!");
+                });
+            } else {
+                li.innerHTML = `<span>${t}</span><button class="btn btn-small btn-accent">Load</button>`;
+                li.querySelector('button').addEventListener('click', () => {
+                   pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
+                   document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
+                });
+            }
             list.appendChild(li);
           });
+          
+          // Add VIP Entry button at the bottom of the template list if not VIP
+          if(!localStorage.getItem('sylva_is_vip')) {
+             const vipBtn = document.createElement('div');
+             vipBtn.style.padding = '12px'; vipBtn.style.textAlign = 'center'; vipBtn.style.marginTop = 'auto';
+             vipBtn.innerHTML = `<button class="btn btn-small" id="btn-open-vip">I have a VIP Code</button>`;
+             list.appendChild(vipBtn);
+             
+             // Setup listener for the new dynamic button
+             setTimeout(() => {
+                 const vBtn = document.getElementById('btn-open-vip');
+                 if(vBtn) vBtn.addEventListener('click', () => {
+                     document.getElementById('modal-vip').classList.add('open');
+                 });
+             }, 100);
+          }
+
         }
 
         document.getElementById('btn-close-template-prompt').onclick = () => document.getElementById('modal-template-prompt').classList.remove('open');
@@ -1012,7 +1141,23 @@
               node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
               document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
           };
-          const bD = document.getElementById('btn-delete-node'); bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex'; bD.onclick = (e) => { e.preventDefault(); getTree().nodes = getTree().nodes.filter(n => n.id !== node.id && n.parentId !== node.id); document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); };
+          const bD = document.getElementById('btn-delete-node'); bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex'; bD.onclick = (e) => { 
+              e.preventDefault(); 
+              const treeToEdit = getTree();
+              const idsToDelete = new Set([node.id]);
+              let added = true;
+              while(added) {
+                  added = false;
+                  treeToEdit.nodes.forEach(n => {
+                      if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) {
+                          idsToDelete.add(n.id);
+                          added = true;
+                      }
+                  });
+              }
+              treeToEdit.nodes = treeToEdit.nodes.filter(n => !idsToDelete.has(n.id)); 
+              document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+          };
           document.getElementById('modal-inspector').classList.add('open');
         }, 150);
       }
@@ -1033,6 +1178,9 @@
         fruits.forEach(f => { const li = document.createElement('li'); li.className = 'directory-item'; li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`; li.addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); openInspector(f); }); list.appendChild(li); });
         document.getElementById('modal-season').classList.add('open');
       }
+
+      const tutBox = document.getElementById('tutorial-tooltip'), tutText = document.getElementById('tut-text'), tutBtn = document.getElementById('tut-next'), tutArrow = document.getElementById('tut-arrow');
+      let tutStep = -1;
 
       const TUT_STEPS = [
         { msg: "Think like a tree. Welcome to Sylva! Let's build your first Forest. Click 'Grow...' above.", top: '60px', left: '50%', arr: 'up' }, 
