@@ -1618,16 +1618,24 @@ case 'Oak':
         }
 
         window.SYLVA_TEMPLATES.forEach(tpl => {
+            const isPremium = tpl.tier === 'premium';
             const el = document.createElement('div');
             el.className = 'directory-item';
             el.innerHTML = `
                 <div>
-                    <div style="font-weight:600; color:var(--text-main);">${escapeHTML(tpl.title)}</div>
+                    <div style="font-weight:600; color:var(--text-main);">${escapeHTML(tpl.title)} ${isPremium ? '💎' : ''}</div>
                     <div style="font-size:11px; color:var(--text-muted);">${escapeHTML(tpl.category)} &bull; ${escapeHTML(tpl.type)} Tree</div>
                 </div>
-                <button class="btn btn-small">Load</button>
+                <button class="btn btn-small" ${isPremium && !state.premiumUnlocked ? 'disabled' : ''}>
+                    ${isPremium && !state.premiumUnlocked ? '$1 Unlock' : 'Load'}
+                </button>
             `;
+            
             el.querySelector('button').addEventListener('click', () => {
+                if (isPremium && !state.premiumUnlocked) {
+                    showAppAlert("Premium templates require the $1 Tree Hugger tier.");
+                    return;
+                }
                 const newTree = {
                     id: 'tree_' + Date.now(),
                     title: tpl.title,
@@ -1644,7 +1652,6 @@ case 'Oak':
             });
             list.appendChild(el);
         });
-    }
 
         const isVip = localStorage.getItem('sylva_is_vip') === 'true';
 
@@ -1708,7 +1715,8 @@ case 'Oak':
           const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
           state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = newTree.id; state.viewMode = 'tree';
           saveData(); render();
-    }
+        };
+      }
     
     function centerOn(x, y) {
         state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform();
