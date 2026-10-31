@@ -48,7 +48,7 @@
     .nav-right { display: flex; align-items: center; z-index: 4; position: relative; gap: 6px; flex-shrink: 0; }
 
     /* Relocated Timeline Button */
-    #timeline-btn-container { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
+    #timeline-btn-container { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
 
     #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
     #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
@@ -230,7 +230,7 @@
     </div>
   </main>
   
-  <button class="btn btn-small" id="btn-timeline-toggle" style="position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">Executive Timeline</button>
+  
   <div id="timeline-layer">
      <div id="timeline-content" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px;"></div>
   </div>
@@ -757,6 +757,7 @@
       </script>
     </div>
 
+  <script src="./templates.js"></script>
   <script>
     (function () {
       'use strict';
@@ -1611,7 +1612,6 @@ case 'Oak':
         const list = document.getElementById('list-templates');
         list.innerHTML = '';
         
-        // Check if the templates file loaded correctly
         if (!window.SYLVA_TEMPLATES) {
             list.innerHTML = '<div style="color:red; text-align:center;">Templates failed to load.</div>';
             return;
@@ -1633,7 +1633,14 @@ case 'Oak':
             
             el.querySelector('button').addEventListener('click', () => {
                 if (isPremium && !state.premiumUnlocked) {
-                    showAppAlert("Premium templates require the $1 Tree Hugger tier.");
+                    const code = prompt("Enter your Tree Hugger unlock code:");
+                    if (code === "FOREST2026") {
+                        state.premiumUnlocked = true;
+                        saveData();
+                        showAppAlert("Premium Unlocked! Click Load again.");
+                    } else if (code) {
+                        showAppAlert("Invalid code. Get yours at yourstore.gumroad.com");
+                    }
                     return;
                 }
                 const newTree = {
@@ -1654,68 +1661,14 @@ case 'Oak':
         });
 
         const isVip = localStorage.getItem('sylva_is_vip') === 'true';
-
-        // Build Free Templates
-        for (const [cat, templates] of Object.entries(freeCats)) {
-          const hdr = document.createElement('div');
-          hdr.style.padding = '8px 16px'; hdr.style.background = 'var(--bg-surface-elevated)'; hdr.style.color = 'var(--accent)'; hdr.style.fontSize = '11px'; hdr.style.fontWeight = 'bold'; hdr.innerText = cat.toUpperCase();
-          list.appendChild(hdr);
-          templates.forEach(t => {
-            const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
-            li.innerHTML = `<span>${escapeHTML(t)}</span><button class="btn btn-small btn-accent">Load</button>`;
-            li.querySelector('button').addEventListener('click', () => {
-              pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
-              document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
-            });
-            list.appendChild(li);
-          });
-        }
-
-        // Build Premium Templates
-        const premHdr = document.createElement('div');
-        premHdr.style.padding = '8px 16px'; premHdr.style.background = '#F59E0B'; premHdr.style.color = '#000'; premHdr.style.fontSize = '11px'; premHdr.style.fontWeight = 'bold'; premHdr.innerText = "PREMIUM ADVANCED FRAMEWORKS";
-        list.appendChild(premHdr);
-        
-        for(let i = 1; i <= 50; i++) {
-           const t = "Premium Industry Framework " + i;
-           const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
-           if (!isVip) {
-              li.innerHTML = `<span>${escapeHTML(t)} <span style="font-size:10px; color:#F59E0B;">($1)</span></span><button class="btn btn-small" style="border-color:#F59E0B; color:#F59E0B;">Unlock</button>`;
-              li.querySelector('button').addEventListener('click', () => { document.getElementById('modal-purchase-template').classList.add('open'); });
-           } else {
-              li.innerHTML = `<span>${escapeHTML(t)} <span style="font-size:10px; color:var(--accent);">(VIP)</span></span><button class="btn btn-small btn-accent">Load</button>`;
-              li.querySelector('button').addEventListener('click', () => {
-                pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
-                document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
-              });
-           }
-           list.appendChild(li);
-        }
-
         if (!isVip) {
-          const vipBtn = document.createElement('div');
-          vipBtn.style.padding = '14px'; vipBtn.style.textAlign = 'center';
-          vipBtn.innerHTML = `<button class="btn btn-small" id="btn-open-vip">I have a VIP Code</button>`;
-          list.appendChild(vipBtn);
-          const vBtn = vipBtn.querySelector('#btn-open-vip');
-          if (vBtn) vBtn.addEventListener('click', () => { document.getElementById('modal-vip').classList.add('open'); });
+            const vipBtn = document.createElement('div');
+            vipBtn.style.padding = '14px'; vipBtn.style.textAlign = 'center';
+            vipBtn.innerHTML = `<button class="btn btn-small" id="btn-open-vip">I have a VIP Code</button>`;
+            list.appendChild(vipBtn);
+            const vBtn = vipBtn.querySelector('#btn-open-vip');
+            if (vBtn) vBtn.addEventListener('click', () => { document.getElementById('modal-vip').classList.add('open'); });
         }
-
-        document.getElementById('btn-close-template-prompt').onclick = () => document.getElementById('modal-template-prompt').classList.remove('open');
-        document.getElementById('btn-tpl-current').onclick = () => {
-          const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 120);
-          const species = getTemplateSpecies(pendingTemplateTitle);
-          const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160 + (getForest().trees.length * 150), y: 160, nodes: newNodes };
-          getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-template-prompt').classList.remove('open'); render(); saveData();
-        };
-        document.getElementById('btn-tpl-new').onclick = () => {
-          const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 120);
-          const species = getTemplateSpecies(pendingTemplateTitle);
-          const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160, y: 160, nodes: newNodes };
-          const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
-          state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = newTree.id; state.viewMode = 'tree';
-          saveData(); render();
-        };
       }
     
     function centerOn(x, y) {
@@ -1834,6 +1787,6 @@ case 'Oak':
       init();
     })();
   </script>
-<script src="./templates.js"></script>
+
 </body>
 </html>
