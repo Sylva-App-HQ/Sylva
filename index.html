@@ -486,79 +486,277 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-tut-animation">
-    <div class="modal-card" style="width: 440px; max-width: 95vw;">
-      <div class="modal-header"><h3>How to use Sylva</h3><button class="btn btn-small" id="btn-close-tut-anim">&times;</button></div>
-      <div class="modal-body" style="padding: 12px; text-align: center;">
+<!-- TUTORIAL ANIMATION MODAL -->
+    <div id="modal-tut-animation" class="modal-overlay" style="display: none; z-index: 9999;">
+      <style>
+        #tut-anim-square { width: 300px; height: 300px; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 12px; position: relative; overflow: hidden; margin: 0 auto 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
         
-        <!-- Square Animation Engine -->
-        <div class="anim-square">
-            <!-- Simulated World -->
-            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-                <div style="width: 100%; height: 100%; animation: animPanWorld 40s infinite; display:flex; align-items:center; justify-content:center;">
-                    <div style="width: 120px; height: 120px; position:relative; animation: animGrowTree 40s infinite ease-out, animPulseTree 40s infinite;">
-                        <div style="position:absolute; bottom:20px; left:50%; width:6px; height:30px; background:#B45309; transform:translateX(-50%); border-radius:3px;"></div>
-                        <div style="position:absolute; bottom:40px; left:50%; width:50px; height:50px; border:2px solid #33485E; border-bottom:0; border-right:0; border-radius:10px 0 0 0; animation: animCriticalGlow 40s infinite;"></div>
-                        <div style="position:absolute; top:20px; left:0px; width:16px; height:16px; background:var(--node-leaf); border-radius:8px 0 8px 0;"></div>
-                        <div style="position:absolute; top:40px; right:-20px; width:14px; height:14px; background:var(--node-fruit); border-radius:50%; animation: animHarvestDrop 40s infinite;"></div>
-                    </div>
-                </div>
+        /* Mock UI Elements */
+        .tut-elem { position: absolute; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; }
+        #tut-tree { width: 30px; height: 30px; background: #10B981; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        #tut-node1 { width: 16px; height: 16px; background: #38BDF8; border-radius: 4px; top: 25%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        #tut-node2 { width: 16px; height: 16px; background: #F59E0B; border-radius: 4px; top: 75%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        #tut-line1 { width: 2px; height: 0%; background: #33485E; top: 50%; left: 50%; transform: translate(-50%, -100%); transform-origin: bottom; }
+        #tut-line2 { width: 2px; height: 0%; background: #33485E; top: 50%; left: 50%; transform: translate(-50%, 0); transform-origin: top; }
+        
+        #tut-inspector { width: 140px; height: 100px; background: var(--bg-surface); border: 1px solid #10B981; border-radius: 8px; top: 120%; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(0,0,0,0.8); }
+        #tut-minimap { width: 60px; height: 60px; background: var(--bg-surface-elevated); border: 1px solid #33485E; border-radius: 4px; bottom: 10px; left: 10px; }
+        #tut-world { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 1s ease-in-out; }
+        #tut-harvest { width: 12px; height: 12px; background: #EF4444; border-radius: 50%; top: 15%; right: 10%; transform: scale(1); opacity: 1; }
+        #tut-timeline { width: 100%; height: 80px; background: var(--bg-surface); border-bottom: 1px solid #33485E; top: -100px; left: 0; }
+        #tut-breadcrumb { width: 100px; height: 12px; background: var(--bg-surface-elevated); border-radius: 4px; top: 15px; left: 60px; opacity: 0.5; }
+        #tut-drawer-l { width: 80px; height: 100%; background: var(--bg-surface); border-right: 1px solid #33485E; top: 0; left: -100px; }
+        #tut-drawer-r { width: 80px; height: 100%; background: var(--bg-surface); border-left: 1px solid #33485E; top: 0; right: -100px; }
+        
+        /* Cursor */
+        #tut-cursor { width: 20px; height: 20px; top: 90%; left: 90%; z-index: 100; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)); pointer-events: none; transition: top 0.6s ease, left 0.6s ease, transform 0.15s ease; }
+        
+        /* Special Animation States */
+        .pulse-tree { animation: tutPulse 0.5s infinite alternate; }
+        @keyframes tutPulse { from { box-shadow: 0 0 5px #10B981, inset 0 0 10px #10B981; transform: translate(-50%, -50%) scale(1.1); } to { box-shadow: 0 0 20px #10B981, inset 0 0 20px #10B981; transform: translate(-50%, -50%) scale(1.3); } }
+        .glow-branch { background: #EF4444 !important; box-shadow: 0 0 10px #EF4444; }
+      </style>
+
+      <div class="modal-card" style="width: 360px; pointer-events: auto;">
+        <div class="modal-body" style="padding: 24px; display: flex; flex-direction: column; align-items: center;">
+          
+          <div id="tut-anim-square">
+            <!-- World layer (pans with minimap) -->
+            <div id="tut-world" class="tut-elem">
+               <div id="tut-line1" class="tut-elem"></div>
+               <div id="tut-line2" class="tut-elem"></div>
+               <div id="tut-tree" class="tut-elem"></div>
+               <div id="tut-node1" class="tut-elem"></div>
+               <div id="tut-node2" class="tut-elem"></div>
             </div>
             
-            <!-- Simulated UI Overlay -->
-            <div style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
-                <!-- Header -->
-                <div style="position:absolute; top:5%; left:5%; width:90%; display:flex; justify-content:space-between;">
-                    <div style="width:24px; height:16px; background:var(--bg-surface-elevated); border-radius:4px;"></div>
-                    <div style="width:40px; height:16px; background:var(--accent-muted); border:1px solid var(--accent); border-radius:4px;"></div>
-                    <div style="width:24px; height:16px; background:var(--bg-surface-elevated); border-radius:4px;"></div>
-                </div>
-                <!-- Breadcrumbs -->
-                <div style="position:absolute; top:15%; left:5%; width:90%; height:12px; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:4px; display:flex; align-items:center; padding:0 4px;">
-                    <div style="width:40px; height:6px; border-radius:2px; animation: animBreadcrumb 40s infinite;"></div>
-                </div>
-                <!-- Timeline Button -->
-                <div style="position:absolute; top:20%; left:50%; transform:translateX(-50%); width:30px; height:10px; background:var(--bg-surface-elevated); border-radius:3px;"></div>
-                <!-- Minimap -->
-                <div style="position:absolute; bottom:5%; left:5%; width:30px; height:30px; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:4px;"></div>
-                <!-- Actions -->
-                <div style="position:absolute; bottom:5%; right:5%; display:flex; flex-direction:column; gap:4px;">
-                    <div style="width:30px; height:10px; background:var(--bg-surface); border:1px solid #F59E0B; border-radius:3px;"></div>
-                    <div style="width:30px; height:10px; background:var(--bg-surface); border:1px solid #EF4444; border-radius:3px;"></div>
-                </div>
-                
-                <!-- Slide-ins -->
-                <div style="position:absolute; top:25%; left:10%; width:80%; height:60%; background:var(--bg-canvas); border:1px solid var(--border-strong); border-radius:6px; animation: animTimelineSlide 40s infinite;"></div>
-                <div style="position:absolute; top:25%; bottom:5%; left:5%; width:35%; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:6px; animation: animDrawerLeft 40s infinite;"></div>
-                <div style="position:absolute; top:25%; bottom:5%; right:5%; width:35%; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:6px; animation: animDrawerRight 40s infinite;"></div>
-                
-                <!-- Inspector Pop -->
-                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80px; height:100px; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:6px; animation: animInspectorPop 40s infinite;"></div>
-            </div>
+            <!-- Static UI Overlays -->
+            <div id="tut-harvest" class="tut-elem"></div>
+            <div id="tut-minimap" class="tut-elem"></div>
+            <div id="tut-timeline" class="tut-elem"></div>
+            <div id="tut-breadcrumb" class="tut-elem"></div>
+            <div id="tut-drawer-l" class="tut-elem"></div>
+            <div id="tut-drawer-r" class="tut-elem"></div>
+            <div id="tut-inspector" class="tut-elem"></div>
             
-            <!-- Virtual Cursor -->
-            <svg viewBox="0 0 24 24" fill="#F1F5F9" stroke="#000" stroke-width="1.5" style="position:absolute; width:24px; height:24px; z-index:50; animation: animCursor 40s infinite; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transform:translate(-12px, -2px);">
-                <path d="M4 2l6.5 19 3.5-7.5 7.5-3.5z"/>
+            <!-- SVG Cursor -->
+            <svg id="tut-cursor" class="tut-elem" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1.5">
+              <path d="M7 2l12 11.2l-5.8.5l3.3 7.3l-2.2.9l-3.2-7.4l-4.4 4.5z"/>
             </svg>
-        </div>
-        
-        <div style="font-size: 14px; font-weight: bold; color: var(--accent); margin-bottom: 12px; min-height: 24px;" id="anim-text-display">1. Use 'Grow' to plant Trees and Nodes.</div>
-        
-        <div style="text-align: left;">
-            <button class="btn btn-small" style="width: 100%; justify-content: space-between; border-color: var(--border-strong);" onclick="document.getElementById('tut-accordion').style.display = document.getElementById('tut-accordion').style.display === 'block' ? 'none' : 'block'">
-                <span>Feature Index</span><span>▾</span>
-            </button>
-            <div id="tut-accordion" style="display: none; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; margin-top: 6px; font-size: 11px; color: var(--text-muted); line-height: 1.5; max-height: 120px; overflow-y: auto;">
-                <strong>🌲 Forests & Trees:</strong> The Forest is your root workspace. Trees are specific projects. Double-click a tree to configure it, long-press to open it.<br><br>
-                <strong>🌿 Nodes (Branches, Leaves, Fruits, Seeds):</strong> Branches group ideas. Leaves are notes. Fruits are actionable tasks. Seeds are links to other trees.<br><br>
-                <strong>⚡ Critical Path:</strong> Highlights the longest chain of dependent nodes in red.<br><br>
-                <strong>🍎 Harvesting:</strong> Collects completed Fruit tasks into a satisfying basket, keeping your tree clean.<br><br>
-                <strong>📅 Executive Timeline:</strong> Formats your visual tree into a clean, chronological list for stakeholders based on Start Dates.
-            </div>
+          </div>
+
+          <div id="tut-text" style="font-size: 15px; font-weight: 500; text-align: center; color: var(--text-main); min-height: 48px; line-height: 1.4;">
+            Starting tutorial...
+          </div>
+          
+          <button id="btn-close-tut-anim" class="btn btn-accent" style="margin-top: 16px; width: 100%;">Got it, close</button>
         </div>
       </div>
+
+      <script>
+        let tutTimer;
+        
+        function resetTutStage() {
+            document.getElementById('tut-world').style.transform = 'translate(0, 0)';
+            document.getElementById('tut-tree').style.transform = 'translate(-50%, -50%) scale(0)';
+            document.getElementById('tut-tree').style.opacity = '0';
+            document.getElementById('tut-tree').className = 'tut-elem';
+            document.getElementById('tut-node1').style.transform = 'translate(-50%, -50%) scale(0)';
+            document.getElementById('tut-node1').style.opacity = '0';
+            document.getElementById('tut-node2').style.transform = 'translate(-50%, -50%) scale(0)';
+            document.getElementById('tut-node2').style.opacity = '0';
+            document.getElementById('tut-line1').style.height = '0%';
+            document.getElementById('tut-line2').style.height = '0%';
+            document.getElementById('tut-line1').classList.remove('glow-branch');
+            document.getElementById('tut-line2').classList.remove('glow-branch');
+            document.getElementById('tut-inspector').style.top = '120%';
+            document.getElementById('tut-timeline').style.top = '-100px';
+            document.getElementById('tut-drawer-l').style.left = '-100px';
+            document.getElementById('tut-drawer-r').style.right = '-100px';
+            document.getElementById('tut-harvest').style.transform = 'scale(1)';
+            document.getElementById('tut-harvest').style.opacity = '1';
+            document.getElementById('tut-breadcrumb').style.opacity = '0.5';
+            document.getElementById('tut-breadcrumb').style.boxShadow = 'none';
+        }
+
+        const tutSteps = [
+          {
+            text: "Click Grow to plant a new Tree and its first Nodes.",
+            run: () => {
+              resetTutStage();
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '10px'; cursor.style.left = '50%'; 
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-tree').style.transform = 'translate(-50%, -50%) scale(1)';
+                document.getElementById('tut-tree').style.opacity = '1';
+                setTimeout(() => {
+                  document.getElementById('tut-line1').style.height = '25%';
+                  document.getElementById('tut-line2').style.height = '25%';
+                  document.getElementById('tut-node1').style.transform = 'translate(-50%, -50%) scale(1)';
+                  document.getElementById('tut-node1').style.opacity = '1';
+                  document.getElementById('tut-node2').style.transform = 'translate(-50%, -50%) scale(1)';
+                  document.getElementById('tut-node2').style.opacity = '1';
+                }, 400);
+              }, 1100);
+            }
+          },
+          {
+            text: "Double-Click a Tree to open the node detail inspector.",
+            run: () => {
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '50%'; cursor.style.left = '50%';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 600);
+              setTimeout(() => { cursor.style.transform = 'scale(1)'; }, 800);
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 1000);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-inspector').style.top = '60%';
+              }, 1200);
+            }
+          },
+          {
+            text: "Long-Press a Tree to enter its specific workspace.",
+            run: () => {
+              document.getElementById('tut-inspector').style.top = '120%';
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '50%'; cursor.style.left = '50%';
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(0.8)'; 
+                document.getElementById('tut-tree').classList.add('pulse-tree');
+              }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-tree').classList.remove('pulse-tree');
+              }, 2200);
+            }
+          },
+          {
+            text: "Drag the PIP minimap to pan around the world.",
+            run: () => {
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '260px'; cursor.style.left = '40px';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.top = '240px'; cursor.style.left = '20px';
+                document.getElementById('tut-world').style.transform = 'translate(40px, 40px)';
+              }, 1200);
+              setTimeout(() => { cursor.style.transform = 'scale(1)'; }, 2200);
+            }
+          },
+          {
+            text: "Click Harvest buttons to collect your goals.",
+            run: () => {
+              document.getElementById('tut-world').style.transform = 'translate(0, 0)';
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '15%'; cursor.style.left = '88%';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-harvest').style.transform = 'translateY(150px) scale(0)';
+                document.getElementById('tut-harvest').style.opacity = '0';
+              }, 1100);
+            }
+          },
+          {
+            text: "Click Executive Timeline to view the schedule overlay.",
+            run: () => {
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '30px'; cursor.style.left = '50%';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-timeline').style.top = '0px';
+              }, 1100);
+            }
+          },
+          {
+            text: "Click Critical Path to highlight important branches.",
+            run: () => {
+              document.getElementById('tut-timeline').style.top = '-100px';
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '10px'; cursor.style.left = '80%';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-line1').classList.add('glow-branch');
+                document.getElementById('tut-line2').classList.add('glow-branch');
+              }, 1100);
+            }
+          },
+          {
+            text: "Click Breadcrumb Nav to jump back up the hierarchy.",
+            run: () => {
+              document.getElementById('tut-line1').classList.remove('glow-branch');
+              document.getElementById('tut-line2').classList.remove('glow-branch');
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '15px'; cursor.style.left = '60px'; 
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-breadcrumb').style.opacity = '1';
+                document.getElementById('tut-breadcrumb').style.boxShadow = '0 0 10px #38BDF8';
+              }, 1100);
+            }
+          },
+          {
+            text: "Click the left Directory for settings and templates.",
+            run: () => {
+              document.getElementById('tut-breadcrumb').style.opacity = '0.5';
+              document.getElementById('tut-breadcrumb').style.boxShadow = 'none';
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '15px'; cursor.style.left = '10px';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-drawer-l').style.left = '0px';
+              }, 1100);
+            }
+          },
+          {
+            text: "Click the right Nursery to view your saved nodes.",
+            run: () => {
+              document.getElementById('tut-drawer-l').style.left = '-100px';
+              const cursor = document.getElementById('tut-cursor');
+              cursor.style.top = '15px'; cursor.style.left = '280px';
+              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
+              setTimeout(() => { 
+                cursor.style.transform = 'scale(1)'; 
+                document.getElementById('tut-drawer-r').style.right = '0px';
+              }, 1100);
+            }
+          }
+        ];
+
+        let tutIndex = 0;
+        function playTutStep() {
+            if(tutIndex >= tutSteps.length) {
+                tutIndex = 0;
+            }
+            document.getElementById('tut-text').innerText = tutSteps[tutIndex].text;
+            tutSteps[tutIndex].run();
+            tutIndex++;
+            tutTimer = setTimeout(playTutStep, 4000);
+        }
+
+        // Start the animation immediately when this script loads in the open modal
+        const modalAnim = document.getElementById('modal-tut-animation');
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('open') || mutation.target.style.display !== 'none') {
+                    tutIndex = 0;
+                    clearTimeout(tutTimer);
+                    resetTutStage();
+                    playTutStep();
+                } else {
+                    clearTimeout(tutTimer);
+                }
+            });
+        });
+        observer.observe(modalAnim, { attributes: true, attributeFilter: ['class', 'style'] });
+      </script>
     </div>
-  </div>
 
   <script>
     (function () {
