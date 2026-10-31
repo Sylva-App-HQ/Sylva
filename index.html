@@ -230,6 +230,7 @@
     </div>
   </main>
   
+  <button class="btn btn-small" id="btn-timeline-toggle" style="position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">Executive Timeline</button>
   <div id="timeline-layer">
      <div id="timeline-content" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px;"></div>
   </div>
@@ -254,14 +255,12 @@
     <div class="drawer-header"><strong>Nursery & Sync</strong><button class="btn btn-small" id="btn-close-right">&times;</button></div>
     <div class="drawer-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn btn-accent" id="btn-export-backup" style="justify-content: flex-start;">
-           <!-- Shovel Export Icon -->
-           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M2 22l7-7m-2-2l7-7a2 2 0 0 1 2.8 0l1.4 1.4a2 2 0 0 1 0 2.8l-7 7l-2-2z"/><path d="M6 16l2 2"/></svg> Export Backup (.json)
-        </button>
-        <button class="btn" id="btn-import-backup" style="justify-content: flex-start;">
-           <!-- Seedling Import Icon -->
-           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M12 2C7 7 6 13 12 22c6-9 5-15 0-20z"/></svg> Import Backup File
-        </button>
+        <button class="btn btn-accent" id="btn-export-backup" style="justify-content: flex-start; margin-bottom: 8px;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M2 22v-4l5-5"/><path d="M2 22h4l5-5"/><path d="M7 13l4 4"/><path d="M9 15l10-10"/><path d="M16 2l6 6"/></svg> Export JSON Backup
+</button>
+<button class="btn" id="btn-import-backup" style="justify-content: flex-start;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M12 22v-8"/><path d="M12 18c-3-1-4-4-2-6c2-2 4 1 2 6"/><path d="M12 16c3-1 4-4 2-6c-2-2-4 1-2 6"/></svg> Import JSON Backup
+</button>
         <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
@@ -832,32 +831,36 @@
 
       function getNodeIcon(type) {
         switch (type) {
-          case 'trunk':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M12 3v18M8 21h8M7 7h10"/></svg>`;
-          case 'branch':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.2"><path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/></svg>`;
-          case 'leaf':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`;
-          case 'fruit':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.2"><circle cx="12" cy="14" r="7"/><path d="M12 7V3m0 0c2 0 4 1 4 3"/></svg>`;
-          case 'seed':
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.2"><path d="M12 2C7 7 6 13 12 22c6-9 5-15 0-20z"/></svg>`;
-          default:
-            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>`;
+            case 'trunk':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#845309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18c0 1.5 5 1.5 5 1.5s5 0 5-1.5v-6c0-1.5-5-1.5-5-1.5s-5 0-5 1.5z"/><ellipse cx="12" cy="10.5" rx="5" ry="1.5"/></svg>';
+            case 'branch':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l10-10M11 13l4 4"/></svg>';
+            case 'leaf':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5-3 8-8 8-12a10 10 0 0 0-10-10C8 2 4 6 4 10c0 4 3 9 8 12z"/><path d="M12 2v20"/></svg>';
+            case 'fruit':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-1-1-3-1-4 1c-1 2-1 4 0 6c1.5 2.5 4 4 4 4s2.5-1.5 4-4c1-2 1-4 0-6c-1-2-3-2-4-1z" fill="#EF4444"/><path d="M12 6V3" stroke="#8B4513" stroke-width="2"/></svg>';
+            case 'seed':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-8"/><path d="M12 18c-3-1-4-4-2-6c2-2 4 1 2 6"/><path d="M12 16c3-1 4-4 2-6c-2-2-4 1-2 6"/></svg>';
+            case 'pinecone':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 0-3 3-3 6 0 2-2 3-2 5 0 2 1 3 3 4 1 2 3 3 4 3s3-1 4-3c2-1 3-2 3-4 0-2-2-3-2-5 0-3-1-6-3-6z"/><path d="M12 2v18M8 12l8 2M8 8l8 2M8 16l8 2"/></svg>';
+            case 'acorn':
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10v2c0 3 2 6 4 6s4-3 4-6v-2z"/><path d="M6 10h12v-2a4 4 0 0 0-8 0h-4z"/><path d="M12 4v2"/></svg>';
+            default:
+                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>';
         }
-      }
+    }
 
       function getTreeIcon(species) {
         switch (species) {
-          case 'Oak':
-            // Redesigned Oak Canopy (No horizontal base line)
-            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#38BDF8" stroke-width="2"><path d="M24 44V26" stroke-width="4"/><path d="M24 12A10 10 0 0 0 12 22A10 10 0 0 0 24 32A10 10 0 0 0 36 22A10 10 0 0 0 24 12Z"/></svg>`;
+case 'Oak':
+            // Redesigned Oak Canopy (Sprawling branches)
+            return '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-6" /><path d="M12 16c-2-2-5-1-7-3c-1-1-1-3 1-3c2 0 3 2 5 2" /><path d="M12 16c2-2 5-1 7-3c1-1 1-3-1-3c-2 0-3 2-5 2" /><path d="M12 16v-6c-2-2-4-2-4-5c0-1.5 1-2 2-2s2 1 2 2" /><path d="M12 10c2-2 4-2 4-5c0-1.5-1-2-2-2s-2 1-2 2" /></svg>';
           case 'Willow':
             // Removed horizontal line
             return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#10B981" stroke-width="2"><path d="M24 44V22"/><path d="M24 12c-10 0-14 8-14 20M24 12c10 0 14 8 14 20M24 10c-6 4-8 12-8 22M24 10c6 4 8 12 8 22"/></svg>`;
           case 'Apple':
-            // Redesigned Apple (No horizontal base line)
-            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M24 44V26" stroke-width="4"/><path d="M24 12A10 10 0 0 0 12 22A10 10 0 0 0 24 32A10 10 0 0 0 36 22A10 10 0 0 0 24 12Z"/><circle cx="18" cy="18" r="2" fill="#F59E0B"/><circle cx="30" cy="20" r="2" fill="#F59E0B"/><circle cx="23" cy="25" r="2" fill="#F59E0B"/></svg>`;
+            // Redesigned Apple (Bush on a stick with one red apple)
+            return '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-8" /><path d="M9 14c-3.5 0-4.5-3-3-5c0-3 3-5 6-5s6 2 6 5c1.5 2 .5 5-3 5" /><circle cx="15" cy="15" r="2" fill="#EF4444" stroke="none" /></svg>';
           case 'Pine':
           default:
             // Removed horizontal line
@@ -879,7 +882,7 @@
         const tree = getTree();
 
         if (state.viewMode === 'forest') {
-          document.getElementById('left-title').innerText = 'Forest Directory';
+          document.getElementById('left-title').innerText = 'Tree Directory';
           const items = [...(forest.trees || [])].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
           items.forEach(t => {
             const createRow = () => {
@@ -1605,21 +1608,43 @@
 
       let pendingTemplateTitle = "";
       function buildTemplateLibrary() {
-        const list = document.getElementById('list-templates'); list.innerHTML = '';
+        const list = document.getElementById('list-templates');
+        list.innerHTML = '';
         
-        // The 100 Free Templates
-        const freeCats = {
-          "Personal Organization": ["Daily To-Do List", "Weekly Review", "Brain Dump / Idea Inbox", "Habit Tracker", "Morning Routine", "Evening Wind-down", "Monthly Goals", "Personal Vision Board", "Subscriptions Index", "Reading List & Notes"],
-          "Health & Wellness": ["Workout Routine", "Meal Prep & Grocery List", "Calorie/Macro Tracker", "Sleep & Mood Log", "Marathon Training Plan", "Yoga Pose Flow", "Medical History & Doctors", "Water Intake Challenge", "Mindfulness Journal", "Supplement Schedule"],
-          "Home & Household": ["Spring Cleaning Checklist", "Home Maintenance Schedule", "Emergency Evacuation Plan", "Moving Packing List", "Pantry & Freezer Inventory", "Pet Care & Vet Records", "Utility Bills Tracker", "Interior Design Moodboard", "Garden Planting Map", "Car Maintenance Log"],
-          "Work & Career": ["Meeting Minutes & Action Items", "Project Brainstorm", "Resume & Portfolio Builder", "Interview Prep", "Weekly Work Sprint", "Client CRM", "Freelance Invoice Tracker", "Performance Review Prep", "Professional Networking Rolodex", "New Job Onboarding"],
-          "Travel & Events": ["Weekend Getaway Itinerary", "International Travel Checklist", "Birthday Party Planner", "Holiday Gift Guide", "Road Trip Route & Stops", "Camping Gear Inventory", "Dinner Party Menu & Prep", "Backpacking Europe Itinerary", "Wedding Guest List", "Travel Inspiration Board"],
-          "Finance & Budgeting": ["Monthly Household Budget", "Debt Snowball Tracker", "Tax Prep Checklist", "Holiday Spending Tracker", "Savings Goal Milestone", "Investment Portfolio Map", "Side Hustle Idea Board", "Expense Reimbursement Log", "Subscription Audit", "Future Purchases Wishlist"],
-          "Learning & Education": ["Semester Class Schedule", "Essay Outline", "Language Learning Vocab", "Study Guide & Flashcards", "Final Exam Prep Timeline", "Thesis Topic Brainstorm", "Online Course Tracker", "Research Paper Citations", "Group Project Task Delegation", "Lecture Notes Organizer"],
-          "Creative Hobbies": ["Knitting/Crochet Pattern Log", "DIY Woodworking Project", "Scrapbook Idea Board", "Short Story Character Web", "Photography Shoot Planner", "30-Day Drawing Challenge", "Blog Post Pipeline", "YouTube Video Script Outline", "Recipe Creation & Tweaks", "Podcasting Interview Questions"],
-          "Social & Relationships": ["Family Birthdays & Anniversaries", "Date Night Ideas", "Kids' Chore Chart", "Baby Name Shortlist", "Roommate Agreement & Rules", "Book Club Discussion Guide", "Holiday Card Mailing List", "Neighborhood Block Party", "Family Reunion Logistics", "Shared Grocery & Errands"],
-          "Technology & Gaming": ["PC Build Parts List", "Video Game Backlog Tracker", "D&D Character Sheet", "Smart Home Setup", "App Development Brainstorm", "Website Redesign Tasks", "Data Backup Schedule", "Software Subscription Keys", "MMO Raid Strategy", "Board Game Collection & Ratings"]
-        };
+        // Check if the templates file loaded correctly
+        if (!window.SYLVA_TEMPLATES) {
+            list.innerHTML = '<div style="color:red; text-align:center;">Templates failed to load.</div>';
+            return;
+        }
+
+        window.SYLVA_TEMPLATES.forEach(tpl => {
+            const el = document.createElement('div');
+            el.className = 'directory-item';
+            el.innerHTML = `
+                <div>
+                    <div style="font-weight:600; color:var(--text-main);">${escapeHTML(tpl.title)}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">${escapeHTML(tpl.category)} &bull; ${escapeHTML(tpl.type)} Tree</div>
+                </div>
+                <button class="btn btn-small">Load</button>
+            `;
+            el.querySelector('button').addEventListener('click', () => {
+                const newTree = {
+                    id: 'tree_' + Date.now(),
+                    title: tpl.title,
+                    type: tpl.type,
+                    x: Math.random() * 800 - 400,
+                    y: Math.random() * 800 - 400,
+                    season: 'Spring',
+                    nodes: tpl.nodes.map(n => ({...n, id: n.id + '_' + Date.now()}))
+                };
+                state.trees.push(newTree);
+                saveData(); render();
+                document.getElementById('modal-templates').classList.remove('open');
+                showAppAlert(`Template loaded: ${tpl.title}`);
+            });
+            list.appendChild(el);
+        });
+    }
 
         const isVip = localStorage.getItem('sylva_is_vip') === 'true';
 
@@ -1682,24 +1707,24 @@
           const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160, y: 160, nodes: newNodes };
           const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
           state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = newTree.id; state.viewMode = 'tree';
-          document.getElementById('modal-template-prompt').classList.remove('open'); saveData(); render();
-        };
-      }
-
-      function centerOn(x, y) {
+          saveData(); render();
+    }
+    
+    function centerOn(x, y) {
         state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform();
       }
 
       function openInspector(node) {
-        setTimeout(() => { 
-          document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
-          document.getElementById('node-input-type').value = node.type; 
+        setTimeout(() => {
+          document.getElementById('node-input-title').value = node.title;
+          document.getElementById('node-input-desc').value = node.desc || '';
+          document.getElementById('node-input-type').value = node.type;
           const typeOpt = document.querySelector(`#node-type-dropdown .custom-opt[data-val="${node.type}"]`);
-          if (typeOpt) { document.getElementById('node-type-trigger').querySelector('span').innerText = typeOpt.innerText; } 
+          if (typeOpt) { document.getElementById('node-type-trigger').querySelector('span').innerText = typeOpt.innerText; }
           else if (node.type === 'trunk') { document.getElementById('node-type-trigger').querySelector('span').innerText = 'Trunk (Root)'; }
 
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
-          
+
           document.getElementById('node-input-start').value = node.startDate || '';
           document.getElementById('node-input-hours').value = node.estHours || '';
           document.getElementById('node-input-assignee').value = node.assignee || '';
@@ -1707,15 +1732,25 @@
           const t = getTree();
           document.getElementById('willow-actions').style.display = (t.type === 'Willow' && node.type === 'branch') ? 'block' : 'none';
           document.getElementById('oak-actions').style.display = (t.type === 'Oak' && node.acornTarget) ? 'block' : 'none';
+
           if (node.acornTarget) {
             const tNode = getNode(node.acornTarget);
-            document.getElementById('btn-acorn-snap').style.display = 'inline-flex'; document.getElementById('acorn-no-target').style.display = 'none';
-            document.getElementById('acorn-target-name').innerText = tNode ? tNode.title : "Missing Node";
+            document.getElementById('btn-acorn-snap').style.display = 'inline-flex';
+            document.getElementById('acorn-no-target').style.display = 'none';
+            document.getElementById('acorn-target-name').innerText = tNode ? tNode.title : 'Missing Node';
             document.getElementById('btn-acorn-snap').onclick = () => {
-              if (tNode) { centerOn(tNode.x, tNode.y); document.getElementById('modal-inspector').classList.remove('open'); setTimeout(() => { state.selectedId = tNode.id; renderTreeSelections(); }, 150); }
+              if (tNode) {
+                centerOn(tNode.x, tNode.y);
+                document.getElementById('modal-inspector').classList.remove('open');
+                setTimeout(() => openInspector(tNode), 400);
+              }
             };
+          } else {
+            document.getElementById('btn-acorn-snap').style.display = 'none';
+            document.getElementById('acorn-no-target').style.display = 'inline';
+            document.getElementById('acorn-target-name').innerText = '';
           }
-          
+
           document.getElementById('btn-willow-lengthen').onclick = () => {
             const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: node.x + (Math.random() * 40 - 20), y: node.y + 160, pinned: false };
             t.nodes.push(newNode); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value;
@@ -1723,28 +1758,28 @@
             saveData(); render(); openInspector(newNode);
           };
 
-          if (t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = "Pine Cone (Checklist)"; }
-          else if (t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = "Acorn (Link)"; }
-          else { document.getElementById('opt-node-fruit').innerText = "Fruit (Task/Deliverable)"; }
+          if (t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = 'Pine Cone (Checklist)'; }
+          else if (t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = 'Acorn (Link)'; }
+          else { document.getElementById('opt-node-fruit').innerText = 'Fruit (Task/Deliverable)'; }
 
-          document.getElementById('btn-save-node').onclick = (e) => { 
+          document.getElementById('btn-save-node').onclick = (e) => {
             e.preventDefault();
             node.title = document.getElementById('node-input-title').value.trim() || node.title; node.desc = document.getElementById('node-input-desc').value;
-            if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; 
+            if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
             node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
-            document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+            document.getElementById('modal-inspector').classList.remove('open'); render(); saveData();
           };
           const bD = document.getElementById('btn-delete-node');
           bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex';
-          bD.onclick = (e) => { 
-            e.preventDefault(); 
+          bD.onclick = (e) => {
+            e.preventDefault();
             const treeToEdit = getTree(); const idsToDelete = new Set([node.id]); let added = true;
             while (added) {
               added = false;
               treeToEdit.nodes.forEach(n => { if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) { idsToDelete.add(n.id); added = true; } });
             }
-            treeToEdit.nodes = treeToEdit.nodes.filter(n => !idsToDelete.has(n.id)); 
-            document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+            treeToEdit.nodes = treeToEdit.nodes.filter(n => !idsToDelete.has(n.id));
+            document.getElementById('modal-inspector').classList.remove('open'); render(); saveData();
           };
           document.getElementById('modal-inspector').classList.add('open');
         }, 120);
@@ -1777,10 +1812,9 @@
         fruits.forEach(f => {
           const li = document.createElement('li'); li.className = 'directory-item';
           li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`;
-          li.addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); openInspector(f); });
+          li.querySelector('button').addEventListener('click', () => openInspector(f));
           list.appendChild(li);
         });
-        document.getElementById('modal-season').classList.add('open');
       }
 
       function initTutorial() {
@@ -1789,26 +1823,9 @@
         }
       }
 
-      // Animation Engine Text Synchronizer
-      setInterval(() => {
-        const t = document.getElementById('anim-text-display');
-        if(t && document.getElementById('modal-tut-animation').classList.contains('open')) {
-          const time = (Date.now() % 40000) / 1000;
-          if(time < 4.0) t.innerText = "1. Use 'Grow' to plant Trees and Nodes.";
-          else if(time < 8.0) t.innerText = "2. Double-Click a Tree or Node to open details.";
-          else if(time < 12.0) t.innerText = "3. Long-Press a Tree to enter its workspace.";
-          else if(time < 16.0) t.innerText = "4. Drag the PIP Minimap to navigate fast.";
-          else if(time < 20.0) t.innerText = "5. Set Season and Harvest completed tasks.";
-          else if(time < 24.0) t.innerText = "6. View chronological Executive Timeline.";
-          else if(time < 28.0) t.innerText = "7. Highlight Critical Paths.";
-          else if(time < 32.0) t.innerText = "8. Navigate nested trees via Breadcrumbs.";
-          else if(time < 36.0) t.innerText = "9. Open Left Directory for saved files & Auto Tidy.";
-          else t.innerText = "10. Open Right Nursery for JSON Backup/Sync.";
-        }
-      }, 100);
-
       init();
     })();
   </script>
+<script src="./templates.js"></script>
 </body>
 </html>
