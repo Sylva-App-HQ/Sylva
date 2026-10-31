@@ -1,3 +1,5 @@
 
 .stfolder/
 .stversions/
+generate_templates.py
+check_models.py
