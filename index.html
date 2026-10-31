@@ -48,7 +48,7 @@
     .nav-right { display: flex; align-items: center; z-index: 4; position: relative; gap: 6px; flex-shrink: 0; }
 
     /* Relocated Timeline Button */
-    #timeline-btn-container { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
+    #timeline-btn-container { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
 
     #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
     #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
@@ -486,7 +486,7 @@
   </div>
 
 <!-- TUTORIAL ANIMATION MODAL -->
-    <div id="modal-tut-animation" class="modal-overlay" style="display: none; z-index: 9999;">
+    <div id="modal-tut-animation" class="modal-overlay" style="z-index: 9999;">
       <style>
         #tut-anim-square { width: 300px; height: 300px; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 12px; position: relative; overflow: hidden; margin: 0 auto 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
         
@@ -1608,7 +1608,7 @@ case 'Oak':
       }
 
       let pendingTemplateTitle = "";
-      function buildTemplateLibrary() {
+    function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
         list.innerHTML = '';
         
@@ -1617,8 +1617,12 @@ case 'Oak':
             return;
         }
 
+        const isVip = localStorage.getItem('sylva_is_vip') === 'true' || state.premiumUnlocked;
+
         window.SYLVA_TEMPLATES.forEach(tpl => {
             const isPremium = tpl.tier === 'premium';
+            const locked = isPremium && !isVip;
+            
             const el = document.createElement('div');
             el.className = 'directory-item';
             el.innerHTML = `
@@ -1626,41 +1630,26 @@ case 'Oak':
                     <div style="font-weight:600; color:var(--text-main);">${escapeHTML(tpl.title)} ${isPremium ? '💎' : ''}</div>
                     <div style="font-size:11px; color:var(--text-muted);">${escapeHTML(tpl.category)} &bull; ${escapeHTML(tpl.type)} Tree</div>
                 </div>
-                <button class="btn btn-small" ${isPremium && !state.premiumUnlocked ? 'disabled' : ''}>
-                    ${isPremium && !state.premiumUnlocked ? '$1 Unlock' : 'Load'}
+                <button class="btn btn-small ${locked ? '' : 'btn-accent'}" style="${locked ? 'border-color:#F59E0B; color:#F59E0B;' : ''}">
+                    ${locked ? 'Unlock' : 'Load'}
                 </button>
             `;
             
             el.querySelector('button').addEventListener('click', () => {
-                if (isPremium && !state.premiumUnlocked) {
-                    const code = prompt("Enter your Tree Hugger unlock code:");
-                    if (code === "FOREST2026") {
-                        state.premiumUnlocked = true;
-                        saveData();
-                        showAppAlert("Premium Unlocked! Click Load again.");
-                    } else if (code) {
-                        showAppAlert("Invalid code. Get yours at yourstore.gumroad.com");
-                    }
+                if (locked) {
+                    document.getElementById('modal-purchase-template').classList.add('open');
+                    document.getElementById('modal-templates').classList.remove('open');
                     return;
                 }
-                const newTree = {
-                    id: 'tree_' + Date.now(),
-                    title: tpl.title,
-                    type: tpl.type,
-                    x: Math.random() * 800 - 400,
-                    y: Math.random() * 800 - 400,
-                    season: 'Spring',
-                    nodes: tpl.nodes.map(n => ({...n, id: n.id + '_' + Date.now()}))
-                };
-                state.trees.push(newTree);
-                saveData(); render();
+                
+                window.pendingTemplateData = tpl;
+                document.getElementById('tpl-prompt-name').innerText = tpl.title;
+                document.getElementById('modal-template-prompt').classList.add('open');
                 document.getElementById('modal-templates').classList.remove('open');
-                showAppAlert(`Template loaded: ${tpl.title}`);
             });
             list.appendChild(el);
         });
 
-        const isVip = localStorage.getItem('sylva_is_vip') === 'true';
         if (!isVip) {
             const vipBtn = document.createElement('div');
             vipBtn.style.padding = '14px'; vipBtn.style.textAlign = 'center';
@@ -1669,6 +1658,53 @@ case 'Oak':
             const vBtn = vipBtn.querySelector('#btn-open-vip');
             if (vBtn) vBtn.addEventListener('click', () => { document.getElementById('modal-vip').classList.add('open'); });
         }
+
+        // Translate Python JSON structures into Sylva JavaScript IDs
+        function processNodes(tplNodes, startX, startY) {
+            const idMap = {};
+            const suffix = '_' + Date.now();
+            tplNodes.forEach(n => idMap[n.id] = n.id + suffix);
+            
+            return tplNodes.map(n => {
+                const oldParent = n.parent !== undefined ? n.parent : n.parentId;
+                return {
+                    id: idMap[n.id],
+                    title: n.title,
+                    desc: n.desc || '',
+                    type: n.type,
+                    parentId: oldParent ? idMap[oldParent] : null,
+                    x: startX + (Math.random() * 80 - 40),
+                    y: startY + (Math.random() * 80 - 40),
+                    pinned: false,
+                    harvested: false
+                };
+            });
+        }
+
+        document.getElementById('btn-close-template-prompt').onclick = () => document.getElementById('modal-template-prompt').classList.remove('open');
+        
+        document.getElementById('btn-tpl-current').onclick = () => {
+            if (!window.pendingTemplateData) return;
+            const tpl = window.pendingTemplateData;
+            const newTree = { id: 't_' + Date.now(), title: tpl.title, type: tpl.type, season: 'Spring', pinned: false, x: 160 + (getForest().trees.length * 150), y: 160, nodes: processNodes(tpl.nodes, 260, 120) };
+            getForest().trees.push(newTree); 
+            state.selectedId = newTree.id; 
+            document.getElementById('modal-template-prompt').classList.remove('open'); 
+            saveData(); render();
+        };
+        
+        document.getElementById('btn-tpl-new').onclick = () => {
+            if (!window.pendingTemplateData) return;
+            const tpl = window.pendingTemplateData;
+            const newTree = { id: 't_' + Date.now(), title: tpl.title, type: tpl.type, season: 'Spring', pinned: false, x: 160, y: 160, nodes: processNodes(tpl.nodes, 260, 120) };
+            const newF = { id: 'forest-' + Date.now(), title: tpl.title, pinned: false, trees: [newTree] };
+            state.forests.push(newF); 
+            state.activeForestId = newF.id; 
+            state.activeTreeId = newTree.id; 
+            state.viewMode = 'tree';
+            document.getElementById('modal-template-prompt').classList.remove('open'); 
+            saveData(); render();
+        };
       }
     
     function centerOn(x, y) {
