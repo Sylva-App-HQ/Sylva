@@ -32,7 +32,7 @@
     .custom-opt { width: 100%; border: none; border-bottom: 1px solid var(--border-subtle); background: transparent; color: var(--text-main); padding: 10px 16px; text-align: left; font-size: 12px; font-weight: 600; cursor: pointer; }
     .custom-opt:last-child { border-bottom: none; }
     .custom-opt:hover { background: var(--bg-surface-elevated); }
-    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 160px; z-index: 100; }
+    #grow-dropdown { top: 44px; left: 50%; transform: translateX(-50%); width: 170px; z-index: 100; }
     
     .custom-select-trigger { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
     .custom-select-container { position: relative; width: 100%; }
@@ -40,11 +40,15 @@
 
     .nav-bar { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 6px 12px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); height: 42px; position: relative; }
     .nav-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; overflow: hidden; }
-    .breadcrumb-text { font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; flex: 1; -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); mask-image: linear-gradient(to right, black 85%, transparent 100%); }
+    
+    /* Improved Breadcrumb Fade */
+    .breadcrumb-text { font-size: 12px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap; flex: 1; -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%); mask-image: linear-gradient(to right, black 80%, transparent 100%); }
     .breadcrumb-crumb { cursor: pointer; position: relative; z-index: 2; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; }
     .breadcrumb-crumb:hover { background: var(--bg-surface-elevated); }
-    .breadcrumb-fade { display: none; }
-    .nav-right { display: flex; align-items: center; z-index: 4; position: relative; gap: 6px; }
+    .nav-right { display: flex; align-items: center; z-index: 4; position: relative; gap: 6px; flex-shrink: 0; }
+
+    /* Relocated Timeline Button */
+    #timeline-btn-container { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
 
     #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
     #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
@@ -64,7 +68,7 @@
     #canvas-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
     #tree-layer, #forest-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto; }
     
-    #timeline-layer { position: absolute; top: 60px; left: 0; width: 100%; height: calc(100% - 60px); background: var(--bg-canvas); pointer-events: auto; z-index: 20; padding: 12px 24px 80px 24px; overflow-y: auto; display: none; }
+    #timeline-layer { position: absolute; top: 110px; left: 0; width: 100%; height: calc(100% - 110px); background: var(--bg-canvas); pointer-events: auto; z-index: 20; padding: 12px 24px 80px 24px; overflow-y: auto; display: none; }
 
     .node-card { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 14px; width: 190px; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
     .node-card.selected { border-color: #10B981; box-shadow: 0 0 16px var(--glow-select); z-index: 10; }
@@ -92,42 +96,61 @@
     .drawer-header { padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
     .drawer-body { padding: 14px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 14px; }
     .directory-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-    .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .directory-item { padding: 8px 10px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 6px; }
 
-    .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; touch-action: none; }
+    .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; touch-action: none; }
     .modal-overlay.open { display: flex; }
-    .modal-card { width: 480px; max-width: 90vw; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 12px; display: flex; flex-direction: column; overflow: visible; pointer-events: auto; max-height: 90vh; }
+    .modal-card { width: 480px; max-width: 90vw; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 12px; display: flex; flex-direction: column; overflow: visible; pointer-events: auto; max-height: 90vh; box-shadow: 0 12px 32px rgba(0,0,0,0.8); }
     .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; overflow-x: hidden; position: relative; }
     .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; flex-shrink: 0; }
     .field-group { display: flex; flex-direction: column; gap: 6px; position: relative; }
     .field-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-    .field-group input, .field-group textarea { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; }
+    .field-group input, .field-group textarea { background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none; user-select: text; -webkit-user-select: text; }
 
     #pip-minimap { position: absolute; bottom: 12px; left: 12px; width: 140px; height: 140px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 8px; z-index: 25; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.5); pointer-events: auto; cursor: crosshair; display: flex; align-items: center; justify-content: center; }
     #pip-canvas { width: 100%; height: 100%; display: block; }
     
-    /* Modals and Help */
-    .feature-accordion { margin-top: 12px; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
-    .feature-accordion-item { border-bottom: 1px solid var(--border-subtle); }
-    .feature-accordion-item:last-child { border-bottom: none; }
-    .feature-accordion-header { padding: 10px 14px; background: var(--bg-surface-elevated); cursor: pointer; font-size: 12px; font-weight: 600; display: flex; justify-content: space-between; }
-    .feature-accordion-content { padding: 12px 14px; font-size: 11px; color: var(--text-muted); display: none; background: var(--bg-canvas); line-height: 1.5; }
-    
-    #tutorial-pointer-toast { position: fixed; top: 120px; left: 340px; background: var(--accent); color: #000; padding: 10px 16px; border-radius: 8px; font-weight: bold; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: none; opacity: 0; transition: opacity 0.3s ease; }
-    #tutorial-pointer-toast::after { content: ''; position: absolute; left: -8px; top: 12px; border-width: 8px 8px 8px 0; border-style: solid; border-color: transparent var(--accent) transparent transparent; }
-
     .acorn-btn { padding: 4px 8px; background: rgba(180, 83, 9, 0.2); border: 1px solid #B45309; color: #B45309; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
     .willow-btn { padding: 4px 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--node-leaf); color: var(--node-leaf); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; margin-top: 8px; }
     
     #overlay-acorn-target { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 55; display: none; align-items: center; justify-content: center; pointer-events: none; }
     #overlay-acorn-target span { background: var(--bg-surface); padding: 12px 24px; border-radius: 8px; border: 1px solid #B45309; color: #B45309; font-weight: bold; }
 
+    /* Animation Engine CSS for Tutorial Overlay */
+    .anim-square { width: 100%; max-width: 400px; aspect-ratio: 1/1; background: var(--bg-canvas); border-radius: 8px; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    
+    @keyframes animGrowTree { 0%, 1% { transform: scale(0); opacity: 0; } 3%, 23% { transform: scale(1); opacity: 1; } 25%, 29% { transform: scale(1.4); opacity: 1; } 30%, 100% { transform: scale(1); opacity: 1; } }
+    @keyframes animInspectorPop { 0%, 12% { opacity: 0; transform: scale(0.8); } 13%, 19% { opacity: 1; transform: scale(1); } 20%, 100% { opacity: 0; transform: scale(0.8); } }
+    @keyframes animPulseTree { 0%, 20% { filter: brightness(1); } 22%, 26% { filter: brightness(1.5) drop-shadow(0 0 10px var(--accent)); } 30%, 100% { filter: brightness(1); } }
+    @keyframes animPanWorld { 0%, 30% { transform: translate(0,0); } 32%, 38% { transform: translate(-30px, -20px); } 40%, 100% { transform: translate(0,0); } }
+    @keyframes animHarvestDrop { 0%, 40% { transform: translateY(0); opacity: 1; } 43%, 48% { transform: translateY(40px); opacity: 0; } 50%, 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes animTimelineSlide { 0%, 50% { transform: translateY(100%); opacity: 0; } 52%, 58% { transform: translateY(0); opacity: 1; } 60%, 100% { transform: translateY(100%); opacity: 0; } }
+    @keyframes animCriticalGlow { 0%, 60% { border-color: #33485E; } 62%, 68% { border-color: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); } 70%, 100% { border-color: #33485E; } }
+    @keyframes animBreadcrumb { 0%, 70% { background: transparent; } 72%, 78% { background: var(--bg-surface-elevated); } 80%, 100% { background: transparent; } }
+    @keyframes animDrawerLeft { 0%, 80% { transform: translateX(-100%); } 82%, 88% { transform: translateX(0); } 90%, 100% { transform: translateX(-100%); } }
+    @keyframes animDrawerRight { 0%, 90% { transform: translateX(100%); } 92%, 98% { transform: translateX(0); } 100% { transform: translateX(100%); } }
+
+    /* Virtual Cursor mapped 0-40s (0-100%) */
+    @keyframes animCursor {
+        0% { top: 50%; left: 50%; opacity: 0; } 1% { opacity: 1; }
+        3% { top: 10%; left: 50%; transform: scale(0.8); } 5% { transform: scale(1); } /* Grow */
+        11% { top: 50%; left: 50%; transform: scale(1); } 12% { transform: scale(0.7); } 13% { transform: scale(1); } 14% { transform: scale(0.7); } 15% { transform: scale(1); } /* Dbl Click */
+        21% { top: 50%; left: 50%; transform: scale(1); } 23% { transform: scale(0.7); } 27% { transform: scale(1); } /* Long Press */
+        31% { top: 85%; left: 15%; transform: scale(1); } 33% { top: 80%; left: 20%; transform: scale(0.8); } 37% { transform: scale(1); } /* PIP Drag */
+        41% { top: 85%; left: 85%; transform: scale(1); } 43% { transform: scale(0.8); } 45% { transform: scale(1); } /* Harvest */
+        51% { top: 20%; left: 50%; transform: scale(1); } 53% { transform: scale(0.8); } 55% { transform: scale(1); } /* Timeline */
+        61% { top: 85%; left: 85%; transform: scale(1); } 63% { transform: scale(0.8); } 65% { transform: scale(1); } /* Critical Path */
+        71% { top: 20%; left: 20%; transform: scale(1); } 73% { transform: scale(0.8); } 75% { transform: scale(1); } /* Breadcrumb */
+        81% { top: 10%; left: 10%; transform: scale(1); } 83% { transform: scale(0.8); } 85% { transform: scale(1); } /* Left Nav */
+        91% { top: 10%; left: 90%; transform: scale(1); } 93% { transform: scale(0.8); } 95% { transform: scale(1); } /* Right Nav */
+        99% { opacity: 1; } 100% { top: 50%; left: 50%; opacity: 0; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Custom Alert Modal -->
+  <!-- App Alerts & Toasts -->
   <div class="modal-overlay" id="modal-alert" style="z-index: 10005;">
     <div class="modal-card" style="width: 320px; text-align: center;">
       <div class="modal-header"><h3>Notification</h3><button class="btn btn-small" onclick="document.getElementById('modal-alert').classList.remove('open')">&times;</button></div>
@@ -141,8 +164,19 @@
     <button class="btn btn-small" style="background:#000; color:#fff;" onclick="window.location.reload(true)">Reload</button>
   </div>
 
+  <div class="modal-overlay" id="modal-install-prompt" style="display:none; z-index: 2000; background: var(--bg-canvas);">
+    <div class="modal-card" style="text-align: center; border: none; padding: 30px; box-shadow: none; background: transparent;">
+      <div style="width: 80px; height: 80px; border: 2px solid var(--accent); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;"><svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg></div>
+      <h2 style="margin-bottom: 12px; color: var(--text-main);">Install Sylva</h2>
+      <p style="color: var(--text-muted); line-height: 1.5; margin-bottom: 24px;">Sylva is a high-speed, local-first workspace. Install it to your device to enable 100% offline access.</p>
+      <button class="btn btn-accent" id="btn-trigger-install" style="width: 100%; height: 44px; font-size: 14px; margin-bottom: 12px;">Install App</button>
+      <button class="btn" id="btn-continue-web" style="width: 100%; height: 44px; font-size: 14px; border: none; background: transparent;">Continue in Browser</button>
+    </div>
+  </div>
+
   <div id="overlay-acorn-target"><span>Select a node to link Acorn... (Tap to cancel)</span></div>
 
+  <!-- Header UI -->
   <header class="app-header">
     <div class="top-row">
       <div class="top-row-left"><button class="btn" id="btn-toggle-directory"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span id="label-directory">Nodes</span></button></div>
@@ -150,14 +184,14 @@
         <button class="btn btn-accent" id="btn-grow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg><span>Grow...</span></button>
         <div id="grow-dropdown" class="custom-dropdown">
           <div id="grow-opts-tree">
-            <button class="custom-opt btn-grow-opt" data-type="branch">... a Branch (Group)</button>
-            <button class="custom-opt btn-grow-opt" data-type="leaf">... a Leaf (Note)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-branch" data-type="branch">... a Branch (Group)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-leaf" data-type="leaf">... a Leaf (Note)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-fruit" data-type="fruit">... a Fruit (Task)</button>
-            <button class="custom-opt btn-grow-opt" data-type="seed">... a Seed (Link)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-seed" data-type="seed">... a Seed (Link)</button>
           </div>
           <div id="grow-opts-forest" style="display:none;">
-            <button class="custom-opt btn-grow-opt" data-type="tree">... a Tree</button>
-            <button class="custom-opt btn-grow-opt" data-type="forest">... a New Forest</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-tree" data-type="tree">... a Tree</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-forest" data-type="forest">... a New Forest</button>
           </div>
         </div>
       </div>
@@ -166,22 +200,21 @@
     <div class="nav-bar">
       <div class="nav-left">
         <button class="btn btn-small" id="btn-switch-context"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg><span>Up</span></button>
-        
         <div class="breadcrumb-text" id="breadcrumb-text"></div>
       </div>
-      <div class="breadcrumb-fade"></div>
       <div class="nav-right"><button class="btn btn-small btn-lock" id="btn-lock" title="Toggle Drag Lock"></button></div>
       <div id="apple-progress-bar"><div id="apple-progress-fill"></div></div>
     </div>
   </header>
-  <div id="timeline-btn-container" style="position: absolute; top: 62px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none;">
+
+  <!-- Extracted Timeline Button -->
+  <div id="timeline-btn-container">
     <button class="btn btn-small" id="btn-toggle-timeline" style="background: var(--bg-surface-elevated); box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Timeline</span>
     </button>
   </div>
 
-
-  <aside id="pip-minimap"><canvas id="pip-canvas"></canvas></aside>
+  <aside id="pip-minimap"><canvas id="pip-canvas" width="140" height="140"></canvas></aside>
 
   <div class="bottom-actions" id="bottom-actions-container">
     <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.15);">Harvest</button>
@@ -201,13 +234,19 @@
      <div id="timeline-content" style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px;"></div>
   </div>
 
+  <!-- Drawers -->
   <aside class="drawer" id="drawer-left">
     <div class="drawer-header"><strong id="left-title">Directory</strong><button class="btn btn-small" id="btn-close-left">&times;</button></div>
     <div class="drawer-body">
-      <button class="btn" id="btn-auto-tidy" style="width:100%; border-color:var(--border-strong); margin-bottom:8px;">Auto Tidy Nodes</button>
+      <button class="btn" id="btn-auto-tidy" style="width:100%; border-color:var(--border-strong); margin-bottom:8px;">Auto Tidy Grid</button>
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">PINNED</div><ul class="directory-list" id="list-pinned-left"></ul></div>
       <div><div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">ALL ITEMS (A-Z)</div><ul class="directory-list" id="list-atoz-left"></ul></div>
-      <button class="btn btn-accent" id="btn-open-help" style="width:100%; margin-top: 16px;">Help & Tutorial</button>
+      
+      <!-- New Help Button -->
+      <div style="margin-top:auto; padding-top:12px; display:flex; flex-direction:column; gap:8px;">
+         <div style="font-size:10px; text-align:center; color:var(--text-muted);">If you need it, it's here:</div>
+         <button class="btn btn-accent" id="btn-open-help" style="width:100%;">Help & Tutorial</button>
+      </div>
     </div>
   </aside>
 
@@ -216,10 +255,12 @@
     <div class="drawer-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <button class="btn btn-accent" id="btn-export-backup" style="justify-content: flex-start;">
-           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M2 22v-5l5-5 5 5-5 5z"/><path d="M9.5 14.5L16 8"/><path d="M14 4l6 6"/><path d="M17 7l3-3"/></svg> Export Backup (.json)
+           <!-- Shovel Export Icon -->
+           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M2 22l7-7m-2-2l7-7a2 2 0 0 1 2.8 0l1.4 1.4a2 2 0 0 1 0 2.8l-7 7l-2-2z"/><path d="M6 16l2 2"/></svg> Export Backup (.json)
         </button>
         <button class="btn" id="btn-import-backup" style="justify-content: flex-start;">
-           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2" style="margin-right:4px;"><path d="M12 2C7 7 6 13 12 22c6-9 5-15 0-20z"/></svg> Import Backup File
+           <!-- Seedling Import Icon -->
+           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M12 2C7 7 6 13 12 22c6-9 5-15 0-20z"/></svg> Import Backup File
         </button>
         <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
       </div>
@@ -237,7 +278,7 @@
     </div>
   </aside>
 
-  <!-- Node Inspector -->
+  <!-- Standard Modals -->
   <div class="modal-overlay" id="modal-inspector">
     <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3 id="inspect-header-title">Inspect Node</h3><button class="btn btn-small" id="btn-close-inspector">&times;</button></div>
@@ -276,7 +317,6 @@
     </div>
   </div>
 
-  <!-- Tree Inspector -->
   <div class="modal-overlay" id="modal-tree-inspector">
     <div class="modal-card" style="overflow:visible;">
       <div class="modal-header"><h3 id="tree-inspect-header">Inspect Tree</h3><button class="btn btn-small" id="btn-close-tree-inspector">&times;</button></div>
@@ -334,7 +374,7 @@
            <button class="btn btn-small" id="btn-inspect-basket">Inspect Basket</button>
         </div>
       </div>
-      <div class="modal-footer"><button class="btn" id="btn-season-done">Done</button></div>
+      <div class="modal-footer"><button class="btn btn-accent" id="btn-season-done">Done</button></div>
     </div>
   </div>
 
@@ -345,6 +385,7 @@
     </div>
   </div>
 
+  <!-- WebRTC Sync Modals -->
   <div class="modal-overlay" id="modal-sync-org">
     <div class="modal-card">
       <div class="modal-header"><h3>Join Organization Sync</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
@@ -367,6 +408,7 @@
     </div>
   </div>
 
+  <!-- Templates Modals -->
   <div class="modal-overlay" id="modal-templates">
     <div class="modal-card" style="height: 80vh;">
       <div class="modal-header"><h3>Template Library</h3><button class="btn btn-small" id="btn-close-templates">&times;</button></div>
@@ -386,6 +428,21 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-purchase-template">
+    <div class="modal-card" style="text-align: center;">
+      <div class="modal-header"><h3>Premium Template</h3><button class="btn btn-small" onclick="document.getElementById('modal-purchase-template').classList.remove('open')">&times;</button></div>
+      <div class="modal-body">
+        <div style="font-size:40px; margin-bottom:12px;">🌲</div>
+        <p style="font-size:13px; color:var(--text-main); line-height:1.5; margin-bottom: 12px;">This is a premium framework template. You can purchase it individually for $1, or become a Tree Hugger for $2 to unlock all 50+ premium templates forever!</p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1);" onclick="window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank');">Just This One Please! ($1)</button>
+          <button class="btn btn-accent" onclick="document.getElementById('modal-purchase-template').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open');">Hug a Tree & Get All of Them! ($2)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monetization Modals -->
   <div class="modal-overlay" id="modal-tree-hugger">
     <div class="modal-card">
       <div class="modal-header"><h3>Become a Tree Hugger</h3><button class="btn btn-small" id="btn-close-hugger">&times;</button></div>
@@ -393,12 +450,12 @@
         <p style="font-size:13px; color:var(--text-main); line-height:1.5;">Support Sylva's development and unlock premium features for a one-time payment of $2!</p>
         <ul style="font-size:12px; color:var(--text-muted); line-height:1.6; margin-left: 20px; margin-bottom: 8px;">
           <li>Unlock custom visual themes (Midnight Forest, Cherry Blossom)</li>
-          <li>Access to premium advanced templates</li>
+          <li>Access to all 50+ premium templates</li>
           <li>Our eternal gratitude!</li>
         </ul>
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <button class="btn" id="btn-pay-stripe" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Pay with Stripe</button>
-          <button class="btn" id="btn-pay-paypal" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M17 10h-2V8a2 2 0 00-2-2H9L7 20h3l1-4h3a4 4 0 000-8z"/></svg> Pay with PayPal</button>
+          <button class="btn" id="btn-pay-stripe" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Pay with Stripe ($2)</button>
+          <button class="btn" id="btn-pay-paypal" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M17 10h-2V8a2 2 0 00-2-2H9L7 20h3l1-4h3a4 4 0 000-8z"/></svg> Pay with PayPal ($2)</button>
         </div>
       </div>
     </div>
@@ -415,12 +472,12 @@
     </div>
   </div>
 
-    <!-- New Optional Tutorial & Help System -->
-  <div class="modal-overlay" id="modal-tutorial-prompt">
-    <div class="modal-card" style="width: 380px; text-align: center;">
-      <div class="modal-header" style="justify-content: center;"><h3>Welcome to Sylva!</h3></div>
+  <!-- NEW Tutorial Flow Modals -->
+  <div class="modal-overlay" id="modal-tut-prompt">
+    <div class="modal-card" style="width: 320px; text-align: center;">
+      <div class="modal-header"><h3>Welcome to Sylva</h3></div>
       <div class="modal-body">
-        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">Would you like a brief tutorial to learn the core features?</p>
+        <p style="font-size: 14px; color: var(--text-main); margin-bottom: 8px;">Would you like a brief tutorial?</p>
       </div>
       <div class="modal-footer" style="flex-direction: column; gap: 8px;">
         <button class="btn btn-accent" id="btn-tut-yes">Yes, show me!</button>
@@ -429,256 +486,1131 @@
     </div>
   </div>
 
-    <div class="modal-overlay" id="modal-tutorial-animation">
-    <div class="modal-card" style="width: 500px; max-width: 95vw;">
+  <div class="modal-overlay" id="modal-tut-animation">
+    <div class="modal-card" style="width: 440px; max-width: 95vw;">
       <div class="modal-header"><h3>How to use Sylva</h3><button class="btn btn-small" id="btn-close-tut-anim">&times;</button></div>
-      <div class="modal-body" style="text-align: center; padding: 12px;">
-        <div style="width: 100%; aspect-ratio: 1/1; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; overflow: hidden; position: relative;">
-           <style>
-             /* Base animations */
-             @keyframes animGrowTree { 
-                 0%, 1% { transform: scale(0); opacity: 0; } 
-                 3%, 23% { transform: scale(1); opacity: 1; } 
-                 25%, 29% { transform: scale(1.4); opacity: 1; } 
-                 30%, 100% { transform: scale(1); opacity: 1; } 
-             }
-             @keyframes animPan { 0%, 31% { transform: translate(0, 0); } 34%, 37% { transform: translate(-30px, -20px); } 40%, 100% { transform: translate(0, 0); } }
-             @keyframes animHarvest { 
-                 0%, 5% { transform: scale(0); opacity: 0; } 
-                 8% { transform: scale(1.2); opacity: 1; } 
-                 10%, 43% { transform: scale(1); opacity: 1; } 
-                 45% { transform: scale(1.3); opacity: 1; } 
-                 47%, 100% { transform: scale(0); opacity: 0; } 
-             }
-             @keyframes growTrunk { 0%, 1% { height: 0; opacity: 0; } 4% { height: 30px; opacity: 1; } 100% { height: 30px; opacity: 1; } }
-             @keyframes growBranch { 0%, 4% { width: 0; opacity: 0; } 7% { width: 50px; opacity: 1; } 100% { width: 50px; opacity: 1; } }
-             @keyframes popLeaf { 0%, 7% { transform: scale(0); opacity: 0; } 9% { transform: scale(1.2); opacity: 1; } 11%, 100% { transform: scale(1); opacity: 1; } }
-             
-             @keyframes animTimeline { 0%, 53% { opacity: 0; pointer-events: none; } 54%, 58% { opacity: 1; pointer-events: auto; } 60%, 100% { opacity: 0; pointer-events: none; } }
-             @keyframes animCP { 0%, 63% { border-color: #33485E; } 64%, 68% { border-color: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); } 70%, 100% { border-color: #33485E; } }
-             @keyframes animBreadcrumb { 0%, 73% { background: transparent; } 74%, 78% { background: var(--bg-surface-elevated); } 80%, 100% { background: transparent; } }
-             @keyframes animDrawerL { 0%, 83% { transform: translateX(-100%); } 84%, 88% { transform: translateX(0); } 90%, 100% { transform: translateX(-100%); } }
-             @keyframes animDrawerR { 0%, 93% { transform: translateX(100%); } 94%, 98% { transform: translateX(0); } 100% { transform: translateX(100%); } }
-             
-             @keyframes animInspector { 0%, 13% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } 14%, 19% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 20%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } }
-
-             @keyframes animCursor {
-               0% { top: 50%; left: 50%; opacity: 0; } 1% { opacity: 1; }
-               /* 1. Grow (0-4s) 0-10% */
-               3% { top: 7%; left: 50%; transform: scale(0.8); } 5% { transform: scale(1); }
-               /* 2. Double Click Inspector (4-8s) 10-20% */
-               12% { top: 50%; left: 50%; transform: scale(1); } 
-               14% { transform: scale(0.7); } 15% { transform: scale(1); } 
-               16% { transform: scale(0.7); } 17% { transform: scale(1); }
-               /* 3. Long Press Open (8-12s) 20-30% */
-               22% { top: 50%; left: 50%; transform: scale(1); }
-               24% { transform: scale(0.7); } 28% { transform: scale(1); }
-               /* 4. PIP (12-16s) 30-40% */
-               32% { top: 92%; left: 7%; transform: scale(1); } 34% { top: 90%; left: 10%; transform: scale(0.8); } 38% { transform: scale(1); }
-               /* 5. Harvest (16-20s) 40-50% */
-               42% { top: 88%; left: 93%; transform: scale(1); } 44% { transform: scale(0.8); } 46% { transform: scale(1); }
-               /* 6. Timeline (20-24s) 50-60% */
-               52% { top: 18%; left: 50%; transform: scale(1); } 54% { transform: scale(0.8); } 56% { transform: scale(1); }
-               /* 7. Critical Path (24-28s) 60-70% */
-               62% { top: 93%; left: 93%; transform: scale(1); } 64% { transform: scale(0.8); } 66% { transform: scale(1); }
-               /* 8. Breadcrumbs (28-32s) 70-80% */
-               72% { top: 18%; left: 7%; transform: scale(1); } 74% { transform: scale(0.8); } 76% { transform: scale(1); }
-               /* 9. Left Drawer (32-36s) 80-90% */
-               82% { top: 7%; left: 7%; transform: scale(1); } 84% { transform: scale(0.8); } 86% { transform: scale(1); }
-               /* 10. Right Drawer (36-40s) 90-100% */
-               92% { top: 7%; left: 93%; transform: scale(1); } 94% { transform: scale(0.8); } 96% { transform: scale(1); }
-               99% { opacity: 1; } 100% { top: 50%; left: 50%; opacity: 0; }
-             }
-
-             /* Mini UI Elements */
-             .mini-ui { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-             .mini-header-bar { position: absolute; top: 5%; left: 5%; width: 90%; display: flex; justify-content: space-between; align-items: center; }
-             .mini-btn { background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; height: 16px; width: 24px; }
-             .mini-btn-grow { background: var(--accent-muted); border-color: var(--accent); width: 40px; }
-             .mini-nav-bar { position: absolute; top: 15%; left: 5%; width: 90%; display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 4px; }
-             .mini-bc { width: 50px; height: 8px; background: var(--border-subtle); border-radius: 2px; animation: animBreadcrumb 40s infinite; }
-             .mini-timeline-btn { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); width: 35px; height: 12px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 3px; }
-             .mini-pip { position: absolute; bottom: 5%; left: 5%; width: 40px; height: 40px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 4px; }
-             .mini-actions { position: absolute; bottom: 5%; right: 5%; display: flex; flex-direction: column; gap: 4px; }
-             .mini-actions > div { width: 35px; height: 12px; border-radius: 3px; border: 1px solid var(--border-subtle); background: var(--bg-surface); }
-             .mini-act-harvest { border-color: #F59E0B !important; }
-             .mini-act-cp { border-color: #EF4444 !important; }
-             
-             .mini-drawer-l { position: absolute; top: 25%; bottom: 5%; left: 5%; width: 30%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translateX(-100%); animation: animDrawerL 40s infinite ease-in-out; }
-             .mini-drawer-r { position: absolute; top: 25%; bottom: 5%; right: 5%; width: 30%; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translateX(100%); animation: animDrawerR 40s infinite ease-in-out; }
-             
-             .mini-inspector { position: absolute; top: 50%; left: 50%; width: 100px; height: 120px; background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 6px; transform: translate(-50%, -50%); animation: animInspector 40s infinite ease-out; z-index: 15; opacity: 0; padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
-             .mi-row { width: 100%; height: 8px; background: var(--bg-canvas); border-radius: 2px; }
-             .mi-row:nth-child(2) { height: 24px; }
-
-             /* World & Tree */
-             .mini-world { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-             .mini-world-pan { position: absolute; top: 0; left: 0; width: 100%; height: 100%; animation: animPan 40s infinite ease-in-out; display: flex; align-items: center; justify-content: center; }
-             .mini-tree-wrapper { position: relative; width: 120px; height: 120px; animation: animGrowTree 40s infinite ease-out; }
-             .mt-trunk { position: absolute; bottom: 10%; left: 50%; width: 6px; height: 30px; background: #B45309; transform: translateX(-50%); border-radius: 3px; animation: growTrunk 40s infinite ease-out; }
-             .mt-branch { position: absolute; bottom: 40px; left: 50%; width: 50px; height: 50px; border: 2px solid #33485E; border-bottom: 0; border-right: 0; border-radius: 10px 0 0 0; animation: animCP 40s infinite; }
-             .mt-leaf { position: absolute; top: 20px; left: 0px; width: 16px; height: 16px; background: var(--node-leaf); border-radius: 8px 0 8px 0; animation: popLeaf 40s infinite ease-out; }
-             .mt-fruit { position: absolute; top: 40px; right: -20px; width: 14px; height: 14px; background: var(--node-fruit); border-radius: 50%; animation: animHarvest 40s infinite ease-out; }
-
-             /* Timeline Overlay */
-             .mini-timeline-overlay { position: absolute; top: 25%; left: 10%; width: 80%; height: 60%; background: var(--bg-canvas); z-index: 10; animation: animTimeline 40s infinite; padding: 10px; display:flex; flex-direction: column; gap:6px; opacity: 0; pointer-events: none; border: 1px solid var(--border-strong); border-radius: 6px; }
-             .mt-row { width: 100%; height: 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px; }
-             
-             .anim-cursor-svg { position: absolute; width: 24px; height: 24px; z-index: 50; animation: animCursor 40s infinite cubic-bezier(0.25, 1, 0.5, 1); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transform: translate(-12px, -2px); opacity: 0; }
-           </style>
-           
-           <div class="mini-world">
-             <div class="mini-world-pan">
-                <div class="mini-tree-wrapper">
-                   <div class="mt-branch"></div>
-                   <div class="mt-trunk"></div>
-                   <div class="mt-leaf"></div>
-                   <div class="mt-fruit"></div>
+      <div class="modal-body" style="padding: 12px; text-align: center;">
+        
+        <!-- Square Animation Engine -->
+        <div class="anim-square">
+            <!-- Simulated World -->
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                <div style="width: 100%; height: 100%; animation: animPanWorld 40s infinite; display:flex; align-items:center; justify-content:center;">
+                    <div style="width: 120px; height: 120px; position:relative; animation: animGrowTree 40s infinite ease-out, animPulseTree 40s infinite;">
+                        <div style="position:absolute; bottom:20px; left:50%; width:6px; height:30px; background:#B45309; transform:translateX(-50%); border-radius:3px;"></div>
+                        <div style="position:absolute; bottom:40px; left:50%; width:50px; height:50px; border:2px solid #33485E; border-bottom:0; border-right:0; border-radius:10px 0 0 0; animation: animCriticalGlow 40s infinite;"></div>
+                        <div style="position:absolute; top:20px; left:0px; width:16px; height:16px; background:var(--node-leaf); border-radius:8px 0 8px 0;"></div>
+                        <div style="position:absolute; top:40px; right:-20px; width:14px; height:14px; background:var(--node-fruit); border-radius:50%; animation: animHarvestDrop 40s infinite;"></div>
+                    </div>
                 </div>
-             </div>
-           </div>
-
-           <div class="mini-ui">
-              <div class="mini-header-bar">
-                 <div class="mini-btn"></div>
-                 <div class="mini-btn mini-btn-grow"></div>
-                 <div class="mini-btn"></div>
-              </div>
-              <div class="mini-nav-bar">
-                 <div class="mini-bc"></div>
-              </div>
-              <div class="mini-timeline-btn"></div>
-              
-              <div class="mini-pip"></div>
-              <div class="mini-actions">
-                 <div></div>
-                 <div class="mini-act-cp"></div>
-                 <div class="mini-act-harvest"></div>
-              </div>
-              
-              <div class="mini-timeline-overlay">
-                 <div class="mt-row"></div><div class="mt-row"></div><div class="mt-row"></div>
-              </div>
-              
-              <div class="mini-drawer-l"></div>
-              <div class="mini-drawer-r"></div>
-              
-              <div class="mini-inspector">
-                 <div class="mi-row"></div><div class="mi-row"></div><div class="mi-row"></div>
-              </div>
-           </div>
-           
-           <svg class="anim-cursor-svg" viewBox="0 0 24 24" fill="#F1F5F9" stroke="#000" stroke-width="1.5">
-             <path d="M4 2l6.5 19 3.5-7.5 7.5-3.5z"/>
-           </svg>
-           
-           <div style="position: absolute; bottom: 8px; width: 90%; text-align: center; font-size: 13px; font-weight: bold; color: var(--text-main); background: rgba(0,0,0,0.75); padding: 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-             <span id="anim-text">1. Use 'Grow' to plant Trees and Nodes.</span>
-             <script>
-                setInterval(() => {
-                   const t = document.getElementById('anim-text');
-                   if(t) {
-                      const time = (Date.now() % 40000) / 1000;
-                      if(time < 4.0) t.innerText = "1. Use 'Grow' to plant Trees and Nodes.";
-                      else if(time < 8.0) t.innerText = "2. Double-Click a Tree or Node to open details.";
-                      else if(time < 12.0) t.innerText = "3. Long-Press a Tree to enter its workspace.";
-                      else if(time < 16.0) t.innerText = "4. Drag the PIP Minimap to navigate fast.";
-                      else if(time < 20.0) t.innerText = "5. Set Season and Harvest completed tasks.";
-                      else if(time < 24.0) t.innerText = "6. View chronological Executive Timeline.";
-                      else if(time < 28.0) t.innerText = "7. Highlight Critical Paths.";
-                      else if(time < 32.0) t.innerText = "8. Navigate nested trees via Breadcrumbs.";
-                      else if(time < 36.0) t.innerText = "9. Open Left Directory for saved files & Tidy.";
-                      else t.innerText = "10. Open Right Nursery for JSON Backup/Sync.";
-                   }
-                }, 100);
-             </script>
-           </div>
+            </div>
+            
+            <!-- Simulated UI Overlay -->
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">
+                <!-- Header -->
+                <div style="position:absolute; top:5%; left:5%; width:90%; display:flex; justify-content:space-between;">
+                    <div style="width:24px; height:16px; background:var(--bg-surface-elevated); border-radius:4px;"></div>
+                    <div style="width:40px; height:16px; background:var(--accent-muted); border:1px solid var(--accent); border-radius:4px;"></div>
+                    <div style="width:24px; height:16px; background:var(--bg-surface-elevated); border-radius:4px;"></div>
+                </div>
+                <!-- Breadcrumbs -->
+                <div style="position:absolute; top:15%; left:5%; width:90%; height:12px; background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:4px; display:flex; align-items:center; padding:0 4px;">
+                    <div style="width:40px; height:6px; border-radius:2px; animation: animBreadcrumb 40s infinite;"></div>
+                </div>
+                <!-- Timeline Button -->
+                <div style="position:absolute; top:20%; left:50%; transform:translateX(-50%); width:30px; height:10px; background:var(--bg-surface-elevated); border-radius:3px;"></div>
+                <!-- Minimap -->
+                <div style="position:absolute; bottom:5%; left:5%; width:30px; height:30px; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:4px;"></div>
+                <!-- Actions -->
+                <div style="position:absolute; bottom:5%; right:5%; display:flex; flex-direction:column; gap:4px;">
+                    <div style="width:30px; height:10px; background:var(--bg-surface); border:1px solid #F59E0B; border-radius:3px;"></div>
+                    <div style="width:30px; height:10px; background:var(--bg-surface); border:1px solid #EF4444; border-radius:3px;"></div>
+                </div>
+                
+                <!-- Slide-ins -->
+                <div style="position:absolute; top:25%; left:10%; width:80%; height:60%; background:var(--bg-canvas); border:1px solid var(--border-strong); border-radius:6px; animation: animTimelineSlide 40s infinite;"></div>
+                <div style="position:absolute; top:25%; bottom:5%; left:5%; width:35%; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:6px; animation: animDrawerLeft 40s infinite;"></div>
+                <div style="position:absolute; top:25%; bottom:5%; right:5%; width:35%; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:6px; animation: animDrawerRight 40s infinite;"></div>
+                
+                <!-- Inspector Pop -->
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80px; height:100px; background:var(--bg-surface); border:1px solid var(--border-strong); border-radius:6px; animation: animInspectorPop 40s infinite;"></div>
+            </div>
+            
+            <!-- Virtual Cursor -->
+            <svg viewBox="0 0 24 24" fill="#F1F5F9" stroke="#000" stroke-width="1.5" style="position:absolute; width:24px; height:24px; z-index:50; animation: animCursor 40s infinite; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transform:translate(-12px, -2px);">
+                <path d="M4 2l6.5 19 3.5-7.5 7.5-3.5z"/>
+            </svg>
         </div>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="modal-help">
-    <div class="modal-card">
-      <div class="modal-header"><h3>Help & Features</h3><button class="btn btn-small" id="btn-close-help">&times;</button></div>
-      <div class="modal-body">
-        <button class="btn btn-accent" id="btn-replay-tutorial" style="width: 100%; margin-bottom: 12px;">Play Tutorial Animation</button>
-        <h4 style="font-size: 12px; color: var(--text-main); margin-bottom: 4px;">Feature Guide</h4>
-        <div class="feature-accordion">
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🌲 The Forest & Trees</span><span>▾</span></div>
-              <div class="feature-accordion-content">The Forest is your main workspace. Trees are individual projects or frameworks. Double-click a tree to open it.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🌿 Branches & Leaves</span><span>▾</span></div>
-              <div class="feature-accordion-content">Inside a tree, Branches group ideas together. Leaves are your individual notes and documents.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🍎 Fruits (Goals) & Harvesting</span><span>▾</span></div>
-              <div class="feature-accordion-content">Fruits are actionable tasks. Set a season, complete the work, and click 'Harvest' to collect completed tasks in your basket.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🌰 Seeds (Linking)</span><span>▾</span></div>
-              <div class="feature-accordion-content">Seeds allow you to link out to other trees, forming a connected web of knowledge.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>⚡ Critical Path & Timeline</span><span>▾</span></div>
-              <div class="feature-accordion-content">The Critical Path highlights the longest chain of dependencies. The Timeline formats your tree into a clean executive list based on Start Dates.</div>
-           </div>
+        
+        <div style="font-size: 14px; font-weight: bold; color: var(--accent); margin-bottom: 12px; min-height: 24px;" id="anim-text-display">1. Use 'Grow' to plant Trees and Nodes.</div>
+        
+        <div style="text-align: left;">
+            <button class="btn btn-small" style="width: 100%; justify-content: space-between; border-color: var(--border-strong);" onclick="document.getElementById('tut-accordion').style.display = document.getElementById('tut-accordion').style.display === 'block' ? 'none' : 'block'">
+                <span>Feature Index</span><span>▾</span>
+            </button>
+            <div id="tut-accordion" style="display: none; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px; margin-top: 6px; font-size: 11px; color: var(--text-muted); line-height: 1.5; max-height: 120px; overflow-y: auto;">
+                <strong>🌲 Forests & Trees:</strong> The Forest is your root workspace. Trees are specific projects. Double-click a tree to configure it, long-press to open it.<br><br>
+                <strong>🌿 Nodes (Branches, Leaves, Fruits, Seeds):</strong> Branches group ideas. Leaves are notes. Fruits are actionable tasks. Seeds are links to other trees.<br><br>
+                <strong>⚡ Critical Path:</strong> Highlights the longest chain of dependent nodes in red.<br><br>
+                <strong>🍎 Harvesting:</strong> Collects completed Fruit tasks into a satisfying basket, keeping your tree clean.<br><br>
+                <strong>📅 Executive Timeline:</strong> Formats your visual tree into a clean, chronological list for stakeholders based on Start Dates.
+            </div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-                setInterval(() => {
-                   const t = document.getElementById('anim-text');
-                   if(t) {
-                      const time = (Date.now() % 32000) / 1000;
-                      if(time < 4.0) t.innerText = "1. Use 'Grow' to plant Trees and Nodes.";
-                      else if(time < 8.0) t.innerText = "2. Drag the PIP Minimap to navigate large workspaces.";
-                      else if(time < 12.0) t.innerText = "3. Set Season and Harvest completed tasks.";
-                      else if(time < 16.0) t.innerText = "4. View chronological Executive Timeline.";
-                      else if(time < 20.0) t.innerText = "5. Highlight Critical Paths.";
-                      else if(time < 24.0) t.innerText = "6. Navigate deeply nested trees via Breadcrumbs.";
-                      else if(time < 28.0) t.innerText = "7. Open Left Directory for saved files & Auto-Tidy.";
-                      else t.innerText = "8. Open Right Nursery for JSON Backup/Sync.";
-                   }
-                }, 100);
-             </script>
-           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    (function () {
+      'use strict';
 
-  <div class="modal-overlay" id="modal-help">
-    <div class="modal-card">
-      <div class="modal-header"><h3>Help & Features</h3><button class="btn btn-small" id="btn-close-help">&times;</button></div>
-      <div class="modal-body">
-        <button class="btn btn-accent" id="btn-replay-tutorial" style="width: 100%; margin-bottom: 12px;">Play Tutorial Animation</button>
-        <h4 style="font-size: 12px; color: var(--text-main); margin-bottom: 4px;">Feature Guide</h4>
-        <div class="feature-accordion">
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🌲 The Forest & Trees</span><span>▾</span></div>
-              <div class="feature-accordion-content">The Forest is your main workspace. Trees are individual projects or frameworks. Double-click a tree to open it.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🌿 Branches & Leaves</span><span>▾</span></div>
-              <div class="feature-accordion-content">Inside a tree, Branches group ideas together. Leaves are your individual notes and documents.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🍎 Fruits (Goals) & Harvesting</span><span>▾</span></div>
-              <div class="feature-accordion-content">Fruits are actionable tasks. Set a season, complete the work, and click 'Harvest' to collect completed tasks in your basket.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>🌰 Seeds (Linking)</span><span>▾</span></div>
-              <div class="feature-accordion-content">Seeds allow you to link out to other trees, forming a connected web of knowledge.</div>
-           </div>
-           <div class="feature-accordion-item">
-              <div class="feature-accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'"><span>⚡ Critical Path & Timeline</span><span>▾</span></div>
-              <div class="feature-accordion-content">The Critical Path highlights the longest chain of dependencies. The Timeline formats your tree into a clean executive list based on Start Dates.</div>
-           </div>
-        </div>
-      </div>
-    </div>
-  </div>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          reg.onupdatefound = () => {
+            const iw = reg.installing;
+            iw.onstatechange = () => {
+              if (iw.state === 'installed' && navigator.serviceWorker.controller) {
+                document.getElementById('update-toast').style.display = 'flex';
+              }
+            };
+          };
+        }).catch(() => {});
+      }
+
+      let deferredInstallPrompt = null;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      
+      let isPinching = false;
+      let currentOrgCode = null;
+      let pendingSaveAction = null;
+      let acornTargetMode = false;
+      let draggedNodeId = null;
+      let dragHoverTimer = null;
+      let dragHoverParentId = null;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        if (!isStandalone && !localStorage.getItem('sylva_web_bypassed')) {
+          document.getElementById('modal-install-prompt').style.display = 'flex';
+        }
+      });
+      document.getElementById('btn-continue-web').addEventListener('click', () => {
+        localStorage.setItem('sylva_web_bypassed', 'true');
+        document.getElementById('modal-install-prompt').style.display = 'none';
+        initTutorial();
+      });
+      document.getElementById('btn-trigger-install').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice.outcome === 'accepted') {
+            document.getElementById('modal-install-prompt').style.display = 'none';
+          }
+          deferredInstallPrompt = null;
+        }
+      });
+
+      let state = {
+        viewMode: 'forest', activeForestId: 'forest-1', activeTreeId: null,
+        isLocked: true, panX: 40, panY: 120, scale: 1, pipScale: 0.1, pipPanX: 0, pipPanY: 0, selectedId: null, showCriticalPath: false,
+        forests: [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }]
+      };
+      
+      let criticalSet = new Set();
+
+      const viewport = document.getElementById('viewport');
+      const world = document.getElementById('world');
+      const canvasSvg = document.getElementById('canvas-svg');
+      const treeLayer = document.getElementById('tree-layer');
+      const forestLayer = document.getElementById('forest-layer');
+      const pipCanvas = document.getElementById('pip-canvas');
+      const timelineLayer = document.getElementById('timeline-layer');
+
+      function escapeHTML(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      function getNodeIcon(type) {
+        switch (type) {
+          case 'trunk':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.5"><path d="M12 3v18M8 21h8M7 7h10"/></svg>`;
+          case 'branch':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-branch)" stroke-width="2.2"><path d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 9a9 9 0 0 1-9 9"/></svg>`;
+          case 'leaf':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-leaf)" stroke-width="2.2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`;
+          case 'fruit':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2.2"><circle cx="12" cy="14" r="7"/><path d="M12 7V3m0 0c2 0 4 1 4 3"/></svg>`;
+          case 'seed':
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="2.2"><path d="M12 2C7 7 6 13 12 22c6-9 5-15 0-20z"/></svg>`;
+          default:
+            return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>`;
+        }
+      }
+
+      function getTreeIcon(species) {
+        switch (species) {
+          case 'Oak':
+            // Redesigned Oak Canopy (No horizontal base line)
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#38BDF8" stroke-width="2"><path d="M24 44V26" stroke-width="4"/><path d="M24 12A10 10 0 0 0 12 22A10 10 0 0 0 24 32A10 10 0 0 0 36 22A10 10 0 0 0 24 12Z"/></svg>`;
+          case 'Willow':
+            // Removed horizontal line
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#10B981" stroke-width="2"><path d="M24 44V22"/><path d="M24 12c-10 0-14 8-14 20M24 12c10 0 14 8 14 20M24 10c-6 4-8 12-8 22M24 10c6 4 8 12 8 22"/></svg>`;
+          case 'Apple':
+            // Redesigned Apple (No horizontal base line)
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M24 44V26" stroke-width="4"/><path d="M24 12A10 10 0 0 0 12 22A10 10 0 0 0 24 32A10 10 0 0 0 36 22A10 10 0 0 0 24 12Z"/><circle cx="18" cy="18" r="2" fill="#F59E0B"/><circle cx="30" cy="20" r="2" fill="#F59E0B"/><circle cx="23" cy="25" r="2" fill="#F59E0B"/></svg>`;
+          case 'Pine':
+          default:
+            // Removed horizontal line
+            return `<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M24 44V34M24 6L14 20H34L24 6ZM24 16L10 34H38L24 16Z"/></svg>`;
+        }
+      }
+
+      function renderDrawers() {
+        const pinnedLeft = document.getElementById('list-pinned-left');
+        const atozLeft = document.getElementById('list-atoz-left');
+        const atozRight = document.getElementById('list-atoz-right');
+        if (!pinnedLeft || !atozLeft || !atozRight) return;
+
+        pinnedLeft.innerHTML = '';
+        atozLeft.innerHTML = '';
+        atozRight.innerHTML = '';
+
+        const forest = getForest();
+        const tree = getTree();
+
+        if (state.viewMode === 'forest') {
+          document.getElementById('left-title').innerText = 'Forest Directory';
+          const items = [...(forest.trees || [])].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+          items.forEach(t => {
+            const createRow = () => {
+              const li = document.createElement('li');
+              li.className = 'directory-item';
+              li.innerHTML = `<span>${escapeHTML(t.title)}</span><button class="btn btn-small">${t.pinned ? '★' : '☆'}</button>`;
+              li.querySelector('span').onclick = () => {
+                state.selectedId = t.id;
+                centerOn(t.x, t.y);
+                document.getElementById('drawer-left').classList.remove('open');
+                render();
+              };
+              li.querySelector('button').onclick = (e) => {
+                e.stopPropagation(); t.pinned = !t.pinned; saveData(); renderDrawers();
+              };
+              return li;
+            };
+            if (t.pinned) pinnedLeft.appendChild(createRow());
+            atozLeft.appendChild(createRow());
+          });
+        } else if (tree) {
+          document.getElementById('left-title').innerText = 'Node Directory';
+          const items = [...(tree.nodes || [])].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+          items.forEach(n => {
+            const createRow = () => {
+              const li = document.createElement('li');
+              li.className = 'directory-item';
+              li.innerHTML = `<span>${escapeHTML(n.title)}</span><button class="btn btn-small">${n.pinned ? '★' : '☆'}</button>`;
+              li.querySelector('span').onclick = () => {
+                state.selectedId = n.id;
+                centerOn(n.x, n.y);
+                document.getElementById('drawer-left').classList.remove('open');
+                render();
+              };
+              li.querySelector('button').onclick = (e) => {
+                e.stopPropagation(); n.pinned = !n.pinned; saveData(); renderDrawers();
+              };
+              return li;
+            };
+            if (n.pinned) pinnedLeft.appendChild(createRow());
+            atozLeft.appendChild(createRow());
+          });
+        }
+
+        const sortedForests = [...state.forests].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        sortedForests.forEach(f => {
+          const li = document.createElement('li');
+          li.className = 'directory-item';
+          li.innerHTML = `<span>${escapeHTML(f.title)} ${f.id === state.activeForestId ? '(Active)' : ''}</span><button class="btn btn-small">Open</button>`;
+          li.onclick = () => {
+            state.activeForestId = f.id; state.activeTreeId = null; state.viewMode = 'forest';
+            document.getElementById('drawer-right').classList.remove('open');
+            render();
+          };
+          atozRight.appendChild(li);
+        });
+      }
+
+      function renderMinimap() {
+        if (!pipCanvas) return;
+        const ctx = pipCanvas.getContext('2d');
+        if (!ctx) return;
+        const w = pipCanvas.width || 140, h = pipCanvas.height || 140;
+        ctx.clearRect(0, 0, w, h);
+
+        const scale = state.pipScale || 0.1, ox = 70 + (state.pipPanX || 0), oy = 70 + (state.pipPanY || 0);
+
+        if (state.viewMode === 'forest') {
+          const forest = getForest();
+          (forest.trees || []).forEach(t => {
+            ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
+            ctx.beginPath(); ctx.arc(ox + t.x * scale, oy + t.y * scale, 4, 0, Math.PI * 2); ctx.fill();
+          });
+        } else {
+          const tree = getTree();
+          if (tree) {
+            ctx.strokeStyle = '#33485E'; ctx.lineWidth = 1;
+            tree.nodes.forEach(n => {
+              if (n.parentId) {
+                const p = tree.nodes.find(pn => pn.id === n.parentId);
+                if (p) {
+                  ctx.beginPath(); ctx.moveTo(ox + p.x * scale, oy + p.y * scale); ctx.lineTo(ox + n.x * scale, oy + n.y * scale); ctx.stroke();
+                }
+              }
+            });
+            tree.nodes.forEach(n => {
+              ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
+              ctx.fillRect(ox + n.x * scale - 3, oy + n.y * scale - 2, 6, 4);
+            });
+          }
+        }
+
+        const vx = (-state.panX / state.scale) * scale + ox, vy = (-state.panY / state.scale) * scale + oy;
+        const vw = (window.innerWidth / state.scale) * scale, vh = (window.innerHeight / state.scale) * scale;
+        ctx.strokeStyle = '#F59E0B'; ctx.lineWidth = 1; ctx.strokeRect(vx, vy, vw, vh);
+      }
+
+      function positionActions() {
+        const pipRect = pipCanvas.getBoundingClientRect();
+        const ac = document.getElementById('bottom-actions-container');
+        ac.style.bottom = (window.innerHeight - pipRect.bottom) + 'px';
+        ac.style.height = pipRect.height + 'px';
+        ac.style.justifyContent = 'space-between';
+      }
+      window.addEventListener('resize', positionActions);
+
+      function init() {
+        const r = localStorage.getItem('sylva_v13_state');
+        if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
+        if(!state.pipScale) state.pipScale = 0.1;
+        if(state.pipPanX === undefined) state.pipPanX = 0;
+        if(state.pipPanY === undefined) state.pipPanY = 0;
+        
+        setupInputHandlers();
+        setupCustomDropdowns();
+        buildTemplateLibrary();
+        positionActions();
+        render();
+
+        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) {
+          initTutorial();
+        } else {
+          document.getElementById('modal-install-prompt').style.display = 'flex';
+          setTimeout(() => {
+            if (!deferredInstallPrompt && document.getElementById('modal-install-prompt').style.display !== 'none') {
+              document.getElementById('modal-install-prompt').style.display = 'none';
+              initTutorial();
+            }
+          }, 3000);
+        }
+      }
+
+      function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
+      function getTree() { const f = getForest(); return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0]; }
+      function getNode(id) { const t = getTree(); return t ? t.nodes.find(n => n.id === id) : null; }
+      
+      function saveData() {
+        if (currentOrgCode) {
+          pendingSaveAction = () => {
+            localStorage.setItem('sylva_v13_state', JSON.stringify(state));
+            showAppAlert(`Change securely broadcasted to Org: ${currentOrgCode}`);
+          };
+          document.getElementById('modal-sync-auth').classList.add('open');
+        } else {
+          try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e){}
+        }
+      }
+
+      function showAppAlert(msg) {
+        document.getElementById('alert-message-text').innerText = msg;
+        document.getElementById('modal-alert').classList.add('open');
+      }
+
+      function updateWorldTransform() {
+        world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        renderMinimap();
+      }
+      
+      function getCriticalPathIds(tree) {
+        const adj = {};
+        tree.nodes.forEach(n => adj[n.id] = []);
+        tree.nodes.forEach(n => {
+          if (n.parentId && adj[n.parentId]) adj[n.parentId].push(n.id);
+          if (n.acornTarget && adj[n.id]) adj[n.id].push(n.acornTarget);
+        });
+        let maxPath = [];
+        function dfs(nodeId, currentPath, visited) {
+          if (visited.has(nodeId)) return;
+          const node = tree.nodes.find(n => n.id === nodeId);
+          if (!node || (node.type === 'fruit' && node.harvested)) return;
+          currentPath.push(nodeId); visited.add(nodeId);
+          if (currentPath.length > maxPath.length) maxPath = [...currentPath];
+          adj[nodeId].forEach(childId => dfs(childId, [...currentPath], new Set(visited)));
+        }
+        const trunk = tree.nodes.find(n => n.type === 'trunk') || tree.nodes[0];
+        if (trunk) dfs(trunk.id, [], new Set());
+        return maxPath;
+      }
+
+      function render() {
+        const forest = getForest(), tree = getTree();
+        const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), bc = document.getElementById('breadcrumb-text');
+        
+        btnLock.className = `btn btn-small btn-lock ${state.isLocked ? '' : 'unlocked'}`;
+        btnLock.innerHTML = state.isLocked ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+          
+        document.getElementById('btn-grow').disabled = !state.isLocked;
+        document.getElementById('btn-season').disabled = !state.isLocked;
+        document.getElementById('btn-harvest-main').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
+        document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
+        document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
+        document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && tree.type === 'Apple') ? 'block' : 'none';
+        
+        document.getElementById('btn-toggle-timeline').style.display = state.viewMode !== 'forest' ? 'inline-flex' : 'none';
+        document.getElementById('timeline-btn-container').style.display = state.viewMode !== 'forest' ? 'block' : 'none';
+        
+        document.getElementById('btn-critical-path').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
+
+        bc.innerHTML = '';
+        const fCrumb = document.createElement('span');
+        fCrumb.className = 'breadcrumb-crumb';
+        fCrumb.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
+        fCrumb.onclick = () => { if (state.viewMode !== 'forest') { state.viewMode = 'forest'; render(); } };
+        bc.appendChild(fCrumb);
+
+        if (state.viewMode === 'forest') {
+          btnSwitchContext.style.display = 'none';
+          document.getElementById('label-directory').innerText = 'Forest'; 
+          treeLayer.style.display = 'none'; timelineLayer.style.display = 'none'; forestLayer.style.display = 'block';
+          renderForest();
+        } else if (tree) {
+          btnSwitchContext.style.display = 'inline-flex';
+          document.getElementById('label-directory').innerText = 'Nodes'; 
+          const arrow = document.createElement('span'); arrow.style.color = 'var(--text-faint)'; arrow.innerText = '>'; bc.appendChild(arrow);
+          const tCrumb = document.createElement('span'); tCrumb.className = 'breadcrumb-crumb'; tCrumb.innerText = escapeHTML(tree.title);
+          tCrumb.onclick = () => { state.viewMode = 'tree'; centerOn(tree.nodes[0].x, tree.nodes[0].y); render(); };
+          bc.appendChild(tCrumb);
+          if (state.selectedId && state.viewMode === 'tree') {
+            const selN = getNode(state.selectedId);
+            if (selN) {
+              const a2 = document.createElement('span'); a2.style.color = 'var(--text-faint)'; a2.innerText = '>'; bc.appendChild(a2);
+              const nCrumb = document.createElement('span'); nCrumb.innerText = escapeHTML(selN.title); bc.appendChild(nCrumb);
+            }
+          }
+          
+          if (tree.type === 'Pine') { document.getElementById('btn-grow-fruit').innerText = "... a Pine Cone (Checklist)"; }
+          else if (tree.type === 'Oak') { document.getElementById('btn-grow-fruit').innerText = "... an Acorn (Link)"; }
+          else { document.getElementById('btn-grow-fruit').innerText = "... a Fruit (Task)"; }
+
+          if (tree.type === 'Apple') {
+            const fruits = tree.nodes.filter(n => n.type === 'fruit');
+            const total = fruits.length; const harvested = fruits.filter(n => n.harvested).length;
+            document.getElementById('apple-progress-fill').style.width = total === 0 ? '0%' : `${(harvested/total)*100}%`;
+          }
+
+          if (state.viewMode === 'timeline') {
+            treeLayer.style.display = 'none'; forestLayer.style.display = 'none'; timelineLayer.style.display = 'block';
+            renderTimeline();
+          } else {
+            timelineLayer.style.display = 'none'; forestLayer.style.display = 'none'; treeLayer.style.display = 'block'; 
+            criticalSet = state.showCriticalPath ? new Set(getCriticalPathIds(tree)) : new Set();
+            renderTree();
+          }
+        }
+        renderDrawers();
+        updateWorldTransform();
+      }
+
+      function updateSVGPaths() {
+        canvasSvg.innerHTML = '';
+        if (state.viewMode !== 'tree') return;
+        const tree = getTree(); if (!tree) return;
+        tree.nodes.forEach(n => {
+          if (n.parentId) {
+            const p = tree.nodes.find(pn => pn.id === n.parentId);
+            if (p) {
+              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              const sx = p.x + 95, sy = p.y + 60, ex = n.x + 95, ey = n.y;
+              if (tree.type === 'Willow') {
+                path.setAttribute('d', `M ${sx} ${sy} Q ${sx} ${ey}, ${ex} ${ey}`);
+              } else {
+                const my = (sy + ey) / 2;
+                path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
+              }
+              path.setAttribute('stroke', (criticalSet.has(p.id) && criticalSet.has(n.id)) ? '#EF4444' : '#33485E'); 
+              path.setAttribute('stroke-width', '2.5'); path.setAttribute('fill', 'none');
+              canvasSvg.appendChild(path);
+            }
+          }
+        });
+      }
+
+      function attachGestureEvents(el, entity, isTreeMode) {
+        let pressTimer, clickTimer, clickCount = 0, startX, startY;
+        el.addEventListener('pointerdown', (e) => {
+          if (isPinching) return;
+          e.stopPropagation(); 
+          if (acornTargetMode && isTreeMode) {
+            acornTargetMode = false; document.getElementById('overlay-acorn-target').style.display = 'none';
+            const tn = getNode(state.selectedId);
+            if (tn) { tn.acornTarget = entity.id; saveData(); render(); showAppAlert('Acorn Linked!'); }
+            return;
+          }
+          startX = e.clientX; startY = e.clientY; draggedNodeId = entity.id;
+          if (!state.isLocked) {
+            el.setPointerCapture(e.pointerId); el.style.zIndex = 50;
+            function onMove(evt) { 
+              if (isPinching) { onUp(evt); return; }
+              const dx = (evt.clientX - startX) / state.scale; const dy = (evt.clientY - startY) / state.scale;
+              entity.x += dx; entity.y += dy; startX = evt.clientX; startY = evt.clientY; 
+              el.style.left = `${entity.x}px`; el.style.top = `${entity.y}px`;
+              if (isTreeMode) updateSVGPaths(); renderMinimap(); 
+              
+              if (isTreeMode && entity.type !== 'trunk') {
+                const mx = evt.clientX, my = evt.clientY;
+                const els = document.elementsFromPoint(mx, my);
+                let hoverNId = null;
+                for (let hel of els) { if (hel.classList.contains('node-card') && hel.id !== entity.id) { hoverNId = hel.id; break; } }
+                if (hoverNId) {
+                  if (hoverNId !== dragHoverParentId) {
+                    clearTimeout(dragHoverTimer); dragHoverParentId = hoverNId;
+                    dragHoverTimer = setTimeout(() => { entity.parentId = hoverNId; el.style.border = '2px solid var(--accent)'; setTimeout(() => el.style.border = '', 500); }, 1500);
+                  }
+                } else { clearTimeout(dragHoverTimer); dragHoverParentId = null; }
+              }
+            }
+            function onUp(evt) { el.releasePointerCapture(evt.pointerId); el.style.zIndex = ''; window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); clearTimeout(dragHoverTimer); dragHoverParentId = null; draggedNodeId = null; saveData(); render(); }
+            window.addEventListener('pointermove', onMove); window.addEventListener('pointerup', onUp); return;
+          }
+          clickCount++;
+          if (clickCount === 1) {
+            pressTimer = setTimeout(() => {
+              clickCount = 0;
+              if (!isTreeMode) { state.activeTreeId = entity.id; state.viewMode = 'tree'; centerOn(entity.nodes[0].x, entity.nodes[0].y); render(); }
+            }, 400); 
+            clickTimer = setTimeout(() => {
+              if (clickCount === 1) { state.selectedId = entity.id; renderTreeSelections(); if (isTreeMode) render(); }
+              clickCount = 0;
+            }, 250); 
+          } else if (clickCount === 2) {
+            clearTimeout(pressTimer); clearTimeout(clickTimer); clickCount = 0;
+            state.selectedId = entity.id; renderTreeSelections();
+            if (isTreeMode) { render(); openInspector(entity); } else { openTreeInspector(entity); }
+          }
+        });
+        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); } });
+        el.addEventListener('pointerup', () => clearTimeout(pressTimer));
+      }
+
+      function renderTree() {
+        const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if (!tree) return;
+        tree.nodes.forEach(node => {
+          const el = document.createElement('div'); el.id = node.id; 
+          el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
+          el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`; 
+          attachGestureEvents(el, node, true); treeLayer.appendChild(el);
+        });
+      }
+
+      function renderTreeSelections() {
+        Array.from(treeLayer.children).forEach(el => { if (el.id === state.selectedId) el.classList.add('selected'); else el.classList.remove('selected'); });
+        Array.from(forestLayer.children).forEach(el => { if (el.id === state.selectedId) el.classList.add('selected'); else el.classList.remove('selected'); });
+      }
+
+      function renderForest() {
+        const forest = getForest(); forestLayer.innerHTML = ''; canvasSvg.innerHTML = '';
+        forest.trees.forEach(t => {
+          const el = document.createElement('div'); el.id = t.id; el.className = `forest-tree-entity ${t.id === state.selectedId ? 'selected' : ''}`; el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
+          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`;
+          attachGestureEvents(el, t, false); forestLayer.appendChild(el);
+        });
+      }
+
+      function renderTimeline() {
+        const tc = document.getElementById('timeline-content'); tc.innerHTML = '';
+        const tree = getTree(); if (!tree) return;
+        const header = document.createElement('h2'); header.innerText = `Executive Timeline: ${tree.title}`; header.style.marginBottom = '16px'; tc.appendChild(header);
+
+        const tasks = tree.nodes.filter(n => n.type !== 'trunk').sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
+        tasks.forEach(n => {
+          const card = document.createElement('div'); card.style.background = 'var(--bg-surface)'; card.style.padding = '16px'; card.style.borderRadius = '8px'; card.style.border = '1px solid var(--border-subtle)';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+              <strong style="font-size:14px;">${escapeHTML(n.title)}</strong>
+              <span style="font-size:10px; padding:2px 6px; background:var(--bg-surface-elevated); border-radius:4px; color:var(--text-muted);">${escapeHTML(n.type.toUpperCase())}</span>
+            </div>
+            <div style="display:flex; gap: 24px; font-size:12px; color:var(--text-muted);">
+              <div><strong>Start:</strong> ${escapeHTML(n.startDate || 'Unscheduled')}</div>
+              <div><strong>Est. Hours:</strong> ${escapeHTML(n.estHours || '0')}</div>
+              <div><strong>Assignee:</strong> ${escapeHTML(n.assignee || 'Unassigned')}</div>
+            </div>
+          `;
+          tc.appendChild(card);
+        });
+      }
+
+      function autoTidyNodes() {
+        if (state.viewMode === 'forest') {
+          const f = getForest(); if(!f || !f.trees) return;
+          const spacingX = 180, spacingY = 180;
+          let cols = Math.max(1, Math.floor(window.innerWidth / spacingX));
+          if(cols < 1) cols = 1;
+          f.trees.forEach((t, i) => {
+              t.x = 80 + (i % cols) * spacingX;
+              t.y = 80 + Math.floor(i / cols) * spacingY;
+          });
+          saveData(); render();
+        } else {
+          const t = getTree(); if (!t) return;
+          const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0]; if (!root) return;
+          const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
+          t.nodes.forEach(n => { if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
+          
+          const hSpacing = 220, vSpacing = 160;
+          function layout(nodeId, depth, xOffset) {
+            const node = getNode(nodeId); if (!node) return 0;
+            node.y = root.y + (depth * vSpacing);
+            const kids = childrenMap[nodeId];
+            if (kids.length === 0) { node.x = xOffset; return hSpacing; }
+            let currX = xOffset, totalW = 0;
+            for (let k of kids) { const w = layout(k.id, depth + 1, currX); currX += w; totalW += w; }
+            node.x = xOffset + (totalW / 2) - (hSpacing / 2);
+            return totalW;
+          }
+          layout(root.id, 0, root.x - (hSpacing * childrenMap[root.id].length) / 2);
+          saveData(); render();
+        }
+      }
+
+      function setupInputHandlers() {
+        let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null;
+        let viewportDragging = false, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
+        let pipPinching = false, prevPipPinchDist = null;
+
+        window.addEventListener('pointerdown', (e) => {
+          activePointers.set(e.pointerId, e);
+          if (activePointers.size >= 2) {
+            const pts = Array.from(activePointers.values());
+            const p1Pip = pts[0].target === pipCanvas || pipCanvas.contains(pts[0].target);
+            const p2Pip = pts[1].target === pipCanvas || pipCanvas.contains(pts[1].target);
+            if (p1Pip && p2Pip) { pipPinching = true; } 
+            else { isPinching = true; viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'none'; document.getElementById('forest-layer').style.pointerEvents = 'none'; }
+          }
+        }, { capture: true }); 
+
+        viewport.addEventListener('pointerdown', (e) => {
+          if (activePointers.size === 1 && !isPinching && !pipPinching) {
+            if (acornTargetMode) { acornTargetMode = false; document.getElementById('overlay-acorn-target').style.display = 'none'; return; }
+            viewportDragging = true; panStartCX = e.clientX; panStartCY = e.clientY; initPanX = state.panX; initPanY = state.panY;
+          }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+          if (!activePointers.has(e.pointerId)) return;
+          activePointers.set(e.pointerId, e);
+          if (activePointers.size >= 2) {
+            const pts = Array.from(activePointers.values());
+            const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+            if (pipPinching) {
+              if (prevPipPinchDist) { const ratio = dist / prevPipPinchDist; state.pipScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 0.5); renderMinimap(); }
+              prevPipPinchDist = dist;
+            } else {
+              isPinching = true;
+              const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
+              if (prevPinchDist && prevCx !== null) {
+                const ratio = dist / prevPinchDist, newScale = Math.min(Math.max(state.scale * ratio, 0.1), 5.0);
+                state.panX += (cx - prevCx); state.panY += (cy - prevCy);
+                state.panX = cx - (cx - state.panX) * (newScale / state.scale); state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+                state.scale = newScale; updateWorldTransform();
+              }
+              prevPinchDist = dist; prevCx = cx; prevCy = cy;
+            }
+          } else if (activePointers.size === 1 && viewportDragging && !isPinching && !pipPinching) {
+            state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
+          }
+        });
+
+        const endPointer = (e) => {
+          activePointers.delete(e.pointerId);
+          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; prevPipPinchDist = null; }
+          if (activePointers.size === 0) {
+            viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; 
+            setTimeout(() => { isPinching = false; pipPinching = false; }, 100);
+          } else if (activePointers.size === 1) {
+            const p = Array.from(activePointers.values())[0];
+            panStartCX = p.clientX; panStartCY = p.clientY; initPanX = state.panX; initPanY = state.panY; viewportDragging = !pipPinching; 
+          }
+        };
+        window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
+        viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
+
+        let pipDragging = false, pipHoldTimer = null;
+        pipCanvas.addEventListener('pointerdown', (e) => { 
+          if (pipPinching) return;
+          pipDragging = true; e.stopPropagation(); 
+          pipHoldTimer = setTimeout(() => { state.pipScale = 0.1; state.pipPanX = 0; state.pipPanY = 0; const t = getTree() || getForest(); if (t) { centerOn(0, 0); } pipDragging = false; renderMinimap(); }, 800);
+        }); 
+        window.addEventListener('pointermove', (e) => { if (pipDragging) { clearTimeout(pipHoldTimer); state.pipPanX += e.movementX; state.pipPanY += e.movementY; renderMinimap(); } }); 
+        window.addEventListener('pointerup', (e) => { 
+          if (pipDragging) {
+            clearTimeout(pipHoldTimer); pipDragging = false;
+            if (e.movementX === 0 && e.movementY === 0) {
+              const rect = pipCanvas.getBoundingClientRect(), pipX = e.clientX - rect.left, pipY = e.clientY - rect.top; 
+              const scale = state.pipScale, offsetX = 70 + state.pipPanX, offsetY = 70 + state.pipPanY; 
+              const worldX = (pipX - offsetX) / scale, worldY = (pipY - offsetY) / scale;
+              state.panX = (window.innerWidth / 2) - (worldX * state.scale); state.panY = (window.innerHeight / 2) - (worldY * state.scale); updateWorldTransform();
+            }
+          }
+        });
+        
+        document.getElementById('btn-switch-context').addEventListener('click', () => { state.viewMode = 'forest'; render(); });
+        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; render(); });
+        document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
+        document.getElementById('btn-critical-path').addEventListener('click', () => { state.showCriticalPath = !state.showCriticalPath; render(); });
+        
+        const btnGrow = document.getElementById('btn-grow');
+        btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
+        btnGrow.addEventListener('click', (e) => { 
+          e.stopPropagation(); 
+          const dd = document.getElementById('grow-dropdown');
+          const isVis = dd.style.display === 'flex';
+          closeAllDropdowns();
+          if (!isVis) dd.style.display = 'flex'; 
+        });
+
+        document.querySelectorAll('.btn-grow-opt').forEach(b => {
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const type = e.currentTarget.getAttribute('data-type');
+            if (state.viewMode === 'tree') {
+              const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
+              if (tree.type === 'Oak' && type === 'fruit') {
+                acornTargetMode = true; document.getElementById('overlay-acorn-target').style.display = 'flex'; document.getElementById('grow-dropdown').style.display = 'none'; return;
+              }
+              const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
+              if (tree.type === 'Pine' && type === 'fruit') { node.title = "New Task"; node.harvested = false; }
+              tree.nodes.push(node); state.selectedId = node.id;
+              document.getElementById('grow-dropdown').style.display = 'none';
+              render(); openInspector(node);
+            } else {
+              if (type === 'tree') {
+                const forest = getForest();
+                const newTree = { id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, x: 160 + (forest.trees.length * 150), y: 160, nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 260, y: 120, pinned: false }] };
+                forest.trees.push(newTree); state.selectedId = newTree.id;
+                document.getElementById('grow-dropdown').style.display = 'none';
+                render(); openTreeInspector(newTree);
+              } else if (type === 'forest') {
+                document.getElementById('input-new-forest').value = 'New Forest';
+                document.getElementById('grow-dropdown').style.display = 'none';
+                document.getElementById('modal-new-forest').classList.add('open');
+              }
+            }
+          });
+        });
+
+        document.getElementById('btn-auto-tidy').addEventListener('click', () => { autoTidyNodes(); document.getElementById('drawer-left').classList.remove('open'); });
+
+        window.addEventListener('pointerdown', (e) => { closeAllDropdowns(); });
+
+        const dl = document.getElementById('drawer-left'), dr = document.getElementById('drawer-right');
+        document.getElementById('btn-toggle-directory').addEventListener('click', () => { dl.classList.toggle('open'); dr.classList.remove('open'); }); 
+        document.getElementById('btn-close-left').addEventListener('click', () => dl.classList.remove('open'));
+        document.getElementById('btn-toggle-nursery').addEventListener('click', () => { dr.classList.toggle('open'); dl.classList.remove('open'); }); 
+        document.getElementById('btn-close-right').addEventListener('click', () => dr.classList.remove('open'));
+        
+        document.getElementById('btn-close-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-inspector').classList.remove('open'); }); 
+        document.getElementById('btn-close-tree-inspector').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-tree-inspector').classList.remove('open'); }); 
+        document.getElementById('btn-close-season').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-season').classList.remove('open'); });
+        
+        document.getElementById('btn-close-new-forest').addEventListener('click', (e) => { e.preventDefault(); document.getElementById('modal-new-forest').classList.remove('open'); });
+        document.getElementById('btn-forest-save').addEventListener('click', (e) => {
+          e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
+          const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
+          state.forests.push(newF); document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render(); showAppAlert('Forest saved to your Nursery!');
+        });
+        document.getElementById('btn-forest-open').addEventListener('click', (e) => {
+          e.preventDefault(); const title = document.getElementById('input-new-forest').value || 'New Forest';
+          const newF = { id: 'forest-' + Date.now(), title: title, pinned: false, trees: [] };
+          state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = null; state.viewMode = 'forest';
+          document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render();
+        });
+        
+        document.getElementById('btn-season').addEventListener('click', () => { openSeasonModal(); }); 
+        document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); render(); });
+        document.getElementById('btn-action-prune').addEventListener('click', () => {
+          const t = getTree(); if (!t) return;
+          const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean));
+          t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0));
+          document.getElementById('modal-season').classList.remove('open'); render();
+        });
+        
+        document.getElementById('btn-inspect-basket').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); document.getElementById('modal-basket').classList.add('open'); });
+        document.getElementById('btn-close-basket').addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); });
+
+        document.getElementById('btn-harvest-main').addEventListener('click', () => {
+          const t = getTree(); if (!t) return; let count = 0;
+          t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested) { n.harvested = true; count++; } });
+          if (t.type === 'Pine') { t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = false; }); showAppAlert('Pine Cone Checklist Reset!'); } 
+          else { showAppAlert(`Harvested ${count} goals!`); }
+          saveData(); render();
+        });
+        
+        // Sync Logic
+        document.getElementById('btn-sync-org').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.add('open'); });
+        document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-connect-org').addEventListener('click', () => {
+          const code = document.getElementById('input-org-code').value.trim();
+          if (code) { currentOrgCode = code; document.getElementById('sync-status').style.display = 'block'; document.getElementById('sync-org-name').innerText = code; document.getElementById('modal-sync-org').classList.remove('open'); showAppAlert(`Connected to Local Peer Network: ${code}\n\n(LNS WebRTC Handshake Established)`); }
+        });
+        document.getElementById('btn-close-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-cancel-auth').addEventListener('click', () => { document.getElementById('modal-sync-auth').classList.remove('open'); });
+        document.getElementById('btn-auth-org').addEventListener('click', () => {
+          const pass = document.getElementById('input-org-pass').value;
+          if (pass.length > 0) { document.getElementById('modal-sync-auth').classList.remove('open'); if (pendingSaveAction) { pendingSaveAction(); pendingSaveAction = null; } } 
+          else { showAppAlert("Password required to broadcast to Org."); }
+        });
+        
+        // Export / Import Backup
+        document.getElementById('btn-export-backup').addEventListener('click', () => {
+          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+          const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "sylva_backup.json");
+          document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
+          document.getElementById('drawer-right').classList.remove('open');
+        });
+        
+        document.getElementById('btn-import-backup').addEventListener('click', () => {
+          const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+          input.onchange = e => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader(); reader.readAsText(file, 'UTF-8');
+            reader.onload = readerEvent => {
+              try { const content = readerEvent.target.result; state = Object.assign(state, JSON.parse(content)); saveData(); render(); showAppAlert('Backup imported successfully!'); } 
+              catch(err) { showAppAlert('Invalid backup file.'); }
+            };
+          };
+          input.click(); document.getElementById('drawer-right').classList.remove('open');
+        });
+
+        // Template and Premium Flows
+        document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); });
+        document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
+        document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
+        document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
+        document.getElementById('btn-close-hugger').addEventListener('click', () => { document.getElementById('modal-tree-hugger').classList.remove('open'); });
+        document.getElementById('btn-close-vip').addEventListener('click', () => { document.getElementById('modal-vip').classList.remove('open'); });
+        
+        document.getElementById('btn-submit-vip').addEventListener('click', () => { 
+          const code = document.getElementById('input-vip-code').value.trim();
+          if (code === 'SYLVA-VIP-2026') {
+            localStorage.setItem('sylva_is_vip', 'true'); document.getElementById('modal-vip').classList.remove('open');
+            showAppAlert('VIP Access Granted! All premium templates are now unlocked forever.');
+            document.getElementById('list-templates').innerHTML = ''; buildTemplateLibrary();
+          } else { showAppAlert('Invalid VIP Code.'); }
+        });
+
+        // NEW Tutorial Engine Bindings
+        document.getElementById('btn-open-help').addEventListener('click', () => {
+            document.getElementById('drawer-left').classList.remove('open');
+            document.getElementById('modal-tut-animation').classList.add('open');
+        });
+        document.getElementById('btn-tut-yes').addEventListener('click', () => {
+            document.getElementById('modal-tut-prompt').classList.remove('open');
+            document.getElementById('modal-tut-animation').classList.add('open');
+            localStorage.setItem('sylva_tutorial_seen', 'true');
+        });
+        document.getElementById('btn-tut-no').addEventListener('click', () => {
+            document.getElementById('modal-tut-prompt').classList.remove('open');
+            localStorage.setItem('sylva_tutorial_seen', 'true');
+            document.getElementById('drawer-left').classList.add('open');
+            setTimeout(() => { showAppAlert("If you need it, the Help & Tutorial button is here in your Nodes Directory!"); }, 300);
+        });
+        document.getElementById('btn-close-tut-anim').addEventListener('click', () => {
+            document.getElementById('modal-tut-animation').classList.remove('open');
+        });
+      }
+
+      function setupCustomDropdowns() {
+        const configs = [
+          { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' },
+          { trig: 'tree-type-trigger', drop: 'tree-type-dropdown', inp: 'tree-input-type' },
+          { trig: 'season-trigger', drop: 'season-dropdown', inp: 'select-tree-season' }
+        ];
+        configs.forEach(cfg => {
+          const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
+          trig.addEventListener('pointerdown', (e) => e.stopPropagation()); 
+          trig.addEventListener('click', (e) => { 
+            e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; 
+          });
+          drop.querySelectorAll('.custom-opt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation(); inp.value = btn.getAttribute('data-val'); trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none';
+              if (cfg.inp === 'select-tree-season') { const t = getTree(); if (t) { t.season = inp.value; saveData(); render(); } }
+            });
+          });
+        });
+        document.querySelectorAll('.custom-dropdown').forEach(dd => { dd.addEventListener('pointerdown', (e) => e.stopPropagation()); });
+        
+        let advOpen = false;
+        document.getElementById('btn-toggle-advanced').addEventListener('click', (e) => {
+          e.preventDefault(); advOpen = !advOpen; 
+          document.getElementById('advanced-metadata-panel').style.display = advOpen ? 'flex' : 'none';
+          document.getElementById('adv-arrow').innerText = advOpen ? '▴' : '▾';
+        });
+      }
+
+      function closeAllDropdowns() {
+        document.getElementById('grow-dropdown').style.display = 'none';
+        document.getElementById('node-type-dropdown').style.display = 'none';
+        document.getElementById('tree-type-dropdown').style.display = 'none';
+        document.getElementById('season-dropdown').style.display = 'none';
+      }
+
+      function getTemplateSpecies(title) {
+        if (title === "Beginner Guitar Mastery" || title === "Beginner Vocal Training" || title === "Marathon Training Plan") return "Apple";
+        if (title === "Music Theory Fundamentals" || title === "Research Paper Citations" || title === "Client CRM") return "Oak";
+        if (title === "Brain Dump / Idea Inbox" || title === "App Development Brainstorm") return "Willow";
+        return "Pine";
+      }
+
+      function generateTemplateNodes(title, startX, startY) {
+        const nodes = []; const generateId = () => 'n_' + Math.random().toString(36).substring(2, 9); const trunkId = generateId();
+        if (title === "Clinical Sepsis Protocol") {
+          const b1 = generateId(), b2 = generateId(), l1 = generateId(), l2 = generateId(), f1 = generateId(), f2 = generateId();
+          nodes.push({ id: trunkId, title: "Sepsis Alert", desc: "Emergency Protocol", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+          nodes.push({ id: b1, title: "Clinical Indicators", desc: "", type: "branch", parentId: trunkId, x: startX - 150, y: startY + 160, pinned: false });
+          nodes.push({ id: l1, title: "Temp > 101.0F", desc: "", type: "leaf", parentId: b1, x: startX - 250, y: startY + 300, pinned: false });
+          nodes.push({ id: l2, title: "Lactic Acid > 2.0", desc: "", type: "leaf", parentId: b1, x: startX - 50, y: startY + 300, pinned: false });
+          nodes.push({ id: b2, title: "Interventions", desc: "", type: "branch", parentId: trunkId, x: startX + 150, y: startY + 160, pinned: false });
+          nodes.push({ id: f1, title: "Blood Cultures Drawn", desc: "", type: "fruit", parentId: b2, x: startX + 50, y: startY + 300, pinned: false, harvested: false });
+          nodes.push({ id: f2, title: "IV Antibiotics Started", desc: "", type: "fruit", parentId: b2, x: startX + 250, y: startY + 300, pinned: false, harvested: false });
+        } else {
+          const b1 = generateId(), b2 = generateId(), l1 = generateId(), f1 = generateId();
+          nodes.push({ id: trunkId, title: title, desc: "Auto-generated structure", type: "trunk", parentId: null, x: startX, y: startY, pinned: false });
+          nodes.push({ id: b1, title: "Phase 1 / Overview", desc: "", type: "branch", parentId: trunkId, x: startX - 120, y: startY + 160, pinned: false });
+          nodes.push({ id: l1, title: "Notes & Details", desc: "", type: "leaf", parentId: b1, x: startX - 120, y: startY + 300, pinned: false });
+          nodes.push({ id: b2, title: "Phase 2 / Action", desc: "", type: "branch", parentId: trunkId, x: startX + 120, y: startY + 160, pinned: false });
+          nodes.push({ id: f1, title: "Deliverable Goal", desc: "", type: "fruit", parentId: b2, x: startX + 120, y: startY + 300, pinned: false, harvested: false });
+        }
+        return nodes;
+      }
+
+      let pendingTemplateTitle = "";
+      function buildTemplateLibrary() {
+        const list = document.getElementById('list-templates'); list.innerHTML = '';
+        
+        // The 100 Free Templates
+        const freeCats = {
+          "Personal Organization": ["Daily To-Do List", "Weekly Review", "Brain Dump / Idea Inbox", "Habit Tracker", "Morning Routine", "Evening Wind-down", "Monthly Goals", "Personal Vision Board", "Subscriptions Index", "Reading List & Notes"],
+          "Health & Wellness": ["Workout Routine", "Meal Prep & Grocery List", "Calorie/Macro Tracker", "Sleep & Mood Log", "Marathon Training Plan", "Yoga Pose Flow", "Medical History & Doctors", "Water Intake Challenge", "Mindfulness Journal", "Supplement Schedule"],
+          "Home & Household": ["Spring Cleaning Checklist", "Home Maintenance Schedule", "Emergency Evacuation Plan", "Moving Packing List", "Pantry & Freezer Inventory", "Pet Care & Vet Records", "Utility Bills Tracker", "Interior Design Moodboard", "Garden Planting Map", "Car Maintenance Log"],
+          "Work & Career": ["Meeting Minutes & Action Items", "Project Brainstorm", "Resume & Portfolio Builder", "Interview Prep", "Weekly Work Sprint", "Client CRM", "Freelance Invoice Tracker", "Performance Review Prep", "Professional Networking Rolodex", "New Job Onboarding"],
+          "Travel & Events": ["Weekend Getaway Itinerary", "International Travel Checklist", "Birthday Party Planner", "Holiday Gift Guide", "Road Trip Route & Stops", "Camping Gear Inventory", "Dinner Party Menu & Prep", "Backpacking Europe Itinerary", "Wedding Guest List", "Travel Inspiration Board"],
+          "Finance & Budgeting": ["Monthly Household Budget", "Debt Snowball Tracker", "Tax Prep Checklist", "Holiday Spending Tracker", "Savings Goal Milestone", "Investment Portfolio Map", "Side Hustle Idea Board", "Expense Reimbursement Log", "Subscription Audit", "Future Purchases Wishlist"],
+          "Learning & Education": ["Semester Class Schedule", "Essay Outline", "Language Learning Vocab", "Study Guide & Flashcards", "Final Exam Prep Timeline", "Thesis Topic Brainstorm", "Online Course Tracker", "Research Paper Citations", "Group Project Task Delegation", "Lecture Notes Organizer"],
+          "Creative Hobbies": ["Knitting/Crochet Pattern Log", "DIY Woodworking Project", "Scrapbook Idea Board", "Short Story Character Web", "Photography Shoot Planner", "30-Day Drawing Challenge", "Blog Post Pipeline", "YouTube Video Script Outline", "Recipe Creation & Tweaks", "Podcasting Interview Questions"],
+          "Social & Relationships": ["Family Birthdays & Anniversaries", "Date Night Ideas", "Kids' Chore Chart", "Baby Name Shortlist", "Roommate Agreement & Rules", "Book Club Discussion Guide", "Holiday Card Mailing List", "Neighborhood Block Party", "Family Reunion Logistics", "Shared Grocery & Errands"],
+          "Technology & Gaming": ["PC Build Parts List", "Video Game Backlog Tracker", "D&D Character Sheet", "Smart Home Setup", "App Development Brainstorm", "Website Redesign Tasks", "Data Backup Schedule", "Software Subscription Keys", "MMO Raid Strategy", "Board Game Collection & Ratings"]
+        };
+
+        const isVip = localStorage.getItem('sylva_is_vip') === 'true';
+
+        // Build Free Templates
+        for (const [cat, templates] of Object.entries(freeCats)) {
+          const hdr = document.createElement('div');
+          hdr.style.padding = '8px 16px'; hdr.style.background = 'var(--bg-surface-elevated)'; hdr.style.color = 'var(--accent)'; hdr.style.fontSize = '11px'; hdr.style.fontWeight = 'bold'; hdr.innerText = cat.toUpperCase();
+          list.appendChild(hdr);
+          templates.forEach(t => {
+            const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
+            li.innerHTML = `<span>${escapeHTML(t)}</span><button class="btn btn-small btn-accent">Load</button>`;
+            li.querySelector('button').addEventListener('click', () => {
+              pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
+              document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
+            });
+            list.appendChild(li);
+          });
+        }
+
+        // Build Premium Templates
+        const premHdr = document.createElement('div');
+        premHdr.style.padding = '8px 16px'; premHdr.style.background = '#F59E0B'; premHdr.style.color = '#000'; premHdr.style.fontSize = '11px'; premHdr.style.fontWeight = 'bold'; premHdr.innerText = "PREMIUM ADVANCED FRAMEWORKS";
+        list.appendChild(premHdr);
+        
+        for(let i = 1; i <= 50; i++) {
+           const t = "Premium Industry Framework " + i;
+           const li = document.createElement('li'); li.className = 'directory-item'; li.style.borderRadius = '0'; li.style.borderLeft = 'none'; li.style.borderRight = 'none';
+           if (!isVip) {
+              li.innerHTML = `<span>${escapeHTML(t)} <span style="font-size:10px; color:#F59E0B;">($1)</span></span><button class="btn btn-small" style="border-color:#F59E0B; color:#F59E0B;">Unlock</button>`;
+              li.querySelector('button').addEventListener('click', () => { document.getElementById('modal-purchase-template').classList.add('open'); });
+           } else {
+              li.innerHTML = `<span>${escapeHTML(t)} <span style="font-size:10px; color:var(--accent);">(VIP)</span></span><button class="btn btn-small btn-accent">Load</button>`;
+              li.querySelector('button').addEventListener('click', () => {
+                pendingTemplateTitle = t; document.getElementById('modal-templates').classList.remove('open');
+                document.getElementById('tpl-prompt-name').innerText = t; document.getElementById('modal-template-prompt').classList.add('open');
+              });
+           }
+           list.appendChild(li);
+        }
+
+        if (!isVip) {
+          const vipBtn = document.createElement('div');
+          vipBtn.style.padding = '14px'; vipBtn.style.textAlign = 'center';
+          vipBtn.innerHTML = `<button class="btn btn-small" id="btn-open-vip">I have a VIP Code</button>`;
+          list.appendChild(vipBtn);
+          const vBtn = vipBtn.querySelector('#btn-open-vip');
+          if (vBtn) vBtn.addEventListener('click', () => { document.getElementById('modal-vip').classList.add('open'); });
+        }
+
+        document.getElementById('btn-close-template-prompt').onclick = () => document.getElementById('modal-template-prompt').classList.remove('open');
+        document.getElementById('btn-tpl-current').onclick = () => {
+          const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 120);
+          const species = getTemplateSpecies(pendingTemplateTitle);
+          const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160 + (getForest().trees.length * 150), y: 160, nodes: newNodes };
+          getForest().trees.push(newTree); state.selectedId = newTree.id; document.getElementById('modal-template-prompt').classList.remove('open'); render(); saveData();
+        };
+        document.getElementById('btn-tpl-new').onclick = () => {
+          const newNodes = generateTemplateNodes(pendingTemplateTitle, 260, 120);
+          const species = getTemplateSpecies(pendingTemplateTitle);
+          const newTree = { id: 't_' + Date.now(), title: pendingTemplateTitle, type: species, season: 'Spring', pinned: false, x: 160, y: 160, nodes: newNodes };
+          const newF = { id: 'forest-' + Date.now(), title: pendingTemplateTitle, pinned: false, trees: [newTree] };
+          state.forests.push(newF); state.activeForestId = newF.id; state.activeTreeId = newTree.id; state.viewMode = 'tree';
+          document.getElementById('modal-template-prompt').classList.remove('open'); saveData(); render();
+        };
+      }
+
+      function centerOn(x, y) {
+        state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform();
+      }
+
+      function openInspector(node) {
+        setTimeout(() => { 
+          document.getElementById('node-input-title').value = node.title; document.getElementById('node-input-desc').value = node.desc || '';
+          document.getElementById('node-input-type').value = node.type; 
+          const typeOpt = document.querySelector(`#node-type-dropdown .custom-opt[data-val="${node.type}"]`);
+          if (typeOpt) { document.getElementById('node-type-trigger').querySelector('span').innerText = typeOpt.innerText; } 
+          else if (node.type === 'trunk') { document.getElementById('node-type-trigger').querySelector('span').innerText = 'Trunk (Root)'; }
+
+          document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
+          
+          document.getElementById('node-input-start').value = node.startDate || '';
+          document.getElementById('node-input-hours').value = node.estHours || '';
+          document.getElementById('node-input-assignee').value = node.assignee || '';
+
+          const t = getTree();
+          document.getElementById('willow-actions').style.display = (t.type === 'Willow' && node.type === 'branch') ? 'block' : 'none';
+          document.getElementById('oak-actions').style.display = (t.type === 'Oak' && node.acornTarget) ? 'block' : 'none';
+          if (node.acornTarget) {
+            const tNode = getNode(node.acornTarget);
+            document.getElementById('btn-acorn-snap').style.display = 'inline-flex'; document.getElementById('acorn-no-target').style.display = 'none';
+            document.getElementById('acorn-target-name').innerText = tNode ? tNode.title : "Missing Node";
+            document.getElementById('btn-acorn-snap').onclick = () => {
+              if (tNode) { centerOn(tNode.x, tNode.y); document.getElementById('modal-inspector').classList.remove('open'); setTimeout(() => { state.selectedId = tNode.id; renderTreeSelections(); }, 150); }
+            };
+          }
+          
+          document.getElementById('btn-willow-lengthen').onclick = () => {
+            const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: node.x + (Math.random() * 40 - 20), y: node.y + 160, pinned: false };
+            t.nodes.push(newNode); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value;
+            if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
+            saveData(); render(); openInspector(newNode);
+          };
+
+          if (t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = "Pine Cone (Checklist)"; }
+          else if (t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = "Acorn (Link)"; }
+          else { document.getElementById('opt-node-fruit').innerText = "Fruit (Task/Deliverable)"; }
+
+          document.getElementById('btn-save-node').onclick = (e) => { 
+            e.preventDefault();
+            node.title = document.getElementById('node-input-title').value.trim() || node.title; node.desc = document.getElementById('node-input-desc').value;
+            if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value; 
+            node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
+            document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+          };
+          const bD = document.getElementById('btn-delete-node');
+          bD.style.display = node.type === 'trunk' ? 'none' : 'inline-flex';
+          bD.onclick = (e) => { 
+            e.preventDefault(); 
+            const treeToEdit = getTree(); const idsToDelete = new Set([node.id]); let added = true;
+            while (added) {
+              added = false;
+              treeToEdit.nodes.forEach(n => { if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) { idsToDelete.add(n.id); added = true; } });
+            }
+            treeToEdit.nodes = treeToEdit.nodes.filter(n => !idsToDelete.has(n.id)); 
+            document.getElementById('modal-inspector').classList.remove('open'); render(); saveData(); 
+          };
+          document.getElementById('modal-inspector').classList.add('open');
+        }, 120);
+      }
+
+      function openTreeInspector(tree) {
+        setTimeout(() => {
+          document.getElementById('tree-input-title').value = tree.title; document.getElementById('tree-input-type').value = tree.type || 'Pine';
+          const speciesOpt = document.querySelector(`#tree-type-dropdown .custom-opt[data-val="${tree.type || 'Pine'}"]`);
+          if (speciesOpt) { document.getElementById('tree-type-trigger').querySelector('span').innerText = speciesOpt.innerText; }
+          document.getElementById('btn-save-tree').onclick = (e) => {
+            e.preventDefault(); tree.title = document.getElementById('tree-input-title').value.trim() || tree.title; tree.type = document.getElementById('tree-input-type').value;
+            document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData();
+          };
+          document.getElementById('btn-delete-tree').onclick = (e) => {
+            e.preventDefault(); const f = getForest(); f.trees = f.trees.filter(t => t.id !== tree.id);
+            document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData();
+          };
+          document.getElementById('modal-tree-inspector').classList.add('open');
+        }, 120);
+      }
+
+      function openSeasonModal() {
+        const t = getTree(); if (!t) return;
+        document.getElementById('select-tree-season').value = t.season || 'Spring';
+        const sOpt = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`);
+        if (sOpt) { document.getElementById('season-trigger').querySelector('span').innerText = sOpt.innerText; }
+        const list = document.getElementById('list-harvest'); list.innerHTML = '';
+        const fruits = t.nodes.filter(n => n.type === 'fruit' && n.harvested); document.getElementById('harvest-total').innerText = fruits.length;
+        fruits.forEach(f => {
+          const li = document.createElement('li'); li.className = 'directory-item';
+          li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`;
+          li.addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); openInspector(f); });
+          list.appendChild(li);
+        });
+        document.getElementById('modal-season').classList.add('open');
+      }
+
+      function initTutorial() {
+        if (!localStorage.getItem('sylva_tutorial_seen')) {
+          document.getElementById('modal-tut-prompt').classList.add('open');
+        }
+      }
+
+      // Animation Engine Text Synchronizer
+      setInterval(() => {
+        const t = document.getElementById('anim-text-display');
+        if(t && document.getElementById('modal-tut-animation').classList.contains('open')) {
+          const time = (Date.now() % 40000) / 1000;
+          if(time < 4.0) t.innerText = "1. Use 'Grow' to plant Trees and Nodes.";
+          else if(time < 8.0) t.innerText = "2. Double-Click a Tree or Node to open details.";
+          else if(time < 12.0) t.innerText = "3. Long-Press a Tree to enter its workspace.";
+          else if(time < 16.0) t.innerText = "4. Drag the PIP Minimap to navigate fast.";
+          else if(time < 20.0) t.innerText = "5. Set Season and Harvest completed tasks.";
+          else if(time < 24.0) t.innerText = "6. View chronological Executive Timeline.";
+          else if(time < 28.0) t.innerText = "7. Highlight Critical Paths.";
+          else if(time < 32.0) t.innerText = "8. Navigate nested trees via Breadcrumbs.";
+          else if(time < 36.0) t.innerText = "9. Open Left Directory for saved files & Auto Tidy.";
+          else t.innerText = "10. Open Right Nursery for JSON Backup/Sync.";
+        }
+      }, 100);
+
+      init();
+    })();
+  </script>
+</body>
+</html>
