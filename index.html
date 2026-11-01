@@ -153,12 +153,30 @@
   <!-- App Alerts & Toasts -->
   <div class="modal-overlay" id="modal-alert" style="z-index: 10005;">
     <div class="modal-card" style="width: 320px; text-align: center;">
-      <div class="modal-header"><h3>Notification</h3><button class="btn btn-small" onclick="document.getElementById('modal-alert').classList.remove('open')">&times;</button></div>
+      <div class="modal-header"><h3 id="alert-header-text">Notification</h3><button class="btn btn-small" onclick="document.getElementById('modal-alert').classList.remove('open')">&times;</button></div>
       <div class="modal-body" id="alert-message-text" style="font-size: 14px; padding: 24px;"></div>
-      <div class="modal-footer" style="justify-content: center;"><button class="btn btn-accent" onclick="document.getElementById('modal-alert').classList.remove('open')">OK</button></div>
+      <div class="modal-footer" id="alert-footer-actions" style="justify-content: center;"></div>
     </div>
   </div>
-
+  
+  <div class="modal-overlay" id="modal-forest-inspector">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Forest Settings</h3><button class="btn btn-small" onclick="document.getElementById('modal-forest-inspector').classList.remove('open')">&times;</button></div>
+      <div class="modal-body">
+        <div class="field-group"><label>Forest Name</label><input type="text" id="forest-input-title"></div>
+        <div class="field-group"><label>Human Resources (Team)</label><textarea id="forest-input-hr" rows="2" placeholder="List team members..."></textarea></div>
+        <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
+           <div style="flex:1;"><label>Total Budget ($)</label><input type="number" id="forest-input-budget"></div>
+           <div style="flex:1;"><label>Total Cost ($)</label><input type="number" id="forest-input-cost"></div>
+        </div>
+        <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
+           <div style="flex:1;"><label>Deadline</label><input type="date" id="forest-input-deadline"></div>
+           <div style="flex:1;"><label>Days Spent</label><input type="number" id="forest-input-days"></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-forest">Delete Forest</button><button class="btn btn-accent" id="btn-save-forest">Save Changes</button></div>
+    </div>
+  </div>
   <div id="update-toast" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:#000; padding:12px 24px; border-radius:8px; z-index:9999; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.5); align-items:center; gap:12px;">
     <span>New version available!</span>
     <button class="btn btn-small" style="background:#000; color:#fff;" onclick="window.location.reload(true)">Reload</button>
@@ -305,7 +323,14 @@
            <button class="btn btn-small" id="btn-toggle-advanced" style="width: 100%; justify-content: space-between; border: 1px solid var(--border-subtle);"><span>Advanced Metadata</span><span id="adv-arrow">▾</span></button>
            <div id="advanced-metadata-panel" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
               <div class="field-group"><label>Start Date</label><input type="date" id="node-input-start"></div>
-              <div class="field-group"><label>Estimated Hours</label><input type="number" id="node-input-hours" placeholder="e.g. 5"></div>
+              <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
+                 <div style="flex:1;"><label>Est. Hours</label><input type="number" id="node-input-hours" placeholder="e.g. 5"></div>
+                 <div style="flex:1;"><label>Time Spent</label><input type="number" id="node-input-timespent" placeholder="e.g. 2"></div>
+              </div>
+              <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
+                 <div style="flex:1;"><label>Budget ($)</label><input type="number" id="node-input-budget" placeholder="0"></div>
+                 <div style="flex:1;"><label>Total Spent ($)</label><input type="number" id="node-input-spent" placeholder="0"></div>
+              </div>
               <div class="field-group"><label>Assigned To</label><input type="text" id="node-input-assignee" placeholder="e.g. John Doe"></div>
            </div>
         </div>
@@ -1034,8 +1059,17 @@
         }
       }
 
-      function showAppAlert(msg) {
+      function showAppAlert(msg, title = "Notification", isConfirm = false, onConfirm = null) {
+        document.getElementById('alert-header-text').innerText = title;
         document.getElementById('alert-message-text').innerText = msg;
+        const footer = document.getElementById('alert-footer-actions');
+        if (isConfirm) {
+            footer.innerHTML = `<button class="btn" id="btn-alert-no">No</button><button class="btn btn-accent" id="btn-alert-yes">Yes</button>`;
+            document.getElementById('btn-alert-no').onclick = () => document.getElementById('modal-alert').classList.remove('open');
+            document.getElementById('btn-alert-yes').onclick = () => { document.getElementById('modal-alert').classList.remove('open'); if (onConfirm) onConfirm(); };
+        } else {
+            footer.innerHTML = `<button class="btn btn-accent" onclick="document.getElementById('modal-alert').classList.remove('open')">OK</button>`;
+        }
         document.getElementById('modal-alert').classList.add('open');
       }
 
@@ -1043,28 +1077,69 @@
         world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
         renderMinimap();
       }
-      
-      function getCriticalPathIds(tree) {
-        const adj = {};
-        tree.nodes.forEach(n => adj[n.id] = []);
-        tree.nodes.forEach(n => {
-          if (n.parentId && adj[n.parentId]) adj[n.parentId].push(n.id);
-          if (n.acornTarget && adj[n.id]) adj[n.id].push(n.acornTarget);
-        });
-        let maxPath = [];
-        function dfs(nodeId, currentPath, visited) {
-          if (visited.has(nodeId)) return;
-          const node = tree.nodes.find(n => n.id === nodeId);
-          if (!node || (node.type === 'fruit' && node.harvested)) return;
-          currentPath.push(nodeId); visited.add(nodeId);
-          if (currentPath.length > maxPath.length) maxPath = [...currentPath];
-          adj[nodeId].forEach(childId => dfs(childId, [...currentPath], new Set(visited)));
-        }
-        const trunk = tree.nodes.find(n => n.type === 'trunk') || tree.nodes[0];
-        if (trunk) dfs(trunk.id, [], new Set());
-        return maxPath;
+
+      function openForestInspector() {
+        const f = getForest();
+        document.getElementById('forest-input-title').value = f.title || '';
+        document.getElementById('forest-input-hr').value = f.hr || '';
+        document.getElementById('forest-input-budget').value = f.budget || '';
+        document.getElementById('forest-input-cost').value = f.cost || '';
+        document.getElementById('forest-input-deadline').value = f.deadline || '';
+        document.getElementById('forest-input-days').value = f.daysSpent || '';
+        
+        document.getElementById('btn-save-forest').onclick = (e) => {
+            e.preventDefault();
+            f.title = document.getElementById('forest-input-title').value.trim() || f.title;
+            f.hr = document.getElementById('forest-input-hr').value; f.budget = document.getElementById('forest-input-budget').value;
+            f.cost = document.getElementById('forest-input-cost').value; f.deadline = document.getElementById('forest-input-deadline').value;
+            f.daysSpent = document.getElementById('forest-input-days').value;
+            document.getElementById('modal-forest-inspector').classList.remove('open'); saveData(); render();
+        };
+        document.getElementById('btn-delete-forest').onclick = (e) => {
+            e.preventDefault();
+            if (state.forests.length > 1) {
+                state.forests = state.forests.filter(fs => fs.id !== f.id);
+                state.activeForestId = state.forests[0].id;
+                document.getElementById('modal-forest-inspector').classList.remove('open'); saveData(); render();
+            } else { showAppAlert("You cannot delete your only forest!"); }
+        };
+        document.getElementById('modal-forest-inspector').classList.add('open');
       }
 
+      function getCriticalPathIds(treeOrForest, isForest = false) {
+        let maxPath = [];
+        function calculateForTree(tree) {
+            const adj = {}; tree.nodes.forEach(n => adj[n.id] = []);
+            tree.nodes.forEach(n => {
+              if (n.parentId && adj[n.parentId]) adj[n.parentId].push(n.id);
+              if (n.acornTarget && adj[n.id]) adj[n.id].push(n.acornTarget);
+            });
+            let treeMaxPath = [], treeMaxWeight = -1;
+            function dfs(nodeId, currentPath, currentWeight, visited) {
+              if (visited.has(nodeId)) return;
+              const node = tree.nodes.find(n => n.id === nodeId);
+              if (!node || (node.type === 'fruit' && node.harvested) || (node.type === 'fruit' && node.ripe)) return;
+              
+              const duration = Math.max(0, (parseFloat(node.estHours) || 1) - (parseFloat(node.timeSpent) || 0));
+              const newWeight = currentWeight + duration; const newPath = [...currentPath, nodeId];
+              
+              if (newWeight > treeMaxWeight) { treeMaxWeight = newWeight; treeMaxPath = newPath; }
+              if (adj[nodeId].length === 0) return;
+              adj[nodeId].forEach(childId => dfs(childId, newPath, newWeight, new Set(visited)));
+            }
+            const trunk = tree.nodes.find(n => n.type === 'trunk') || tree.nodes[0];
+            if (trunk) dfs(trunk.id, [], 0, new Set());
+            return { path: treeMaxPath, weight: treeMaxWeight };
+        }
+        if (isForest) {
+            let forestMaxWeight = -1;
+            treeOrForest.trees.forEach(t => {
+                const res = calculateForTree(t);
+                if (res.weight > forestMaxWeight) { forestMaxWeight = res.weight; maxPath = res.path; }
+            });
+        } else { maxPath = calculateForTree(treeOrForest).path; }
+        return maxPath;
+      }
       function render() {
         const forest = getForest(), tree = getTree();
         const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), bc = document.getElementById('breadcrumb-text');
@@ -1074,15 +1149,15 @@
           
         document.getElementById('btn-grow').disabled = !state.isLocked;
         document.getElementById('btn-season').disabled = !state.isLocked;
-        document.getElementById('btn-harvest-main').style.display = state.viewMode !== 'forest' ? 'inline-flex' : 'none';
+        document.getElementById('btn-harvest-main').style.display = 'inline-flex';
+        document.getElementById('btn-critical-path').style.display = 'inline-flex';
+        document.getElementById('btn-season').style.display = 'inline-flex';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
         document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && tree.type === 'Apple') ? 'block' : 'none';
         
         document.getElementById('btn-toggle-timeline').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
         document.getElementById('timeline-btn-container').style.display = state.viewMode === 'tree' ? 'block' : 'none';
-        
-        document.getElementById('btn-critical-path').style.display = state.viewMode !== 'forest' ? 'inline-flex' : 'none';
 
         bc.innerHTML = '';
         const fCrumb = document.createElement('span');
@@ -1272,31 +1347,53 @@
 
       function renderTimeline() {
         const tc = document.getElementById('timeline-content'); tc.innerHTML = '';
-        const tree = getTree(); if (!tree) return;
-        const header = document.createElement('h2'); header.innerText = `Executive Timeline: ${tree.title}`; header.style.marginBottom = '16px'; tc.appendChild(header);
+        let targetNodes = [], headerText = '';
+        
+        if (state.viewMode === 'forest') {
+            const f = getForest(); headerText = `Executive Timeline: ${f.title}`;
+            f.trees.forEach(t => targetNodes = targetNodes.concat(t.nodes.filter(n => n.type !== 'trunk')));
+            const fm = document.createElement('div');
+            fm.style.background = 'var(--bg-surface-elevated)'; fm.style.padding = '16px'; fm.style.borderRadius = '8px'; fm.style.marginBottom = '16px';
+            fm.innerHTML = `<div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                <div><strong>Team:</strong> ${escapeHTML(f.hr || 'None')}</div>
+                <div><strong>Deadline:</strong> ${escapeHTML(f.deadline || 'None')}</div>
+                <div><strong>Days Spent:</strong> ${escapeHTML(f.daysSpent || '0')}</div>
+                <div style="color:${parseFloat(f.cost)>parseFloat(f.budget)?'#EF4444':'#10B981'}"><strong>Budget:</strong> $${escapeHTML(f.cost||'0')} / $${escapeHTML(f.budget||'0')}</div>
+            </div>`;
+            tc.appendChild(fm);
+        } else {
+            const tree = getTree(); if (!tree) return;
+            headerText = `Executive Timeline: ${tree.title}`;
+            targetNodes = tree.nodes.filter(n => n.type !== 'trunk');
+        }
+        
+        const header = document.createElement('h2'); header.innerText = headerText; header.style.marginBottom = '16px'; 
+        tc.insertBefore(header, tc.firstChild);
 
-        const tasks = tree.nodes.filter(n => n.type !== 'trunk').sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
+        const tasks = targetNodes.sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
         tasks.forEach(n => {
+          if (n.harvested) return; // Removes harvested tasks from timeline view
           const isCritical = criticalSet.has(n.id);
-          const borderStyle = isCritical ? '1px solid #EF4444' : '1px solid var(--border-subtle)';
-          const shadowStyle = isCritical ? '0 0 16px rgba(239, 68, 68, 0.5)' : 'none';
-          const ripeBadge = (n.type === 'fruit' && n.ripe && !n.harvested) ? ` <span style="font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
-
-          const card = document.createElement('div'); 
-          card.style.background = 'var(--bg-surface)'; 
-          card.style.padding = '16px'; 
-          card.style.borderRadius = '8px'; 
-          card.style.border = borderStyle;
-          card.style.boxShadow = shadowStyle;
+          const isOverBudget = (parseFloat(n.totalSpent) || 0) > (parseFloat(n.budget) || 0) && (parseFloat(n.budget) || 0) > 0;
+          const isOverTime = (parseFloat(n.timeSpent) || 0) > (parseFloat(n.estHours) || 0) && (parseFloat(n.estHours) || 0) > 0;
           
+          const card = document.createElement('div'); 
+          card.style.background = 'var(--bg-surface)'; card.style.padding = '16px'; card.style.borderRadius = '8px'; 
+          card.style.border = isCritical ? '1px solid #EF4444' : '1px solid var(--border-subtle)';
+          card.style.boxShadow = isCritical ? '0 0 16px rgba(239, 68, 68, 0.5)' : 'none';
+          
+          const ripeBadge = (n.type === 'fruit' && n.ripe) ? ` <span style="font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
+          const warnBadge = (isOverBudget || isOverTime) ? ` <span style="color:#EF4444; font-weight:bold; font-size:12px; margin-left:8px;" title="Over Budget or Time!">⚠️ OVERRUN</span>` : '';
+
           card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-              <strong style="font-size:14px;">${escapeHTML(n.title)}${ripeBadge}</strong>
+              <strong style="font-size:14px;">${escapeHTML(n.title)}${ripeBadge}${warnBadge}</strong>
               <span style="font-size:10px; padding:2px 6px; background:var(--bg-surface-elevated); border-radius:4px; color:var(--text-muted);">${escapeHTML(n.type.toUpperCase())}</span>
             </div>
-            <div style="display:flex; gap: 24px; font-size:12px; color:var(--text-muted);">
+            <div style="display:flex; gap: 16px; flex-wrap:wrap; font-size:12px; color:var(--text-muted);">
               <div><strong>Start:</strong> ${escapeHTML(n.startDate || 'Unscheduled')}</div>
-              <div><strong>Est. Hours:</strong> ${escapeHTML(n.estHours || '0')}</div>
+              <div style="color:${isOverTime?'#EF4444':''}"><strong>Hours:</strong> ${escapeHTML(n.timeSpent || '0')} / ${escapeHTML(n.estHours || '0')}</div>
+              <div style="color:${isOverBudget?'#EF4444':''}"><strong>Budget:</strong> $${escapeHTML(n.totalSpent || '0')} / $${escapeHTML(n.budget || '0')}</div>
               <div><strong>Assignee:</strong> ${escapeHTML(n.assignee || 'Unassigned')}</div>
             </div>
           `;
@@ -1529,11 +1626,19 @@
         document.getElementById('btn-close-basket').addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); });
 
         document.getElementById('btn-harvest-main').addEventListener('click', () => {
-          const t = getTree(); if (!t) return; let count = 0;
-          t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested && n.ripe) { n.harvested = true; count++; } });
-          if (t.type === 'Pine') { t.nodes.forEach(n => { if (n.type === 'fruit') { n.harvested = false; n.ripe = false; } }); showAppAlert('Pine Cone Checklist Reset!'); } 
-          else { showAppAlert(`Harvested ${count} completed goals!`); }
-          saveData(); render();
+          showAppAlert("Would you like to harvest all ripe tasks?", "Harvest Time", true, () => {
+              let count = 0;
+              const trees = state.viewMode === 'forest' ? getForest().trees : [getTree()];
+              trees.forEach(t => {
+                  if (!t) return;
+                  t.nodes.forEach(n => { 
+                      if (n.type === 'fruit' && !n.harvested && n.ripe) { n.harvested = true; count++; } 
+                      if (t.type === 'Pine' && n.type === 'fruit') { n.harvested = false; n.ripe = false; }
+                  });
+              });
+              saveData(); render();
+              setTimeout(() => { showAppAlert(`Harvested ${count} completed goals!`, "Successful Pickin's!"); }, 400);
+          });
         });
         
         // Sync Logic
@@ -1796,6 +1901,9 @@
 
           document.getElementById('node-input-start').value = node.startDate || '';
           document.getElementById('node-input-hours').value = node.estHours || '';
+          document.getElementById('node-input-timespent').value = node.timeSpent || '';
+          document.getElementById('node-input-budget').value = node.budget || '';
+          document.getElementById('node-input-spent').value = node.totalSpent || '';
           document.getElementById('node-input-assignee').value = node.assignee || '';
 
           const t = getTree();
@@ -1835,8 +1943,15 @@
             e.preventDefault();
             node.title = document.getElementById('node-input-title').value.trim() || node.title; node.desc = document.getElementById('node-input-desc').value;
             if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
-            node.ripe = document.getElementById('node-input-ripe').checked;
-            node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
+            if (node.type === 'fruit') node.ripe = document.getElementById('node-input-ripe').checked;
+            
+            node.startDate = document.getElementById('node-input-start').value; 
+            node.estHours = document.getElementById('node-input-hours').value; 
+            node.timeSpent = document.getElementById('node-input-timespent').value;
+            node.budget = document.getElementById('node-input-budget').value; 
+            node.totalSpent = document.getElementById('node-input-spent').value;
+            node.assignee = document.getElementById('node-input-assignee').value;
+            
             document.getElementById('modal-inspector').classList.remove('open'); render(); saveData();
           };
           const bD = document.getElementById('btn-delete-node');
@@ -1873,13 +1988,28 @@
       }
 
       function openSeasonModal() {
-        const t = getTree(); if (!t) return;
-        document.getElementById('select-tree-season').value = t.season || 'Spring';
-        const sOpt = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`);
-        if (sOpt) { document.getElementById('season-trigger').querySelector('span').innerText = sOpt.innerText; }
+        const isForest = state.viewMode === 'forest';
+        const trees = isForest ? getForest().trees : [getTree()];
+        
+        // Hide the season dropdown if in forest view, since seasons apply to specific trees
+        document.getElementById('season-trigger').parentElement.style.display = isForest ? 'none' : 'block';
+        
+        if (!isForest) {
+            const t = getTree(); if (t) {
+                document.getElementById('select-tree-season').value = t.season || 'Spring';
+                const sOpt = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`);
+                if (sOpt) { document.getElementById('season-trigger').querySelector('span').innerText = sOpt.innerText; }
+            }
+        }
+
         const list = document.getElementById('list-harvest'); list.innerHTML = '';
-        const fruits = t.nodes.filter(n => n.type === 'fruit' && n.harvested); document.getElementById('harvest-total').innerText = fruits.length;
-        fruits.forEach(f => {
+        let allHarvested = [];
+        trees.forEach(t => {
+            if (t) { allHarvested = allHarvested.concat(t.nodes.filter(n => n.type === 'fruit' && n.harvested)); }
+        });
+        
+        document.getElementById('harvest-total').innerText = allHarvested.length;
+        allHarvested.forEach(f => {
           const li = document.createElement('li'); li.className = 'directory-item';
           li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`;
           li.querySelector('button').addEventListener('click', () => openInspector(f));
