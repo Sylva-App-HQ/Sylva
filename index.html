@@ -117,39 +117,26 @@
     #overlay-acorn-target { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 55; display: none; align-items: center; justify-content: center; pointer-events: none; }
     #overlay-acorn-target span { background: var(--bg-surface); padding: 12px 24px; border-radius: 8px; border: 1px solid #B45309; color: #B45309; font-weight: bold; }
 
-    /* Animation Engine CSS for Tutorial Overlay */
-    .anim-square { width: 100%; max-width: 400px; aspect-ratio: 1/1; background: var(--bg-canvas); border-radius: 8px; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-    
-    @keyframes animGrowTree { 0%, 1% { transform: scale(0); opacity: 0; } 3%, 23% { transform: scale(1); opacity: 1; } 25%, 29% { transform: scale(1.4); opacity: 1; } 30%, 100% { transform: scale(1); opacity: 1; } }
-    @keyframes animInspectorPop { 0%, 12% { opacity: 0; transform: scale(0.8); } 13%, 19% { opacity: 1; transform: scale(1); } 20%, 100% { opacity: 0; transform: scale(0.8); } }
-    @keyframes animPulseTree { 0%, 20% { filter: brightness(1); } 22%, 26% { filter: brightness(1.5) drop-shadow(0 0 10px var(--accent)); } 30%, 100% { filter: brightness(1); } }
-    @keyframes animPanWorld { 0%, 30% { transform: translate(0,0); } 32%, 38% { transform: translate(-30px, -20px); } 40%, 100% { transform: translate(0,0); } }
-    @keyframes animHarvestDrop { 0%, 40% { transform: translateY(0); opacity: 1; } 43%, 48% { transform: translateY(40px); opacity: 0; } 50%, 100% { transform: translateY(0); opacity: 1; } }
-    @keyframes animTimelineSlide { 0%, 50% { transform: translateY(100%); opacity: 0; } 52%, 58% { transform: translateY(0); opacity: 1; } 60%, 100% { transform: translateY(100%); opacity: 0; } }
-    @keyframes animCriticalGlow { 0%, 60% { border-color: #33485E; } 62%, 68% { border-color: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); } 70%, 100% { border-color: #33485E; } }
-    @keyframes animBreadcrumb { 0%, 70% { background: transparent; } 72%, 78% { background: var(--bg-surface-elevated); } 80%, 100% { background: transparent; } }
-    @keyframes animDrawerLeft { 0%, 80% { transform: translateX(-100%); } 82%, 88% { transform: translateX(0); } 90%, 100% { transform: translateX(-100%); } }
-    @keyframes animDrawerRight { 0%, 90% { transform: translateX(100%); } 92%, 98% { transform: translateX(0); } 100% { transform: translateX(100%); } }
-
-    /* Virtual Cursor mapped 0-40s (0-100%) */
-    @keyframes animCursor {
-        0% { top: 50%; left: 50%; opacity: 0; } 1% { opacity: 1; }
-        3% { top: 10%; left: 50%; transform: scale(0.8); } 5% { transform: scale(1); } /* Grow */
-        11% { top: 50%; left: 50%; transform: scale(1); } 12% { transform: scale(0.7); } 13% { transform: scale(1); } 14% { transform: scale(0.7); } 15% { transform: scale(1); } /* Dbl Click */
-        21% { top: 50%; left: 50%; transform: scale(1); } 23% { transform: scale(0.7); } 27% { transform: scale(1); } /* Long Press */
-        31% { top: 85%; left: 15%; transform: scale(1); } 33% { top: 80%; left: 20%; transform: scale(0.8); } 37% { transform: scale(1); } /* PIP Drag */
-        41% { top: 85%; left: 85%; transform: scale(1); } 43% { transform: scale(0.8); } 45% { transform: scale(1); } /* Harvest */
-        51% { top: 20%; left: 50%; transform: scale(1); } 53% { transform: scale(0.8); } 55% { transform: scale(1); } /* Timeline */
-        61% { top: 85%; left: 85%; transform: scale(1); } 63% { transform: scale(0.8); } 65% { transform: scale(1); } /* Critical Path */
-        71% { top: 20%; left: 20%; transform: scale(1); } 73% { transform: scale(0.8); } 75% { transform: scale(1); } /* Breadcrumb */
-        81% { top: 10%; left: 10%; transform: scale(1); } 83% { transform: scale(0.8); } 85% { transform: scale(1); } /* Left Nav */
-        91% { top: 10%; left: 90%; transform: scale(1); } 93% { transform: scale(0.8); } 95% { transform: scale(1); } /* Right Nav */
-        99% { opacity: 1; } 100% { top: 50%; left: 50%; opacity: 0; }
-    }
+    /* --- GUIDED TOUR CSS --- */
+    #tour-highlight { position: absolute; background: transparent; border: 2px solid var(--accent); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.7); z-index: 10001; display: none; transition: all 0.3s ease; pointer-events: none; }
+    #tour-tooltip { position: absolute; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 20px; border-radius: 12px; width: 300px; z-index: 10002; display: none; flex-direction: column; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: opacity 0.3s ease; opacity: 0; }
+    .tour-buttons { display: flex; justify-content: space-between; margin-top: 8px; }
+    .tour-active-element { z-index: 10002 !important; position: relative !important; pointer-events: none !important; }
   </style>
 </head>
 <body>
-
+<!-- Guided Tour Elements -->
+  <div id="tour-highlight"></div>
+  <div id="tour-tooltip">
+      <h3 id="tour-title" style="margin: 0; color: var(--accent);"></h3>
+      <div id="tour-desc" style="font-size: 14px; line-height: 1.5;"></div>
+      <div class="tour-buttons">
+          <button class="btn btn-small" id="tour-prev" style="background: transparent; border: 1px solid var(--border-subtle);">Back</button>
+          <span id="tour-progress" style="font-size: 12px; color: var(--text-muted); align-self: center;"></span>
+          <button class="btn btn-accent btn-small" id="tour-next">Next</button>
+      </div>
+      <button class="btn btn-small" id="tour-close" style="position: absolute; top: 12px; right: 12px; padding: 4px 8px; background: transparent; border: none;">&times;</button>
+  </div>
   <!-- App Alerts & Toasts -->
   <div class="modal-overlay" id="modal-alert" style="z-index: 10005;">
     <div class="modal-card" style="width: 320px; text-align: center;">
@@ -514,278 +501,6 @@
       </div>
     </div>
   </div>
-
-<!-- TUTORIAL ANIMATION MODAL -->
-    <div id="modal-tut-animation" class="modal-overlay" style="z-index: 9999;">
-      <style>
-        #tut-anim-square { width: 300px; height: 300px; background: var(--bg-canvas); border: 1px solid var(--border-subtle); border-radius: 12px; position: relative; overflow: hidden; margin: 0 auto 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
-        
-        /* Mock UI Elements */
-        .tut-elem { position: absolute; transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; }
-        #tut-tree { width: 30px; height: 30px; background: #10B981; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; }
-        #tut-node1 { width: 16px; height: 16px; background: #38BDF8; border-radius: 4px; top: 25%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; }
-        #tut-node2 { width: 16px; height: 16px; background: #F59E0B; border-radius: 4px; top: 75%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; }
-        #tut-line1 { width: 2px; height: 0%; background: #33485E; top: 50%; left: 50%; transform: translate(-50%, -100%); transform-origin: bottom; }
-        #tut-line2 { width: 2px; height: 0%; background: #33485E; top: 50%; left: 50%; transform: translate(-50%, 0); transform-origin: top; }
-        
-        #tut-inspector { width: 140px; height: 100px; background: var(--bg-surface); border: 1px solid #10B981; border-radius: 8px; top: 120%; left: 50%; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(0,0,0,0.8); }
-        #tut-minimap { width: 60px; height: 60px; background: var(--bg-surface-elevated); border: 1px solid #33485E; border-radius: 4px; bottom: 10px; left: 10px; }
-        #tut-world { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transition: transform 1s ease-in-out; }
-        #tut-harvest { width: 12px; height: 12px; background: #EF4444; border-radius: 50%; top: 15%; right: 10%; transform: scale(1); opacity: 1; }
-        #tut-timeline { width: 100%; height: 80px; background: var(--bg-surface); border-bottom: 1px solid #33485E; top: -100px; left: 0; }
-        #tut-breadcrumb { width: 100px; height: 12px; background: var(--bg-surface-elevated); border-radius: 4px; top: 15px; left: 60px; opacity: 0.5; }
-        #tut-drawer-l { width: 80px; height: 100%; background: var(--bg-surface); border-right: 1px solid #33485E; top: 0; left: -100px; }
-        #tut-drawer-r { width: 80px; height: 100%; background: var(--bg-surface); border-left: 1px solid #33485E; top: 0; right: -100px; }
-        
-        /* Cursor */
-        #tut-cursor { width: 20px; height: 20px; top: 90%; left: 90%; z-index: 100; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)); pointer-events: none; transition: top 0.6s ease, left 0.6s ease, transform 0.15s ease; }
-        
-        /* Special Animation States */
-        .pulse-tree { animation: tutPulse 0.5s infinite alternate; }
-        @keyframes tutPulse { from { box-shadow: 0 0 5px #10B981, inset 0 0 10px #10B981; transform: translate(-50%, -50%) scale(1.1); } to { box-shadow: 0 0 20px #10B981, inset 0 0 20px #10B981; transform: translate(-50%, -50%) scale(1.3); } }
-        .glow-branch { background: #EF4444 !important; box-shadow: 0 0 10px #EF4444; }
-      </style>
-
-      <div class="modal-card" style="width: 360px; pointer-events: auto;">
-        <div class="modal-body" style="padding: 24px; display: flex; flex-direction: column; align-items: center;">
-          
-          <div id="tut-anim-square">
-            <!-- World layer (pans with minimap) -->
-            <div id="tut-world" class="tut-elem">
-               <div id="tut-line1" class="tut-elem"></div>
-               <div id="tut-line2" class="tut-elem"></div>
-               <div id="tut-tree" class="tut-elem"></div>
-               <div id="tut-node1" class="tut-elem"></div>
-               <div id="tut-node2" class="tut-elem"></div>
-            </div>
-            
-            <!-- Static UI Overlays -->
-            <div id="tut-harvest" class="tut-elem"></div>
-            <div id="tut-minimap" class="tut-elem"></div>
-            <div id="tut-timeline" class="tut-elem"></div>
-            <div id="tut-breadcrumb" class="tut-elem"></div>
-            <div id="tut-drawer-l" class="tut-elem"></div>
-            <div id="tut-drawer-r" class="tut-elem"></div>
-            <div id="tut-inspector" class="tut-elem"></div>
-            
-            <!-- SVG Cursor -->
-            <svg id="tut-cursor" class="tut-elem" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1.5">
-              <path d="M7 2l12 11.2l-5.8.5l3.3 7.3l-2.2.9l-3.2-7.4l-4.4 4.5z"/>
-            </svg>
-          </div>
-
-          <div id="tut-text" style="font-size: 15px; font-weight: 500; text-align: center; color: var(--text-main); min-height: 48px; line-height: 1.4;">
-            Starting tutorial...
-          </div>
-          
-          <button id="btn-close-tut-anim" class="btn btn-accent" style="margin-top: 16px; width: 100%;">Got it, close</button>
-        </div>
-      </div>
-
-      <script>
-        let tutTimer;
-        
-        function resetTutStage() {
-            document.getElementById('tut-world').style.transform = 'translate(0, 0)';
-            document.getElementById('tut-tree').style.transform = 'translate(-50%, -50%) scale(0)';
-            document.getElementById('tut-tree').style.opacity = '0';
-            document.getElementById('tut-tree').className = 'tut-elem';
-            document.getElementById('tut-node1').style.transform = 'translate(-50%, -50%) scale(0)';
-            document.getElementById('tut-node1').style.opacity = '0';
-            document.getElementById('tut-node2').style.transform = 'translate(-50%, -50%) scale(0)';
-            document.getElementById('tut-node2').style.opacity = '0';
-            document.getElementById('tut-line1').style.height = '0%';
-            document.getElementById('tut-line2').style.height = '0%';
-            document.getElementById('tut-line1').classList.remove('glow-branch');
-            document.getElementById('tut-line2').classList.remove('glow-branch');
-            document.getElementById('tut-inspector').style.top = '120%';
-            document.getElementById('tut-timeline').style.top = '-100px';
-            document.getElementById('tut-drawer-l').style.left = '-100px';
-            document.getElementById('tut-drawer-r').style.right = '-100px';
-            document.getElementById('tut-harvest').style.transform = 'scale(1)';
-            document.getElementById('tut-harvest').style.opacity = '1';
-            document.getElementById('tut-breadcrumb').style.opacity = '0.5';
-            document.getElementById('tut-breadcrumb').style.boxShadow = 'none';
-        }
-
-        const tutSteps = [
-          {
-            text: "Click Grow to plant a new Tree and its first Nodes.",
-            run: () => {
-              resetTutStage();
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '10px'; cursor.style.left = '50%'; 
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-tree').style.transform = 'translate(-50%, -50%) scale(1)';
-                document.getElementById('tut-tree').style.opacity = '1';
-                setTimeout(() => {
-                  document.getElementById('tut-line1').style.height = '25%';
-                  document.getElementById('tut-line2').style.height = '25%';
-                  document.getElementById('tut-node1').style.transform = 'translate(-50%, -50%) scale(1)';
-                  document.getElementById('tut-node1').style.opacity = '1';
-                  document.getElementById('tut-node2').style.transform = 'translate(-50%, -50%) scale(1)';
-                  document.getElementById('tut-node2').style.opacity = '1';
-                }, 400);
-              }, 1100);
-            }
-          },
-          {
-            text: "Double-Click a Tree to open the node detail inspector.",
-            run: () => {
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '50%'; cursor.style.left = '50%';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 600);
-              setTimeout(() => { cursor.style.transform = 'scale(1)'; }, 800);
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 1000);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-inspector').style.top = '60%';
-              }, 1200);
-            }
-          },
-          {
-            text: "Long-Press a Tree to enter its specific workspace.",
-            run: () => {
-              document.getElementById('tut-inspector').style.top = '120%';
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '50%'; cursor.style.left = '50%';
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(0.8)'; 
-                document.getElementById('tut-tree').classList.add('pulse-tree');
-              }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-tree').classList.remove('pulse-tree');
-              }, 2200);
-            }
-          },
-          {
-            text: "Drag the PIP minimap to pan around the world.",
-            run: () => {
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '260px'; cursor.style.left = '40px';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.top = '240px'; cursor.style.left = '20px';
-                document.getElementById('tut-world').style.transform = 'translate(40px, 40px)';
-              }, 1200);
-              setTimeout(() => { cursor.style.transform = 'scale(1)'; }, 2200);
-            }
-          },
-          {
-            text: "Click Harvest buttons to collect your goals.",
-            run: () => {
-              document.getElementById('tut-world').style.transform = 'translate(0, 0)';
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '15%'; cursor.style.left = '88%';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-harvest').style.transform = 'translateY(150px) scale(0)';
-                document.getElementById('tut-harvest').style.opacity = '0';
-              }, 1100);
-            }
-          },
-          {
-            text: "Click Executive Timeline to view the schedule overlay.",
-            run: () => {
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '30px'; cursor.style.left = '50%';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-timeline').style.top = '0px';
-              }, 1100);
-            }
-          },
-          {
-            text: "Click Critical Path to highlight important branches.",
-            run: () => {
-              document.getElementById('tut-timeline').style.top = '-100px';
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '10px'; cursor.style.left = '80%';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-line1').classList.add('glow-branch');
-                document.getElementById('tut-line2').classList.add('glow-branch');
-              }, 1100);
-            }
-          },
-          {
-            text: "Click Breadcrumb Nav to jump back up the hierarchy.",
-            run: () => {
-              document.getElementById('tut-line1').classList.remove('glow-branch');
-              document.getElementById('tut-line2').classList.remove('glow-branch');
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '15px'; cursor.style.left = '60px'; 
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-breadcrumb').style.opacity = '1';
-                document.getElementById('tut-breadcrumb').style.boxShadow = '0 0 10px #38BDF8';
-              }, 1100);
-            }
-          },
-          {
-            text: "Click the left Directory for settings and templates.",
-            run: () => {
-              document.getElementById('tut-breadcrumb').style.opacity = '0.5';
-              document.getElementById('tut-breadcrumb').style.boxShadow = 'none';
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '15px'; cursor.style.left = '10px';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-drawer-l').style.left = '0px';
-              }, 1100);
-            }
-          },
-          {
-            text: "Click the right Nursery to view your saved nodes.",
-            run: () => {
-              document.getElementById('tut-drawer-l').style.left = '-100px';
-              const cursor = document.getElementById('tut-cursor');
-              cursor.style.top = '15px'; cursor.style.left = '280px';
-              setTimeout(() => { cursor.style.transform = 'scale(0.8)'; }, 800);
-              setTimeout(() => { 
-                cursor.style.transform = 'scale(1)'; 
-                document.getElementById('tut-drawer-r').style.right = '0px';
-              }, 1100);
-            }
-          }
-        ];
-
-        let tutIndex = 0;
-        function playTutStep() {
-            if(tutIndex >= tutSteps.length) {
-                tutIndex = 0;
-            }
-            document.getElementById('tut-text').innerText = tutSteps[tutIndex].text;
-            tutSteps[tutIndex].run();
-            tutIndex++;
-            tutTimer = setTimeout(playTutStep, 4000);
-        }
-
-        // Start the animation immediately when this script loads in the open modal
-        const modalAnim = document.getElementById('modal-tut-animation');
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.target.classList.contains('open') || mutation.target.style.display !== 'none') {
-                    tutIndex = 0;
-                    clearTimeout(tutTimer);
-                    resetTutStage();
-                    playTutStep();
-                } else {
-                    clearTimeout(tutTimer);
-                }
-            });
-        });
-        observer.observe(modalAnim, { attributes: true, attributeFilter: ['class', 'style'] });
-      </script>
-    </div>
 
   <script src="./templates.js"></script>
   <script>
@@ -1698,21 +1413,20 @@
         // NEW Tutorial Engine Bindings
         document.getElementById('btn-open-help').addEventListener('click', () => {
             document.getElementById('drawer-left').classList.remove('open');
-            document.getElementById('modal-tut-animation').classList.add('open');
+            startTour();
         });
+        
         document.getElementById('btn-tut-yes').addEventListener('click', () => {
             document.getElementById('modal-tut-prompt').classList.remove('open');
-            document.getElementById('modal-tut-animation').classList.add('open');
             localStorage.setItem('sylva_tutorial_seen', 'true');
+            startTour();
         });
+        
         document.getElementById('btn-tut-no').addEventListener('click', () => {
             document.getElementById('modal-tut-prompt').classList.remove('open');
             localStorage.setItem('sylva_tutorial_seen', 'true');
             document.getElementById('drawer-left').classList.add('open');
             setTimeout(() => { showAppAlert("If you need it, the Help & Tutorial button is here in your Nodes Directory!"); }, 300);
-        });
-        document.getElementById('btn-close-tut-anim').addEventListener('click', () => {
-            document.getElementById('modal-tut-animation').classList.remove('open');
         });
       }
 
@@ -2015,6 +1729,82 @@
           li.querySelector('button').addEventListener('click', () => openInspector(f));
           list.appendChild(li);
         });
+      }
+
+      /* --- GUIDED TOUR ENGINE --- */
+      const tourSteps = [
+          { id: 'btn-toggle-directory', title: 'The Nursery', text: 'This is where you manage all your Forests. Think of a Forest as a master project or workspace.' },
+          { id: 'btn-grow', title: 'Planting Seeds', text: 'Click here to grow new Trees, Branches, and Fruits. This is how you build out your project structure.' },
+          { id: 'btn-harvest-main', title: 'Harvest Time', text: 'When your tasks (Fruits) are complete and "Ripe for the Pickin\'", click here to harvest them and clear your board.' },
+          { id: 'btn-critical-path', title: 'Critical Path', text: 'Toggle this to instantly calculate and highlight the most crucial tasks needed to finish your project on time.' }
+      ];
+      
+      let currentTourStep = 0;
+      let activeTourElement = null;
+
+      function updateTourPosition() {
+          const highlightBox = document.getElementById('tour-highlight');
+          const tooltipBox = document.getElementById('tour-tooltip');
+          
+          if (currentTourStep >= tourSteps.length) { endTour(); return; }
+          const step = tourSteps[currentTourStep];
+          const target = document.getElementById(step.id);
+          
+          if (!target || target.style.display === 'none') {
+              currentTourStep++; updateTourPosition(); return;
+          }
+
+          if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
+          activeTourElement = target;
+          activeTourElement.classList.add('tour-active-element');
+
+          const rect = target.getBoundingClientRect();
+          highlightBox.style.display = 'block';
+          highlightBox.style.top = `${rect.top - 8}px`;
+          highlightBox.style.left = `${rect.left - 8}px`;
+          highlightBox.style.width = `${rect.width + 16}px`;
+          highlightBox.style.height = `${rect.height + 16}px`;
+
+          document.getElementById('tour-title').innerText = step.title;
+          document.getElementById('tour-desc').innerText = step.text;
+          document.getElementById('tour-progress').innerText = `${currentTourStep + 1} / ${tourSteps.length}`;
+          
+          tooltipBox.style.display = 'flex';
+          setTimeout(() => tooltipBox.style.opacity = '1', 50);
+
+          let tooltipTop = rect.bottom + 16;
+          let tooltipLeft = rect.left;
+          
+          if (tooltipLeft + 300 > window.innerWidth) tooltipLeft = window.innerWidth - 320;
+          if (tooltipTop + 200 > window.innerHeight) tooltipTop = rect.top - 200;
+
+          tooltipBox.style.top = `${tooltipTop}px`;
+          tooltipBox.style.left = `${tooltipLeft}px`;
+          
+          document.getElementById('tour-prev').style.visibility = currentTourStep === 0 ? 'hidden' : 'visible';
+          document.getElementById('tour-next').innerText = currentTourStep === tourSteps.length - 1 ? 'Finish' : 'Next';
+      }
+
+      function endTour() {
+          const highlightBox = document.getElementById('tour-highlight');
+          const tooltipBox = document.getElementById('tour-tooltip');
+          highlightBox.style.display = 'none';
+          tooltipBox.style.opacity = '0';
+          setTimeout(() => tooltipBox.style.display = 'none', 300);
+          if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
+          currentTourStep = 0;
+          activeTourElement = null;
+      }
+
+      document.getElementById('tour-next').onclick = () => { currentTourStep++; updateTourPosition(); };
+      document.getElementById('tour-prev').onclick = () => { currentTourStep--; updateTourPosition(); };
+      document.getElementById('tour-close').onclick = endTour;
+      
+      function startTour() {
+          currentTourStep = 0;
+          state.viewMode = 'tree';
+          render();
+          updateTourPosition();
       }
 
       function initTutorial() {
