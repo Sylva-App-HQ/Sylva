@@ -217,8 +217,8 @@
   <aside id="pip-minimap"><canvas id="pip-canvas" width="140" height="140"></canvas></aside>
 
   <div class="bottom-actions" id="bottom-actions-container">
-    <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.15);">Harvest</button>
-    <button class="btn" id="btn-critical-path" style="display:none; border-color:#EF4444; color:#EF4444; background:rgba(239,68,68,0.15);">Critical Path</button>
+    <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:#322615;">Harvest</button>
+    <button class="btn" id="btn-critical-path" style="display:none; border-color:#EF4444; color:#EF4444; background:#311C21;">Critical Path</button>
     <button class="btn" id="btn-season">Season</button>
   </div>
 
@@ -296,6 +296,11 @@
           <input type="hidden" id="node-input-type" value="branch">
         </div>
         
+        <div class="field-group" id="node-ripe-container" style="display:none; flex-direction: row; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer;">
+          <input type="checkbox" id="node-input-ripe" style="width: 16px; height: 16px; cursor: pointer;">
+          <label for="node-input-ripe" style="color:#10B981; font-weight: bold; cursor: pointer;">Complete (Ripe for the Pickin')</label>
+        </div>
+
         <div style="margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
            <button class="btn btn-small" id="btn-toggle-advanced" style="width: 100%; justify-content: space-between; border: 1px solid var(--border-subtle);"><span>Advanced Metadata</span><span id="adv-arrow">▾</span></button>
            <div id="advanced-metadata-panel" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
@@ -932,6 +937,7 @@
           li.onclick = () => {
             state.activeForestId = f.id; state.activeTreeId = null; state.viewMode = 'forest';
             document.getElementById('drawer-right').classList.remove('open');
+            if (f.trees && f.trees.length > 0) centerOn(f.trees[0].x, f.trees[0].y);
             render();
           };
           atozRight.appendChild(li);
@@ -1068,21 +1074,28 @@
           
         document.getElementById('btn-grow').disabled = !state.isLocked;
         document.getElementById('btn-season').disabled = !state.isLocked;
-        document.getElementById('btn-harvest-main').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
+        document.getElementById('btn-harvest-main').style.display = state.viewMode !== 'forest' ? 'inline-flex' : 'none';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
         document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && tree.type === 'Apple') ? 'block' : 'none';
         
-        document.getElementById('btn-toggle-timeline').style.display = state.viewMode !== 'forest' ? 'inline-flex' : 'none';
-        document.getElementById('timeline-btn-container').style.display = state.viewMode !== 'forest' ? 'block' : 'none';
+        document.getElementById('btn-toggle-timeline').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
+        document.getElementById('timeline-btn-container').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         
-        document.getElementById('btn-critical-path').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
+        document.getElementById('btn-critical-path').style.display = state.viewMode !== 'forest' ? 'inline-flex' : 'none';
 
         bc.innerHTML = '';
         const fCrumb = document.createElement('span');
         fCrumb.className = 'breadcrumb-crumb';
         fCrumb.innerHTML = `🌲 ${escapeHTML(forest.title)}`;
-        fCrumb.onclick = () => { if (state.viewMode !== 'forest') { state.viewMode = 'forest'; render(); } };
+       fCrumb.onclick = () => { 
+            if (state.viewMode !== 'forest') { 
+                state.viewMode = 'forest'; 
+                const t = forest.trees.find(tr => tr.id === state.activeTreeId) || forest.trees[0];
+                if (t) centerOn(t.x, t.y);
+                render(); 
+            } 
+        };
         bc.appendChild(fCrumb);
 
         if (state.viewMode === 'forest') {
@@ -1095,7 +1108,12 @@
           document.getElementById('label-directory').innerText = 'Nodes'; 
           const arrow = document.createElement('span'); arrow.style.color = 'var(--text-faint)'; arrow.innerText = '>'; bc.appendChild(arrow);
           const tCrumb = document.createElement('span'); tCrumb.className = 'breadcrumb-crumb'; tCrumb.innerText = escapeHTML(tree.title);
-          tCrumb.onclick = () => { state.viewMode = 'tree'; centerOn(tree.nodes[0].x, tree.nodes[0].y); render(); };
+          tCrumb.onclick = () => { 
+              state.viewMode = 'tree'; 
+              const n = tree.nodes.find(nd => nd.id === state.selectedId) || tree.nodes[0];
+              if (n) centerOn(n.x, n.y); 
+              render(); 
+          };
           bc.appendChild(tCrumb);
           if (state.selectedId && state.viewMode === 'tree') {
             const selN = getNode(state.selectedId);
@@ -1115,6 +1133,9 @@
             document.getElementById('apple-progress-fill').style.width = total === 0 ? '0%' : `${(harvested/total)*100}%`;
           }
 
+          // Generate critical path universally for both tree and timeline views
+          criticalSet = state.showCriticalPath ? new Set(getCriticalPathIds(tree)) : new Set();
+
           if (state.viewMode === 'timeline') {
             const a3 = document.createElement('span'); a3.style.color = 'var(--text-faint)'; a3.innerText = '>'; bc.appendChild(a3);
             const tmCrumb = document.createElement('span'); tmCrumb.innerText = 'Executive Tab'; bc.appendChild(tmCrumb);
@@ -1123,7 +1144,6 @@
             renderTimeline();
           } else {
             timelineLayer.style.display = 'none'; forestLayer.style.display = 'none'; treeLayer.style.display = 'block'; 
-            criticalSet = state.showCriticalPath ? new Set(getCriticalPathIds(tree)) : new Set();
             renderTree();
           }
         }
@@ -1155,8 +1175,8 @@
         });
       }
 
-      function attachGestureEvents(el, entity, isTreeMode) {
-        let pressTimer, clickTimer, clickCount = 0, startX, startY;
+     function attachGestureEvents(el, entity, isTreeMode) {
+        let pressTimer, clickTimer, longPressTimer, clickCount = 0, startX, startY;
         el.addEventListener('pointerdown', (e) => {
           if (isPinching) return;
           e.stopPropagation(); 
@@ -1167,9 +1187,20 @@
             return;
           }
           startX = e.clientX; startY = e.clientY; draggedNodeId = entity.id;
+
+          longPressTimer = setTimeout(() => {
+              if (isTreeMode && entity.type === 'fruit') {
+                  entity.ripe = !entity.ripe;
+                  clickCount = 0;
+                  saveData(); render();
+                  showAppAlert(entity.ripe ? 'Fruit is Complete (Ripe for the Pickin\'!) ✅' : 'Fruit marked incomplete.');
+              }
+          }, 600);
+
           if (!state.isLocked) {
             el.setPointerCapture(e.pointerId); el.style.zIndex = 50;
             function onMove(evt) { 
+              clearTimeout(longPressTimer);
               if (isPinching) { onUp(evt); return; }
               const dx = (evt.clientX - startX) / state.scale; const dy = (evt.clientY - startY) / state.scale;
               entity.x += dx; entity.y += dy; startX = evt.clientX; startY = evt.clientY; 
@@ -1208,8 +1239,9 @@
             if (isTreeMode) { render(); openInspector(entity); } else { openTreeInspector(entity); }
           }
         });
-        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); } });
-        el.addEventListener('pointerup', () => clearTimeout(pressTimer));
+        el.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - startX, e.clientY - startY) > 10) { clearTimeout(pressTimer); clearTimeout(longPressTimer); } });
+        el.addEventListener('pointerup', () => { clearTimeout(pressTimer); clearTimeout(longPressTimer); });
+        el.addEventListener('pointercancel', () => { clearTimeout(pressTimer); clearTimeout(longPressTimer); });
       }
 
       function renderTree() {
@@ -1218,7 +1250,8 @@
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`; 
+          const ripeBadge = (node.type === 'fruit' && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
+          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
           attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
       }
@@ -1244,10 +1277,21 @@
 
         const tasks = tree.nodes.filter(n => n.type !== 'trunk').sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
         tasks.forEach(n => {
-          const card = document.createElement('div'); card.style.background = 'var(--bg-surface)'; card.style.padding = '16px'; card.style.borderRadius = '8px'; card.style.border = '1px solid var(--border-subtle)';
+          const isCritical = criticalSet.has(n.id);
+          const borderStyle = isCritical ? '1px solid #EF4444' : '1px solid var(--border-subtle)';
+          const shadowStyle = isCritical ? '0 0 16px rgba(239, 68, 68, 0.5)' : 'none';
+          const ripeBadge = (n.type === 'fruit' && n.ripe && !n.harvested) ? ` <span style="font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
+
+          const card = document.createElement('div'); 
+          card.style.background = 'var(--bg-surface)'; 
+          card.style.padding = '16px'; 
+          card.style.borderRadius = '8px'; 
+          card.style.border = borderStyle;
+          card.style.boxShadow = shadowStyle;
+          
           card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-              <strong style="font-size:14px;">${escapeHTML(n.title)}</strong>
+              <strong style="font-size:14px;">${escapeHTML(n.title)}${ripeBadge}</strong>
               <span style="font-size:10px; padding:2px 6px; background:var(--bg-surface-elevated); border-radius:4px; color:var(--text-muted);">${escapeHTML(n.type.toUpperCase())}</span>
             </div>
             <div style="display:flex; gap: 24px; font-size:12px; color:var(--text-muted);">
@@ -1377,14 +1421,31 @@
         document.getElementById('btn-switch-context').addEventListener('click', () => { 
             if (state.viewMode === 'timeline') {
                 state.viewMode = 'tree';
+                const t = getTree();
+                const n = t ? (t.nodes.find(nd => nd.id === state.selectedId) || t.nodes[0]) : null;
+                if (n) centerOn(n.x, n.y);
             } else if (state.viewMode === 'tree' && state.selectedId) {
                 state.selectedId = null;
+                const t = getTree();
+                const root = t ? (t.nodes.find(nd => nd.type === 'trunk') || t.nodes[0]) : null;
+                if (root) centerOn(root.x, root.y);
             } else {
                 state.viewMode = 'forest';
+                const f = getForest();
+                const t = f ? (f.trees.find(tr => tr.id === state.activeTreeId) || f.trees[0]) : null;
+                if (t) centerOn(t.x, t.y);
             }
             render(); 
         });
-        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; render(); });
+        document.getElementById('btn-toggle-timeline').addEventListener('click', () => { 
+            state.viewMode = state.viewMode === 'timeline' ? 'tree' : 'timeline'; 
+            if (state.viewMode === 'tree') {
+                const t = getTree();
+                const n = t ? (t.nodes.find(nd => nd.id === state.selectedId) || t.nodes[0]) : null;
+                if (n) centerOn(n.x, n.y);
+            }
+            render(); 
+        });
         document.getElementById('btn-lock').addEventListener('click', () => { state.isLocked = !state.isLocked; render(); });
         document.getElementById('btn-critical-path').addEventListener('click', () => { state.showCriticalPath = !state.showCriticalPath; render(); });
         
@@ -1469,9 +1530,9 @@
 
         document.getElementById('btn-harvest-main').addEventListener('click', () => {
           const t = getTree(); if (!t) return; let count = 0;
-          t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested) { n.harvested = true; count++; } });
-          if (t.type === 'Pine') { t.nodes.forEach(n => { if (n.type === 'fruit') n.harvested = false; }); showAppAlert('Pine Cone Checklist Reset!'); } 
-          else { showAppAlert(`Harvested ${count} goals!`); }
+          t.nodes.forEach(n => { if (n.type === 'fruit' && !n.harvested && n.ripe) { n.harvested = true; count++; } });
+          if (t.type === 'Pine') { t.nodes.forEach(n => { if (n.type === 'fruit') { n.harvested = false; n.ripe = false; } }); showAppAlert('Pine Cone Checklist Reset!'); } 
+          else { showAppAlert(`Harvested ${count} completed goals!`); }
           saveData(); render();
         });
         
@@ -1730,6 +1791,9 @@
 
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
 
+          document.getElementById('node-input-ripe').checked = !!node.ripe;
+          document.getElementById('node-ripe-container').style.display = (node.type === 'fruit') ? 'flex' : 'none';
+
           document.getElementById('node-input-start').value = node.startDate || '';
           document.getElementById('node-input-hours').value = node.estHours || '';
           document.getElementById('node-input-assignee').value = node.assignee || '';
@@ -1771,6 +1835,7 @@
             e.preventDefault();
             node.title = document.getElementById('node-input-title').value.trim() || node.title; node.desc = document.getElementById('node-input-desc').value;
             if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
+            node.ripe = document.getElementById('node-input-ripe').checked;
             node.startDate = document.getElementById('node-input-start').value; node.estHours = document.getElementById('node-input-hours').value; node.assignee = document.getElementById('node-input-assignee').value;
             document.getElementById('modal-inspector').classList.remove('open'); render(); saveData();
           };
