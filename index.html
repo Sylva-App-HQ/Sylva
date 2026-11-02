@@ -227,7 +227,7 @@
     <button class="btn" id="btn-critical-path" style="display:none; border-color:#EF4444; color:#EF4444; background:#311C21;">Critical Path</button>
     <button class="btn" id="btn-season">Season</button>
     
-    <button class="btn btn-accent" id="btn-pm-tools" style="display: none; margin-left: 8px;">
+    <button class="btn btn-accent" id="btn-pm-tools" style="display: none;">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
@@ -428,7 +428,7 @@
 <div class="modal-overlay" id="modal-pm-tools">
     <div class="modal-card" style="max-width: 600px; overflow-y: visible;">
         <div class="modal-header">
-            <h3>Enterprise Project Management</h3>
+            <h3>Project Management</h3>
             <button class="btn btn-small" id="btn-close-pm-tools">&times;</button>
         </div>
         <div class="modal-body">
@@ -833,6 +833,16 @@ window.openCheckout = function(productType, platform) {
       function init() {
         const r = localStorage.getItem('sylva_v13_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
+        // Failsafe: Ensure critical state variables are never null
+        if (!state.activeForestId || state.forests.length === 0) {
+            state.activeForestId = 'forest-1';
+            state.forests = [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }];
+            state.viewMode = 'forest';
+        }
+        if (state.viewMode === 'tree' && !state.activeTreeId) {
+            state.viewMode = 'forest';
+        }
+        if (typeof state.isLocked === 'undefined') state.isLocked = true;
         if(!state.pipScale) state.pipScale = 0.1;
         if(state.pipPanX === undefined) state.pipPanX = 0;
         if(state.pipPanY === undefined) state.pipPanY = 0;
@@ -1296,6 +1306,7 @@ window.openCheckout = function(productType, platform) {
 
       
         function setupInputHandlers() {
+          
           // Project Management Tools Handlers
         document.getElementById('btn-pm-tools').addEventListener('click', () => {
             document.getElementById('modal-pm-tools').classList.add('open');
@@ -1306,54 +1317,79 @@ window.openCheckout = function(productType, platform) {
         });
 
         document.querySelectorAll('.btn-export-doc').forEach(btn => {
-            document.querySelectorAll('.btn-export-doc').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const type = e.target.getAttribute('data-type');
                 const format = e.target.getAttribute('data-format');
-                
                 const originalText = e.target.innerText;
-                e.target.innerText = 'Compiling...';
-                e.target.disabled = true;
+                e.target.innerText = 'Exporting...';
 
-                // Grab the currently active project data
                 const currentData = state.viewMode === 'forest' ? getForest() : getTree();
+                const nodes = currentData.nodes || [];
+                const title = currentData.title || 'Sylva_Project';
 
-                fetch('http://localhost:5000/export', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: type,
-                        format: format,
-                        treeData: currentData
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    // Standardize output to .xlsx or .docx regardless of OS preference label
-                    const ext = (format === 'pages' || format === 'docx') ? 'docx' : 'xlsx';
-                    a.download = `Sylva_${type.toUpperCase()}.${ext}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    
-                    e.target.innerText = originalText;
-                    e.target.disabled = false;
-                })
-                .catch(err => {
-                    console.error('Export error:', err);
-                    alert('Make sure your Python PM Bridge is running in the terminal (python pm_bridge.py).');
-                    e.target.innerText = originalText;
-                    e.target.disabled = false;
-                });
+                let blob, filename;
+
+                if (format === 'xlsx' || format === 'numbers') {
+                    // Generate standard CSV for spreadsheets
+                    let csvContent = "WBS Level,Task Name,Node Type,Status,Description\n";
+                    nodes.forEach((n, idx) => {
+                        const status = n.harvested ? "Complete" : (n.ripe ? "Ripe" : "Pending");
+                        const desc = (n.desc || '').replace(/"/g, '""').replace(/\n/g, ' ');
+                        csvContent += `1.${idx + 1},"${n.title || ''}","${n.type}","${status}","${desc}"\n`;
+                    });
+                    blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.csv`;
+                } else {
+                    // Generate native .doc file via HTML signature
+                    let docContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head><meta charset='utf-8'><title>${title}</title></head><body>
+                    <h1>${title} - ${type.toUpperCase()}</h1>`;
+
+                    if (type === 'charter') {
+                        docContent += `<h2>1. Project Scope</h2><p>Auto-generated scope from Sylva structure.</p><h2>2. Deliverables (Fruit Nodes)</h2><ul>`;
+                        nodes.filter(n => n.type === 'fruit').forEach(n => {
+                            docContent += `<li><strong>${n.title}</strong>: ${n.desc || 'No description'}</li>`;
+                        });
+                        docContent += `</ul>`;
+                    } else {
+                        docContent += `<h2>Project Nodes</h2><ul>`;
+                        nodes.forEach(n => { docContent += `<li><strong>${n.title}</strong> (${n.type})</li>`; });
+                        docContent += `</ul>`;
+                    }
+                    docContent += `</body></html>`;
+                    blob = new Blob([docContent], { type: 'application/msword' });
+                    filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.doc`;
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+                setTimeout(() => { e.target.innerText = originalText; }, 500);
             });
         });
+            // Double Click Background to Deselect
+        let bgClickCount = 0;
+        let bgClickTimer = null;
+        document.getElementById('viewport').addEventListener('pointerdown', (e) => {
+            // Check if the user clicked empty canvas space
+            if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
+                bgClickCount++;
+                if (bgClickCount === 2) {
+                    state.selectedId = null;
+                    renderTreeSelections();
+                    render();
+                    bgClickCount = 0;
+                    clearTimeout(bgClickTimer);
+                } else {
+                    bgClickTimer = setTimeout(() => { bgClickCount = 0; }, 300);
+                }
+            }
         });
         // WebRTC Sync Modal Handlers
         document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
@@ -1444,7 +1480,20 @@ window.openCheckout = function(productType, platform) {
             const pts = Array.from(activePointers.values());
             const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
             if (pipPinching) {
-              if (prevPipPinchDist) { const ratio = dist / prevPipPinchDist; state.pipScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 0.5); renderMinimap(); }
+              const pipCx = (pts[0].clientX + pts[1].clientX) / 2;
+              const pipCy = (pts[0].clientY + pts[1].clientY) / 2;
+              
+              if (prevPipPinchDist) { 
+                  const ratio = dist / prevPipPinchDist;
+                  const newScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 1.0);
+                  
+                  // Adjust PIP pan based on pinch center to keep it anchored
+                  state.pipPanX += (pipCx - 70) * (1 - ratio) * 0.1;
+                  state.pipPanY += (pipCy - 70) * (1 - ratio) * 0.1;
+                  
+                  state.pipScale = newScale; 
+                  renderMinimap(); 
+              }
               prevPipPinchDist = dist;
             } else {
               isPinching = true;
@@ -1608,17 +1657,20 @@ window.openCheckout = function(productType, platform) {
         document.getElementById('btn-critical-path').addEventListener('click', () => { state.showCriticalPath = !state.showCriticalPath; render(); });
         
         const btnGrow = document.getElementById('btn-grow');
-    const growDropdown = document.getElementById('grow-dropdown');
-    btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
-    btnGrow.addEventListener('click', (e) => { 
-      e.stopPropagation(); 
-      const isVis = growDropdown.style.display === 'flex' || growDropdown.style.display === 'block';
-      closeAllDropdowns();
-      if (!isVis) {
-          growDropdown.style.display = 'flex';
-          growDropdown.style.zIndex = '99999';
-      }
-    });
+        const growDropdown = document.getElementById('grow-dropdown');
+        
+        btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
+        btnGrow.addEventListener('click', (e) => { 
+          e.stopPropagation(); 
+          if (!state.isLocked) return; // Prevent growing while dragging
+          
+          const isVis = growDropdown.style.display === 'flex';
+          closeAllDropdowns();
+          if (!isVis) {
+              growDropdown.style.display = 'flex';
+              growDropdown.style.zIndex = '10000';
+          }
+        });
 
         document.querySelectorAll('.btn-grow-opt').forEach(b => {
           b.addEventListener('click', (e) => {
@@ -1796,8 +1848,14 @@ window.openCheckout = function(productType, platform) {
           const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
           trig.addEventListener('pointerdown', (e) => e.stopPropagation()); 
           trig.addEventListener('click', (e) => { 
-            e.stopPropagation(); const isVis = drop.style.display === 'flex'; closeAllDropdowns(); if (!isVis) drop.style.display = 'flex'; 
-          });
+              e.stopPropagation(); 
+              const isVis = drop.style.display === 'flex'; 
+              closeAllDropdowns(); 
+              if (!isVis) {
+                  drop.style.display = 'flex';
+                  drop.style.zIndex = '10000';
+              }
+            });
           drop.querySelectorAll('.custom-opt').forEach(btn => {
             btn.addEventListener('click', (e) => {
               e.stopPropagation(); inp.value = btn.getAttribute('data-val'); trig.querySelector('span').innerText = btn.innerText; drop.style.display = 'none';
