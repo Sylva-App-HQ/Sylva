@@ -1705,7 +1705,11 @@
         });
 
         // Template and Premium Flows
-        document.getElementById('btn-open-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.add('open'); document.getElementById('drawer-right').classList.remove('open'); });
+        document.getElementById('btn-open-templates').addEventListener('click', () => { 
+    document.getElementById('modal-templates').classList.add('open'); 
+    buildTemplateLibrary(); // <-- Make sure this line is present here!
+    document.getElementById('drawer-right').classList.remove('open'); 
+});
         document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
         document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
         document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
