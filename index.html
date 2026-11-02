@@ -216,7 +216,7 @@
   <!-- Extracted Timeline Button -->
   <div id="timeline-btn-container">
     <button class="btn btn-small" id="btn-toggle-timeline" style="background: var(--bg-surface-elevated); box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Timeline</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Document View</span>
     </button>
   </div>
 
@@ -527,7 +527,40 @@
   </div>
 </div>
 </div>
-
+<!-- Branding Modal -->
+  <div class="modal-overlay" id="modal-branding">
+    <div class="modal-card" style="max-width: 400px;">
+      <div class="modal-header"><h3>🎨 Custom Branding</h3><button class="btn btn-small" onclick="document.getElementById('modal-branding').classList.remove('open')">&times;</button></div>
+      <div class="modal-body">
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom: 12px;">Customize your workspace. These changes apply immediately across your personal device.</p>
+        
+        <div class="field-group">
+            <label>Canvas Background (Hex)</label>
+            <input type="color" id="brand-bg" value="#070B0E" style="height: 40px; padding: 2px;">
+        </div>
+        <div class="field-group">
+            <label>Surface Elements (Hex)</label>
+            <input type="color" id="brand-surface" value="#0F171F" style="height: 40px; padding: 2px;">
+        </div>
+        <div class="field-group">
+            <label>Accent Color (Hex)</label>
+            <input type="color" id="brand-accent" value="#2DD4BF" style="height: 40px; padding: 2px;">
+        </div>
+        <div class="field-group custom-select-container" style="margin-top: 8px;">
+            <label>Typography Set</label>
+            <select id="brand-font" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; width: 100%;">
+                <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Modern UI (Default)</option>
+                <option value="'Courier New', Courier, monospace">Hacker / Monospace</option>
+                <option value="Georgia, serif">Classic Serif</option>
+            </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn" onclick="resetBranding()">Reset Default</button>
+          <button class="btn btn-accent" id="btn-save-branding">Save & Apply</button>
+      </div>
+    </div>
+  </div>
 <!-- Monetization Modals -->
 <div class="modal-overlay" id="modal-tree-hugger">
 <div class="modal-card">
@@ -543,26 +576,6 @@
   </div>
 </div>
 </div>
-
-  <!-- Monetization Modals -->
-  <div class="modal-overlay" id="modal-tree-hugger">
-    <div class="modal-card">
-      <div class="modal-header"><h3>Become a Tree Hugger</h3><button class="btn btn-small" id="btn-close-hugger">&times;</button></div>
-      <div class="modal-body">
-        <p style="font-size:13px; color:var(--text-main); line-height:1.5;">Support Sylva's development and unlock premium features for a one-time payment of $2!</p>
-        <ul style="font-size:12px; color:var(--text-muted); line-height:1.6; margin-left: 20px; margin-bottom: 8px;">
-          <li>Unlock custom visual themes (Midnight Forest, Cherry Blossom)</li>
-          <li>Access to all 50+ premium templates</li>
-          <li>Our eternal gratitude!</li>
-        </ul>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <!-- TREE HUGGER $2 STRIPE & PAYPAL BUTTON HANDLERS FIXED -->
-          <button class="btn" id="btn-pay-stripe" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);" onclick="window.open('https://buy.stripe.com/4gM6oH1eQe2H7Eicat4Ni00', '_blank');"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Pay with Stripe ($2)</button>
-          <button class="btn" id="btn-pay-paypal" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);" onclick="window.open('https://www.paypal.com/ncp/payment/ZLERDYT863QRG', '_blank');"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M17 10h-2V8a2 2 0 00-2-2H9L7 20h3l1-4h3a4 4 0 000-8z"/></svg> Pay with PayPal ($2)</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="modal-overlay" id="modal-vip">
     <div class="modal-card">
@@ -810,7 +823,10 @@
       window.addEventListener('resize', positionActions);
 
 window.openCheckout = function(productType, platform) {
-      // Paste your real product links here inside the single quotes:
+          if (productType === 'single' && window.pendingTemplateData) {
+              // Remember which template they are buying before they leave
+              localStorage.setItem('sylva_pending_unlock', window.pendingTemplateData.title);
+          }
       const links = {
           single: {
               kofi: 'https://ko-fi.com/s/5d61e59f6c',
@@ -827,9 +843,9 @@ window.openCheckout = function(productType, platform) {
       };
       
       const targetUrl = links[productType][platform];
-      // This appends the exact unlock parameters so the app knows what they bought when they return
-      window.open(`${targetUrl}?unlock=${productType}&template=${window.pendingTemplateData ? window.pendingTemplateData.id : 'general'}`, '_blank');
-  };
+          // Ensure your payment platform redirects specifically to: https://sylvatree.com/?unlock=single (or treehugger)
+          window.open(targetUrl, '_blank');
+      };
       function init() {
         const r = localStorage.getItem('sylva_v13_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
@@ -848,35 +864,33 @@ window.openCheckout = function(productType, platform) {
         if(state.pipPanY === undefined) state.pipPanY = 0;
         
         // --- AUTO-UNLOCK LISTENER ---
+        // --- AUTO-UNLOCK LISTENER ---
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('unlock') === 'treehugger') {
+        const unlockParam = urlParams.get('unlock');
+        
+        if (unlockParam === 'treehugger') {
             localStorage.setItem('sylva_is_vip', 'true');
             window.history.replaceState({}, document.title, window.location.pathname);
             setTimeout(() => {
                 showAppAlert('Payment successful! Thank you for becoming a Tree Hugger. All premium templates are now unlocked forever.');
             }, 500);
+        } else if (unlockParam === 'single') {
+            const pendingTemplate = localStorage.getItem('sylva_pending_unlock');
+            if (pendingTemplate) {
+                // Add the template to their list of owned singles
+                let ownedSingles = JSON.parse(localStorage.getItem('sylva_owned_singles') || '[]');
+                if (!ownedSingles.includes(pendingTemplate)) ownedSingles.push(pendingTemplate);
+                localStorage.setItem('sylva_owned_singles', JSON.stringify(ownedSingles));
+                localStorage.removeItem('sylva_pending_unlock');
+            }
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => {
+                showAppAlert('Payment successful! Your template is now permanently unlocked.');
+            }, 500);
         }
         
         state.premiumUnlocked = localStorage.getItem('sylva_is_vip') === 'true';
         // ----------------------------
-
-        setupInputHandlers();
-        setupCustomDropdowns();
-        buildTemplateLibrary();
-        positionActions();
-        render();
-
-        if (isStandalone || localStorage.getItem('sylva_web_bypassed')) {
-          initTutorial();
-        } else {
-          document.getElementById('modal-install-prompt').style.display = 'flex';
-          setTimeout(() => {
-            if (!deferredInstallPrompt && document.getElementById('modal-install-prompt').style.display !== 'none') {
-              document.getElementById('modal-install-prompt').style.display = 'none';
-              initTutorial();
-            }
-          }, 3000);
-        }
       }
 
       function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
@@ -1238,17 +1252,14 @@ window.openCheckout = function(productType, platform) {
         });
       }
 
-      function autoTidyNodes() {
+     function autoTidyNodes() {
         if (state.viewMode === 'forest') {
           const f = getForest(); if(!f || !f.trees) return;
-          
-          // Organic Forest Growth (Golden Ratio Spiral)
           f.trees.forEach((t, i) => {
-              if (i === 0) {
-                  t.x = 5000; t.y = 5000;
-              } else {
+              if (i === 0) { t.x = 5000; t.y = 5000; }
+              else {
                   const radius = 260 * Math.sqrt(i);
-                  const angle = i * 2.39996; // 137.5 degrees (Golden Angle)
+                  const angle = i * 2.39996;
                   t.x = 5000 + (radius * Math.cos(angle));
                   t.y = 5000 + (radius * Math.sin(angle));
               }
@@ -1260,16 +1271,15 @@ window.openCheckout = function(productType, platform) {
           const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
           t.nodes.forEach(n => { if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
           
+          const nodeWidth = 210; // Tightened from 280px to heavily restrict horizontal sprawling
+          const vSpacing = 160;
           const widths = {};
-          const hSpacing = 280; // Standard width allocated per node column
-          const vSpacing = 160; // Standard vertical drop per layer
 
-          // 1. Bottom-up pass: Calculate the total physical block width needed for each subtree
           function calculateSubtreeWidths(nodeId) {
               const kids = childrenMap[nodeId];
               if (kids.length === 0) {
-                  widths[nodeId] = hSpacing;
-                  return hSpacing;
+                  widths[nodeId] = nodeWidth;
+                  return nodeWidth;
               }
               let totalWidth = 0;
               for (let k of kids) {
@@ -1279,14 +1289,12 @@ window.openCheckout = function(productType, platform) {
               return totalWidth;
           }
 
-          // 2. Top-down pass: Assign coordinates ensuring no overlap and perfect centering
           function assignCoordinates(nodeId, depth, startX) {
               const node = t.nodes.find(n => n.id === nodeId); if (!node) return;
               const kids = childrenMap[nodeId];
               const myWidth = widths[nodeId];
 
-              // Parent is placed perfectly in the mathematical center of its allocated horizontal block
-              node.x = startX + (myWidth / 2) - (hSpacing / 2);
+              node.x = startX + (myWidth / 2) - 95; 
               node.y = 5000 + (depth * vSpacing);
 
               let currentX = startX;
@@ -1297,10 +1305,18 @@ window.openCheckout = function(productType, platform) {
           }
           
           calculateSubtreeWidths(root.id);
-          // Center the entire root structure around absolute X=5000
           assignCoordinates(root.id, 0, 5000 - (widths[root.id] / 2));
+
+          // Apply organic canopy curve mimicking physical trees
+          t.nodes.forEach(n => {
+             if (n.type !== 'trunk') {
+                 const distFromCenter = Math.abs(n.x - root.x);
+                 n.y += (distFromCenter * 0.15);
+             }
+          });
           
           saveData(); render();
+          setTimeout(() => centerOn(root.x, root.y), 100);
         }
       }
 
@@ -1805,7 +1821,64 @@ window.openCheckout = function(productType, platform) {
 });
         document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
         document.getElementById('btn-enterprise-contact').addEventListener('click', () => { window.location.href = 'mailto:founder@sylvatree.com?subject=Sylva%20Enterprise%20Onsite%20Bundle%20Inquiry'; });
-        document.getElementById('btn-tree-hugger').addEventListener('click', () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); });
+        function applyCustomBranding() {
+            if (localStorage.getItem('sylva_is_vip') !== 'true') return;
+            
+            const bg = localStorage.getItem('sylva_brand_bg');
+            const surface = localStorage.getItem('sylva_brand_surface');
+            const accent = localStorage.getItem('sylva_brand_accent');
+            const font = localStorage.getItem('sylva_brand_font');
+            
+            if (bg) document.documentElement.style.setProperty('--bg-canvas', bg);
+            if (surface) document.documentElement.style.setProperty('--bg-surface', surface);
+            if (accent) document.documentElement.style.setProperty('--accent', accent);
+            if (font) document.documentElement.style.setProperty('--font-ui', font);
+        }
+
+        function updatePremiumUI() {
+            const btnHugger = document.getElementById('btn-tree-hugger');
+            if (localStorage.getItem('sylva_is_vip') === 'true') {
+                btnHugger.innerHTML = '🎨 Custom Branding Panel';
+                btnHugger.style.borderColor = '#A855F7';
+                btnHugger.style.color = '#A855F7';
+                btnHugger.style.background = 'rgba(168,85,247,0.1)';
+                btnHugger.onclick = () => { 
+                    document.getElementById('drawer-right').classList.remove('open');
+                    document.getElementById('brand-bg').value = localStorage.getItem('sylva_brand_bg') || '#070B0E';
+                    document.getElementById('brand-surface').value = localStorage.getItem('sylva_brand_surface') || '#0F171F';
+                    document.getElementById('brand-accent').value = localStorage.getItem('sylva_brand_accent') || '#2DD4BF';
+                    document.getElementById('brand-font').value = localStorage.getItem('sylva_brand_font') || '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif';
+                    document.getElementById('modal-branding').classList.add('open');
+                };
+                applyCustomBranding();
+            } else {
+                btnHugger.onclick = () => { document.getElementById('drawer-right').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open'); };
+            }
+        }
+        
+        // Execute UI update on load
+        updatePremiumUI();
+
+        document.getElementById('btn-save-branding').addEventListener('click', () => {
+            localStorage.setItem('sylva_brand_bg', document.getElementById('brand-bg').value);
+            localStorage.setItem('sylva_brand_surface', document.getElementById('brand-surface').value);
+            localStorage.setItem('sylva_brand_accent', document.getElementById('brand-accent').value);
+            localStorage.setItem('sylva_brand_font', document.getElementById('brand-font').value);
+            applyCustomBranding();
+            document.getElementById('modal-branding').classList.remove('open');
+        });
+
+        window.resetBranding = function() {
+            localStorage.removeItem('sylva_brand_bg');
+            localStorage.removeItem('sylva_brand_surface');
+            localStorage.removeItem('sylva_brand_accent');
+            localStorage.removeItem('sylva_brand_font');
+            document.documentElement.style.setProperty('--bg-canvas', '#070B0E');
+            document.documentElement.style.setProperty('--bg-surface', '#0F171F');
+            document.documentElement.style.setProperty('--accent', '#2DD4BF');
+            document.documentElement.style.setProperty('--font-ui', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif');
+            document.getElementById('modal-branding').classList.remove('open');
+        };
         document.getElementById('btn-close-hugger').addEventListener('click', () => { document.getElementById('modal-tree-hugger').classList.remove('open'); });
         document.getElementById('btn-close-vip').addEventListener('click', () => { document.getElementById('modal-vip').classList.remove('open'); });
         
@@ -1921,9 +1994,12 @@ window.openCheckout = function(productType, platform) {
 
         const isVip = localStorage.getItem('sylva_is_vip') === 'true' || state.premiumUnlocked;
 
+        const ownedSingles = JSON.parse(localStorage.getItem('sylva_owned_singles') || '[]');
+
         window.SYLVA_TEMPLATES.forEach(tpl => {
             const isPremium = tpl.tier === 'premium';
-            const locked = isPremium && !isVip;
+            // It is locked ONLY if it's premium, they aren't a VIP, and they don't own this specific one
+            const locked = isPremium && !isVip && !ownedSingles.includes(tpl.title);
             
             const el = document.createElement('div');
             el.className = 'directory-item';
@@ -2281,12 +2357,17 @@ window.openCheckout = function(productType, platform) {
 
       /* --- GUIDED TOUR ENGINE --- */
       const tourSteps = [
-          { id: 'btn-toggle-directory', title: 'The Nursery', text: 'This is where you manage all your Forests. Think of a Forest as a master project or workspace.' },
-          { id: 'btn-grow', title: 'Planting Seeds', text: 'Click here to grow new Trees, Branches, and Fruits. This is how you build out your project structure.' },
-          { id: 'btn-harvest-main', title: 'Harvest Time', text: "When your tasks (Fruits) are complete and \"Ripe for the Pickin'\", click here to harvest them and clear your board." },
-          { id: 'btn-critical-path', title: 'Critical Path', text: 'Toggle this to instantly calculate and highlight the most crucial tasks needed to finish your project on time.' }
+            { id: 'btn-grow', title: 'Welcome to Sylva - Think like a Tree!', text: 'Click here to grow new Trees in a Forest, or grow new branches (groups), leaves (documents and text), fruits (action items) and more on your active Tree. You can tell its a tree because of the way it is.' },
+            { id: 'viewport', title: 'Navigate the Canvas', text: 'Drag to the screen to pan around your workspace. Tap any node to select it, double tap it to see its details, and double-tap the background to deselect something.' },
+            { id: 'btn-lock', title: 'Messy Tree? Rearrange!', text: 'Click the lock icon to unlock trees and nodes and rearrange them as needed. How neat is that? Dats perty neat!' },
+            { id: 'pip-canvas', title: 'The Minimap', text: 'Keep your bearings with the PIP minimap. Pinch-to-zoom directly on this map to get your bearings, click a node to pan to it, and double click to center the view on a tree or forest.' },
+            { id: 'bottom-actions-container', title: 'Track Your Progress', text: 'Use these tools to highlight Critical Paths, view Season Details and Settings, or track and complete tasks with Harvest.' },
+            { id: 'btn-toggle-timeline', title: 'Executive Spread', text: 'Click here to see a breakdown of your tree in a professionally structured format.' },
+            { id: 'btn-pm-tools', title: 'Export Instantly', text: 'When you are ready, click here to instantly generate spreadsheets and documents straight from your tree and save them wherever you need.' },
+            { id: 'btn-drawer-left', title: 'This is your Table of Contents', text: 'Here you can find a list of all of your trees and nodes. Pin something to keep it at the top for faster access!' },
+            { id: 'btn-toggle-nursery', title: 'Finally, SAVE THE TREES!', text: 'Click here to save and import trees and forests, load templates, and manage your workspace.' },
       ];
-      
+
       let currentTourStep = 0;
       let activeTourElement = null;
 
