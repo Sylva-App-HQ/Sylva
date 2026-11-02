@@ -226,6 +226,17 @@
     <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:#322615;">Harvest</button>
     <button class="btn" id="btn-critical-path" style="display:none; border-color:#EF4444; color:#EF4444; background:#311C21;">Critical Path</button>
     <button class="btn" id="btn-season">Season</button>
+    
+    <button class="btn btn-accent" id="btn-pm-tools" style="display: none; margin-left: 8px;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+    </svg>
+    Project Management
+</button>
   </div>
 
   <main id="viewport">
@@ -262,10 +273,10 @@
     <div class="drawer-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <button class="btn btn-accent" id="btn-export-backup" style="justify-content: flex-start; margin-bottom: 8px;">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M2 22v-4l5-5"/><path d="M2 22h4l5-5"/><path d="M7 13l4 4"/><path d="M9 15l10-10"/><path d="M16 2l6 6"/></svg> Export JSON Backup
+  🪏 Export JSON Tree Backup
 </button>
 <button class="btn" id="btn-import-backup" style="justify-content: flex-start;">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--node-seed)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M12 22v-8"/><path d="M12 18c-3-1-4-4-2-6c2-2 4 1 2 6"/><path d="M12 16c3-1 4-4 2-6c-2-2-4 1-2 6"/></svg> Import JSON Backup
+🌱 Import JSON Tree Backup
 </button>
         <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
       </div>
@@ -368,21 +379,20 @@
   </div>
 
   <div class="modal-overlay" id="modal-season">
-    <div class="modal-card" style="overflow:visible;">
+    <div class="modal-card" style="overflow:visible; max-width: 500px;">
       <div class="modal-header"><h3>Tree Life Cycle & Harvest</h3><button class="btn btn-small" id="btn-close-season">&times;</button></div>
-      <div class="modal-body" style="overflow:visible;">
-        <div class="field-group custom-select-container">
-          <label>Current Season</label>
-          <div class="custom-select-trigger" id="season-trigger"><span>Spring (New)</span> <span>▾</span></div>
-          <div class="custom-dropdown custom-select-dropdown" id="season-dropdown">
-            <button class="custom-opt" data-val="Spring">Spring (New)</button>
-            <button class="custom-opt" data-val="Summer">Summer (Active)</button>
-            <button class="custom-opt" data-val="Autumn">Fall (Finalize/Review)</button>
-            <button class="custom-opt" data-val="Winter">Winter (Archive/Reference)</button>
-          </div>
-          <input type="hidden" id="select-tree-season" value="Spring">
+      <div class="modal-body" style="overflow-y:auto; max-height: 65vh;">
+        
+        <div class="field-group" style="text-align: center; margin-bottom: 15px;">
+          <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Overall Season</label>
+          <div id="overall-season-display" style="font-size: 1.5em; font-weight: bold; color: var(--text-main); margin-top: 4px;">Spring</div>
         </div>
-        <div class="field-group"><label>Prune (Clean Inactive)</label><p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p><button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button></div>
+        
+        <div id="season-lists-container">
+            <!-- Dynamically populated via JS -->
+        </div>
+
+        <div class="field-group" style="margin-top: 20px;"><label>Prune (Clean Inactive)</label><p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p><button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button></div>
         
         <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
            <div style="display:flex; align-items:center; gap:8px;">
@@ -414,7 +424,62 @@
       <div class="modal-footer"><button class="btn" id="btn-cancel-sync">Cancel</button><button class="btn btn-accent" id="btn-connect-org">Connect</button></div>
     </div>
   </div>
+<!-- Project Management Modal -->
+<div class="modal-overlay" id="modal-pm-tools">
+    <div class="modal-card" style="max-width: 600px; overflow-y: visible;">
+        <div class="modal-header">
+            <h3>Enterprise Project Management</h3>
+            <button class="btn btn-small" id="btn-close-pm-tools">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                Generate industry-standard project management artifacts based on your current project structure.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <!-- Project Plan -->
+                <div style="background: var(--bg-surface-elevated); padding: 15px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--text-main);">Project Plan</h4>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Comprehensive roadmap detailing scope, schedule, resources, and risk management.</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-small btn-export-doc" data-type="plan" data-format="docx" style="flex: 1;">MS Word (.docx)</button>
+                        <button class="btn btn-small btn-export-doc" data-type="plan" data-format="pages" style="flex: 1;">Mac Pages</button>
+                    </div>
+                </div>
 
+                <!-- Project Charter -->
+                <div style="background: var(--bg-surface-elevated); padding: 15px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--text-main);">Project Charter</h4>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Formal authorization document outlining objectives, stakeholders, and high-level constraints.</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-small btn-export-doc" data-type="charter" data-format="docx" style="flex: 1;">MS Word (.docx)</button>
+                        <button class="btn btn-small btn-export-doc" data-type="charter" data-format="pages" style="flex: 1;">Mac Pages</button>
+                    </div>
+                </div>
+
+                <!-- WBS -->
+                <div style="background: var(--bg-surface-elevated); padding: 15px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--text-main);">WBS</h4>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Hierarchical decomposition of the total scope of work into deliverable-oriented components.</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-small btn-export-doc" data-type="wbs" data-format="xlsx" style="flex: 1;">MS Excel (.xlsx)</button>
+                        <button class="btn btn-small btn-export-doc" data-type="wbs" data-format="numbers" style="flex: 1;">Mac Numbers</button>
+                    </div>
+                </div>
+
+                <!-- RACI Matrix -->
+                <div style="background: var(--bg-surface-elevated); padding: 15px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--text-main);">RACI Matrix</h4>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Responsibility matrix mapping out tasks against roles (Responsible, Accountable, Consulted, Informed).</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-small btn-export-doc" data-type="raci" data-format="xlsx" style="flex: 1;">MS Excel (.xlsx)</button>
+                        <button class="btn btn-small btn-export-doc" data-type="raci" data-format="numbers" style="flex: 1;">Mac Numbers</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
   <div class="modal-overlay" id="modal-sync-auth">
     <div class="modal-card">
       <div class="modal-header"><h3>Admin Authorization</h3><button class="btn btn-small" id="btn-close-auth">&times;</button></div>
@@ -453,7 +518,8 @@
         <div style="font-size:40px; margin-bottom:12px;">🌲</div>
         <p style="font-size:13px; color:var(--text-main); line-height:1.5; margin-bottom: 12px;">This is a premium framework template. You can purchase it individually for $1, or become a Tree Hugger for $2 to unlock all 50+ premium templates forever!</p>
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <button class="btn" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1);" onclick="window.open('YOUR_STRIPE_PAYMENT_LINK', '_blank');">Just This One Please! ($1)</button>
+          <!-- TEMPLATE $1 UNLOCK BUTTON HANDLER FIXED -->
+          <button class="btn" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1);" onclick="window.open('https//sylvafounder.gumroad.com/l/SylvaTemplateUnlock', '_blank');">Just This One Please! ($1)</button>
           <button class="btn btn-accent" onclick="document.getElementById('modal-purchase-template').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open');">Hug a Tree & Get All of Them! ($2)</button>
         </div>
       </div>
@@ -472,8 +538,9 @@
           <li>Our eternal gratitude!</li>
         </ul>
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <button class="btn" id="btn-pay-stripe" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Pay with Stripe ($2)</button>
-          <button class="btn" id="btn-pay-paypal" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M17 10h-2V8a2 2 0 00-2-2H9L7 20h3l1-4h3a4 4 0 000-8z"/></svg> Pay with PayPal ($2)</button>
+          <!-- TREE HUGGER $2 STRIPE & PAYPAL BUTTON HANDLERS FIXED -->
+          <button class="btn" id="btn-pay-stripe" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);" onclick="window.open('https://buy.stripe.com/4gM6oH1eQe2H7Eicat4Ni00', '_blank');"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Pay with Stripe ($2)</button>
+          <button class="btn" id="btn-pay-paypal" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);" onclick="window.open('https://www.paypal.com/ncp/payment/ZLERDYT863QRG', '_blank');"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M17 10h-2V8a2 2 0 00-2-2H9L7 20h3l1-4h3a4 4 0 000-8z"/></svg> Pay with PayPal ($2)</button>
         </div>
       </div>
     </div>
@@ -577,26 +644,16 @@
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       }
 
-      function getNodeIcon(type) {
-        switch (type) {
-            case 'trunk':
-                return '<span style="font-size:14px; line-height:1;">🪵</span>';
-            case 'branch':
-                return '<span style="font-size:14px; line-height:1;">🪾</span>';
-            case 'leaf':
-                return '<span style="font-size:14px; line-height:1;">🍁</span>';
-            case 'fruit':
-                return '<span style="font-size:14px; line-height:1;">🍎</span>';
-            case 'seed':
-                return '<span style="font-size:14px; line-height:1;">🌱</span>';
-            case 'pinecone':
-                return '<img src="pinecone.png" alt="pinecone emoji" style="width:14px; height:14px; display:inline-block; vertical-align:middle; line-height:1;" />';
-            case 'acorn':
-                return '<span style="font-size:14px; line-height:1;">🌰</span>';
-            default:
-                return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>';
-        }
-      }
+      function getNodeIcon(type, linkId = null) {
+    if (type === 'trunk') return '🪵';
+    if (type === 'branch') {
+        return linkId ? '🌰' : '🌳';
+    }
+    if (type === 'fruit') return '🍎';
+    if (type === 'seed' || linkId) return '🌰';
+    if (type === 'pinecone') return '🌲';
+    return '🍃';
+}
 
       function getTreeIcon(species) {
         switch (species) {
@@ -632,7 +689,7 @@
             const createRow = () => {
               const li = document.createElement('li');
               li.className = 'directory-item';
-              li.innerHTML = `<span>${escapeHTML(t.title)}</span><button class="btn btn-small">${t.pinned ? '★' : '☆'}</button>`;
+              li.innerHTML = `<span>${escapeHTML(t.title)}</span><button class="btn btn-small">${t.pinned ? '📌' : 'Pin This'}</button>`;
               li.querySelector('span').onclick = () => {
                 state.selectedId = t.id;
                 centerOn(t.x, t.y);
@@ -654,7 +711,7 @@
             const createRow = () => {
               const li = document.createElement('li');
               li.className = 'directory-item';
-              li.innerHTML = `<span>${escapeHTML(n.title)}</span><button class="btn btn-small">${n.pinned ? '★' : '☆'}</button>`;
+              li.innerHTML = `<span>${escapeHTML(n.title)}</span><button class="btn btn-small">${n.pinned ? '📌' : 'Pin This'}</button>`;
               li.querySelector('span').onclick = () => {
                 state.selectedId = n.id;
                 centerOn(n.x, n.y);
@@ -742,6 +799,19 @@
         if(state.pipPanX === undefined) state.pipPanX = 0;
         if(state.pipPanY === undefined) state.pipPanY = 0;
         
+        // --- AUTO-UNLOCK LISTENER ---
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('unlock') === 'treehugger') {
+            localStorage.setItem('sylva_is_vip', 'true');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => {
+                showAppAlert('Payment successful! Thank you for becoming a Tree Hugger. All premium templates are now unlocked forever.');
+            }, 500);
+        }
+        
+        state.premiumUnlocked = localStorage.getItem('sylva_is_vip') === 'true';
+        // ----------------------------
+
         setupInputHandlers();
         setupCustomDropdowns();
         buildTemplateLibrary();
@@ -869,7 +939,8 @@
         document.getElementById('btn-season').disabled = !state.isLocked;
         document.getElementById('btn-harvest-main').style.display = 'inline-flex';
         document.getElementById('btn-critical-path').style.display = 'inline-flex';
-        document.getElementById('btn-season').style.display = 'inline-flex';
+        document.getElementById('btn-season').style.display = (state.viewMode === 'tree' || state.viewMode === 'forest') ? 'inline-flex' : 'none';
+        document.getElementById('btn-pm-tools').style.display = state.viewMode === 'timeline' ? 'inline-flex' : 'none';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
         document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && tree.type === 'Apple') ? 'block' : 'none';
@@ -1141,47 +1212,171 @@
           const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
           t.nodes.forEach(n => { if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
           
-          // Tree Canopy Layout
-          function layout(nodeId, depth, xOffset) {
-            const node = getNode(nodeId); if (!node) return 0;
-            const kids = childrenMap[nodeId];
-            
-            // Siblings spread slightly wider apart at deeper levels
-            const hSpacing = 130 + (depth * 25);
-            const baseVSpacing = 180;
-            
-            if (kids.length === 0) { 
-                node.x = xOffset; 
-                node.y = 5000 + (depth * baseVSpacing);
-                return hSpacing; 
-            }
-            
-            let currX = xOffset, totalW = 0;
-            for (let k of kids) { 
-                const w = layout(k.id, depth + 1, currX); 
-                currX += w; totalW += w; 
-            }
-            node.x = xOffset + (totalW / 2) - (hSpacing / 2);
-            node.y = 5000 + (depth * baseVSpacing);
-            return totalW;
+          const widths = {};
+          const hSpacing = 280; // Standard width allocated per node column
+          const vSpacing = 160; // Standard vertical drop per layer
+
+          // 1. Bottom-up pass: Calculate the total physical block width needed for each subtree
+          function calculateSubtreeWidths(nodeId) {
+              const kids = childrenMap[nodeId];
+              if (kids.length === 0) {
+                  widths[nodeId] = hSpacing;
+                  return hSpacing;
+              }
+              let totalWidth = 0;
+              for (let k of kids) {
+                  totalWidth += calculateSubtreeWidths(k.id);
+              }
+              widths[nodeId] = totalWidth;
+              return totalWidth;
+          }
+
+          // 2. Top-down pass: Assign coordinates ensuring no overlap and perfect centering
+          function assignCoordinates(nodeId, depth, startX) {
+              const node = t.nodes.find(n => n.id === nodeId); if (!node) return;
+              const kids = childrenMap[nodeId];
+              const myWidth = widths[nodeId];
+
+              // Parent is placed perfectly in the mathematical center of its allocated horizontal block
+              node.x = startX + (myWidth / 2) - (hSpacing / 2);
+              node.y = 5000 + (depth * vSpacing);
+
+              let currentX = startX;
+              for (let k of kids) {
+                  assignCoordinates(k.id, depth + 1, currentX);
+                  currentX += widths[k.id];
+              }
           }
           
-          // 1. Build the outward expanding structure
-          layout(root.id, 0, 5000 - (130 * childrenMap[root.id].length) / 2);
-          
-          // 2. Apply the "Canopy Droop" curve based on distance from the trunk
-          t.nodes.forEach(n => {
-             if (n.type !== 'trunk') {
-                 const distFromCenter = Math.abs(n.x - root.x);
-                 n.y += (distFromCenter * 0.18); // Outer branches droop lower
-             }
-          });
+          calculateSubtreeWidths(root.id);
+          // Center the entire root structure around absolute X=5000
+          assignCoordinates(root.id, 0, 5000 - (widths[root.id] / 2));
           
           saveData(); render();
         }
       }
 
-      function setupInputHandlers() {
+      
+        function setupInputHandlers() {
+          // Project Management Tools Handlers
+        document.getElementById('btn-pm-tools').addEventListener('click', () => {
+            document.getElementById('modal-pm-tools').classList.add('open');
+        });
+
+        document.getElementById('btn-close-pm-tools').addEventListener('click', () => {
+            document.getElementById('modal-pm-tools').classList.remove('open');
+        });
+
+        document.querySelectorAll('.btn-export-doc').forEach(btn => {
+            document.querySelectorAll('.btn-export-doc').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const type = e.target.getAttribute('data-type');
+                const format = e.target.getAttribute('data-format');
+                
+                const originalText = e.target.innerText;
+                e.target.innerText = 'Compiling...';
+                e.target.disabled = true;
+
+                // Grab the currently active project data
+                const currentData = state.viewMode === 'forest' ? getForest() : getTree();
+
+                fetch('http://localhost:5000/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: type,
+                        format: format,
+                        treeData: currentData
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    // Standardize output to .xlsx or .docx regardless of OS preference label
+                    const ext = (format === 'pages' || format === 'docx') ? 'docx' : 'xlsx';
+                    a.download = `Sylva_${type.toUpperCase()}.${ext}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    
+                    e.target.innerText = originalText;
+                    e.target.disabled = false;
+                })
+                .catch(err => {
+                    console.error('Export error:', err);
+                    alert('Make sure your Python PM Bridge is running in the terminal (python pm_bridge.py).');
+                    e.target.innerText = originalText;
+                    e.target.disabled = false;
+                });
+            });
+        });
+        });
+        // WebRTC Sync Modal Handlers
+        document.getElementById('btn-close-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        document.getElementById('btn-cancel-sync').addEventListener('click', () => { document.getElementById('modal-sync-org').classList.remove('open'); });
+        
+        document.getElementById('btn-connect-org').addEventListener('click', () => {
+            const orgCode = document.getElementById('input-org-code').value.trim();
+            if (!orgCode) return;
+            
+            const btn = document.getElementById('btn-connect-org');
+            btn.innerText = 'Connecting...';
+            btn.disabled = true;
+
+            // 1. WebRTC Chunking Transmitter (Bypasses 64KB-256KB limits & websocket latency)
+            window.sendChunkedData = function(channel, dataObj) {
+                const jsonStr = JSON.stringify(dataObj);
+                const CHUNK_SIZE = 16384; 
+                const totalChunks = Math.ceil(jsonStr.length / CHUNK_SIZE);
+                const transferId = Math.random().toString(36).substring(2);
+                
+                for (let i = 0; i < totalChunks; i++) {
+                    setTimeout(() => {
+                        if (channel.readyState === 'open') {
+                            channel.send(JSON.stringify({ 
+                                type: 'chunk', transferId, chunkIndex: i, totalChunks, payload: jsonStr.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE) 
+                            }));
+                        }
+                    }, i * 10); 
+                }
+            };
+
+            // 2. WebRTC Chunking Receiver Buffer
+            window.chunkBuffers = window.chunkBuffers || {};
+            window.handleIncomingChunk = function(msg) {
+                if (msg.type !== 'chunk') return;
+                if (!window.chunkBuffers[msg.transferId]) window.chunkBuffers[msg.transferId] = { chunks: [], received: 0 };
+                
+                const buffer = window.chunkBuffers[msg.transferId];
+                buffer.chunks[msg.chunkIndex] = msg.payload;
+                buffer.received++;
+                
+                if (buffer.received === msg.totalChunks) {
+                    const completeData = JSON.parse(buffer.chunks.join(''));
+                    delete window.chunkBuffers[msg.transferId];
+                    console.log('Complete P2P payload received and reassembled.');
+                    if (typeof mergeData === 'function') mergeData(completeData);
+                }
+            };
+
+            // 3. Initiate Handshake via Org Code
+            console.log(`Initiating WebRTC handshake for Org Code: ${orgCode}`);
+            
+            setTimeout(() => {
+                document.getElementById('modal-sync-org').classList.remove('open');
+                btn.innerText = 'Connect';
+                btn.disabled = false;
+                document.getElementById('input-org-code').value = '';
+            }, 600);
+        });
+
+        // ... your existing event listeners (like btn-close-inspector) continue directly below here ...
         let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null;
         let viewportDragging = false, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
         let pipPinching = false, prevPipPinchDist = null;
@@ -1441,7 +1636,10 @@
           document.getElementById('modal-new-forest').classList.remove('open'); saveData(); render();
         });
         
-        document.getElementById('btn-season').addEventListener('click', () => { openSeasonModal(); }); 
+        document.getElementById('btn-season').addEventListener('click', () => {
+          if (state.viewMode === 'executive') return;
+          openSeasonModal();
+        });
         document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); render(); });
         document.getElementById('btn-action-prune').addEventListener('click', () => {
           const t = getTree(); if (!t) return;
@@ -1863,19 +2061,105 @@
       }
 
       function openSeasonModal() {
+        document.getElementById('modal-season').classList.add('open');
         const isForest = state.viewMode === 'forest';
-        const trees = isForest ? getForest().trees : [getTree()];
+        const trees = isForest ? (getForest()?.trees || []) : [getTree()];
         
-        // Hide the season dropdown if in forest view, since seasons apply to specific trees
-        document.getElementById('season-trigger').parentElement.style.display = isForest ? 'none' : 'block';
+        let allNodes = [];
+        trees.forEach(t => {
+            if (t && t.nodes) allNodes = allNodes.concat(t.nodes);
+        });
+
+        const seasonGroups = { 'Spring': [], 'Summer': [], 'Autumn': [], 'Winter': [] };
+
+        allNodes.forEach(n => {
+            const s = n.season || 'Spring';
+            if (seasonGroups[s]) seasonGroups[s].push(n);
+        });
+
+        let maxCount = -1;
+        let majoritySeason = 'Spring';
+        const orderedSeasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
         
-        if (!isForest) {
-            const t = getTree(); if (t) {
-                document.getElementById('select-tree-season').value = t.season || 'Spring';
-                const sOpt = document.querySelector(`#season-dropdown .custom-opt[data-val="${t.season || 'Spring'}"]`);
-                if (sOpt) { document.getElementById('season-trigger').querySelector('span').innerText = sOpt.innerText; }
+        for (const s of orderedSeasons) {
+            seasonGroups[s].sort((a, b) => (a.title || 'Untitled').localeCompare(b.title || 'Untitled'));
+            if (seasonGroups[s].length > maxCount) {
+                maxCount = seasonGroups[s].length;
+                majoritySeason = s;
             }
         }
+
+        if (!isForest) {
+            const t = getTree();
+            if (t) {
+                t.season = majoritySeason;
+                saveData(); 
+            }
+        }
+        
+        document.getElementById('overall-season-display').innerText = majoritySeason;
+
+        const container = document.getElementById('season-lists-container');
+        container.innerHTML = '';
+
+        orderedSeasons.forEach(s => {
+            const groupDiv = document.createElement('div');
+            groupDiv.style.marginBottom = '12px';
+            groupDiv.style.background = 'var(--bg-surface)';
+            groupDiv.style.border = '1px solid var(--border-subtle)';
+            groupDiv.style.borderRadius = '6px';
+            groupDiv.style.padding = '8px';
+
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.justifyContent = 'space-between';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.borderBottom = '1px solid var(--border-subtle)';
+            headerDiv.style.paddingBottom = '4px';
+            headerDiv.style.marginBottom = '6px';
+
+            const title = document.createElement('strong');
+            title.innerText = `${s} (${seasonGroups[s].length})`;
+            headerDiv.appendChild(title);
+
+            if (!isForest) {
+                const forceBtn = document.createElement('button');
+                forceBtn.className = 'btn btn-small';
+                forceBtn.innerText = 'Force';
+                forceBtn.onclick = () => {
+                    const t = getTree();
+                    if (t) {
+                        t.nodes.forEach(n => n.season = s);
+                        t.season = s;
+                        saveData();
+                        render();
+                        openSeasonModal(); 
+                    }
+                };
+                headerDiv.appendChild(forceBtn);
+            }
+
+            groupDiv.appendChild(headerDiv);
+
+            const listDiv = document.createElement('div');
+            listDiv.style.maxHeight = '120px';
+            listDiv.style.overflowY = 'auto';
+            listDiv.style.fontSize = '12px';
+            
+            if (seasonGroups[s].length === 0) {
+                listDiv.innerHTML = '<span style="color:var(--text-muted)">No nodes in this season</span>';
+            } else {
+                seasonGroups[s].forEach(n => {
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.style.padding = '3px 0';
+                    nodeDiv.innerText = `• ${n.title || 'Untitled'}`;
+                    listDiv.appendChild(nodeDiv);
+                });
+            }
+
+            groupDiv.appendChild(listDiv);
+            container.appendChild(groupDiv);
+        });
 
         const list = document.getElementById('list-harvest'); list.innerHTML = '';
         let allHarvested = [];
@@ -1896,7 +2180,7 @@
       const tourSteps = [
           { id: 'btn-toggle-directory', title: 'The Nursery', text: 'This is where you manage all your Forests. Think of a Forest as a master project or workspace.' },
           { id: 'btn-grow', title: 'Planting Seeds', text: 'Click here to grow new Trees, Branches, and Fruits. This is how you build out your project structure.' },
-          { id: 'btn-harvest-main', title: 'Harvest Time', text: 'When your tasks (Fruits) are complete and "Ripe for the Pickin\'", click here to harvest them and clear your board.' },
+          { id: 'btn-harvest-main', title: 'Harvest Time', text: "When your tasks (Fruits) are complete and \"Ripe for the Pickin'\", click here to harvest them and clear your board." },
           { id: 'btn-critical-path', title: 'Critical Path', text: 'Toggle this to instantly calculate and highlight the most crucial tasks needed to finish your project on time.' }
       ];
       
