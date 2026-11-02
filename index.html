@@ -512,19 +512,37 @@
   </div>
 
   <div class="modal-overlay" id="modal-purchase-template">
-    <div class="modal-card" style="text-align: center;">
-      <div class="modal-header"><h3>Premium Template</h3><button class="btn btn-small" onclick="document.getElementById('modal-purchase-template').classList.remove('open')">&times;</button></div>
-      <div class="modal-body">
-        <div style="font-size:40px; margin-bottom:12px;">🌲</div>
-        <p style="font-size:13px; color:var(--text-main); line-height:1.5; margin-bottom: 12px;">This is a premium framework template. You can purchase it individually for $1, or become a Tree Hugger for $2 to unlock all 50+ premium templates forever!</p>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <!-- TEMPLATE $1 UNLOCK BUTTON HANDLER FIXED -->
-          <button class="btn" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1);" onclick="window.open('https//sylvafounder.gumroad.com/l/SylvaTemplateUnlock', '_blank');">Just This One Please! ($1)</button>
-          <button class="btn btn-accent" onclick="document.getElementById('modal-purchase-template').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open');">Hug a Tree & Get All of Them! ($2)</button>
-        </div>
-      </div>
+<div class="modal-card" style="text-align: center;">
+  <div class="modal-header"><h3>Premium Template</h3><button class="btn btn-small" onclick="document.getElementById('modal-purchase-template').classList.remove('open')">&times;</button></div>
+  <div class="modal-body">
+    <div style="font-size:40px; margin-bottom:12px;">🌲</div>
+    <p style="font-size:13px; color:var(--text-main); line-height:1.5; margin-bottom: 12px;">This is a premium framework template. Purchase it individually for $1, or become a Tree Hugger for $2 to unlock all 50+ templates forever!</p>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button class="btn" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1);" onclick="openCheckout('single', 'kofi')">Ko-fi ($1)</button>
+      <button class="btn" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);" onclick="openCheckout('single', 'gumroad')">Gumroad ($1)</button>
+      <button class="btn" style="border-color:#38BDF8; color:#38BDF8; background:rgba(56,189,248,0.1);" onclick="openCheckout('single', 'stripe')">Stripe ($1)</button>
+      <button class="btn" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);" onclick="openCheckout('single', 'paypal')">PayPal ($1)</button>
+      <button class="btn btn-accent" onclick="document.getElementById('modal-purchase-template').classList.remove('open'); document.getElementById('modal-tree-hugger').classList.add('open');">Hug a Tree & Get All of Them! ($2)</button>
     </div>
   </div>
+</div>
+</div>
+
+<!-- Monetization Modals -->
+<div class="modal-overlay" id="modal-tree-hugger">
+<div class="modal-card">
+  <div class="modal-header"><h3>Become a Tree Hugger</h3><button class="btn btn-small" id="btn-close-hugger">&times;</button></div>
+  <div class="modal-body">
+    <p style="font-size:13px; color:var(--text-main); line-height:1.5;">Support Sylva's development and unlock all premium features for $2!</p>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-top: 8px;">
+      <button class="btn" style="border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1);" onclick="openCheckout('treehugger', 'kofi')">Ko-fi ($2)</button>
+      <button class="btn" style="border-color:#6366F1; color:#6366F1; background:rgba(99,102,241,0.1);" onclick="openCheckout('treehugger', 'gumroad')">Gumroad ($2)</button>
+      <button class="btn" style="border-color:#38BDF8; color:#38BDF8; background:rgba(56,189,248,0.1);" onclick="openCheckout('treehugger', 'stripe')">Stripe ($2)</button>
+      <button class="btn" style="border-color:#0ea5e9; color:#0ea5e9; background:rgba(14,165,233,0.1);" onclick="openCheckout('treehugger', 'paypal')">PayPal ($2)</button>
+    </div>
+  </div>
+</div>
+</div>
 
   <!-- Monetization Modals -->
   <div class="modal-overlay" id="modal-tree-hugger">
@@ -750,7 +768,9 @@
         const w = pipCanvas.width || 140, h = pipCanvas.height || 140;
         ctx.clearRect(0, 0, w, h);
 
-        const scale = state.pipScale || 0.1, ox = 70 + (state.pipPanX || 0), oy = 70 + (state.pipPanY || 0);
+        const scale = state.pipScale || 0.1;
+    const ox = (w / 2) + (state.pipPanX || 0);
+    const oy = (h / 2) + (state.pipPanY || 0);
 
         if (state.viewMode === 'forest') {
           const forest = getForest();
@@ -784,14 +804,32 @@
       }
 
       function positionActions() {
-        const pipRect = pipCanvas.getBoundingClientRect();
-        const ac = document.getElementById('bottom-actions-container');
-        ac.style.bottom = (window.innerHeight - pipRect.bottom) + 'px';
-        ac.style.height = pipRect.height + 'px';
-        ac.style.justifyContent = 'space-between';
-      }
+    const ac = document.getElementById('bottom-actions-container');
+    ac.style.bottom = '12px';
+  }
       window.addEventListener('resize', positionActions);
 
+window.openCheckout = function(productType, platform) {
+      // Paste your real product links here inside the single quotes:
+      const links = {
+          single: {
+              kofi: 'https://ko-fi.com/s/5d61e59f6c',
+              gumroad: 'https://sylvafounder.gumroad.com/l/SylvaTemplateUnlock',
+              stripe: 'https://buy.stripe.com/4gM9AT3mYcYDe2G8Yh4Ni01',
+              paypal: 'https://www.paypal.com/ncp/payment/B3LZZ6AFE5GRE'
+          },
+          treehugger: {
+              kofi: 'https://ko-fi.com/s/99892e1e35',
+              gumroad: 'https://sylvafounder.gumroad.com/l/SylvaTreeHugger',
+              stripe: 'https://buy.stripe.com/4gM6oH1eQe2H7Eicat4Ni00',
+              paypal: 'https://www.paypal.com/ncp/payment/ZLERDYT863QRG'
+          }
+      };
+      
+      const targetUrl = links[productType][platform];
+      // This appends the exact unlock parameters so the app knows what they bought when they return
+      window.open(`${targetUrl}?unlock=${productType}&template=${window.pendingTemplateData ? window.pendingTemplateData.id : 'general'}`, '_blank');
+  };
       function init() {
         const r = localStorage.getItem('sylva_v13_state');
         if (r) { try { state = Object.assign(state, JSON.parse(r)); } catch(e){} }
@@ -1570,14 +1608,17 @@
         document.getElementById('btn-critical-path').addEventListener('click', () => { state.showCriticalPath = !state.showCriticalPath; render(); });
         
         const btnGrow = document.getElementById('btn-grow');
-        btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
-        btnGrow.addEventListener('click', (e) => { 
-          e.stopPropagation(); 
-          const dd = document.getElementById('grow-dropdown');
-          const isVis = dd.style.display === 'flex';
-          closeAllDropdowns();
-          if (!isVis) dd.style.display = 'flex'; 
-        });
+    const growDropdown = document.getElementById('grow-dropdown');
+    btnGrow.addEventListener('pointerdown', (e) => e.stopPropagation()); 
+    btnGrow.addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      const isVis = growDropdown.style.display === 'flex' || growDropdown.style.display === 'block';
+      closeAllDropdowns();
+      if (!isVis) {
+          growDropdown.style.display = 'flex';
+          growDropdown.style.zIndex = '99999';
+      }
+    });
 
         document.querySelectorAll('.btn-grow-opt').forEach(b => {
           b.addEventListener('click', (e) => {
