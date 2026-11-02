@@ -152,14 +152,15 @@
       <div class="modal-body">
         <div class="field-group"><label>Forest Name</label><input type="text" id="forest-input-title"></div>
         <div class="field-group"><label>Human Resources (Team)</label><textarea id="forest-input-hr" rows="2" placeholder="List team members..."></textarea></div>
-        <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
-           <div style="flex:1;"><label>Total Budget ($)</label><input type="number" id="forest-input-budget"></div>
-           <div style="flex:1;"><label>Total Cost ($)</label><input type="number" id="forest-input-cost"></div>
+        <div style="display:flex; flex-direction:row; gap:8px;">
+           <div class="field-group" style="flex:1; min-width:0;"><label>Total Budget ($)</label><input type="number" id="forest-input-budget" style="width:100%;"></div>
+           <div class="field-group" style="flex:1; min-width:0;"><label>Total Cost ($)</label><input type="number" id="forest-input-cost" style="width:100%;"></div>
         </div>
-        <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
-           <div style="flex:1;"><label>Deadline</label><input type="date" id="forest-input-deadline"></div>
-           <div style="flex:1;"><label>Days Spent</label><input type="number" id="forest-input-days"></div>
+        <div style="display:flex; flex-direction:row; gap:8px;">
+           <div class="field-group" style="flex:1; min-width:0;"><label>Deadline</label><input type="date" id="forest-input-deadline" style="width:100%;"></div>
+           <div class="field-group" style="flex:1; min-width:0;"><label>Days Spent</label><input type="number" id="forest-input-days" style="width:100%;"></div>
         </div>
+        <!-- Removed duplicate Deadline and Days Spent fields -->
       </div>
       <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-forest">Delete Forest</button><button class="btn btn-accent" id="btn-save-forest">Save Changes</button></div>
     </div>
@@ -285,7 +286,7 @@
   <!-- Standard Modals -->
   <div class="modal-overlay" id="modal-inspector">
     <div class="modal-card" style="overflow:visible;">
-      <div class="modal-header"><h3 id="inspect-header-title">Inspect Node</h3><button class="btn btn-small" id="btn-close-inspector">&times;</button></div>
+      <div class="modal-header"><h3 id="inspect-header-title">Details</h3><button class="btn btn-small" id="btn-close-inspector">&times;</button></div>
       <div class="modal-body" style="overflow:visible;">
         <div class="field-group"><label>Title</label><input type="text" id="node-input-title"></div>
         <div class="field-group"><label>Notes & Details</label><textarea id="node-input-desc" rows="4"></textarea></div>
@@ -310,15 +311,16 @@
            <button class="btn btn-small" id="btn-toggle-advanced" style="width: 100%; justify-content: space-between; border: 1px solid var(--border-subtle);"><span>Advanced Metadata</span><span id="adv-arrow">▾</span></button>
            <div id="advanced-metadata-panel" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
               <div class="field-group"><label>Start Date</label><input type="date" id="node-input-start"></div>
-              <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
-                 <div style="flex:1;"><label>Est. Hours</label><input type="number" id="node-input-hours" placeholder="e.g. 5"></div>
-                 <div style="flex:1;"><label>Time Spent</label><input type="number" id="node-input-timespent" placeholder="e.g. 2"></div>
+              <div style="display:flex; flex-direction:row; gap:8px;">
+                 <div class="field-group" style="flex:1; min-width:0;"><label>Est. Hours</label><input type="number" id="node-input-hours" placeholder="0" style="width:100%;"></div>
+                 <div class="field-group" style="flex:1; min-width:0;"><label>Time Spent</label><input type="number" id="node-input-timespent" placeholder="0" style="width:100%;"></div>
               </div>
-              <div class="field-group" style="display:flex; flex-direction:row; gap:8px;">
-                 <div style="flex:1;"><label>Budget ($)</label><input type="number" id="node-input-budget" placeholder="0"></div>
-                 <div style="flex:1;"><label>Total Spent ($)</label><input type="number" id="node-input-spent" placeholder="0"></div>
+              <div style="display:flex; flex-direction:row; gap:8px;">
+                 <div class="field-group" style="flex:1; min-width:0;"><label>Budget ($)</label><input type="number" id="node-input-budget" placeholder="0" style="width:100%;"></div>
+                 <div class="field-group" style="flex:1; min-width:0;"><label>Total Spent ($)</label><input type="number" id="node-input-spent" placeholder="0" style="width:100%;"></div>
               </div>
-              <div class="field-group"><label>Assigned To</label><input type="text" id="node-input-assignee" placeholder="e.g. John Doe"></div>
+              <!-- Removed duplicate Budget and Total Spent fields -->
+              <div class="field-group"><label>Assigned To</label><input type="text" id="node-input-assignee" placeholder="Enter Name Here"></div>
            </div>
         </div>
 
@@ -697,7 +699,7 @@
           const forest = getForest();
           (forest.trees || []).forEach(t => {
             ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
-            ctx.beginPath(); ctx.arc(ox + t.x * scale, oy + t.y * scale, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(ox + t.x * scale, oy + t.y * scale, 6, 0, Math.PI * 2); ctx.fill();
           });
         } else {
           const tree = getTree();
@@ -713,10 +715,11 @@
             });
             tree.nodes.forEach(n => {
               ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
-              ctx.fillRect(ox + n.x * scale - 3, oy + n.y * scale - 2, 6, 4);
+              ctx.fillRect(ox + n.x * scale - 5, oy + n.y * scale - 4, 10, 8);
             });
           }
         }
+        // Removed redundant tree.nodes.forEach block as it duplicates the one inside the if(tree) block.
 
         const vx = (-state.panX / state.scale) * scale + ox, vy = (-state.panY / state.scale) * scale + oy;
         const vw = (window.innerWidth / state.scale) * scale, vh = (window.innerHeight / state.scale) * scale;
@@ -1065,7 +1068,7 @@
         let targetNodes = [], headerText = '';
         
         if (state.viewMode === 'forest') {
-            const f = getForest(); headerText = `Executive Timeline: ${f.title}`;
+            const f = getForest(); headerText = `Executive Spread: ${f.title}`;
             f.trees.forEach(t => targetNodes = targetNodes.concat(t.nodes.filter(n => n.type !== 'trunk')));
             const fm = document.createElement('div');
             fm.style.background = 'var(--bg-surface-elevated)'; fm.style.padding = '16px'; fm.style.borderRadius = '8px'; fm.style.marginBottom = '16px';
@@ -1078,7 +1081,7 @@
             tc.appendChild(fm);
         } else {
             const tree = getTree(); if (!tree) return;
-            headerText = `Executive Timeline: ${tree.title}`;
+            headerText = `Executive Spread: ${tree.title}`;
             targetNodes = tree.nodes.filter(n => n.type !== 'trunk');
         }
         
@@ -1119,12 +1122,17 @@
       function autoTidyNodes() {
         if (state.viewMode === 'forest') {
           const f = getForest(); if(!f || !f.trees) return;
-          const spacingX = 180, spacingY = 180;
-          let cols = Math.max(1, Math.floor(window.innerWidth / spacingX));
-          if(cols < 1) cols = 1;
+          
+          // Organic Forest Growth (Golden Ratio Spiral)
           f.trees.forEach((t, i) => {
-              t.x = 80 + (i % cols) * spacingX;
-              t.y = 80 + Math.floor(i / cols) * spacingY;
+              if (i === 0) {
+                  t.x = 5000; t.y = 5000;
+              } else {
+                  const radius = 260 * Math.sqrt(i);
+                  const angle = i * 2.39996; // 137.5 degrees (Golden Angle)
+                  t.x = 5000 + (radius * Math.cos(angle));
+                  t.y = 5000 + (radius * Math.sin(angle));
+              }
           });
           saveData(); render();
         } else {
@@ -1133,18 +1141,42 @@
           const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
           t.nodes.forEach(n => { if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
           
-          const hSpacing = 220, vSpacing = 160;
+          // Tree Canopy Layout
           function layout(nodeId, depth, xOffset) {
             const node = getNode(nodeId); if (!node) return 0;
-            node.y = root.y + (depth * vSpacing);
             const kids = childrenMap[nodeId];
-            if (kids.length === 0) { node.x = xOffset; return hSpacing; }
+            
+            // Siblings spread slightly wider apart at deeper levels
+            const hSpacing = 130 + (depth * 25);
+            const baseVSpacing = 180;
+            
+            if (kids.length === 0) { 
+                node.x = xOffset; 
+                node.y = 5000 + (depth * baseVSpacing);
+                return hSpacing; 
+            }
+            
             let currX = xOffset, totalW = 0;
-            for (let k of kids) { const w = layout(k.id, depth + 1, currX); currX += w; totalW += w; }
+            for (let k of kids) { 
+                const w = layout(k.id, depth + 1, currX); 
+                currX += w; totalW += w; 
+            }
             node.x = xOffset + (totalW / 2) - (hSpacing / 2);
+            node.y = 5000 + (depth * baseVSpacing);
             return totalW;
           }
-          layout(root.id, 0, root.x - (hSpacing * childrenMap[root.id].length) / 2);
+          
+          // 1. Build the outward expanding structure
+          layout(root.id, 0, 5000 - (130 * childrenMap[root.id].length) / 2);
+          
+          // 2. Apply the "Canopy Droop" curve based on distance from the trunk
+          t.nodes.forEach(n => {
+             if (n.type !== 'trunk') {
+                 const distFromCenter = Math.abs(n.x - root.x);
+                 n.y += (distFromCenter * 0.18); // Outer branches droop lower
+             }
+          });
+          
           saveData(); render();
         }
       }
@@ -1211,21 +1243,102 @@
         window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
         viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
 
-        let pipDragging = false, pipHoldTimer = null;
+        let pipDragging = false, pipHoldTimer = null, pipStartX = 0, pipStartY = 0, pipHasMoved = false;
+        let pipClickCount = 0, pipClickTimer = null;
+        
         pipCanvas.addEventListener('pointerdown', (e) => { 
-          if (pipPinching) return;
-          pipDragging = true; e.stopPropagation(); 
+          if (pipPinching || activePointers.size > 1) return;
+          pipDragging = true; pipHasMoved = false; 
+          pipStartX = e.clientX; pipStartY = e.clientY;
+          e.stopPropagation(); 
           pipHoldTimer = setTimeout(() => { state.pipScale = 0.1; state.pipPanX = 0; state.pipPanY = 0; const t = getTree() || getForest(); if (t) { centerOn(0, 0); } pipDragging = false; renderMinimap(); }, 800);
         }); 
-        window.addEventListener('pointermove', (e) => { if (pipDragging) { clearTimeout(pipHoldTimer); state.pipPanX += e.movementX; state.pipPanY += e.movementY; renderMinimap(); } }); 
+        
+        window.addEventListener('pointermove', (e) => { 
+          if (pipDragging) { 
+            if (Math.hypot(e.clientX - pipStartX, e.clientY - pipStartY) > 5) pipHasMoved = true;
+            clearTimeout(pipHoldTimer); 
+            state.pipPanX += e.movementX; state.pipPanY += e.movementY; 
+            renderMinimap(); 
+          } 
+        }); 
+        
         window.addEventListener('pointerup', (e) => { 
           if (pipDragging) {
             clearTimeout(pipHoldTimer); pipDragging = false;
-            if (e.movementX === 0 && e.movementY === 0) {
+            
+            if (!pipHasMoved && !pipPinching) {
+              pipClickCount++;
               const rect = pipCanvas.getBoundingClientRect(), pipX = e.clientX - rect.left, pipY = e.clientY - rect.top; 
               const scale = state.pipScale, offsetX = 70 + state.pipPanX, offsetY = 70 + state.pipPanY; 
               const worldX = (pipX - offsetX) / scale, worldY = (pipY - offsetY) / scale;
-              state.panX = (window.innerWidth / 2) - (worldX * state.scale); state.panY = (window.innerHeight / 2) - (worldY * state.scale); updateWorldTransform();
+              
+              if (pipClickCount === 1) {
+                pipClickTimer = setTimeout(() => {
+                  pipClickCount = 0;
+                  
+                  let hitNode = null;
+                  const isTreeMode = state.viewMode === 'tree';
+                  const items = isTreeMode ? (getTree()?.nodes || []) : (getForest()?.trees || []);
+                  
+                  // Check 5-pixel hit radius
+                  for (let item of items) {
+                    const itemPipX = offsetX + item.x * scale;
+                    const itemPipY = offsetY + item.y * scale;
+                    if (Math.hypot(pipX - itemPipX, pipY - itemPipY) <= 5) {
+                      hitNode = item; break;
+                    }
+                  }
+                  
+                  if (hitNode) {
+                    // Node clicked: smooth glide to exactly 148px below screen top
+                    const halfWidth = isTreeMode ? 95 : 70;
+                    state.scale = 1.6; // ~3x the size of a standard button
+                    state.panX = (window.innerWidth / 2) - ((hitNode.x + halfWidth) * state.scale);
+                    state.panY = 148 - (hitNode.y * state.scale);
+                    
+                    const worldEl = document.getElementById('world');
+                    worldEl.style.transition = 'transform 0.4s ease-out';
+                    updateWorldTransform();
+                    setTimeout(() => { worldEl.style.transition = 'none'; }, 450);
+                  } else {
+                    // Empty space clicked: slight delay, instant jump
+                    setTimeout(() => {
+                      state.panX = (window.innerWidth / 2) - (worldX * state.scale); 
+                      state.panY = (window.innerHeight / 2) - (worldY * state.scale); 
+                      updateWorldTransform();
+                    }, 100);
+                  }
+                }, 250);
+              } else if (pipClickCount === 2) {
+                clearTimeout(pipClickTimer); pipClickCount = 0;
+                
+                // Double click: Instant stretch-to-fit in PIP window
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                const isTreeMode = state.viewMode === 'tree';
+                const items = isTreeMode ? (getTree()?.nodes || []) : (getForest()?.trees || []);
+                
+                if (items.length > 0) {
+                  items.forEach(item => {
+                    const w = isTreeMode ? 190 : 140, h = isTreeMode ? 80 : 100;
+                    if (item.x < minX) minX = item.x; 
+                    if (item.x + w > maxX) maxX = item.x + w;
+                    if (item.y < minY) minY = item.y; 
+                    if (item.y + h > maxY) maxY = item.y + h;
+                  });
+                  
+                  const w = Math.max(maxX - minX, 1);
+                  const h = Math.max(maxY - minY, 1);
+                  
+                  // Targets 100x100 to leave a 20px buffer padding inside the 140x140 canvas
+                  const targetScale = Math.min(100 / w, 100 / h, 0.5);
+                  
+                  state.pipScale = targetScale;
+                  state.pipPanX = -((minX + maxX) / 2) * targetScale;
+                  state.pipPanY = -((minY + maxY) / 2) * targetScale;
+                  renderMinimap();
+                }
+              }
             }
           }
         });
@@ -1561,8 +1674,8 @@
                     desc: n.desc || '',
                     type: n.type,
                     parentId: oldParent ? idMap[oldParent] : null,
-                    x: startX + (Math.random() * 80 - 40),
-                    y: startY + (Math.random() * 80 - 40),
+                    x: startX,
+                    y: startY,
                     pinned: false,
                     harvested: false
                 };
@@ -1574,29 +1687,77 @@
         document.getElementById('btn-tpl-current').onclick = () => {
             if (!window.pendingTemplateData) return;
             const tpl = window.pendingTemplateData;
-            const newTree = { id: 't_' + Date.now(), title: tpl.title, type: tpl.type, season: 'Spring', pinned: false, x: 160 + (getForest().trees.length * 150), y: 160, nodes: processNodes(tpl.nodes, 260, 120) };
+            
+            // Literal center of the 10,000 x 10,000 canvas
+            const canvasCenterX = 5000;
+            const canvasCenterY = 5000;
+            
+            const newTree = { id: 't_' + Date.now(), title: tpl.title, type: tpl.type, season: 'Spring', pinned: false, x: canvasCenterX, y: canvasCenterY, nodes: processNodes(tpl.nodes, canvasCenterX, canvasCenterY) };
             getForest().trees.push(newTree); 
+            
+            state.activeTreeId = newTree.id; 
+            state.viewMode = 'tree';
             state.selectedId = newTree.id; 
             document.getElementById('modal-template-prompt').classList.remove('open'); 
+            
+            autoTidyNodes();
             saveData(); render();
+            setTimeout(() => smoothFocusOnTree(newTree), 50);
         };
         
         document.getElementById('btn-tpl-new').onclick = () => {
             if (!window.pendingTemplateData) return;
             const tpl = window.pendingTemplateData;
-            const newTree = { id: 't_' + Date.now(), title: tpl.title, type: tpl.type, season: 'Spring', pinned: false, x: 160, y: 160, nodes: processNodes(tpl.nodes, 260, 120) };
+            
+            // Literal center of the 10,000 x 10,000 canvas
+            const canvasCenterX = 5000;
+            const canvasCenterY = 5000;
+            
+            const newTree = { id: 't_' + Date.now(), title: tpl.title, type: tpl.type, season: 'Spring', pinned: false, x: canvasCenterX, y: canvasCenterY, nodes: processNodes(tpl.nodes, canvasCenterX, canvasCenterY) };
             const newF = { id: 'forest-' + Date.now(), title: tpl.title, pinned: false, trees: [newTree] };
             state.forests.push(newF); 
+            
             state.activeForestId = newF.id; 
             state.activeTreeId = newTree.id; 
             state.viewMode = 'tree';
             document.getElementById('modal-template-prompt').classList.remove('open'); 
+            
+            autoTidyNodes();
             saveData(); render();
+            setTimeout(() => smoothFocusOnTree(newTree), 50);
         };
       }
     
     function centerOn(x, y) {
         state.scale = 1.0; state.panX = (window.innerWidth / 2) - x - 95; state.panY = (window.innerHeight / 2) - y - 60; updateWorldTransform();
+      }
+
+      function smoothFocusOnTree(tree) {
+        if (!tree || !tree.nodes || tree.nodes.length === 0) return;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        tree.nodes.forEach(n => {
+          if (n.x < minX) minX = n.x;
+          if (n.x > maxX) maxX = n.x;
+          if (n.y < minY) minY = n.y;
+          if (n.y > maxY) maxY = n.y;
+        });
+        
+        const treeWidth = (maxX - minX) + 190 + 200; 
+        const treeHeight = (maxY - minY) + 80 + 200;
+        
+        const targetScale = Math.min(window.innerWidth / treeWidth, window.innerHeight / treeHeight, 1.0);
+        const centerX = (minX + maxX + 190) / 2;
+        const centerY = (minY + maxY + 80) / 2;
+        
+        const worldEl = document.getElementById('world');
+        worldEl.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+        
+        state.scale = targetScale;
+        state.panX = (window.innerWidth / 2) - (centerX * targetScale);
+        state.panY = (window.innerHeight / 2) - (centerY * targetScale);
+        updateWorldTransform();
+        
+        setTimeout(() => { worldEl.style.transition = 'none'; }, 850);
       }
 
       function openInspector(node) {
