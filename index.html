@@ -53,7 +53,7 @@
     #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
     #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
 
-    .bottom-actions { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 25; pointer-events: auto; }
+    .bottom-actions { position: absolute; right: 12px; bottom: 12px; height: 140px; display: flex; flex-direction: column; justify-content: space-between; z-index: 25; pointer-events: auto; }
     .btn { height: 38px; padding: 0 12px; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.1s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     .btn-small { height: 28px; padding: 0 8px; font-size: 11px; }
     .btn:active { transform: scale(0.96); }
@@ -331,7 +331,13 @@
                  <div class="field-group" style="flex:1; min-width:0;"><label>Total Spent ($)</label><input type="number" id="node-input-spent" placeholder="0" style="width:100%;"></div>
               </div>
               <!-- Removed duplicate Budget and Total Spent fields -->
-              <div class="field-group"><label>Assigned To</label><input type="text" id="node-input-assignee" placeholder="Enter Name Here"></div>
+              <<div class="field-group">
+                 <label style="display: flex; justify-content: space-between; align-items: center;">
+                    Assignees & RACI Roles
+                    <button class="btn btn-small" id="btn-add-assignee" style="height: 20px; padding: 0 6px;">+ Add</button>
+                 </label>
+                 <div id="assignees-container" style="display: flex; flex-direction: column; gap: 6px;"></div>
+              </div>
            </div>
         </div>
 
@@ -855,9 +861,9 @@ window.openCheckout = function(productType, platform) {
             state.forests = [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }];
             state.viewMode = 'forest';
         }
-        if (state.viewMode === 'tree' && !state.activeTreeId) {
-            state.viewMode = 'forest';
-        }
+        if (state.viewMode === 'tree' && !getTree()) {
+         state.viewMode = 'forest';
+     }
         if (typeof state.isLocked === 'undefined') state.isLocked = true;
         if(!state.pipScale) state.pipScale = 0.1;
         if(state.pipPanX === undefined) state.pipPanX = 0;
@@ -1002,7 +1008,23 @@ window.openCheckout = function(productType, platform) {
         btnLock.className = `btn btn-small btn-lock ${state.isLocked ? '' : 'unlocked'}`;
         btnLock.innerHTML = state.isLocked ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
           
-        document.getElementById('btn-grow').disabled = !state.isLocked;
+        // --- ZERO STATE PULSE LOGIC ---
+const btnGrow = document.getElementById('btn-grow');
+btnGrow.disabled = !state.isLocked;
+
+let isZeroState = false;
+if (state.viewMode === 'forest') {
+    isZeroState = (!forest.trees || forest.trees.length === 0);
+} else if (state.viewMode === 'tree' && tree) {
+    isZeroState = (!tree.nodes || tree.nodes.length <= 1);
+}
+
+if (isZeroState && state.isLocked) {
+    btnGrow.classList.add('pulse-glow');
+} else {
+    btnGrow.classList.remove('pulse-glow');
+}
+// ------------------------------
         document.getElementById('btn-season').disabled = !state.isLocked;
         document.getElementById('btn-harvest-main').style.display = 'inline-flex';
         document.getElementById('btn-critical-path').style.display = 'inline-flex';
@@ -1223,8 +1245,25 @@ window.openCheckout = function(productType, platform) {
             targetNodes = tree.nodes.filter(n => n.type !== 'trunk');
         }
         
-        const header = document.createElement('h2'); header.innerText = headerText; header.style.marginBottom = '16px'; 
-        tc.insertBefore(header, tc.firstChild);
+        const headerContainer = document.createElement('div');
+     headerContainer.style.display = 'flex';
+     headerContainer.style.justifyContent = 'space-between';
+     headerContainer.style.alignItems = 'center';
+     headerContainer.style.marginBottom = '16px';
+
+     const header = document.createElement('h2'); 
+     header.innerText = headerText; 
+     header.style.margin = '0';
+
+     const backBtn = document.createElement('button');
+     backBtn.className = 'btn btn-small';
+     backBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
+     backBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;"><path d="M15 18l-6-6 6-6"/></svg>Back';
+     backBtn.onclick = () => document.getElementById('btn-toggle-timeline').click();
+
+     headerContainer.appendChild(header);
+     headerContainer.appendChild(backBtn);
+     tc.insertBefore(headerContainer, tc.firstChild);
 
         const tasks = targetNodes.sort((a,b) => (a.startDate || '9999').localeCompare(b.startDate || '9999'));
         tasks.forEach(n => {
@@ -1351,17 +1390,32 @@ window.openCheckout = function(productType, platform) {
                 let blob, filename;
 
                 if (format === 'xlsx' || format === 'numbers') {
-                    // Generate standard CSV for spreadsheets
-                    let csvContent = "WBS Level,Task Name,Node Type,Status,Description\n";
-                    nodes.forEach((n, idx) => {
-                        const status = n.harvested ? "Complete" : (n.ripe ? "Ripe" : "Pending");
-                        const desc = (n.desc || '').replace(/"/g, '""').replace(/\n/g, ' ');
-                        csvContent += `1.${idx + 1},"${n.title || ''}","${n.type}","${status}","${desc}"\n`;
-                    });
-                    blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    if (type === 'raci') {
+                        let csvContent = "WBS Level,Task Name,Node Type,Responsible (R),Accountable (A),Consulted (C),Informed (I)\n";
+                        nodes.forEach((n, idx) => {
+                            const r = [], a = [], c = [], i = [];
+                            (n.assignees || []).forEach(assignee => {
+                                if (assignee.role === 'R') r.push(assignee.name);
+                                if (assignee.role === 'A') a.push(assignee.name);
+                                if (assignee.role === 'C') c.push(assignee.name);
+                                if (assignee.role === 'I') i.push(assignee.name);
+                            });
+                            if ((!n.assignees || n.assignees.length === 0) && n.assignee) r.push(n.assignee);
+                            csvContent += `1.${idx + 1},"${(n.title || '').replace(/"/g, '""')}","${n.type}","${r.join(', ')}","${a.join(', ')}","${c.join(', ')}","${i.join(', ')}"\n`;
+                        });
+                        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    } else {
+                        let csvContent = "WBS Level,Task Name,Node Type,Status,Assignees,Description\n";
+                        nodes.forEach((n, idx) => {
+                            const status = n.harvested ? "Complete" : (n.ripe ? "Ripe" : "Pending");
+                            const desc = (n.desc || '').replace(/"/g, '""').replace(/\n/g, ' ');
+                            const assigneesStr = (n.assignees || []).map(a => `${a.name} (${a.role})`).join('; ') || (n.assignee || '');
+                            csvContent += `1.${idx + 1},"${(n.title || '').replace(/"/g, '""')}","${n.type}","${status}","${assigneesStr}","${desc}"\n`;
+                        });
+                        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    }
                     filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.csv`;
                 } else {
-                    // Generate native .doc file via HTML signature
                     let docContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                     <head><meta charset='utf-8'><title>${title}</title></head><body>
                     <h1>${title} - ${type.toUpperCase()}</h1>`;
@@ -1369,9 +1423,17 @@ window.openCheckout = function(productType, platform) {
                     if (type === 'charter') {
                         docContent += `<h2>1. Project Scope</h2><p>Auto-generated scope from Sylva structure.</p><h2>2. Deliverables (Fruit Nodes)</h2><ul>`;
                         nodes.filter(n => n.type === 'fruit').forEach(n => {
-                            docContent += `<li><strong>${n.title}</strong>: ${n.desc || 'No description'}</li>`;
+                            const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
+                            docContent += `<li><strong>${n.title}</strong> (Assigned: ${assigneesStr}): ${n.desc || 'No description'}</li>`;
                         });
                         docContent += `</ul>`;
+                    } else if (type === 'plan') {
+                         docContent += `<h2>Project Nodes & Assignments</h2><ul>`;
+                         nodes.forEach(n => { 
+                             const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
+                             docContent += `<li><strong>${n.title}</strong> (${n.type}) - Assignees: ${assigneesStr}</li>`; 
+                         });
+                         docContent += `</ul>`;
                     } else {
                         docContent += `<h2>Project Nodes</h2><ul>`;
                         nodes.forEach(n => { docContent += `<li><strong>${n.title}</strong> (${n.type})</li>`; });
@@ -1471,10 +1533,9 @@ window.openCheckout = function(productType, platform) {
             }, 600);
         });
 
-        // ... your existing event listeners (like btn-close-inspector) continue directly below here ...
         let activePointers = new Map(), prevPinchDist = null, prevCx = null, prevCy = null;
-        let viewportDragging = false, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
-        let pipPinching = false, prevPipPinchDist = null;
+     let viewportDragging = false, panStartCX = 0, panStartCY = 0, initPanX = 0, initPanY = 0;
+     let pipPinching = false, prevPipPinchDist = null, prevPipCx = null, prevPipCy = null;
 
         window.addEventListener('pointerdown', (e) => {
           activePointers.set(e.pointerId, e);
@@ -1501,21 +1562,31 @@ window.openCheckout = function(productType, platform) {
             const pts = Array.from(activePointers.values());
             const dist = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
             if (pipPinching) {
-              const pipCx = (pts[0].clientX + pts[1].clientX) / 2;
-              const pipCy = (pts[0].clientY + pts[1].clientY) / 2;
-              
-              if (prevPipPinchDist) { 
-                  const ratio = dist / prevPipPinchDist;
-                  const newScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 1.0);
-                  
-                  // Adjust PIP pan based on pinch center to keep it anchored
-                  state.pipPanX += (pipCx - 70) * (1 - ratio) * 0.1;
-                  state.pipPanY += (pipCy - 70) * (1 - ratio) * 0.1;
-                  
-                  state.pipScale = newScale; 
-                  renderMinimap(); 
-              }
-              prevPipPinchDist = dist;
+           const pipCx = (pts[0].clientX + pts[1].clientX) / 2;
+           const pipCy = (pts[0].clientY + pts[1].clientY) / 2;
+
+           if (prevPipPinchDist && prevPipCx !== null && prevPipCy !== null) { 
+               const ratio = dist / prevPipPinchDist;
+               const newScale = Math.min(Math.max(state.pipScale * ratio, 0.02), 1.0);
+
+               // 1. Follow the dragging of the fingers
+               state.pipPanX += (pipCx - prevPipCx);
+               state.pipPanY += (pipCy - prevPipCy);
+
+               // 2. Anchor the zoom perfectly at the center of the fingers
+               const rect = pipCanvas.getBoundingClientRect();
+               const localCx = pipCx - rect.left - 70;
+               const localCy = pipCy - rect.top - 70;
+
+               state.pipPanX = localCx - (localCx - state.pipPanX) * (newScale / state.pipScale);
+               state.pipPanY = localCy - (localCy - state.pipPanY) * (newScale / state.pipScale);
+
+               state.pipScale = newScale; 
+               renderMinimap(); 
+           }
+           prevPipPinchDist = dist;
+           prevPipCx = pipCx;
+           prevPipCy = pipCy;
             } else {
               isPinching = true;
               const cx = (pts[0].clientX + pts[1].clientX) / 2, cy = (pts[0].clientY + pts[1].clientY) / 2;
@@ -1534,7 +1605,7 @@ window.openCheckout = function(productType, platform) {
 
         const endPointer = (e) => {
           activePointers.delete(e.pointerId);
-          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; prevPipPinchDist = null; }
+          if (activePointers.size < 2) { prevPinchDist = null; prevCx = null; prevCy = null; prevPipPinchDist = null; prevPipCx = null; prevPipCy = null; }
           if (activePointers.size === 0) {
             viewportDragging = false; document.getElementById('tree-layer').style.pointerEvents = 'auto'; document.getElementById('forest-layer').style.pointerEvents = 'auto'; 
             setTimeout(() => { isPinching = false; pipPinching = false; }, 100);
@@ -2128,7 +2199,19 @@ window.openCheckout = function(productType, platform) {
           if (n.y < minY) minY = n.y;
           if (n.y > maxY) maxY = n.y;
         });
-        
+        window.initialFocus = function() {
+     if (state.viewMode === 'tree') {
+         const t = getTree();
+         if (t) smoothFocusOnTree(t);
+     } else if (state.viewMode === 'forest') {
+         const f = getForest();
+         if (f && f.trees && f.trees.length > 0) {
+             centerOn(f.trees[0].x, f.trees[0].y);
+         } else {
+             centerOn(5000, 5000); // Centers perfectly on the blank canvas
+         }
+     }
+   };
         const treeWidth = (maxX - minX) + 190 + 200; 
         const treeHeight = (maxY - minY) + 80 + 200;
         
@@ -2166,7 +2249,32 @@ window.openCheckout = function(productType, platform) {
           document.getElementById('node-input-timespent').value = node.timeSpent || '';
           document.getElementById('node-input-budget').value = node.budget || '';
           document.getElementById('node-input-spent').value = node.totalSpent || '';
-          document.getElementById('node-input-assignee').value = node.assignee || '';
+          const assigneesContainer = document.getElementById('assignees-container');
+          assigneesContainer.innerHTML = '';
+          const assigneesList = node.assignees || [];
+          
+          const addAssigneeRow = (name = '', role = 'R') => {
+              const row = document.createElement('div');
+              row.style.display = 'flex'; row.style.gap = '4px';
+              row.innerHTML = `
+                  <input type="text" class="assignee-name" placeholder="Name" value="${escapeHTML(name)}" style="flex: 1; background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 4px; padding: 6px; font-size: 12px; outline: none;">
+                  <select class="assignee-role" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 4px; padding: 6px; font-size: 12px; outline: none; width: 50px;">
+                      <option value="R" ${role === 'R' ? 'selected' : ''}>R</option>
+                      <option value="A" ${role === 'A' ? 'selected' : ''}>A</option>
+                      <option value="C" ${role === 'C' ? 'selected' : ''}>C</option>
+                      <option value="I" ${role === 'I' ? 'selected' : ''}>I</option>
+                  </select>
+                  <button class="btn btn-small" onclick="this.parentElement.remove()" style="padding: 0 6px; background: transparent; border: 1px solid #EF4444; color: #EF4444;">&times;</button>
+              `;
+              assigneesContainer.appendChild(row);
+          };
+          
+          assigneesList.forEach(a => addAssigneeRow(a.name, a.role));
+          if (assigneesList.length === 0 && node.assignee) addAssigneeRow(node.assignee, 'R'); // Load old data format
+          
+          document.getElementById('btn-add-assignee').onclick = (e) => {
+              e.preventDefault(); addAssigneeRow();
+          };
 
           const t = getTree();
           document.getElementById('willow-actions').style.display = (t.type === 'Willow' && node.type === 'branch') ? 'block' : 'none';
@@ -2212,7 +2320,14 @@ window.openCheckout = function(productType, platform) {
             node.timeSpent = document.getElementById('node-input-timespent').value;
             node.budget = document.getElementById('node-input-budget').value; 
             node.totalSpent = document.getElementById('node-input-spent').value;
-            node.assignee = document.getElementById('node-input-assignee').value;
+            const assigneeRows = document.querySelectorAll('#assignees-container > div');
+            node.assignees = [];
+            assigneeRows.forEach(row => {
+                const name = row.querySelector('.assignee-name').value.trim();
+                const role = row.querySelector('.assignee-role').value;
+                if (name) node.assignees.push({ name, role });
+            });
+            node.assignee = node.assignees.map(a => a.name).join(', '); // Keeps the Timeline view working
             
             document.getElementById('modal-inspector').classList.remove('open'); render(); saveData();
           };
@@ -2469,6 +2584,7 @@ window.openCheckout = function(productType, platform) {
               state.viewMode = 'forest';
           }
           render();
+          setTimeout(window.initialFocus, 100);
       }
 
       document.getElementById('tour-next').onclick = () => { currentTourStep++; updateTourPosition(); };
@@ -2496,20 +2612,24 @@ window.openCheckout = function(productType, platform) {
       }
 
       function initTutorial() {
-        if (!localStorage.getItem('sylva_tutorial_seen')) {
-          document.getElementById('modal-tut-prompt').classList.add('open');
-        }
-        document.getElementById('btn-tut-yes').onclick = () => {
-          document.getElementById('modal-tut-prompt').classList.remove('open');
-          localStorage.setItem('sylva_tutorial_seen', 'true');
-          startTour();
-        };
+     if (!localStorage.getItem('sylva_tutorial_seen')) {
+       document.getElementById('modal-tut-prompt').classList.add('open');
+     } else {
+       setTimeout(window.initialFocus, 100);
+     }
 
-        document.getElementById('btn-tut-no').onclick = () => {
-          document.getElementById('modal-tut-prompt').classList.remove('open');
-          localStorage.setItem('sylva_tutorial_seen', 'true');
-        };
-      }
+     document.getElementById('btn-tut-yes').onclick = () => {
+       document.getElementById('modal-tut-prompt').classList.remove('open');
+       localStorage.setItem('sylva_tutorial_seen', 'true');
+       startTour();
+     };
+
+     document.getElementById('btn-tut-no').onclick = () => {
+       document.getElementById('modal-tut-prompt').classList.remove('open');
+       localStorage.setItem('sylva_tutorial_seen', 'true');
+       setTimeout(window.initialFocus, 100);
+     };
+   }
 
       init();
     
