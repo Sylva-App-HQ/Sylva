@@ -1786,7 +1786,7 @@ if (isZeroState && state.isLocked) {
              let tx = 5000, ty = 5000;
              if (i > 0) {
                  const radius = 260 * Math.sqrt(i);
-                 const angle = i * 2.39996; // Golden angle for organic circular spread
+                 const angle = i * 2.39996;
                  tx = 5000 + (radius * Math.cos(angle));
                  ty = 5000 + (radius * Math.sin(angle));
              }
@@ -1797,6 +1797,10 @@ if (isZeroState && state.isLocked) {
              };
              forest.trees.push(newTree); state.selectedId = newTree.id;
              document.getElementById('grow-dropdown').style.display = 'none';
+
+             // Forces the camera and PIP to instantly snap to the new tree's location
+             centerOn(tx, ty); 
+
              render(); openTreeInspector(newTree);
            }
             }
