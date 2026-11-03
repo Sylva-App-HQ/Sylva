@@ -761,7 +761,11 @@
           li.onclick = () => {
          state.activeForestId = f.id; state.activeTreeId = null; state.viewMode = 'forest';
          document.getElementById('drawer-right').classList.remove('open');
-         centerOn(5000, 5000);
+         if (f.trees && f.trees.length > 0) {
+             centerOn(f.trees[0].x, f.trees[0].y);
+         } else {
+             centerOn(5000, 5000);
+         }
          render();
        };
           atozRight.appendChild(li);
@@ -780,31 +784,32 @@
     const oy = (h / 2) + (state.pipPanY || 0);
 
         if (state.viewMode === 'forest') {
-          const forest = getForest();
-          (forest.trees || []).forEach(t => {
-            ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
-            ctx.beginPath(); ctx.arc(ox + t.x * scale, oy + t.y * scale, 6, 0, Math.PI * 2); ctx.fill();
-          });
-        } else {
-          const tree = getTree();
-          if (tree) {
-            ctx.strokeStyle = '#33485E'; ctx.lineWidth = 1;
-            tree.nodes.forEach(n => {
-              if (n.parentId) {
-                const p = tree.nodes.find(pn => pn.id === n.parentId);
-                if (p) {
-                  ctx.beginPath(); ctx.moveTo(ox + p.x * scale, oy + p.y * scale); ctx.lineTo(ox + n.x * scale, oy + n.y * scale); ctx.stroke();
-                }
-              }
-            });
-            tree.nodes.forEach(n => {
-              ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
-              ctx.fillRect(ox + n.x * scale - 5, oy + n.y * scale - 4, 10, 8);
-            });
-          }
-        }
-        // Removed redundant tree.nodes.forEach block as it duplicates the one inside the if(tree) block.
-
+       const forest = getForest();
+       (forest.trees || []).forEach(t => {
+         ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
+         // +70 and +50 aligns the dot to the center of the tree card
+         ctx.beginPath(); ctx.arc(ox + (t.x + 70) * scale, oy + (t.y + 50) * scale, 6, 0, Math.PI * 2); ctx.fill();
+       });
+     } else {
+       const tree = getTree();
+       if (tree) {
+         ctx.strokeStyle = '#33485E'; ctx.lineWidth = 1;
+         tree.nodes.forEach(n => {
+           if (n.parentId) {
+             const p = tree.nodes.find(pn => pn.id === n.parentId);
+             if (p) {
+               // +95 and +60 aligns the lines to the center of the node cards
+               ctx.beginPath(); ctx.moveTo(ox + (p.x + 95) * scale, oy + (p.y + 60) * scale); ctx.lineTo(ox + (n.x + 95) * scale, oy + (n.y + 60) * scale); ctx.stroke();
+             }
+           }
+         });
+         tree.nodes.forEach(n => {
+           ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
+           // +95 and +60 aligns the squares to the center of the node cards
+           ctx.fillRect(ox + (n.x + 95) * scale - 5, oy + (n.y + 60) * scale - 4, 10, 8);
+         });
+       }
+     }
         const vx = (-state.panX / state.scale) * scale + ox, vy = (-state.panY / state.scale) * scale + oy;
         const vw = (window.innerWidth / state.scale) * scale, vh = (window.innerHeight / state.scale) * scale;
         ctx.strokeStyle = '#F59E0B'; ctx.lineWidth = 1; ctx.strokeRect(vx, vy, vw, vh);
@@ -1032,10 +1037,16 @@ if (isZeroState && state.isLocked) {
        fCrumb.onclick = () => { 
          if (state.viewMode !== 'forest') { 
              state.viewMode = 'forest'; 
-             centerOn(5000, 5000);
+             const f = getForest();
+             if (f && f.trees && f.trees.length > 0) {
+                 centerOn(f.trees[0].x, f.trees[0].y);
+             } else {
+                 centerOn(5000, 5000);
+             }
              render(); 
          } 
      };
+     window.initialFocus();
         bc.appendChild(fCrumb);
 
         if (state.viewMode === 'forest') {
@@ -1717,7 +1728,12 @@ if (isZeroState && state.isLocked) {
              if (root) centerOn(root.x, root.y);
          } else {
              state.viewMode = 'forest';
-             centerOn(5000, 5000);
+             const f = getForest();
+             if (f && f.trees && f.trees.length > 0) {
+                 centerOn(f.trees[0].x, f.trees[0].y);
+             } else {
+                 centerOn(5000, 5000);
+             }
          }
          render(); 
      });
@@ -2204,6 +2220,21 @@ if (isZeroState && state.isLocked) {
         setTimeout(() => { worldEl.style.transition = 'none'; }, 850);
       }
 
+      window.initialFocus = function() {
+     if (state.viewMode === 'tree') {
+         const t = getTree();
+         const root = t ? (t.nodes.find(nd => nd.type === 'trunk') || t.nodes[0]) : null;
+         if (root) centerOn(root.x, root.y);
+     } else if (state.viewMode === 'forest') {
+         const f = getForest();
+         if (f && f.trees && f.trees.length > 0) {
+             centerOn(f.trees[0].x, f.trees[0].y);
+         } else {
+             centerOn(5000, 5000);
+         }
+     }
+   };
+      
       function openInspector(node) {
         setTimeout(() => {
           document.getElementById('node-input-title').value = node.title;
