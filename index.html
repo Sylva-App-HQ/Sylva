@@ -604,7 +604,7 @@
 
   <script src="./templates.js"></script>
   <script>
-    (function () {
+    (() => {
       'use strict';
 
       if ('serviceWorker' in navigator) {
@@ -890,8 +890,10 @@ window.openCheckout = function(productType, platform) {
         }
         
         state.premiumUnlocked = localStorage.getItem('sylva_is_vip') === 'true';
-        // ----------------------------
-      }
+    
+    render();
+    initTutorial();
+}
 
       function getForest() { return state.forests.find(f => f.id === state.activeForestId) || state.forests[0]; }
       function getTree() { const f = getForest(); return f.trees.find(t => t.id === state.activeTreeId) || f.trees[0]; }
