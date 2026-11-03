@@ -53,7 +53,7 @@
     #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
     #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
 
-    .bottom-actions { position: absolute; right: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 25; pointer-events: auto; }
+    .bottom-actions { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 8px; z-index: 25; pointer-events: auto; }
     .btn { height: 38px; padding: 0 12px; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.1s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     .btn-small { height: 28px; padding: 0 8px; font-size: 11px; }
     .btn:active { transform: scale(0.96); }
@@ -121,7 +121,7 @@
     #tour-highlight { position: absolute; background: transparent; border: 2px solid var(--accent); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.7); z-index: 10001; display: none; transition: all 0.3s ease; pointer-events: none; }
     #tour-tooltip { position: absolute; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 20px; border-radius: 12px; width: 300px; z-index: 10002; display: none; flex-direction: column; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: opacity 0.3s ease; opacity: 0; }
     .tour-buttons { display: flex; justify-content: space-between; margin-top: 8px; }
-    .tour-active-element { z-index: 10002 !important; position: relative !important; pointer-events: none !important; }
+    .tour-active-element { z-index: 10002 !important; pointer-events: none !important; }
   </style>
 </head>
 <body>
@@ -891,6 +891,9 @@ window.openCheckout = function(productType, platform) {
         
         state.premiumUnlocked = localStorage.getItem('sylva_is_vip') === 'true';
     
+    positionActions();
+    setupInputHandlers();
+    setupCustomDropdowns();
     render();
     initTutorial();
 }
@@ -1921,6 +1924,7 @@ window.openCheckout = function(productType, platform) {
         ];
         configs.forEach(cfg => {
           const trig = document.getElementById(cfg.trig), drop = document.getElementById(cfg.drop), inp = document.getElementById(cfg.inp);
+          if (!trig || !drop || !inp) return;
           trig.addEventListener('pointerdown', (e) => e.stopPropagation()); 
           trig.addEventListener('click', (e) => { 
               e.stopPropagation(); 
@@ -1949,10 +1953,14 @@ window.openCheckout = function(productType, platform) {
       }
 
       function closeAllDropdowns() {
-        document.getElementById('grow-dropdown').style.display = 'none';
-        document.getElementById('node-type-dropdown').style.display = 'none';
-        document.getElementById('tree-type-dropdown').style.display = 'none';
-        document.getElementById('season-dropdown').style.display = 'none';
+        const gDrop = document.getElementById('grow-dropdown');
+        const nDrop = document.getElementById('node-type-dropdown');
+        const tDrop = document.getElementById('tree-type-dropdown');
+        const sDrop = document.getElementById('season-dropdown');
+        if (gDrop) gDrop.style.display = 'none';
+        if (nDrop) nDrop.style.display = 'none';
+        if (tDrop) tDrop.style.display = 'none';
+        if (sDrop) sDrop.style.display = 'none';
       }
 
       function getTemplateSpecies(title) {
@@ -1985,7 +1993,7 @@ window.openCheckout = function(productType, platform) {
       }
 
       let pendingTemplateTitle = "";
-    function buildTemplateLibrary() {
+     function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
         list.innerHTML = '';
         
@@ -2366,18 +2374,21 @@ window.openCheckout = function(productType, platform) {
             { id: 'bottom-actions-container', title: 'Track Your Progress', text: 'Use these tools to highlight Critical Paths, view Season Details and Settings, or track and complete tasks with Harvest.' },
             { id: 'btn-toggle-timeline', title: 'Executive Spread', text: 'Click here to see a breakdown of your tree in a professionally structured format.' },
             { id: 'btn-pm-tools', title: 'Export Instantly', text: 'When you are ready, click here to instantly generate spreadsheets and documents straight from your tree and save them wherever you need.' },
-            { id: 'btn-drawer-left', title: 'This is your Table of Contents', text: 'Here you can find a list of all of your trees and nodes. Pin something to keep it at the top for faster access!' },
+            { id: 'btn-toggle-directory', title: 'This is your Table of Contents', text: 'Here you can find a list of all of your trees and nodes. Pin something to keep it at the top for faster access!' },
             { id: 'btn-toggle-nursery', title: 'Finally, SAVE THE TREES!', text: 'Click here to save and import trees and forests, load templates, and manage your workspace.' },
       ];
 
       let currentTourStep = 0;
       let activeTourElement = null;
+      let preTourViewMode = null;
 
       function updateTourPosition() {
           const highlightBox = document.getElementById('tour-highlight');
           const tooltipBox = document.getElementById('tour-tooltip');
           
           if (currentTourStep >= tourSteps.length) { endTour(); return; }
+          if (currentTourStep < 0) currentTourStep = 0;
+
           const step = tourSteps[currentTourStep];
           const target = document.getElementById(step.id);
           
@@ -2387,30 +2398,55 @@ window.openCheckout = function(productType, platform) {
 
           if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
           activeTourElement = target;
-          activeTourElement.classList.add('tour-active-element');
-
-          const rect = target.getBoundingClientRect();
-          highlightBox.style.display = 'block';
-          highlightBox.style.top = `${rect.top - 8}px`;
-          highlightBox.style.left = `${rect.left - 8}px`;
-          highlightBox.style.width = `${rect.width + 16}px`;
-          highlightBox.style.height = `${rect.height + 16}px`;
+          if (step.id !== 'viewport') {
+              activeTourElement.classList.add('tour-active-element');
+          }
 
           document.getElementById('tour-title').innerText = step.title; 
           document.getElementById('tour-desc').innerText = step.text;
           document.getElementById('tour-progress').innerText = `${currentTourStep + 1} / ${tourSteps.length}`;
           
           tooltipBox.style.display = 'flex';
-          setTimeout(() => tooltipBox.style.opacity = '1', 50);
 
-          let tooltipTop = rect.bottom + 16;
-          let tooltipLeft = rect.left;
-          
-          if (tooltipLeft + 300 > window.innerWidth) tooltipLeft = window.innerWidth - 320;
-          if (tooltipTop + 200 > window.innerHeight) tooltipTop = rect.top - 200;
+          const rect = target.getBoundingClientRect();
+          const ttRect = tooltipBox.getBoundingClientRect();
+          const ttWidth = ttRect.width || 300;
+          const ttHeight = ttRect.height || 190;
+
+          highlightBox.style.display = 'block';
+          if (step.id === 'viewport') {
+              highlightBox.style.top = '112px';
+              highlightBox.style.left = '12px';
+              highlightBox.style.width = `${window.innerWidth - 24}px`;
+              highlightBox.style.height = `${window.innerHeight - 280}px`;
+          } else {
+              highlightBox.style.top = `${rect.top - 8}px`;
+              highlightBox.style.left = `${rect.left - 8}px`;
+              highlightBox.style.width = `${rect.width + 16}px`;
+              highlightBox.style.height = `${rect.height + 16}px`;
+          }
+
+          let tooltipTop, tooltipLeft;
+          if (step.id === 'viewport') {
+              tooltipTop = (window.innerHeight - ttHeight) / 2;
+              tooltipLeft = (window.innerWidth - ttWidth) / 2;
+          } else {
+              tooltipTop = rect.bottom + 16;
+              tooltipLeft = rect.left;
+              
+              if (tooltipTop + ttHeight > window.innerHeight - 12) {
+                  tooltipTop = rect.top - ttHeight - 16;
+              }
+              if (tooltipLeft + ttWidth > window.innerWidth - 12) {
+                  tooltipLeft = window.innerWidth - ttWidth - 12;
+              }
+              if (tooltipLeft < 12) tooltipLeft = 12;
+              if (tooltipTop < 12) tooltipTop = 12;
+          }
 
           tooltipBox.style.top = `${tooltipTop}px`;
           tooltipBox.style.left = `${tooltipLeft}px`;
+          setTimeout(() => tooltipBox.style.opacity = '1', 50);
           
           document.getElementById('tour-prev').style.visibility = currentTourStep === 0 ? 'hidden' : 'visible';
           document.getElementById('tour-next').innerText = currentTourStep === tourSteps.length - 1 ? 'Finish' : 'Next';
@@ -2425,15 +2461,36 @@ window.openCheckout = function(productType, platform) {
           if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
           currentTourStep = 0;
           activeTourElement = null;
+          if (preTourViewMode) {
+              state.viewMode = preTourViewMode;
+              preTourViewMode = null;
+          }
+          if (state.viewMode === 'tree' && !getTree()) {
+              state.viewMode = 'forest';
+          }
+          render();
       }
 
       document.getElementById('tour-next').onclick = () => { currentTourStep++; updateTourPosition(); };
-      document.getElementById('tour-prev').onclick = () => { currentTourStep--; updateTourPosition(); };
+      document.getElementById('tour-prev').onclick = () => {
+          currentTourStep--;
+          while (currentTourStep > 0) {
+              const target = document.getElementById(tourSteps[currentTourStep].id);
+              if (target && target.style.display !== 'none') break;
+              currentTourStep--;
+          }
+          updateTourPosition();
+      };
       document.getElementById('tour-close').onclick = endTour;
       
       function startTour() {
           currentTourStep = 0;
-          state.viewMode = 'tree';
+          preTourViewMode = state.viewMode;
+          if (getTree()) {
+              state.viewMode = 'tree';
+          } else {
+              state.viewMode = 'forest';
+          }
           render();
           updateTourPosition();
       }
