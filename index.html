@@ -863,7 +863,7 @@ window.openCheckout = function(productType, platform) {
         if(state.pipPanX === undefined) state.pipPanX = 0;
         if(state.pipPanY === undefined) state.pipPanY = 0;
         
-        // --- AUTO-UNLOCK LISTENER ---
+        
         // --- AUTO-UNLOCK LISTENER ---
         const urlParams = new URLSearchParams(window.location.search);
         const unlockParam = urlParams.get('unlock');
@@ -1816,7 +1816,7 @@ window.openCheckout = function(productType, platform) {
         // Template and Premium Flows
         document.getElementById('btn-open-templates').addEventListener('click', () => { 
     document.getElementById('modal-templates').classList.add('open'); 
-    buildTemplateLibrary(); // <-- Make sure this line is present here!
+    buildTemplateLibrary(); 
     document.getElementById('drawer-right').classList.remove('open'); 
 });
         document.getElementById('btn-close-templates').addEventListener('click', () => { document.getElementById('modal-templates').classList.remove('open'); });
@@ -2394,7 +2394,7 @@ window.openCheckout = function(productType, platform) {
           highlightBox.style.width = `${rect.width + 16}px`;
           highlightBox.style.height = `${rect.height + 16}px`;
 
-          document.getElementById('tour-title').innerText = step.title;
+          document.getElementById('tour-title').innerText = step.title; 
           document.getElementById('tour-desc').innerText = step.text;
           document.getElementById('tour-progress').innerText = `${currentTourStep + 1} / ${tourSteps.length}`;
           
@@ -2440,6 +2440,16 @@ window.openCheckout = function(productType, platform) {
         if (!localStorage.getItem('sylva_tutorial_seen')) {
           document.getElementById('modal-tut-prompt').classList.add('open');
         }
+        document.getElementById('btn-tut-yes').onclick = () => {
+          document.getElementById('modal-tut-prompt').classList.remove('open');
+          localStorage.setItem('sylva_tutorial_seen', 'true');
+          startTour();
+        };
+
+        document.getElementById('btn-tut-no').onclick = () => {
+          document.getElementById('modal-tut-prompt').classList.remove('open');
+          localStorage.setItem('sylva_tutorial_seen', 'true');
+        };
       }
 
       init();
