@@ -430,8 +430,9 @@
   <!-- WebRTC Sync Modals -->
   <div class="modal-overlay" id="modal-sync-org">
     <div class="modal-card">
-      <div class="modal-header"><h3>Join Organization Sync</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
+      <div class="modal-header"><h3>🤝 Join Org</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
       <button class="btn" id="btn-create-org">🏢 Create Org</button>
+      
       <div class="modal-body">
         <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter an Org Code to link with other devices on your local network via secure P2P WebRTC.</p>
         <div class="field-group"><label>Org Code</label><input type="text" id="input-org-code" placeholder="e.g., MED-TRIAGE-88"></div>
@@ -1684,11 +1685,11 @@ if (isZeroState && state.isLocked) {
                   const isTreeMode = state.viewMode === 'tree';
                   const items = isTreeMode ? (getTree()?.nodes || []) : (getForest()?.trees || []);
                   
-                  // Check 5-pixel hit radius
+                  // Check 30-pixel hit radius
                   for (let item of items) {
                     const itemPipX = offsetX + item.x * scale;
                     const itemPipY = offsetY + item.y * scale;
-                    if (Math.hypot(pipX - itemPipX, pipY - itemPipY) <= 5) {
+                    if (Math.hypot(pipX - itemPipX, pipY - itemPipY) <= 30) {
                       hitNode = item; break;
                     }
                   }
@@ -2773,6 +2774,20 @@ function tryUnlockTemplate(templateId) {
     }
     return false;
 }
+window.addEventListener('DOMContentLoaded', () => {
+    const isTreeHugger = localStorage.getItem('sylva_treehugger') === 'true';
+    const isEnterprise = localStorage.getItem('sylva_enterprise') === 'true';
+
+    if (isTreeHugger || isEnterprise) {
+        // Search by the visible text if the exact ID varies in your code
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Tree Hugger')) {
+                btn.style.display = 'none';
+            }
+        });
+    }
+});
   </script>
 
 </body>
