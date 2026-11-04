@@ -431,6 +431,7 @@
   <div class="modal-overlay" id="modal-sync-org">
     <div class="modal-card">
       <div class="modal-header"><h3>Join Organization Sync</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
+      <button class="btn" id="btn-create-org">🏢 Create Org</button>
       <div class="modal-body">
         <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter an Org Code to link with other devices on your local network via secure P2P WebRTC.</p>
         <div class="field-group"><label>Org Code</label><input type="text" id="input-org-code" placeholder="e.g., MED-TRIAGE-88"></div>
@@ -2733,7 +2734,45 @@ if (isZeroState && state.isLocked) {
    }
 
       init();
-    
+  
+      document.getElementById('btn-create-org').addEventListener('click', () => {
+    const newOrgCode = 'ORG-' + Math.floor(1000 + Math.random() * 9000);
+    showAppAlert(`Your new Org Code is: ${newOrgCode}. Share this with your team!`);
+});
+const urlParams = new URLSearchParams(window.location.search);
+const unlockData = urlParams.get('unlock');
+
+if (unlockData) {
+    if (unlockData === 'treehugger') {
+        localStorage.setItem('sylva_treehugger', 'true');
+    showAppAlert('Tree Hugger Edition Unlocked! All templates available.');
+  } else if (unlockData === 'credit') {
+    let currentCredits = parseInt(localStorage.getItem('sylva_credits') || '0');
+    localStorage.setItem('sylva_credits', currentCredits + 1);
+    showAppAlert('1 Template Credit Added! Click any locked template to use it.');
+    } else {
+        localStorage.setItem(`sylva_template_${unlockData}`, 'true');
+        showAppAlert('Template Unlocked!');
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+function tryUnlockTemplate(templateId) {
+    if (localStorage.getItem('sylva_treehugger') === 'true' || localStorage.getItem(`sylva_template_${templateId}`) === 'true') {
+        return true; 
+    }
+    let credits = parseInt(localStorage.getItem('sylva_credits') || '0');
+    if (credits > 0) {
+        if (confirm(`Use 1 credit to unlock this template? You have ${credits} credits left.`)) {
+            localStorage.setItem('sylva_credits', credits - 1);
+            localStorage.setItem(`sylva_template_${templateId}`, 'true');
+            showAppAlert('Template Unlocked!');
+            return true;
+        }
+    } else {
+        showAppAlert('Template locked. Purchase a Template Credit or the Tree Hugger edition to unlock.');
+    }
+    return false;
+}
   </script>
 
 </body>
