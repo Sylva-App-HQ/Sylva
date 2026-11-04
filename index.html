@@ -249,12 +249,16 @@
 </button>
   </div>
 
+  <style>
+    .lasso-box { position: absolute; border: 1px dashed var(--accent); background: rgba(45, 212, 191, 0.1); pointer-events: none; z-index: 100; display: none; }
+  </style>
   <main id="viewport">
     <div id="world">
       <svg id="canvas-svg"></svg>
       <div id="tree-layer"></div>
       <div id="forest-layer" style="display: none;"></div>
     </div>
+    <div id="lasso-element" class="lasso-box"></div>
   </main>
   
   
@@ -290,7 +294,7 @@
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn" id="btn-sync-org" style="border-color:#38BDF8; color:#38BDF8;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Sync W/ Group</button>
+        <button class="btn" id="btn-sync-org" style="border-color:#38BDF8; color:#38BDF8;">🤝 Sync w/ or Create Group</button>
         <div id="sync-status" style="font-size:10px; text-align:center; color:var(--text-muted); display:none;">Connected to Org: <span id="sync-org-name" style="color:#38BDF8; font-weight:bold;"></span></div>
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
@@ -430,12 +434,12 @@
   <!-- WebRTC Sync Modals -->
   <div class="modal-overlay" id="modal-sync-org">
     <div class="modal-card">
-      <div class="modal-header"><h3>🤝 Join Org</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
-      <button class="btn" id="btn-create-org">🏢 Create Org</button>
+      <div class="modal-header"><h3>🤝 Join Group</h3><button class="btn btn-small" id="btn-close-sync">&times;</button></div>
+      <button class="btn" id="btn-create-org">🤝 Create Group</button>
       
       <div class="modal-body">
-        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter an Org Code to link with other devices on your local network via secure P2P WebRTC.</p>
-        <div class="field-group"><label>Org Code</label><input type="text" id="input-org-code" placeholder="e.g., MED-TRIAGE-88"></div>
+        <p style="font-size:12px; color:var(--text-muted); line-height:1.4;">Enter a Group Code to link with other devices on your local network via secure P2P WebRTC.</p>
+        <div class="field-group"><label>Group Code</label><input type="text" id="input-org-code" placeholder="e.g., MED-TRIAGE-88"></div>
       </div>
       <div class="modal-footer"><button class="btn" id="btn-cancel-sync">Cancel</button><button class="btn btn-accent" id="btn-connect-org">Connect</button></div>
     </div>
@@ -1485,22 +1489,101 @@ if (isZeroState && state.isLocked) {
                 setTimeout(() => { e.target.innerText = originalText; }, 500);
             });
         });
-            // Double Click Background to Deselect
-        let bgClickCount = 0;
+            let bgClickCount = 0;
         let bgClickTimer = null;
-        document.getElementById('viewport').addEventListener('pointerdown', (e) => {
-            // Check if the user clicked empty canvas space
-            if (activePointers.size >= 1 || isPinching) return;
+        let bgLongPressTimer = null;
+        let isLassoing = false;
+        let lassoStartX = 0, lassoStartY = 0;
+        const lassoEl = document.getElementById('lasso-element');
+
+        const viewportEl = document.getElementById('viewport');
+        viewportEl.addEventListener('pointerdown', (e) => {
+            if (activePointers.size >= 1 || isPinching) return; 
+            
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
-                bgClickCount++;
-                if (bgClickCount === 2) {
-                    state.selectedId = null;
-                    renderTreeSelections();
-                    render();
-                    bgClickCount = 0;
-                    clearTimeout(bgClickTimer);
-                } else {
-                    bgClickTimer = setTimeout(() => { bgClickCount = 0; }, 300);
+                bgLongPressTimer = setTimeout(() => {
+                    if (!viewportDragging) {
+                        isLassoing = true;
+                        lassoStartX = e.clientX;
+                        lassoStartY = e.clientY;
+                        lassoEl.style.display = 'block';
+                        lassoEl.style.left = `${lassoStartX}px`;
+                        lassoEl.style.top = `${lassoStartY}px`;
+                        lassoEl.style.width = '0px';
+                        lassoEl.style.height = '0px';
+                        if (navigator.vibrate) navigator.vibrate(50);
+                    }
+                }, 500);
+            }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (bgLongPressTimer && Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) > 10 && !isLassoing) {
+                clearTimeout(bgLongPressTimer);
+            }
+            if (isLassoing) {
+                const currentX = e.clientX, currentY = e.clientY;
+                lassoEl.style.left = `${Math.min(lassoStartX, currentX)}px`;
+                lassoEl.style.top = `${Math.min(lassoStartY, currentY)}px`;
+                lassoEl.style.width = `${Math.abs(currentX - lassoStartX)}px`;
+                lassoEl.style.height = `${Math.abs(currentY - lassoStartY)}px`;
+            }
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            clearTimeout(bgLongPressTimer);
+            if (isLassoing) {
+                isLassoing = false;
+                lassoEl.style.display = 'none';
+                showAppAlert("Lasso selection complete. Bulk actions coming in V2!");
+                return;
+            }
+
+            if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
+                if (Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) < 10) {
+                    bgClickCount++;
+                    if (bgClickCount === 1) {
+                        bgClickTimer = setTimeout(() => {
+                            bgClickCount = 0;
+                            state.selectedId = null; // Single Click Deselect
+                            renderTreeSelections();
+                            render();
+                        }, 250);
+                    } else if (bgClickCount === 2) {
+                        clearTimeout(bgClickTimer);
+                        bgClickCount = 0;
+                        
+                        // Double Click Center
+                        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                        const isTreeMode = state.viewMode === 'tree';
+                        const items = isTreeMode ? (getTree()?.nodes || []) : (getForest()?.trees || []);
+                        
+                        if (items.length > 0) {
+                            items.forEach(item => {
+                                const w = isTreeMode ? 190 : 140, h = isTreeMode ? 80 : 100;
+                                if (item.x < minX) minX = item.x; 
+                                if (item.x + w > maxX) maxX = item.x + w;
+                                if (item.y < minY) minY = item.y; 
+                                if (item.y + h > maxY) maxY = item.y + h;
+                            });
+                            
+                            const targetScale = Math.min((window.innerWidth - 120) / Math.max(maxX - minX, 1), (window.innerHeight - 120) / Math.max(maxY - minY, 1), 1.2);
+                            const centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+                            
+                            const worldEl = document.getElementById('world');
+                            worldEl.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                            
+                            state.scale = targetScale;
+                            state.panX = (window.innerWidth / 2) - (centerX * targetScale);
+                            state.panY = (window.innerHeight / 2) - (centerY * targetScale);
+                            state.pipScale = 0.1; 
+                            state.pipPanX = -centerX * 0.1; 
+                            state.pipPanY = -centerY * 0.1;
+                            
+                            updateWorldTransform();
+                            setTimeout(() => { worldEl.style.transition = 'none'; }, 550);
+                        }
+                    }
                 }
             }
         });
@@ -1648,15 +1731,20 @@ if (isZeroState && state.isLocked) {
         viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
 
         let pipDragging = false, pipHoldTimer = null, pipStartX = 0, pipStartY = 0, pipHasMoved = false;
-        let pipClickCount = 0, pipClickTimer = null;
+        let pipClickCount = 0, pipClickTimer = null, pipLongPressed = false;
         
         pipCanvas.addEventListener('pointerdown', (e) => { 
           if (pipPinching || activePointers.size > 1) return;
-          pipDragging = true; pipHasMoved = false; 
+          pipDragging = true; pipHasMoved = false; pipLongPressed = false;
           pipStartX = e.clientX; pipStartY = e.clientY;
           e.stopPropagation(); 
-          pipHoldTimer = setTimeout(() => { pipDragging = false; window.initialFocus(); }, 800);
-        }); 
+          pipHoldTimer = setTimeout(() => { 
+            pipLongPressed = true; 
+            pipDragging = false; 
+            if (navigator.vibrate) navigator.vibrate(50);
+            window.initialFocus(); 
+          }, 800);
+        });
         
         window.addEventListener('pointermove', (e) => { 
           if (pipDragging) { 
@@ -1668,10 +1756,10 @@ if (isZeroState && state.isLocked) {
         }); 
         
         window.addEventListener('pointerup', (e) => { 
+          clearTimeout(pipHoldTimer);
           if (pipDragging) {
-            clearTimeout(pipHoldTimer); pipDragging = false;
-            
-            if (!pipHasMoved && !pipPinching) {
+            pipDragging = false;
+            if (!pipHasMoved && !pipPinching && !pipLongPressed) {
               pipClickCount++;
               const rect = pipCanvas.getBoundingClientRect(), pipX = e.clientX - rect.left, pipY = e.clientY - rect.top; 
               const scale = state.pipScale, offsetX = 70 + state.pipPanX, offsetY = 70 + state.pipPanY; 
@@ -2762,9 +2850,19 @@ if (isZeroState && state.isLocked) {
       init();
   
       document.getElementById('btn-create-org').addEventListener('click', () => {
-    const newOrgCode = 'ORG-' + Math.floor(1000 + Math.random() * 9000);
-    showAppAlert(`Your new Org Code is: ${newOrgCode}. Share this with your team!`);
-});
+        const userInput = prompt("Enter a custom Group Code (or leave blank to auto-generate):");
+        
+        // If the user clicks Cancel, stop here
+        if (userInput === null) return; 
+
+        // Use their input, or generate a random one if they left it blank
+        let newOrgCode = userInput.trim();
+        if (newOrgCode === "") {
+            newOrgCode = 'GROUP-' + Math.floor(1000 + Math.random() * 9000);
+        }
+        
+        showAppAlert(`Your Group Code is: ${newOrgCode}. Share this with your team!`);
+    });
 const urlParams = new URLSearchParams(window.location.search);
 const unlockData = urlParams.get('unlock');
 
