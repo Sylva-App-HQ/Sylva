@@ -377,7 +377,7 @@
           <input type="hidden" id="tree-input-type" value="Pine">
         </div>
       </div>
-      <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-tree">Delete Tree</button><button class="btn btn-accent" id="btn-save-tree">Save Changes</button></div>
+      <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-tree">Delete Tree</button><button class="btn btn-accent" id="btn-update-tree">Save Changes</button></div>
     </div>
   </div>
   
@@ -1815,9 +1815,34 @@ if (isZeroState && state.isLocked) {
               if (type === 'tree') {
              const forest = getForest();
 
-             // Calculate the exact center of the user's current screen
-             const spawnX = (window.innerWidth / 2 - state.panX) / state.scale - 70;
-             const spawnY = (window.innerHeight / 2 - state.panY) / state.scale - 40;
+             const baseX = (window.innerWidth / 2 - state.panX) / state.scale - 70;
+             const baseY = (window.innerHeight / 2 - state.panY) / state.scale - 40;
+             
+             let spawnX = baseX;
+             let spawnY = baseY;
+             let isSafe = false;
+             let searchRadius = 0;
+             let searchAngle = 0;
+             const safeClearance = 180;
+
+             while (!isSafe && searchRadius < 3000) {
+                 isSafe = true;
+                 for (let t of forest.trees) {
+                     if (Math.hypot(t.x - spawnX, t.y - spawnY) < safeClearance) {
+                         isSafe = false;
+                         break;
+                     }
+                 }
+                 if (!isSafe) {
+                     searchAngle += Math.PI / 4;
+                     if (searchAngle >= Math.PI * 2) {
+                         searchAngle = 0;
+                         searchRadius += 45;
+                     }
+                     spawnX = baseX + Math.cos(searchAngle) * searchRadius;
+                     spawnY = baseY + Math.sin(searchAngle) * searchRadius;
+                 }
+             }
 
              const newTree = { 
                  id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, 
@@ -2429,10 +2454,10 @@ if (isZeroState && state.isLocked) {
           document.getElementById('tree-input-title').value = tree.title; document.getElementById('tree-input-type').value = tree.type || 'Pine';
           const speciesOpt = document.querySelector(`#tree-type-dropdown .custom-opt[data-val="${tree.type || 'Pine'}"]`);
           if (speciesOpt) { document.getElementById('tree-type-trigger').querySelector('span').innerText = speciesOpt.innerText; }
-          document.getElementById('btn-save-tree').onclick = (e) => {
-            e.preventDefault(); tree.title = document.getElementById('tree-input-title').value.trim() || tree.title; tree.type = document.getElementById('tree-input-type').value;
-            document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData();
-          };
+          document.getElementById('btn-update-tree').onclick = (e) => {
+                    e.preventDefault(); tree.title = document.getElementById('tree-input-title').value.trim() || tree.title; tree.type = document.getElementById('tree-input-type').value;
+                    document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData();
+                  };
           document.getElementById('btn-delete-tree').onclick = (e) => {
             e.preventDefault(); const f = getForest(); f.trees = f.trees.filter(t => t.id !== tree.id);
             document.getElementById('modal-tree-inspector').classList.remove('open'); render(); saveData();
