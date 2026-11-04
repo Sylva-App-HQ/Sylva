@@ -1494,6 +1494,7 @@ if (isZeroState && state.isLocked) {
         let bgLongPressTimer = null;
         let isLassoing = false;
         let lassoStartX = 0, lassoStartY = 0;
+        let lpInitialX = 0, lpInitialY = 0;
         const lassoEl = document.getElementById('lasso-element');
 
         const viewportEl = document.getElementById('viewport');
@@ -1501,12 +1502,17 @@ if (isZeroState && state.isLocked) {
             if (activePointers.size >= 1 || isPinching) return; 
             
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
+                lpInitialX = e.clientX;
+                lpInitialY = e.clientY;
+                
                 bgLongPressTimer = setTimeout(() => {
-                    if (!viewportDragging && !isPinching) {
+                    if (!isPinching) {
                         isLassoing = true;
-                        activePointers.clear(); // Stops standard canvas panning logic
-                        lassoStartX = e.clientX;
-                        lassoStartY = e.clientY;
+                        if (typeof viewportDragging !== 'undefined') viewportDragging = false; 
+                        activePointers.clear(); // Forcibly stop the panning engine
+                        
+                        lassoStartX = lpInitialX;
+                        lassoStartY = lpInitialY;
                         lassoEl.style.display = 'block';
                         lassoEl.style.left = `${lassoStartX}px`;
                         lassoEl.style.top = `${lassoStartY}px`;
@@ -1519,10 +1525,15 @@ if (isZeroState && state.isLocked) {
         });
 
         window.addEventListener('pointermove', (e) => {
-            if (bgLongPressTimer && Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) > 10 && !isLassoing) {
-                clearTimeout(bgLongPressTimer);
+            if (bgLongPressTimer && !isLassoing) {
+                // Increased tolerance to 15px so normal finger wobble doesn't cancel the lasso
+                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 15) {
+                    clearTimeout(bgLongPressTimer);
+                    bgLongPressTimer = null;
+                }
             }
             if (isLassoing) {
+                activePointers.clear(); // Continually suppress panning while lassoing
                 const currentX = e.clientX, currentY = e.clientY;
                 lassoEl.style.left = `${Math.min(lassoStartX, currentX)}px`;
                 lassoEl.style.top = `${Math.min(lassoStartY, currentY)}px`;
@@ -1532,7 +1543,10 @@ if (isZeroState && state.isLocked) {
         });
 
         window.addEventListener('pointerup', (e) => {
-            clearTimeout(bgLongPressTimer);
+            if (bgLongPressTimer) {
+                clearTimeout(bgLongPressTimer);
+                bgLongPressTimer = null;
+            }
             
             if (isLassoing) {
                 isLassoing = false;
@@ -1541,15 +1555,15 @@ if (isZeroState && state.isLocked) {
                 return;
             }
 
-            if (isPinching) return; // Fixes pinch-to-zoom snapback delay
+            if (isPinching) return;
 
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
-                if (Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) < 10) {
+                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) < 15) {
                     bgClickCount++;
                     if (bgClickCount === 1) {
                         bgClickTimer = setTimeout(() => {
                             bgClickCount = 0;
-                            state.selectedId = null; // Single Click Deselect
+                            state.selectedId = null;
                             renderTreeSelections();
                             render();
                         }, 250);
@@ -1557,7 +1571,6 @@ if (isZeroState && state.isLocked) {
                         clearTimeout(bgClickTimer);
                         bgClickCount = 0;
                         
-                        // Double Click Center
                         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
                         const isTreeMode = state.viewMode === 'tree';
                         const items = isTreeMode ? (getTree()?.nodes || []) : (getForest()?.trees || []);
@@ -2937,11 +2950,21 @@ if (isZeroState && state.isLocked) {
      };
 
      document.getElementById('btn-tut-no').onclick = () => {
-       document.getElementById('modal-tut-prompt').classList.remove('open');
-       localStorage.setItem('sylva_tutorial_seen', 'true');
-       setTimeout(window.initialFocus, 100);
-     };
-   }
+        document.getElementById('modal-tut-prompt').classList.remove('open');
+        localStorage.setItem('sylva_tutorial_seen', 'true');
+        setTimeout(window.initialFocus, 100);
+      };
+    }
+
+    init();
+
+    // Post-Load Sanity Check: Prevent ghost views
+    // If the app loads into a tree that no longer exists, force it back to the forest
+    if (state.viewMode === 'tree' && typeof getTree === 'function' && !getTree()) {
+        state.viewMode = 'forest';
+        state.currentTreeId = null;
+        if (typeof render === 'function') render();
+    }
 
       init();
   
