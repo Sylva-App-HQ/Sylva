@@ -147,4 +147,205 @@ window.SYLVA_TEMPLATES = [
   {"id": "hob145", "title": "Vintage Ferrari Resto", "category": "Hobbies", "type": "Oak", "tier": "premium", "nodes": [{"id": "n1", "title": "Vehicle Intake and Assessment", "type": "trunk", "parent": null}, {"id": "n2", "title": "Provenance and Documentation Audit", "type": "branch", "parent": "n1"}, {"id": "n3", "title": "Chassis Number Verification", "type": "leaf", "parent": "n2"}, {"id": "n4", "title": "Mechanical Health Diagnostic", "type": "branch", "parent": "n1"}, {"id": "n5", "title": "Compression Test", "type": "seed", "parent": "n4"}, {"id": "n6", "title": "Complete Disassembly", "type": "trunk", "parent": null}, {"id": "n7", "title": "Body Strip and Soda Blasting", "type": "branch", "parent": "n6"}, {"id": "n8", "title": "Rust and Metalwork Repair", "type": "pinecone", "parent": "n7"}, {"id": "n9", "title": "Engine Rebuild", "type": "branch", "parent": "n6"}, {"id": "n10", "title": "Colombo V12 Machining", "type": "leaf", "parent": "n9"}, {"id": "n11", "title": "Weber Carburetor Restoration", "type": "acorn", "parent": "n9"}, {"id": "n12", "title": "Transmission and Suspension", "type": "branch", "parent": "n6"}, {"id": "n13", "title": "Gearbox Overhaul", "type": "leaf", "parent": "n12"}, {"id": "n14", "title": "Borrani Wire Wheel Refurbishment", "type": "seed", "parent": "n12"}, {"id": "n15", "title": "Cosmetic Restoration", "type": "trunk", "parent": null}, {"id": "n16", "title": "Interior Upholstery", "type": "branch", "parent": "n15"}, {"id": "n17", "title": "Connolly Leather Sourcing", "type": "acorn", "parent": "n16"}, {"id": "n18", "title": "Varnished Steering Wheel Restoration", "type": "leaf", "parent": "n16"}, {"id": "n19", "title": "Paint and Finishing", "type": "branch", "parent": "n15"}, {"id": "n20", "title": "Rosso Corsa Paint Application", "type": "pinecone", "parent": "n19"}, {"id": "n21", "title": "Final Assembly and Testing", "type": "trunk", "parent": null}, {"id": "n22", "title": "Dyno Tuning", "type": "branch", "parent": "n21"}, {"id": "n23", "title": "Road Testing", "type": "leaf", "parent": "n21"}, {"id": "n24", "title": "Concours Detailing", "type": "fruit", "parent": "n21"}]},
   {"id": "hob146", "title": "Everest Expedition", "category": "Hobbies", "type": "Apple", "tier": "premium", "nodes": [{"id": "n1", "title": "Everest Expedition Planning", "type": "trunk", "parent": null}, {"id": "n2", "title": "Permits and Documentation", "type": "branch", "parent": "n1"}, {"id": "n3", "title": "Obtain climbing permits", "type": "leaf", "parent": "n2"}, {"id": "n4", "title": "Secure travel insurance", "type": "leaf", "parent": "n2"}, {"id": "n5", "title": "Physical Training", "type": "branch", "parent": "n1"}, {"id": "n6", "title": "Cardiovascular endurance", "type": "leaf", "parent": "n5"}, {"id": "n7", "title": "High-altitude simulation", "type": "leaf", "parent": "n5"}, {"id": "n8", "title": "Strength and conditioning", "type": "leaf", "parent": "n5"}, {"id": "n9", "title": "Equipment and Gear", "type": "branch", "parent": "n1"}, {"id": "n10", "title": "Apparel and layers", "type": "seed", "parent": "n9"}, {"id": "n11", "title": "Technical climbing gear", "type": "seed", "parent": "n9"}, {"id": "n12", "title": "Camping and cooking supplies", "type": "seed", "parent": "n9"}, {"id": "n13", "title": "Base Camp Logistics", "type": "branch", "parent": "n1"}, {"id": "n14", "title": "Flight to Lukla", "type": "pinecone", "parent": "n13"}, {"id": "n15", "title": "Trek through Khumbu Valley", "type": "pinecone", "parent": "n13"}, {"id": "n16", "title": "Acclimatization rotation schedule", "type": "pinecone", "parent": "n13"}, {"id": "n17", "title": "Summit Push", "type": "branch", "parent": "n1"}, {"id": "n18", "title": "Camp 1 to Camp 2", "type": "acorn", "parent": "n17"}, {"id": "n19", "title": "Camp 3 to South Col (Camp 4)", "type": "acorn", "parent": "n17"}, {"id": "n20", "title": "Final ascent to the Summit", "type": "fruit", "parent": "n17"}]},
   {"id": "hob147", "title": "Orchid Cross-Breeding", "category": "Hobbies", "type": "Willow", "tier": "premium", "nodes": [{"id": "n1", "title": "Orchid Cross-Breeding Project", "type": "trunk", "parent": null}, {"id": "n2", "title": "Parent Selection", "type": "branch", "parent": "n1"}, {"id": "n3", "title": "Evaluate Seed Parent Vigor", "type": "leaf", "parent": "n2"}, {"id": "n4", "title": "Evaluate Pollen Parent Traits", "type": "leaf", "parent": "n2"}, {"id": "n5", "title": "Check Flowering Synchronization", "type": "leaf", "parent": "n2"}, {"id": "n6", "title": "Pollination Process", "type": "branch", "parent": "n1"}, {"id": "n7", "title": "Sterilize Workspace and Tools", "type": "leaf", "parent": "n6"}, {"id": "n8", "title": "Collect Pollinia from Donor", "type": "leaf", "parent": "n6"}, {"id": "n9", "title": "Deposit Pollinia on Stigma", "type": "leaf", "parent": "n6"}, {"id": "n10", "title": "Tag and Record Cross Details", "type": "seed", "parent": "n6"}, {"id": "n11", "title": "Pod Development Monitoring", "type": "branch", "parent": "n1"}, {"id": "n12", "title": "Track Gestation Timeline", "type": "leaf", "parent": "n11"}, {"id": "n13", "title": "Inspect for Fungal Infections", "type": "leaf", "parent": "n11"}, {"id": "n14", "title": "Harvest Green Pod", "type": "leaf", "parent": "n11"}, {"id": "n15", "title": "Flask Sowing and Propagation", "type": "branch", "parent": "n1"}, {"id": "n16", "title": "Surface Sterilize Seed Pod", "type": "leaf", "parent": "n15"}, {"id": "n17", "title": "Extract Seeds in Laminar Flow", "type": "leaf", "parent": "n15"}, {"id": "n18", "title": "Sow Seeds on Agar Medium", "type": "pinecone", "parent": "n15"}, {"id": "n19", "title": "De-flasking and Composting", "type": "branch", "parent": "n1"}, {"id": "n20", "title": "Wash Agar from Protocorms", "type": "leaf", "parent": "n19"}, {"id": "n21", "title": "Pot in Fine Bark Mix", "type": "acorn", "parent": "n19"}, {"id": "n22", "title": "First Bloom Evaluation", "type": "fruit", "parent": "n19"}]},
+,
+  {
+    id: 'tpl_free_01', title: 'Master Grocery List', description: 'Organize your weekly shopping by store section.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Grocery List', type: 'Apple', nodes: [ { id: 'n1', title: 'Produce', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Dairy & Eggs', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Meat & Protein', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Pantry Staples', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_02', title: 'Weekly Meal Planner', description: 'Plan out your breakfasts, lunches, and dinners.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Meal Planner', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'Breakfasts', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Lunches', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Dinners', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Snacks', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_03', title: 'Daily Habit Tracker', description: 'Build consistency with daily routines.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Habits', type: 'Oak', nodes: [ { id: 'n1', title: 'Morning Habits', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Work/Focus', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Health/Fitness', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Evening Wind-down', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_04', title: 'Daily Journal', description: 'A space for thoughts, gratitude, and reflection.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Journal', type: 'Willow', nodes: [ { id: 'n1', title: 'Today I am grateful for...', type: 'Leaf/Notes', x: -200, y: -100 }, { id: 'n2', title: 'Brain Dump', type: 'Leaf/Notes', x: 200, y: -100 }, { id: 'n3', title: 'What went well?', type: 'Leaf/Notes', x: -200, y: 100 }, { id: 'n4', title: 'Ideas & Sparks', type: 'Leaf/Notes', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_05', title: 'Morning Routine', description: 'Start your day with intention.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Morning Routine', type: 'Pine', nodes: [ { id: 'n1', title: 'Wake & Hydrate', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Movement/Stretch', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Breakfast & Coffee', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Review Daily Goals', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_06', title: 'Evening Routine', description: 'Unplug and prepare for restful sleep.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Evening Routine', type: 'Pine', nodes: [ { id: 'n1', title: 'Digital Sunset', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Prep for Tomorrow', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Reading/Relaxing', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Lights Out', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_07', title: 'Weekend Chores', description: 'Knock out the house cleaning efficiently.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Weekend Chores', type: 'Oak', nodes: [ { id: 'n1', title: 'Kitchen & Dining', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Bathrooms', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Living Areas', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Laundry & Trash', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_08', title: 'Deep Cleaning Tracker', description: 'For seasonal and heavy house maintenance.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Deep Clean', type: 'Oak', nodes: [ { id: 'n1', title: 'Windows & Blinds', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Baseboards & Walls', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Appliances (Inside)', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Closet Purge', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_09', title: 'Fitness Tracker', description: 'Log your workouts and active days.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Fitness Tracker', type: 'Apple', nodes: [ { id: 'n1', title: 'Cardio', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Strength/Weights', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Flexibility/Yoga', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Rest & Recovery', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_10', title: 'Book Reading List', description: 'Track books you want to read and have finished.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Reading List', type: 'Willow', nodes: [ { id: 'n1', title: 'Up Next (TBR)', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Currently Reading', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Finished', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'All-Time Favorites', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_11', title: 'Movie & TV Watchlist', description: 'Never forget what show was recommended to you.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Watchlist', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'Movies', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'TV Shows', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Documentaries', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Already Watched', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_12', title: 'Travel Packing List', description: 'The essentials for your next trip.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Packing List', type: 'Pine', nodes: [ { id: 'n1', title: 'Clothing & Shoes', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Toiletries', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Electronics', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Travel Documents', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_13', title: 'Monthly Budget', description: 'Simple bucket tracking for income and expenses.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Budget', type: 'Oak', nodes: [ { id: 'n1', title: 'Income', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Fixed Expenses (Bills)', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Variable (Food/Gas)', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Savings & Investments', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_14', title: 'Subscription Tracker', description: 'Audit your recurring digital charges.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Subscriptions', type: 'Willow', nodes: [ { id: 'n1', title: 'Streaming (Video/Music)', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Software & Apps', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Physical Boxes/Deliveries', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Memberships (Gym, etc)', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_15', title: 'Debt Snowball', description: 'List debts smallest to largest and attack.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Debt Payoff', type: 'Oak', nodes: [ { id: 'n1', title: 'Credit Cards', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Auto Loans', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Student Loans', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Other Debts', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_16', title: 'SMART Goals', description: 'Specific, Measurable, Achievable, Relevant, Time-Bound.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'SMART Goal', type: 'Apple', nodes: [ { id: 'n1', title: 'Specific & Measurable', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Achievable Action Steps', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Why is it Relevant?', type: 'Leaf/Notes', x: -200, y: 100 }, { id: 'n4', title: 'Time-Bound Deadline', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_17', title: '5-Year Vision Board', description: 'Map out the big picture for your future.', price: 'free', category: 'Everyday Life',
+    treeData: { title: '5-Year Vision', type: 'Pine', nodes: [ { id: 'n1', title: 'Career & Business', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Health & Fitness', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Relationships', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Finances & Wealth', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_18', title: 'Gratitude Log', description: 'Keep track of the good things.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Gratitude', type: 'Willow', nodes: [ { id: 'n1', title: 'People I Appreciate', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Great Experiences', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Opportunities', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Simple Pleasures', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_19', title: 'Project Brainstorm', description: 'Break a personal project into phases.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Brainstorm', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'Project Goal', type: 'Leaf/Notes', x: -200, y: -100 }, { id: 'n2', title: 'Required Resources/Tools', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Phase 1 Tasks', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Phase 2 Tasks', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_20', title: 'Gift Ideas Tracker', description: 'Never forget a good gift idea for loved ones.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Gift Ideas', type: 'Apple', nodes: [ { id: 'n1', title: 'Family', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Friends', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Partner/Significant Other', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Coworkers', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_21', title: 'Event & Party Planner', description: 'Host without the stress.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Party Planner', type: 'Oak', nodes: [ { id: 'n1', title: 'Guest List & RSVPs', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Food & Drink Menu', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Decorations & Setup', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Day-of Schedule', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_22', title: 'Emergency Contacts', description: 'Keep vital info accessible offline.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Emergency Info', type: 'Pine', nodes: [ { id: 'n1', title: 'Family Contacts', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Doctors & Medical', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Utilities & Home Repair', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Neighbors', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_23', title: 'Pet Care Schedule', description: 'Vet visits, feeding, and meds for furry friends.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Pet Care', type: 'Apple', nodes: [ { id: 'n1', title: 'Feeding & Diet', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Medications', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Vet History & Vaccines', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Grooming & Exercise', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_24', title: 'Car Maintenance Log', description: 'Track oil changes, tires, and repairs.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Auto Log', type: 'Oak', nodes: [ { id: 'n1', title: 'Oil & Fluids', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Tires & Brakes', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Repair History', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Insurance & Registration', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_25', title: 'Home Maintenance', description: 'Filters, alarms, and seasonal upkeep.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Home Upkeep', type: 'Pine', nodes: [ { id: 'n1', title: 'HVAC & Filters', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Smoke & CO2 Alarms', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Exterior & Gutters', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Plumbing & Water', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_26', title: 'Digital Recipe Box', description: 'Save your favorite meals to cook.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Recipes', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'Breakfasts', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Main Courses', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Sides & Salads', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Desserts & Baking', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_27', title: 'Language Learning', description: 'Organize vocabulary and study topics.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Language Study', type: 'Willow', nodes: [ { id: 'n1', title: 'Vocabulary Lists', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Grammar Rules', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Practice Phrases', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Media/Resources', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_28', title: 'Study & Class Notes', description: 'Structure notes for a specific subject.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Class Notes', type: 'Apple', nodes: [ { id: 'n1', title: 'Key Concepts', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Formulas & Rules', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Questions for Teacher', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Chapter Summaries', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_29', title: 'Exam Prep Strategy', description: 'Break down studying before a big test.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Exam Prep', type: 'Pine', nodes: [ { id: 'n1', title: 'Topics to Master', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Practice Test Scores', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Weak Areas to Review', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Study Schedule', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_30', title: 'Moving Checklist', description: 'Boxes, utilities, and address changes.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Moving Tracker', type: 'Oak', nodes: [ { id: 'n1', title: 'Packing Inventory', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Utilities & Services', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Address Changes', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Cleaning & Repairs', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_31', title: 'Baby / Nursery Checklist', description: 'Prepare for a new arrival.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Baby Prep', type: 'Willow', nodes: [ { id: 'n1', title: 'Nursery Furniture', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Clothing & Diapers', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Feeding Supplies', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Hospital Bag', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_32', title: 'Wedding Planner Overview', description: 'Track the massive moving parts of a wedding.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Wedding Prep', type: 'Oak', nodes: [ { id: 'n1', title: 'Venue & Vendors', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Guest List', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Attire & Rings', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Honeymoon', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_33', title: 'Date Night Ideas', description: 'Keep a running list of fun things to do.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Date Nights', type: 'Apple', nodes: [ { id: 'n1', title: 'Free / At Home', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Outdoors & Active', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Dinner & Drinks', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Weekend Day Trips', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_34', title: 'Local Restaurants Map', description: 'Categorize your local food scene.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Restaurants', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'Quick Takeout', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Nice Dine-In', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Coffee & Bakeries', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Bars & Breweries', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_35', title: 'Hiking Trails Directory', description: 'Log trails you want to conquer.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Hiking Trails', type: 'Pine', nodes: [ { id: 'n1', title: 'Easy / Casual', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Moderate / Half-Day', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Hard / Full-Day', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Trail Gear Checklist', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_36', title: 'Camping Gear Checklist', description: 'Never forget the tent stakes again.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Camping Gear', type: 'Pine', nodes: [ { id: 'n1', title: 'Shelter & Sleeping', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Camp Kitchen', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Safety & First Aid', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Clothing & Weather', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_37', title: 'Fishing Log & Gear', description: 'Track favorite spots and tackle inventory.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Fishing', type: 'Willow', nodes: [ { id: 'n1', title: 'Favorite Spots', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Tackle Box Inventory', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Target Species', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Licenses & Permits', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_38', title: 'Gardening Schedule', description: 'Plan out your planting seasons.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Gardening', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'Spring Planting', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Summer Harvest', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Fall Cleanup', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Indoor Plants', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_39', title: 'DIY Project Planner', description: 'Organize materials and steps for home projects.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'DIY Project', type: 'Oak', nodes: [ { id: 'n1', title: 'Materials List', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Tools Needed', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Step-by-Step Plan', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Budget & Receipts', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_40', title: 'Wardrobe Inventory', description: 'Audit your closet and plan outfits.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Wardrobe', type: 'Apple', nodes: [ { id: 'n1', title: 'Tops & Shirts', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Bottoms', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Shoes & Accessories', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Items to Donate', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_41', title: 'Skincare Routine', description: 'Track products and daily application order.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Skincare', type: 'Willow', nodes: [ { id: 'n1', title: 'Morning Routine', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Evening Routine', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Weekly Treatments', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Product Restock List', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_42', title: 'Side Hustle Brainstorm', description: 'Flesh out a new income stream.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Side Hustle', type: 'Pine', nodes: [ { id: 'n1', title: 'The Core Idea', type: 'Leaf/Notes', x: -200, y: -100 }, { id: 'n2', title: 'Target Audience', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Initial Costs', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'First 3 Action Steps', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_43', title: 'Job Hunt Tracker', description: 'Organize applications and interviews.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Job Hunt', type: 'Oak', nodes: [ { id: 'n1', title: 'Companies to Apply To', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Applications Sent', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Interviews Scheduled', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Offers / Rejections', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_44', title: 'Resume Builder Outline', description: 'Draft the building blocks of a great CV.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Resume Outline', type: 'Apple', nodes: [ { id: 'n1', title: 'Professional Summary', type: 'Leaf/Notes', x: -200, y: -100 }, { id: 'n2', title: 'Work Experience', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Education & Certs', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Core Skills', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_45', title: 'Meeting & Call Notes', description: 'Agenda, decisions, and action items.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Meeting Notes', type: 'Pine', nodes: [ { id: 'n1', title: 'Pre-Meeting Agenda', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Key Discussion Points', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Decisions Made', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Action Items / Next Steps', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_46', title: 'Brain Dump Matrix', description: 'Get it out of your head and onto the canvas.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Brain Dump', type: 'Willow', nodes: [ { id: 'n1', title: 'Urgent & Important', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Important, Not Urgent', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Urgent, Not Important', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Trash / Ignore', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_47', title: 'End of Year Review', description: 'Reflect on the past 12 months.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Yearly Review', type: 'Oak', nodes: [ { id: 'n1', title: 'Biggest Wins & Successes', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Hardest Lessons Learned', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'What to Leave Behind', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Goals for Next Year', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_48', title: 'Daily To-Do List', description: 'A highly focused snapshot of today.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Today', type: 'Apple', nodes: [ { id: 'n1', title: 'Top 3 Priorities', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Quick 5-Minute Tasks', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Meetings & Appointments', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Errands', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_49', title: 'Weekly Reflection', description: 'Recalibrate before Monday begins.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Weekly Sync', type: 'Fruit Orchard', nodes: [ { id: 'n1', title: 'What went well?', type: 'Leaf/Notes', x: -200, y: -100 }, { id: 'n2', title: 'What could improve?', type: 'Leaf/Notes', x: 200, y: -100 }, { id: 'n3', title: 'Unfinished Tasks', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Focus for Next Week', type: 'Branch', x: 200, y: 100 } ] }
+  },
+  {
+    id: 'tpl_free_50', title: 'Life Bucket List', description: 'Track your biggest life goals and dreams.', price: 'free', category: 'Everyday Life',
+    treeData: { title: 'Bucket List', type: 'Pine', nodes: [ { id: 'n1', title: 'Travel Destinations', type: 'Branch', x: -200, y: -100 }, { id: 'n2', title: 'Skills to Learn', type: 'Branch', x: 200, y: -100 }, { id: 'n3', title: 'Adventures & Experiences', type: 'Branch', x: -200, y: 100 }, { id: 'n4', title: 'Financial Milestones', type: 'Branch', x: 200, y: 100 } ] }
+  }
 ];
