@@ -122,6 +122,16 @@
     #tour-tooltip { position: absolute; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); color: var(--text-main); padding: 20px; border-radius: 12px; width: 300px; z-index: 10002; display: none; flex-direction: column; gap: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); transition: opacity 0.3s ease; opacity: 0; }
     .tour-buttons { display: flex; justify-content: space-between; margin-top: 8px; }
     .tour-active-element { z-index: 10002 !important; pointer-events: none !important; }
+  /* --- ZERO-STATE PULSE --- */
+ @keyframes emptyStatePulse {
+   0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.65); }
+   70% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+   100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+ }
+ .pulse-glow {
+   animation: emptyStatePulse 2.5s infinite cubic-bezier(0.66, 0, 0, 1) !important;
+   border-color: #10B981 !important;
+ }
   </style>
 </head>
 <body>
@@ -272,12 +282,10 @@
     <div class="drawer-header"><strong>Nursery & Sync</strong><button class="btn btn-small" id="btn-close-right">&times;</button></div>
     <div class="drawer-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn btn-accent" id="btn-export-backup" style="justify-content: flex-start; margin-bottom: 8px;">
-  🪏 Export JSON Tree Backup
-</button>
-<button class="btn" id="btn-import-backup" style="justify-content: flex-start;">
-🌱 Import JSON Tree Backup
-</button>
+        <button class="btn btn-accent" id="btn-save-tree" style="justify-content: flex-start; margin-bottom: 8px;">🪏 Save Tree</button>
+     <button class="btn" id="btn-load-tree" style="justify-content: flex-start; margin-bottom: 8px;">🌱 Load Tree</button>
+     <button class="btn btn-accent" id="btn-save-forest" style="justify-content: flex-start; margin-bottom: 8px;">🪏 Save Forest</button>
+     <button class="btn" id="btn-load-forest" style="justify-content: flex-start; margin-bottom: 8px;">🌱 Load Forest</button>
         <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
@@ -1216,7 +1224,8 @@ if (isZeroState && state.isLocked) {
         const forest = getForest(); forestLayer.innerHTML = ''; canvasSvg.innerHTML = '';
         forest.trees.forEach(t => {
           const el = document.createElement('div'); el.id = t.id; el.className = `forest-tree-entity ${t.id === state.selectedId ? 'selected' : ''}`; el.style.left = `${t.x}px`; el.style.top = `${t.y}px`;
-          el.innerHTML = `<div class="tree-icon-box">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`;
+          const isTreeEmpty = t.nodes.length <= 1;
+       el.innerHTML = `<div class="tree-icon-box ${isTreeEmpty ? 'pulse-glow' : ''}">${getTreeIcon(t.type)}</div><div style="margin-top:6px; font-weight:600;">${escapeHTML(t.title)}</div><div style="font-size:10px; color:var(--text-muted);">${t.nodes.length} items</div>`;
           attachGestureEvents(el, t, false); forestLayer.appendChild(el);
         });
       }
@@ -1295,19 +1304,22 @@ if (isZeroState && state.isLocked) {
       }
 
      function autoTidyNodes() {
-        if (state.viewMode === 'forest') {
-          const f = getForest(); if(!f || !f.trees) return;
-          f.trees.forEach((t, i) => {
-              if (i === 0) { t.x = 5000; t.y = 5000; }
-              else {
-                  const radius = 260 * Math.sqrt(i);
-                  const angle = i * 2.39996;
-                  t.x = 5000 + (radius * Math.cos(angle));
-                  t.y = 5000 + (radius * Math.sin(angle));
-              }
-          });
-          saveData(); render();
-        } else {
+     if (state.viewMode === 'forest') {
+       const f = getForest(); if(!f || !f.trees) return;
+       f.trees.forEach((t, i) => {
+           if (i === 0) { t.x = 5000; t.y = 5000; }
+           else {
+               let currentRing = 1, capacity = 6, processed = 1; 
+               while (i >= processed + capacity) { processed += capacity; currentRing++; capacity = currentRing * 6; }
+               const indexInRing = i - processed;
+               const radius = currentRing * 350; 
+               const angle = (indexInRing / capacity) * Math.PI * 2;
+               t.x = 5000 + (radius * Math.cos(angle));
+               t.y = 5000 + (radius * Math.sin(angle));
+           }
+       });
+       saveData(); centerOn(5000, 5000); render();
+     } else {
           const t = getTree(); if (!t) return;
           const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0]; if (!root) return;
           const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
@@ -1415,31 +1427,48 @@ if (isZeroState && state.isLocked) {
                     filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.csv`;
                 } else {
                     let docContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                    <head><meta charset='utf-8'><title>${title}</title></head><body>
-                    <h1>${title} - ${type.toUpperCase()}</h1>`;
+                 <head><meta charset='utf-8'><title>${title}</title>
+                 <style>
+                     body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; }
+                     h1 { color: #16222E; border-bottom: 2px solid #2DD4BF; padding-bottom: 10px; }
+                     h2 { color: #134E4A; margin-top: 20px; }
+                     table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
+                     th, td { border: 1px solid #94A3B8; padding: 10px; text-align: left; }
+                     th { background-color: #F1F5F9; font-weight: bold; }
+                     .sign-off { margin-top: 50px; width: 100%; }
+                     .sign-off td { border: none; border-top: 1px solid #333; padding-top: 5px; }
+                 </style></head><body>
+                 <div style="text-align: center; margin-bottom: 50px;">
+                     <h1 style="font-size: 28px; border: none;">${title}</h1>
+                     <h3 style="color: #475569;">Official Project ${type.toUpperCase()}</h3>
+                     <p>Generated by Sylva Project Management</p>
+                 </div>`;
 
-                    if (type === 'charter') {
-                        docContent += `<h2>1. Project Scope</h2><p>Auto-generated scope from Sylva structure.</p><h2>2. Deliverables (Fruit Nodes)</h2><ul>`;
-                        nodes.filter(n => n.type === 'fruit').forEach(n => {
-                            const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
-                            docContent += `<li><strong>${n.title}</strong> (Assigned: ${assigneesStr}): ${n.desc || 'No description'}</li>`;
-                        });
-                        docContent += `</ul>`;
-                    } else if (type === 'plan') {
-                         docContent += `<h2>Project Nodes & Assignments</h2><ul>`;
-                         nodes.forEach(n => { 
-                             const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
-                             docContent += `<li><strong>${n.title}</strong> (${n.type}) - Assignees: ${assigneesStr}</li>`; 
-                         });
-                         docContent += `</ul>`;
-                    } else {
-                        docContent += `<h2>Project Nodes</h2><ul>`;
-                        nodes.forEach(n => { docContent += `<li><strong>${n.title}</strong> (${n.type})</li>`; });
-                        docContent += `</ul>`;
-                    }
-                    docContent += `</body></html>`;
-                    blob = new Blob([docContent], { type: 'application/msword' });
-                    filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.doc`;
+                 if (type === 'charter') {
+                     docContent += `<h2>1. Executive Summary & Scope</h2><p>This charter formally authorizes the project based on the defined Sylva structure.</p>
+                     <h2>2. Key Deliverables (Fruit)</h2><table><tr><th>Deliverable</th><th>Assignees</th><th>Description</th></tr>`;
+                     nodes.filter(n => n.type === 'fruit').forEach(n => {
+                         const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
+                         docContent += `<tr><td><strong>${n.title}</strong></td><td>${assigneesStr}</td><td>${n.desc || 'N/A'}</td></tr>`;
+                     });
+                     docContent += `</table>
+                     <table class="sign-off"><tr><td style="width:40%;">Project Sponsor Signature</td><td style="width:20%;"></td><td style="width:40%;">Date</td></tr></table>`;
+                 } else if (type === 'plan') {
+                      docContent += `<h2>Project Schedule & Assignments</h2>
+                      <table><tr><th>Task / Node</th><th>Type</th><th>Time / Budget</th><th>Assignees & Roles</th></tr>`;
+                      nodes.forEach(n => { 
+                          const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
+                          docContent += `<tr><td><strong>${n.title}</strong></td><td>${n.type.toUpperCase()}</td><td>${n.estHours || 0} hrs / $${n.budget || 0}</td><td>${assigneesStr}</td></tr>`; 
+                      });
+                      docContent += `</table>`;
+                 } else {
+                     docContent += `<h2>Project Outline</h2><ul>`;
+                     nodes.forEach(n => { docContent += `<li><strong>${n.title}</strong> (${n.type})</li>`; });
+                     docContent += `</ul>`;
+                 }
+                 docContent += `</body></html>`;
+                 blob = new Blob([docContent], { type: 'application/msword' });
+                 filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.doc`;
                 }
 
                 const url = window.URL.createObjectURL(blob);
@@ -1459,6 +1488,7 @@ if (isZeroState && state.isLocked) {
         let bgClickTimer = null;
         document.getElementById('viewport').addEventListener('pointerdown', (e) => {
             // Check if the user clicked empty canvas space
+            if (activePointers.size >= 1 || isPinching) return;
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
                 bgClickCount++;
                 if (bgClickCount === 2) {
@@ -1782,26 +1812,26 @@ if (isZeroState && state.isLocked) {
             } else {
               if (type === 'tree') {
              const forest = getForest();
-             const i = forest.trees.length;
-             let tx = 5000, ty = 5000;
-             if (i > 0) {
-                 const radius = 260 * Math.sqrt(i);
-                 const angle = i * 2.39996;
-                 tx = 5000 + (radius * Math.cos(angle));
-                 ty = 5000 + (radius * Math.sin(angle));
-             }
+
+             // Calculate the exact center of the user's current screen
+             const spawnX = (window.innerWidth / 2 - state.panX) / state.scale - 70;
+             const spawnY = (window.innerHeight / 2 - state.panY) / state.scale - 40;
+
              const newTree = { 
                  id: 't_' + Date.now(), title: 'New Tree', type: 'Pine', season: 'Spring', pinned: false, 
-                 x: tx, y: ty, 
-                 nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false }] 
+                 x: spawnX, y: spawnY, 
+                 nodes: [{ id: 'r_' + Date.now(), title: 'Core Goal', desc: '', type: 'trunk', parentId: null, x: spawnX, y: spawnY, pinned: false }] 
              };
+
              forest.trees.push(newTree); state.selectedId = newTree.id;
              document.getElementById('grow-dropdown').style.display = 'none';
 
-             // Forces the camera and PIP to instantly snap to the new tree's location
-             centerOn(tx, ty); 
-
+             // Renders the tree right in front of you without moving the camera!
              render(); openTreeInspector(newTree);
+           } else if (type === 'forest') {
+             document.getElementById('input-new-forest').value = 'New Forest';
+             document.getElementById('grow-dropdown').style.display = 'none';
+             document.getElementById('modal-new-forest').classList.add('open');
            }
             }
           });
@@ -1881,26 +1911,62 @@ if (isZeroState && state.isLocked) {
           else { showAppAlert("Password required to broadcast to Org."); }
         });
         
-        // Export / Import Backup
-        document.getElementById('btn-export-backup').addEventListener('click', () => {
-          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-          const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "sylva_backup.json");
-          document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
-          document.getElementById('drawer-right').classList.remove('open');
-        });
-        
-        document.getElementById('btn-import-backup').addEventListener('click', () => {
-          const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-          input.onchange = e => {
-            const file = e.target.files[0]; if (!file) return;
-            const reader = new FileReader(); reader.readAsText(file, 'UTF-8');
-            reader.onload = readerEvent => {
-              try { const content = readerEvent.target.result; state = Object.assign(state, JSON.parse(content)); saveData(); render(); showAppAlert('Backup imported successfully!'); } 
-              catch(err) { showAppAlert('Invalid backup file.'); }
-            };
-          };
-          input.click(); document.getElementById('drawer-right').classList.remove('open');
-        });
+        // Save / Load Individual Trees & Forests
+     document.getElementById('btn-save-tree').addEventListener('click', () => {
+         const t = getTree(); if (!t) return showAppAlert('You must open a Tree to save it.');
+         const name = prompt('Name your Tree save file:', t.title || 'My_Tree');
+         if (!name) return;
+         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(t));
+         const dl = document.createElement('a'); dl.href = dataStr; dl.download = name.replace(/\s+/g, '_') + "_Tree.json"; dl.click();
+         document.getElementById('drawer-right').classList.remove('open');
+     });
+
+     document.getElementById('btn-load-tree').addEventListener('click', () => {
+         const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+         input.onchange = e => {
+             const file = e.target.files[0]; if (!file) return;
+             const reader = new FileReader(); reader.readAsText(file, 'UTF-8');
+             reader.onload = ev => {
+                 try { 
+                     const importedTree = JSON.parse(ev.target.result); 
+                     if (!importedTree.nodes) throw new Error();
+                     importedTree.id = 't_' + Date.now(); // Prevents ID conflicts
+                     getForest().trees.push(importedTree);
+                     state.activeTreeId = importedTree.id; state.viewMode = 'tree';
+                     saveData(); centerOn(importedTree.x, importedTree.y); render(); showAppAlert('Tree loaded successfully!');
+                 } catch(err) { showAppAlert('Invalid Tree file.'); }
+             };
+         };
+         input.click(); document.getElementById('drawer-right').classList.remove('open');
+     });
+
+     document.getElementById('btn-save-forest').addEventListener('click', () => {
+         const f = getForest(); if (!f) return;
+         const name = prompt('Name your Forest save file:', f.title || 'My_Forest');
+         if (!name) return;
+         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(f));
+         const dl = document.createElement('a'); dl.href = dataStr; dl.download = name.replace(/\s+/g, '_') + "_Forest.json"; dl.click();
+         document.getElementById('drawer-right').classList.remove('open');
+     });
+
+     document.getElementById('btn-load-forest').addEventListener('click', () => {
+         const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+         input.onchange = e => {
+             const file = e.target.files[0]; if (!file) return;
+             const reader = new FileReader(); reader.readAsText(file, 'UTF-8');
+             reader.onload = ev => {
+                 try { 
+                     const importedForest = JSON.parse(ev.target.result); 
+                     if (!importedForest.trees) throw new Error();
+                     importedForest.id = 'forest-' + Date.now(); // Prevents ID conflicts
+                     state.forests.push(importedForest);
+                     state.activeForestId = importedForest.id; state.activeTreeId = null; state.viewMode = 'forest';
+                     saveData(); centerOn(5000, 5000); render(); showAppAlert('Forest loaded successfully!');
+                 } catch(err) { showAppAlert('Invalid Forest file.'); }
+             };
+         };
+         input.click(); document.getElementById('drawer-right').classList.remove('open');
+     });
 
         // Template and Premium Flows
         document.getElementById('btn-open-templates').addEventListener('click', () => { 
@@ -2491,8 +2557,9 @@ if (isZeroState && state.isLocked) {
 
       /* --- GUIDED TOUR ENGINE --- */
       const tourSteps = [
-            { id: 'btn-grow', title: 'Welcome to Sylva - Think like a Tree!', text: 'Click here to grow new Trees in a Forest, or grow new branches (groups), leaves (documents and text), fruits (action items) and more on your active Tree. You can tell its a tree because of the way it is.' },
-            { id: 'viewport', title: 'Navigate the Canvas', text: 'Drag to the screen to pan around your workspace. Tap any node to select it, double tap it to see its details, and double-tap the background to deselect something.' },
+            { id: 'welcome-placard', title: 'Welcome to Sylva - Think like a Tree!', text: 'Use this workspace for everything: brainstorming, project management, tracking goals, and building knowledge bases. Give life to your ideas and watch them grow!' },
+            { id: 'btn-grow', title: 'Give it life!', text: 'Click here to grow your ideas, projects, lists, databases and more! Forests are your Master Folder, Trees act as project containers, branches are for grouping things, fruits for tasks, leaves for text and docs, acorns link things, seeds hold trees within them, and pinecones are recurrent tasks.' },
+            { id: 'viewport', title: 'Navigate the Canvas', text: 'Drag the screen to pan around your workspace. Tap any node to select it, double tap it to see its details, and double-tap the background to deselect something. You can tell its a tree because of the way it is!' },
             { id: 'btn-lock', title: 'Messy Tree? Rearrange!', text: 'Click the lock icon to unlock trees and nodes and rearrange them as needed. How neat is that? Dats perty neat!' },
             { id: 'pip-canvas', title: 'The Minimap', text: 'Keep your bearings with the PIP minimap. Pinch-to-zoom directly on this map to get your bearings, click a node to pan to it, and double click to center the view on a tree or forest.' },
             { id: 'bottom-actions-container', title: 'Track Your Progress', text: 'Use these tools to highlight Critical Paths, view Season Details and Settings, or track and complete tasks with Harvest.' },
@@ -2514,13 +2581,38 @@ if (isZeroState && state.isLocked) {
           if (currentTourStep < 0) currentTourStep = 0;
 
           const step = tourSteps[currentTourStep];
-          const target = document.getElementById(step.id);
-          
-          if (!target || target.style.display === 'none') {
-              currentTourStep++; updateTourPosition(); return;
-          }
 
-          if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
+       // Custom logic for the center-screen welcome placard
+       if (step.id === 'welcome-placard') {
+           document.getElementById('tour-highlight').style.display = 'none';
+           const tooltipBox = document.getElementById('tour-tooltip');
+           tooltipBox.style.display = 'flex';
+
+           const ttRect = tooltipBox.getBoundingClientRect();
+           const ttWidth = ttRect.width || 300;
+           const ttHeight = ttRect.height || 190;
+
+           tooltipBox.style.top = `${(window.innerHeight - ttHeight) / 2}px`;
+           tooltipBox.style.left = `${(window.innerWidth - ttWidth) / 2}px`;
+           setTimeout(() => tooltipBox.style.opacity = '1', 50);
+
+           document.getElementById('tour-title').innerText = step.title; 
+           document.getElementById('tour-desc').innerText = step.text;
+           document.getElementById('tour-progress').innerText = `${currentTourStep + 1} / ${tourSteps.length}`;
+           document.getElementById('tour-prev').style.visibility = 'hidden';
+           document.getElementById('tour-next').innerText = 'Next';
+
+           if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
+           activeTourElement = null;
+           return;
+       }
+
+       const target = document.getElementById(step.id);
+       if (!target || target.style.display === 'none') {
+           currentTourStep++; updateTourPosition(); return;
+       }
+
+       if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
           activeTourElement = target;
           if (step.id !== 'viewport') {
               activeTourElement.classList.add('tour-active-element');
