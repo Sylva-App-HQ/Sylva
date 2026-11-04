@@ -277,7 +277,7 @@
       <!-- New Help Button -->
       <div style="margin-top:auto; padding-top:12px; display:flex; flex-direction:column; gap:8px;">
          <div style="font-size:10px; text-align:center; color:var(--text-muted);">If you need it, it's here:</div>
-         <button class="btn btn-accent" id="btn-open-help" style="width:100%;">Help & Tutorial</button>
+         <button class="btn btn-accent" id="btn-open-help" style="width:100%;">Help & Options</button>
       </div>
     </div>
   </aside>
@@ -343,7 +343,7 @@
                  <div class="field-group" style="flex:1; min-width:0;"><label>Total Spent ($)</label><input type="number" id="node-input-spent" placeholder="0" style="width:100%;"></div>
               </div>
               <!-- Removed duplicate Budget and Total Spent fields -->
-              <<div class="field-group">
+              <div class="field-group">
                  <label style="display: flex; justify-content: space-between; align-items: center;">
                     Assignees & RACI Roles
                     <button class="btn btn-small" id="btn-add-assignee" style="height: 20px; padding: 0 6px;">+ Add</button>
@@ -2156,23 +2156,34 @@ if (isZeroState && state.isLocked) {
 
         // NEW Tutorial Engine Bindings
         document.getElementById('btn-open-help').addEventListener('click', () => {
-            document.getElementById('drawer-left').classList.remove('open');
-            startTour();
-        });
-        
-        document.getElementById('btn-tut-yes').addEventListener('click', () => {
-            document.getElementById('modal-tut-prompt').classList.remove('open');
-            localStorage.setItem('sylva_tutorial_seen', 'true');
-            startTour();
-        });
-        
-        document.getElementById('btn-tut-no').addEventListener('click', () => {
-            document.getElementById('modal-tut-prompt').classList.remove('open');
-            localStorage.setItem('sylva_tutorial_seen', 'true');
-            document.getElementById('drawer-left').classList.add('open');
-            setTimeout(() => { showAppAlert("If you need it, the Help & Tutorial button is here in your Nodes Directory!"); }, 300);
-        });
-      }
+          document.getElementById('side-panel').classList.remove('open');
+          document.getElementById('modal-help-options').style.display = 'flex';
+      });
+
+      document.getElementById('btn-close-help-options').addEventListener('click', () => {
+          document.getElementById('modal-help-options').style.display = 'none';
+      });
+
+      document.getElementById('btn-close-help-index').addEventListener('click', () => {
+          document.getElementById('modal-help-index').style.display = 'none';
+      });
+
+      document.getElementById('btn-opt-tutorial').addEventListener('click', () => {
+          document.getElementById('modal-help-options').style.display = 'none';
+          startTour();
+      });
+
+      document.getElementById('btn-opt-index').addEventListener('click', () => {
+          document.getElementById('modal-help-options').style.display = 'none';
+          document.getElementById('modal-help-index').style.display = 'flex';
+      });
+
+      document.getElementById('btn-opt-walkthrough').addEventListener('click', () => {
+          document.getElementById('modal-help-options').style.display = 'none';
+          startInteractiveWalkthrough();
+      });
+
+        }
 
       function setupCustomDropdowns() {
         const configs = [
@@ -2264,37 +2275,76 @@ if (isZeroState && state.isLocked) {
 
         const ownedSingles = JSON.parse(localStorage.getItem('sylva_owned_singles') || '[]');
 
-        window.SYLVA_TEMPLATES.forEach(tpl => {
-            const isPremium = tpl.tier === 'premium';
-            // It is locked ONLY if it's premium, they aren't a VIP, and they don't own this specific one
-            const locked = isPremium && !isVip && !ownedSingles.includes(tpl.title);
+        const freeTemplates = window.SYLVA_TEMPLATES.filter(t => t.price === 'free' || t.tier === 'free');
+        const premiumTemplates = window.SYLVA_TEMPLATES.filter(t => t.price !== 'free' && t.tier !== 'free');
+        
+        const renderTemplateGroup = (title, templatesArray, container) => {
+            if (templatesArray.length === 0) return;
             
-            const el = document.createElement('div');
-            el.className = 'directory-item';
-            el.innerHTML = `
-                <div>
-                    <div style="font-weight:600; color:var(--text-main);">${escapeHTML(tpl.title)} ${isPremium ? '💎' : ''}</div>
-                    <div style="font-size:11px; color:var(--text-muted);">${escapeHTML(tpl.category)} &bull; ${escapeHTML(tpl.type)} Tree</div>
-                </div>
-                <button class="btn btn-small ${locked ? '' : 'btn-accent'}" style="${locked ? 'border-color:#F59E0B; color:#F59E0B;' : ''}">
-                    ${locked ? 'Unlock' : 'Load'}
-                </button>
-            `;
-            
-            el.querySelector('button').addEventListener('click', () => {
-                if (locked) {
-                    document.getElementById('modal-purchase-template').classList.add('open');
-                    document.getElementById('modal-templates').classList.remove('open');
-                    return;
-                }
-                
-                window.pendingTemplateData = tpl;
-                document.getElementById('tpl-prompt-name').innerText = tpl.title;
-                document.getElementById('modal-template-prompt').classList.add('open');
-                document.getElementById('modal-templates').classList.remove('open');
+            const header = document.createElement('div');
+            header.className = 'template-tier-header';
+            header.innerHTML = title;
+            container.appendChild(header);
+
+            const categories = {};
+            templatesArray.forEach(tpl => {
+                const cat = tpl.category || 'Uncategorized';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(tpl);
             });
-            list.appendChild(el);
-        });
+
+            Object.keys(categories).sort().forEach(catName => {
+                const catHeader = document.createElement('div');
+                catHeader.className = 'template-category-header';
+                catHeader.innerText = catName;
+                container.appendChild(catHeader);
+
+                const grid = document.createElement('div');
+                grid.className = 'template-grid';
+                
+                categories[catName].sort((a, b) => a.title.localeCompare(b.title)).forEach(tpl => {
+                    const isPremium = tpl.tier === 'premium' || tpl.price !== 'free';
+                    const locked = isPremium && !isVip && !ownedSingles.includes(tpl.title);
+                    
+                    const el = document.createElement('div');
+                    el.className = 'directory-item';
+                    el.style.display = 'flex';
+                    el.style.flexDirection = 'column';
+                    el.style.justifyContent = 'space-between';
+                    el.style.alignItems = 'flex-start';
+                    el.style.height = '100%';
+                    el.style.padding = '15px';
+                    
+                    el.innerHTML = `
+                        <div style="width: 100%;">
+                            <div style="font-weight:600; color:var(--text-main); font-size: 16px; margin-bottom: 5px;">${escapeHTML(tpl.title)} ${isPremium ? '💎' : ''}</div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;">${escapeHTML(tpl.type)} Tree</div>
+                            <div style="font-size:12px; color:#aaa; margin-bottom: 15px; line-height: 1.4;">${escapeHTML(tpl.description || '')}</div>
+                        </div>
+                        <button class="btn btn-small ${locked ? '' : 'btn-accent'}" style="width: 100%; ${locked ? 'border-color:#F59E0B; color:#F59E0B;' : ''}">
+                            ${locked ? 'Unlock' : 'Load Template'}
+                        </button>
+                    `;
+                    
+                    el.querySelector('button').addEventListener('click', () => {
+                        if (locked) {
+                            document.getElementById('modal-purchase-template').classList.add('open');
+                            document.getElementById('modal-templates').classList.remove('open');
+                            return;
+                        }
+                        window.pendingTemplateData = tpl;
+                        document.getElementById('tpl-prompt-name').innerText = tpl.title;
+                        document.getElementById('modal-template-prompt').classList.add('open');
+                        document.getElementById('modal-templates').classList.remove('open');
+                    });
+                    grid.appendChild(el);
+                });
+                container.appendChild(grid);
+            });
+        };
+
+        renderTemplateGroup('🌱 Free Templates', freeTemplates, list);
+        renderTemplateGroup('🌳 Premium Templates', premiumTemplates, list);
         
         // Translate Python JSON structures into Sylva JavaScript IDs
         function processNodes(tplNodes, startX, startY) {
@@ -2830,6 +2880,49 @@ if (isZeroState && state.isLocked) {
           updateTourPosition();
       }
 
+      function startInteractiveWalkthrough() {
+          const tpl = window.SYLVA_TEMPLATES.find(t => t.id === 'tpl_free_01');
+          if (!tpl) {
+              showAppAlert("Template 'Master Grocery List' not found for walkthrough.");
+              return;
+          }
+          
+          let wTree = JSON.parse(JSON.stringify(tpl.treeData));
+          wTree.id = 'w_tree_' + Date.now();
+          wTree.nodes = wTree.nodes || [];
+          
+          const f = getForest() || (state.forests.length > 0 ? state.forests[0] : null);
+          if (f) {
+              wTree.x = f.panX + (window.innerWidth / 2);
+              wTree.y = f.panY + (window.innerHeight / 2);
+              f.trees.push(wTree);
+          } else {
+              state.forests.push({
+                  id: 'w_forest_' + Date.now(),
+                  name: 'Walkthrough Forest',
+                  trees: [wTree],
+                  panX: 0, panY: 0, scale: 1
+              });
+          }
+          
+          state.currentForestId = state.forests[state.forests.length-1].id;
+          state.currentTreeId = wTree.id;
+          state.viewMode = 'tree';
+          render();
+          setTimeout(() => { window.initialFocus(); }, 100);
+          
+          tourSteps.length = 0; // Clear standard tutorial
+          tourSteps.push(
+              { id: 'viewport', title: 'Interactive Walkthrough', text: "We just loaded the 'Master Grocery List' template for you! Let's get hands-on." },
+              { id: 'btn-harvest', title: 'Complete a Task', text: "Pretend you just bought your produce. Double-click the 'Produce' node, check the 'Complete' box, click Save, then click the Harvest button here to clear it from the tree." },
+              { id: 'btn-view-harvest', title: 'View Harvest Basket', text: "Click here to view your Harvest Basket. All completed fruits go here for safekeeping." },
+              { id: 'btn-toggle-critical', title: 'Critical Path', text: "Toggle this on. It highlights the most critical path to project completion." },
+              { id: 'btn-toggle-timeline', title: 'Executive Spread', text: "Click here to view the tree in a top-down, professional spreadsheet view." },
+              { id: 'btn-grow', title: 'You are ready to Grow!', text: "That's it! You know how to manage nodes, harvest tasks, and view data. Click here to start growing your own ideas!" }
+          );
+          startTour();
+      }
+
       function initTutorial() {
      if (!localStorage.getItem('sylva_tutorial_seen')) {
        document.getElementById('modal-tut-prompt').classList.add('open');
@@ -2916,5 +3009,46 @@ window.addEventListener('DOMContentLoaded', () => {
 });
   </script>
 
+<!-- App Index & Help Modals -->
+  <style>
+    .template-tier-header { font-size: 24px; text-align: center; margin: 30px 0 15px 0; font-weight: bold; color: #fff; }
+    .template-category-header { font-size: 16px; color: var(--accent); margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+  </style>
+  
+  <div class="modal-overlay" id="modal-help-options" style="display:none; z-index: 10000;">
+    <div class="modal-card">
+      <div class="modal-header"><h3>💡 Help Options</h3><button class="btn btn-small" id="btn-close-help-options">&times;</button></div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px; text-align: center;">
+        <button class="btn" id="btn-opt-tutorial" style="padding: 15px;">🎬 View Quick Tutorial</button>
+        <button class="btn" id="btn-opt-walkthrough" style="padding: 15px; border-color: var(--accent); color: var(--accent);">🚀 Start Guided Walkthrough</button>
+        <button class="btn" id="btn-opt-index" style="padding: 15px;">📚 View Feature Index</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-help-index" style="display:none; z-index: 10000;">
+    <div class="modal-card" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+      <div class="modal-header"><h3>📚 Sylva Feature Index</h3><button class="btn btn-small" id="btn-close-help-index">&times;</button></div>
+      <div class="modal-body" style="text-align: left; line-height: 1.5;">
+        <h4 style="color: var(--accent); margin-bottom: 5px;">🌳 Nodes & Trees</h4>
+        <p style="font-size: 13px; margin-bottom: 15px;"><strong>Nodes:</strong> The building blocks. Branches group ideas. Leaves are notes. Fruits are deliverables. Seeds link to other trees. Pine Cones & Acorns are specialized markers.<br>
+        <strong>Trees:</strong> A complete project map (e.g., Pine, Oak, Willow).<br>
+        <strong>Forests:</strong> Multiple trees on a single canvas.</p>
+        
+        <h4 style="color: var(--accent); margin-bottom: 5px;">🧺 Harvesting</h4>
+        <p style="font-size: 13px; margin-bottom: 15px;">When a Fruit (deliverable) is marked complete, clicking 'Harvest' removes it from the tree and safely stores it in your Harvest Basket for review.</p>
+
+        <h4 style="color: var(--accent); margin-bottom: 5px;">🗺️ Navigation & Views</h4>
+        <p style="font-size: 13px; margin-bottom: 15px;"><strong>PIP Minimap:</strong> A picture-in-picture map to pan around large forests.<br>
+        <strong>Executive Spread:</strong> A high-level overview mode for rapid status checks.<br>
+        <strong>Critical Path:</strong> Highlights the most crucial path to completing a project.<br>
+        <strong>Seasons:</strong> Visual themes representing the phase of your project.</p>
+
+        <h4 style="color: var(--accent); margin-bottom: 5px;">🤝 Local P2P Group Sync</h4>
+        <p style="font-size: 13px; margin-bottom: 15px;">Connect directly with other devices on your local network using a secure Group Code. No cloud servers required.</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
