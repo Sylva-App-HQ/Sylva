@@ -1502,8 +1502,9 @@ if (isZeroState && state.isLocked) {
             
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
                 bgLongPressTimer = setTimeout(() => {
-                    if (!viewportDragging) {
+                    if (!viewportDragging && !isPinching) {
                         isLassoing = true;
+                        activePointers.clear(); // Stops standard canvas panning logic
                         lassoStartX = e.clientX;
                         lassoStartY = e.clientY;
                         lassoEl.style.display = 'block';
@@ -1532,12 +1533,15 @@ if (isZeroState && state.isLocked) {
 
         window.addEventListener('pointerup', (e) => {
             clearTimeout(bgLongPressTimer);
+            
             if (isLassoing) {
                 isLassoing = false;
                 lassoEl.style.display = 'none';
                 showAppAlert("Lasso selection complete. Bulk actions coming in V2!");
                 return;
             }
+
+            if (isPinching) return; // Fixes pinch-to-zoom snapback delay
 
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
                 if (Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) < 10) {
@@ -1740,7 +1744,6 @@ if (isZeroState && state.isLocked) {
           e.stopPropagation(); 
           pipHoldTimer = setTimeout(() => { 
             pipLongPressed = true; 
-            pipDragging = false; 
             if (navigator.vibrate) navigator.vibrate(50);
             window.initialFocus(); 
           }, 800);
