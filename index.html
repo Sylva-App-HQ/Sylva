@@ -794,36 +794,37 @@
         ctx.clearRect(0, 0, w, h);
 
         const scale = state.pipScale || 0.1;
-    const ox = (w / 2) + (state.pipPanX || 0);
-    const oy = (h / 2) + (state.pipPanY || 0);
+        const ox = (w / 2) + (state.pipPanX || 0);
+        const oy = (h / 2) + (state.pipPanY || 0);
 
         if (state.viewMode === 'forest') {
-       const forest = getForest();
-       (forest.trees || []).forEach(t => {
-         ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
-         // +70 and +50 aligns the dot to the center of the tree card
-         ctx.beginPath(); ctx.arc(ox + (t.x + 70) * scale, oy + (t.y + 50) * scale, 6, 0, Math.PI * 2); ctx.fill();
-       });
-     } else {
-       const tree = getTree();
-       if (tree) {
-         ctx.strokeStyle = '#33485E'; ctx.lineWidth = 1;
-         tree.nodes.forEach(n => {
-           if (n.parentId) {
-             const p = tree.nodes.find(pn => pn.id === n.parentId);
-             if (p) {
-               // +95 and +60 aligns the lines to the center of the node cards
-               ctx.beginPath(); ctx.moveTo(ox + (p.x + 95) * scale, oy + (p.y + 60) * scale); ctx.lineTo(ox + (n.x + 95) * scale, oy + (n.y + 60) * scale); ctx.stroke();
-             }
-           }
-         });
-         tree.nodes.forEach(n => {
-           ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
-           // +95 and +60 aligns the squares to the center of the node cards
-           ctx.fillRect(ox + (n.x + 95) * scale - 5, oy + (n.y + 60) * scale - 4, 10, 8);
-         });
-       }
-     }
+          const forest = getForest();
+          (forest.trees || []).forEach(t => {
+            ctx.fillStyle = t.id === state.selectedId ? '#10B981' : '#2DD4BF';
+            // +70 and +50 aligns the dot to the center of the tree card
+            ctx.beginPath(); ctx.arc(ox + (t.x + 70) * scale, oy + (t.y + 50) * scale, 6, 0, Math.PI * 2); ctx.fill();
+          });
+        } else {
+          const tree = getTree();
+          if (tree) {
+            ctx.strokeStyle = '#33485E'; ctx.lineWidth = 1;
+            (tree.nodes || []).forEach(n => {
+              if (n.parentId) {
+                const p = (tree.nodes || []).find(pn => pn.id === n.parentId);
+                if (p) {
+                  // +95 and +60 aligns the lines to the center of the node cards
+                  ctx.beginPath(); ctx.moveTo(ox + (p.x + 95) * scale, oy + (p.y + 60) * scale); ctx.lineTo(ox + (n.x + 95) * scale, oy + (n.y + 60) * scale); ctx.stroke();
+                }
+              }
+            });
+            (tree.nodes || []).forEach(n => {
+              ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
+              // +95 and +60 aligns the squares to the center of the node cards
+              ctx.fillRect(ox + (n.x + 95) * scale - 5, oy + (n.y + 60) * scale - 4, 10, 8);
+            });
+          }
+        }
+
         const vx = (-state.panX / state.scale) * scale + ox, vy = (-state.panY / state.scale) * scale + oy;
         const vw = (window.innerWidth / state.scale) * scale, vh = (window.innerHeight / state.scale) * scale;
         ctx.strokeStyle = '#F59E0B'; ctx.lineWidth = 1; ctx.strokeRect(vx, vy, vw, vh);
@@ -1257,10 +1258,10 @@ if (isZeroState && state.isLocked) {
             </div>`;
             tc.appendChild(fm);
         } else {
-            const tree = getTree(); if (!tree) return;
-            headerText = `Executive Spread: ${tree.title}`;
-            targetNodes = tree.nodes.filter(n => n.type !== 'trunk');
-        }
+             const tree = getTree(); if (!tree) return;
+             headerText = `Executive Spread: ${tree.title}`;
+             targetNodes = (tree.nodes || []).filter(n => n.type !== 'trunk');
+         }
         
         const headerContainer = document.createElement('div');
      headerContainer.style.display = 'flex';
