@@ -628,65 +628,93 @@
   </div>
 
   <div class="modal-overlay" id="modal-help-index" style="display:none; z-index: 10000;">
-    <div class="modal-card" style="max-width: 640px; max-height: 85vh; overflow: hidden;">
-      <div class="modal-header"><h3>📚 Sylva Complete Feature & Button Index</h3><button class="btn btn-small" id="btn-close-help-index">&times;</button></div>
-      <div class="modal-body" style="text-align: left; line-height: 1.55; overflow-y: auto; gap: 14px; font-size: 12.5px;">
+    <div class="modal-card" style="max-width: 500px; max-height: 82vh; overflow: hidden;">
+      <div class="modal-header">
+        <h3>📚 Sylva Feature Index</h3>
+        <button class="btn btn-small" id="btn-close-help-index">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; gap: 14px; padding: 16px;">
+        <div style="font-size: 12px; color: var(--text-muted); text-align: center;">Tap any feature or button below to view its details:</div>
 
         <div>
-          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🧭 Top Header & Navigation Bar</h4>
-          <p style="margin-bottom: 6px;"><strong>☰ Forest / Nodes (Left Drawer Button):</strong> Opens the Directory drawer showing Pinned items and an A–Z list of all Trees (when in Forest View) or Nodes (when in Tree View). Tap any item's name to center the camera on it, or click <em>Pin This</em> to keep it at the top.</p>
-          <p style="margin-bottom: 6px;"><strong>+ Grow... (Center Accent Button):</strong> Creates new items on the canvas. In <em>Forest View</em>, grow a new <strong>Tree</strong> or a <strong>New Forest</strong> workspace. In <em>Tree View</em>, grow a child node attached to your currently selected node (or the Trunk if none is selected).</p>
-          <p style="margin-bottom: 6px;"><strong>Nursery ▾ (Right Drawer Button):</strong> Opens the Nursery & Sync drawer to export/import JSON files, browse the Template Library, switch between saved Forests, or sync with a group.</p>
-          <p style="margin-bottom: 6px;"><strong>^ Up Button:</strong> Steps backward one level in your hierarchy: from Document View back to Tree View, from a selected Node to the Tree root, or from Tree View back out to Forest View.</p>
-          <p style="margin-bottom: 6px;"><strong>Breadcrumb Bar:</strong> Shows your exact location (<code>🌲 Forest &gt; Tree &gt; Selected Node</code>). Tap the Forest or Tree name in the breadcrumb bar to jump directly to that level.</p>
-          <p style="margin-bottom: 6px;"><strong>🔒 / 🔓 Drag Lock Toggle:</strong> When <strong>Locked (🔒)</strong>, dragging pans the canvas safely and unlocks the <em>Grow</em> and <em>Season</em> buttons. When <strong>Unlocked (🔓)</strong>, you can freely drag Trees and Nodes to new positions; hovering a node over another node for 1.5 seconds while unlocked re-parents it.</p>
-          <p style="margin-bottom: 0;"><strong>📄 Document View Button:</strong> Appears beneath the navigation bar when inside a Tree. Toggles the <strong>Executive Spread</strong>, a structured document/spreadsheet view of all nodes sorted by Start Date, displaying hours, budget overruns (⚠️), and assignees.</p>
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🧭 Top Header &amp; Navigation</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('☰ Forest / Nodes Directory', 'Opens the left Directory drawer showing your Pinned items at the top and an alphabetical (A–Z) list of all Trees (when in Forest View) or Nodes (when in Tree View).\n\n• Tap any item\'s title to smoothly center the camera on it.\n• Tap \'Pin This\' to pin important trees or nodes to the top of your directory.')"><span>☰ Forest / Nodes Directory</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('+ Grow... Button', 'Creates new items on the canvas.\n\n• In Forest View: Grow a new Tree or create a New Forest workspace.\n• In Tree View: Grow a Branch, Leaf, Fruit, or Seed attached to your currently selected node (or attached to the Trunk if no node is selected).\n\nNote: The Canvas Drag Lock must be locked (🔒) to use Grow.')"><span>+ Grow... Button</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('Nursery ▾ Drawer', 'Opens the right-hand Nursery & Sync drawer.\n\nFrom here you can:\n• Export or import standalone Tree and Forest .json backup files.\n• Open the Template Library.\n• Switch between your saved Forests.\n• Connect to a local peer group via WebRTC.\n• Access Custom Branding / Tree Hugger upgrades.')"><span>Nursery ▾ Drawer</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('^ Up &amp; Breadcrumb Bar', '• ^ Up Button: Steps backward one level in your workspace—from Document View back to Tree View, from a selected Node to the Tree root, or from Tree View back out to Forest View.\n\n• Breadcrumb Bar: Displays your current path (Forest > Tree > Selected Node). Tap the Forest or Tree name in the breadcrumb bar to jump directly to that level.')"><span>^ Up &amp; Breadcrumb Bar</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🔒 / 🔓 Drag Lock Toggle', 'Controls whether touch/mouse dragging moves the camera or moves your items.\n\n• Locked (🔒): Dragging pans the canvas safely. Enables the Grow and Season buttons.\n• Unlocked (🔓): Dragging moves individual Trees or Nodes across the canvas. While unlocked inside a Tree, dragging a node and hovering it over another node for 1.5 seconds will re-parent it.')"><span>🔒 / 🔓 Drag Lock Toggle</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📄 Document View (Executive Spread)', 'Appears below the navigation bar when viewing a Tree.\n\nSwitches from the visual canvas to an executive spreadsheet/document breakdown of all tasks and nodes sorted by Start Date. Automatically flags budget and hour overruns with a red ⚠️ OVERRUN badge.')"><span>📄 Document View</span><span style="color:var(--text-muted);">▸</span></button>
+          </div>
         </div>
 
         <div>
-          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🌲 Tree Species (Mechanics)</h4>
-          <p style="margin-bottom: 6px;"><strong>Pine (Persistent Wiki / SOPs):</strong> Built for recurring checklists and standard operating procedures. Fruits become <em>Pine Cones</em>—when harvested, they automatically reset to incomplete instead of disappearing so you can reuse the checklist.</p>
-          <p style="margin-bottom: 6px;"><strong>Oak (Large Projects / Research / Acorn Links):</strong> Built for complex cross-referenced architectures. Selecting <em>Grow... &gt; Acorn (Link)</em> activates Acorn Target Mode, allowing you to link any two nodes across the tree and snap between them via the Node Inspector.</p>
-          <p style="margin-bottom: 6px;"><strong>Willow (Fluid Brainstorming / Journal):</strong> Uses curved organic canopy paths and adds a <em>Lengthen Branch</em> button inside the Node Inspector to rapidly chain sequential thoughts.</p>
-          <p style="margin-bottom: 0;"><strong>Apple (Tasks / Deliverables):</strong> Displays a live completion progress bar along the bottom of the navigation bar tracking harvested Fruits vs. total Fruits.</p>
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🌲 Tree Species (Mechanics)</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌲 Pine Tree (Recurring / SOPs)', 'Designed for recurring checklists, standard operating procedures, and wikis.\n\nIn a Pine Tree, Fruits act as Pine Cones. When you Harvest a Pine Tree, completed Pine Cones automatically reset to incomplete instead of being removed, allowing you to run the checklist again.')"><span>🌲 Pine (Recurring / SOPs)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌳 Oak Tree (Projects / Acorn Links)', 'Designed for large projects and cross-referenced research.\n\nIn an Oak Tree, selecting Grow... > Acorn (Link) activates Acorn Target Mode, allowing you to link any two nodes across the tree and snap the camera directly between them from the Node Inspector.')"><span>🌳 Oak (Projects / Acorn Links)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌿 Willow Tree (Brainstorming / Journal)', 'Designed for fluid brainstorming and journaling.\n\nRenders curved, organic canopy connections and unlocks the \'Lengthen Branch\' button inside the Node Inspector so you can rapidly chain sequential thoughts.')"><span>🌿 Willow (Brainstorming / Journal)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🍎 Apple Tree (Tasks / Deliverables)', 'Designed for task tracking and deliverable pipelines.\n\nDisplays a live orange progress bar along the bottom of the navigation bar that fills up as Fruits are harvested.')"><span>🍎 Apple (Tasks / Deliverables)</span><span style="color:var(--text-muted);">▸</span></button>
+          </div>
         </div>
 
         <div>
-          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🍃 Node Types & Inspector</h4>
-          <p style="margin-bottom: 6px;"><strong>🪵 Trunk:</strong> The core goal or root node of a Tree. Cannot be deleted.</p>
-          <p style="margin-bottom: 6px;"><strong>🌳 Branch (Group):</strong> Structural category or phase used to organize child nodes.</p>
-          <p style="margin-bottom: 6px;"><strong>🍃 Leaf (Note / Document):</strong> Holds text, documentation, research notes, and details.</p>
-          <p style="margin-bottom: 6px;"><strong>🍎 Fruit (Task / Deliverable):</strong> Actionable items that can be marked <em>Complete (Ripe ✅)</em> and harvested.</p>
-          <p style="margin-bottom: 6px;"><strong>🌰 Seed (Link):</strong> Represents a linked sub-tree or external reference.</p>
-          <p style="margin-bottom: 0;"><strong>Advanced Metadata (Inside Node Inspector):</strong> Double-tap any node and click <em>Advanced Metadata</em> to set a <strong>Start Date</strong>, <strong>Estimated Hours</strong>, <strong>Time Spent</strong>, <strong>Budget ($)</strong>, <strong>Total Spent ($)</strong>, and multiple <strong>Assignees with RACI Roles</strong> (Responsible, Accountable, Consulted, Informed).</p>
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🍃 Node Types &amp; Metadata</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🪵 Trunk, 🌳 Branch, 🍃 Leaf, 🍎 Fruit, 🌰 Seed', '• 🪵 Trunk: The core root node of your tree (cannot be deleted).\n• 🌳 Branch (Group): Structural category or project phase.\n• 🍃 Leaf (Note): Holds text, notes, and documentation.\n• 🍎 Fruit (Task): Actionable deliverable. Long-press (0.6s) or double-tap to mark Complete (Ripe ✅).\n• 🌰 Seed (Link): Represents a linked tree or external reference.')"><span>🪵 Node Types Overview</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📊 Advanced Metadata &amp; RACI Roles', 'Double-tap any node to open the Node Details Inspector, then click \'Advanced Metadata\'.\n\nHere you can track:\n• Start Date\n• Estimated Hours vs. Time Spent\n• Budget ($) vs. Total Spent ($)\n• Multiple Assignees with RACI roles (Responsible, Accountable, Consulted, Informed).')"><span>📊 Advanced Metadata &amp; RACI</span><span style="color:var(--text-muted);">▸</span></button>
+          </div>
         </div>
 
         <div>
-          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">⚡ Bottom-Right Action Buttons</h4>
-          <p style="margin-bottom: 6px;"><strong>Harvest:</strong> Collects all Fruit nodes marked <em>Complete (Ripe ✅)</em> across the current Tree or Forest. Harvested fruits are removed from the active timeline and stored in your Harvest Basket (except Pine Cones, which reset).</p>
-          <p style="margin-bottom: 6px;"><strong>Critical Path:</strong> Calculates and highlights in glowing red the longest chain of incomplete tasks based on remaining hours (<code>Est. Hours - Time Spent</code>), showing your project's primary bottleneck.</p>
-          <p style="margin-bottom: 6px;"><strong>Season:</strong> Opens the <em>Tree Life Cycle &amp; Harvest</em> modal. View nodes grouped by season (Spring, Summer, Autumn, Winter), <strong>Force</strong> a tree into a season, click <strong>Prune Tree</strong> to clean up blank disconnected notes, or click <strong>Inspect Basket</strong> to view harvested deliverables.</p>
-          <p style="margin-bottom: 0;"><strong>Project Management (Visible in Document View):</strong> Exports your live project structure directly to <strong>Project Plan</strong> (.doc), <strong>Project Charter</strong> (.doc), <strong>Work Breakdown Structure / WBS</strong> (.csv/.xlsx), or <strong>RACI Matrix</strong> (.csv/.xlsx).</p>
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">⚡ Bottom-Right Action Tools</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🧺 Harvest Button', 'Collects all Fruit nodes marked Complete (Ripe ✅) across your current Tree or Forest.\n\nHarvested tasks are removed from the active Document View timeline and stored safely in your Harvest Basket (accessible via the Season menu).')"><span>🧺 Harvest Button</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🔥 Critical Path Toggle', 'Calculates and highlights in glowing red the longest chain of incomplete tasks based on remaining duration (Est. Hours minus Time Spent).\n\nUse this to immediately spot project bottlenecks.')"><span>🔥 Critical Path Toggle</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🍂 Season, Prune &amp; Harvest Basket', 'Opens the Tree Life Cycle & Harvest modal:\n\n• Seasons: View nodes grouped by Spring, Summer, Autumn, or Winter, or Force all nodes into a season.\n• Prune Tree: Safely removes blank, disconnected leaf notes with no children.\n• Inspect Basket: View and inspect all previously harvested Fruit tasks.')"><span>🍂 Season, Prune &amp; Basket</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📋 Project Management Exports', 'Visible in the bottom-right corner while inside Document View.\n\nGenerates downloadable, industry-standard project artifacts directly from your tree data:\n• Project Plan (.doc)\n• Project Charter (.doc)\n• Work Breakdown Structure / WBS (.csv/.xlsx)\n• RACI Matrix (.csv/.xlsx)')"><span>📋 Project Management Exports</span><span style="color:var(--text-muted);">▸</span></button>
+          </div>
         </div>
 
         <div>
-          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🗺️ PIP Minimap & Canvas Gestures</h4>
-          <p style="margin-bottom: 6px;"><strong>Canvas Touch / Mouse Controls:</strong> Drag to pan; pinch with two fingers (or scroll wheel) to zoom; single-tap a node to select; double-tap a node or tree to open its Inspector; long-press a Tree (0.4s) in Forest View to enter it; long-press a Fruit (0.6s) to toggle Ripe ✅; double-tap empty canvas to zoom-to-fit all items; press-and-hold empty canvas for 1.5s to draw a Lasso box.</p>
-          <p style="margin-bottom: 0;"><strong>PIP Minimap (Bottom-Left):</strong> Shows a live radar of your workspace and orange viewport box. Drag inside the minimap to pan the radar; pinch with two fingers inside the minimap to zoom the radar; single-tap a node dot on the minimap to glide the main camera to it; double-tap the minimap to auto-fit the radar; long-press the minimap (0.8s) to snap back to initial focus.</p>
-        </div>
-
-        <div>
-          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🌱 Nursery, Templates, Sync & Branding</h4>
-          <p style="margin-bottom: 6px;"><strong>Auto Tidy Grid (Left Drawer):</strong> Automatically arranges all Trees in concentric rings (in Forest View) or formats all Nodes into a balanced organic tree canopy (in Tree View).</p>
-          <p style="margin-bottom: 6px;"><strong>Save / Load Tree &amp; Forest (Right Drawer):</strong> Exports or imports standalone <code>.json</code> backup files to your device.</p>
-          <p style="margin-bottom: 6px;"><strong>Template Library:</strong> Browse pre-built project and life templates by category, sorted with Free templates at the top and Premium templates below. Inject templates into your current forest or a brand-new forest.</p>
-          <p style="margin-bottom: 6px;"><strong>🤝 Sync w/ or Create Group:</strong> Generate or enter a Group Code to broadcast changes across local peer devices over chunked WebRTC data channels with Admin Password protection.</p>
-          <p style="margin-bottom: 0;"><strong>🎨 Custom Branding / Tree Hugger ($2):</strong> Unlocking Tree Hugger status unlocks all 50+ templates and converts the button into the <em>Custom Branding Panel</em>, allowing you to customize Canvas, Surface, and Accent hex colors and UI typography.</p>
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🗺️ Minimap, Gestures &amp; Sync</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🖐️ Canvas Touch &amp; Mouse Gestures', '• Pan & Zoom: Drag empty canvas to pan; pinch with two fingers (or scroll wheel) to zoom.\n• Select & Inspect: Single-tap a node/tree to select it; double-tap to open its Details Inspector.\n• Enter Tree: In Forest View, press-and-hold a Tree for 0.4s to enter it.\n• Quick Complete: In Tree View, press-and-hold a Fruit node for 0.6s to toggle Ripe ✅.\n• Zoom-to-Fit: Double-tap the empty canvas background to fit all items on screen.\n• Lasso Select: Press-and-hold empty canvas for 1.5s without moving to draw a selection box.')"><span>🖐️ Canvas Touch &amp; Mouse Gestures</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🗺️ PIP Minimap Controls', 'The bottom-left radar shows all items and an orange box representing your camera viewport.\n\n• Drag inside the minimap to pan the radar.\n• Pinch with two fingers inside the minimap to zoom the radar.\n• Single-tap a node dot in the minimap to glide your main camera directly to it.\n• Double-tap the minimap to stretch-to-fit the radar.\n• Long-press (0.8s) inside the minimap to reset camera focus.')"><span>🗺️ PIP Minimap Controls</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('✨ Auto Tidy Grid', 'Located at the top of the left Directory drawer.\n\n• In Forest View: Arranges all Trees into balanced concentric rings.\n• In Tree View: Automatically formats all Nodes into a clean, non-overlapping hierarchical canopy.')"><span>✨ Auto Tidy Grid</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🤝 Local P2P Group Sync &amp; Branding', '• Sync w/ or Create Group: Located in the Nursery drawer. Generate or enter a Group Code to link devices on your local network via chunked WebRTC P2P data channels with Admin Password authorization.\n\n• Custom Branding: Unlocking Tree Hugger status ($2) unlocks all 50+ templates and enables the Custom Branding Panel to customize Canvas, Surface, and Accent colors and fonts.')"><span>🤝 P2P Sync &amp; Custom Branding</span><span style="color:var(--text-muted);">▸</span></button>
+          </div>
         </div>
 
       </div>
     </div>
   </div>
+
+  <!-- Inspector-Style Detail Modal for Feature Index Items -->
+  <div class="modal-overlay" id="modal-help-detail" style="display:none; z-index: 10005;">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 id="help-detail-title">Feature Details</h3>
+        <button class="btn btn-small" onclick="document.getElementById('modal-help-detail').style.display='none'">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>Description &amp; Usage</label>
+          <div id="help-detail-body" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 14px; font-size: 13px; line-height: 1.55; white-space: pre-wrap;"></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-accent" onclick="document.getElementById('modal-help-detail').style.display='none'">Back to Index</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.openHelpDetail = function(title, desc) {
+      document.getElementById('help-detail-title').innerText = title;
+      document.getElementById('help-detail-body').innerText = desc;
+      document.getElementById('modal-help-detail').style.display = 'flex';
+    };
+  </script>
 
   <script src="./templates.js"></script>
   <script>
@@ -2955,6 +2983,9 @@ if (isZeroState && state.isLocked) {
           document.getElementById('tour-next').innerText = currentTourStep === tourSteps.length - 1 ? 'Finish' : 'Next';
       }
 
+      const defaultTourSteps = [...tourSteps];
+      let isWalkthroughActive = false;
+
       function endTour() {
           const highlightBox = document.getElementById('tour-highlight');
           const tooltipBox = document.getElementById('tour-tooltip');
@@ -2964,6 +2995,13 @@ if (isZeroState && state.isLocked) {
           if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
           currentTourStep = 0;
           activeTourElement = null;
+
+          if (isWalkthroughActive) {
+              isWalkthroughActive = false;
+              tourSteps.length = 0;
+              defaultTourSteps.forEach(s => tourSteps.push(s));
+          }
+
           if (preTourViewMode) {
               state.viewMode = preTourViewMode;
               preTourViewMode = null;
@@ -2979,7 +3017,9 @@ if (isZeroState && state.isLocked) {
       document.getElementById('tour-prev').onclick = () => {
           currentTourStep--;
           while (currentTourStep > 0) {
-              const target = document.getElementById(tourSteps[currentTourStep].id);
+              const stepId = tourSteps[currentTourStep].id;
+              if (stepId === 'welcome-placard') break;
+              const target = document.getElementById(stepId);
               if (target && target.style.display !== 'none') break;
               currentTourStep--;
           }
@@ -2996,46 +3036,31 @@ if (isZeroState && state.isLocked) {
               state.viewMode = 'forest';
           }
           render();
-          updateTourPosition();
+          setTimeout(() => { updateTourPosition(); }, 50);
       }
 
       function startInteractiveWalkthrough() {
-          const tpl = (window.SYLVA_TEMPLATES || []).find(t => t.title === 'Master Grocery List' || t.id === 'tpl_free_01') || (window.SYLVA_TEMPLATES || [])[0];
-          const suffix = '_' + Date.now();
-          let builtNodes = [];
+          document.getElementById('drawer-left').classList.remove('open');
+          document.getElementById('drawer-right').classList.remove('open');
+          document.getElementById('modal-help-options').style.display = 'none';
 
-          if (tpl && Array.isArray(tpl.nodes) && tpl.nodes.length > 0) {
-              const idMap = {};
-              tpl.nodes.forEach(n => idMap[n.id] = n.id + suffix);
-              builtNodes = tpl.nodes.map(n => {
-                  const oldParent = n.parent !== undefined ? n.parent : n.parentId;
-                  return {
-                      id: idMap[n.id],
-                      title: n.title || 'Item',
-                      desc: n.desc || '',
-                      type: n.type || 'leaf',
-                      parentId: oldParent ? idMap[oldParent] : null,
-                      x: 5000,
-                      y: 5000,
-                      pinned: false,
-                      harvested: false,
-                      ripe: false
-                  };
-              });
-          } else {
-              const trunkId = 'n_trunk' + suffix;
-              const branchId = 'n_branch' + suffix;
-              builtNodes = [
-                  { id: trunkId, title: 'Master Grocery List', desc: 'Walkthrough Sample Tree', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false },
-                  { id: branchId, title: 'Produce Section', desc: 'Fresh fruits and vegetables', type: 'branch', parentId: trunkId, x: 4900, y: 5160, pinned: false },
-                  { id: 'n_fruit' + suffix, title: 'Buy Apples & Greens', desc: 'Long-press or double-tap to mark Ripe!', type: 'fruit', parentId: branchId, x: 4900, y: 5320, pinned: false, ripe: true, harvested: false }
-              ];
-          }
+          const suffix = '_' + Date.now();
+          const trunkId = 'n_trunk' + suffix;
+          const b1 = 'n_b1' + suffix;
+          const b2 = 'n_b2' + suffix;
+
+          const builtNodes = [
+              { id: trunkId, title: 'Master Grocery List', desc: 'Interactive Walkthrough Tree', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false },
+              { id: b1, title: 'Produce Section', desc: 'Fresh fruits and greens', type: 'branch', parentId: trunkId, x: 4850, y: 5160, pinned: false },
+              { id: b2, title: 'Pantry Staples', desc: 'Dry goods and canned items', type: 'branch', parentId: trunkId, x: 5150, y: 5160, pinned: false },
+              { id: 'n_f1' + suffix, title: 'Organic Apples', desc: 'Marked Ripe and ready to harvest!', type: 'fruit', parentId: b1, x: 4850, y: 5320, pinned: false, ripe: true, harvested: false, estHours: 2, timeSpent: 0 },
+              { id: 'n_l1' + suffix, title: 'Shopping Notes', desc: 'Bring reusable bags', type: 'leaf', parentId: b2, x: 5150, y: 5320, pinned: false, estHours: 1, timeSpent: 0 }
+          ];
 
           const wTree = {
               id: 'w_tree_' + Date.now(),
-              title: (tpl && tpl.title) ? tpl.title : 'Master Grocery List',
-              type: (tpl && tpl.type) ? tpl.type : 'Apple',
+              title: 'Master Grocery List (Walkthrough)',
+              type: 'Apple',
               season: 'Spring',
               pinned: false,
               x: 5000,
@@ -3043,27 +3068,40 @@ if (isZeroState && state.isLocked) {
               nodes: builtNodes
           };
 
-          const f = getForest() || state.forests[0];
+          if (!state.forests || state.forests.length === 0) {
+              state.forests = [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }];
+              state.activeForestId = 'forest-1';
+          }
+
+          const f = getForest();
           f.trees.push(wTree);
           state.activeForestId = f.id;
           state.activeTreeId = wTree.id;
           state.viewMode = 'tree';
-          state.selectedId = wTree.id;
+          state.selectedId = trunkId;
+          state.isLocked = true;
 
-          autoTidyNodes();
-          saveData();
-          render();
+          try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e) {}
 
+          isWalkthroughActive = true;
           tourSteps.length = 0;
           tourSteps.push(
-              { id: 'viewport', title: 'Interactive Walkthrough', text: `We just loaded a sample tree ('${wTree.title}') and arranged its nodes on your canvas! Let's walk through the core tools.` },
-              { id: 'btn-harvest-main', title: 'Complete & Harvest Tasks', text: "Double-tap any Fruit (task) node—or long-press it for 0.6s—to mark it Complete (Ripe ✅). Then click this Harvest button to clear ripe tasks from your tree." },
-              { id: 'btn-season', title: 'Seasons & Harvest Basket', text: "Click Season to view your Tree Life Cycle, Prune empty notes, or open your Harvest Basket to review completed tasks." },
-              { id: 'btn-critical-path', title: 'Critical Path', text: "Toggle Critical Path to highlight the longest chain of incomplete tasks in red so you know where bottlenecks are." },
-              { id: 'btn-toggle-timeline', title: 'Document View (Executive Spread)', text: "Click Document View to switch from the visual canvas to an executive breakdown of schedules, hours, budgets, and assignees." },
-              { id: 'btn-grow', title: 'You Are Ready to Grow!', text: "Click Grow... anytime to add new Branches, Leaves, Fruits, or Seeds to your tree!" }
+              { id: 'welcome-placard', title: '🚀 Interactive Walkthrough', text: "We just created and opened a sample 'Master Grocery List' Apple Tree on your canvas! Click Next to walk through your core project tools." },
+              { id: 'viewport', title: '1. Your Visual Tree', text: "Here is your Trunk ('Master Grocery List'), two Branches ('Produce' & 'Pantry'), a Leaf note, and a ripe Fruit task ('Organic Apples' ✅)." },
+              { id: 'btn-harvest-main', title: '2. Complete & Harvest Tasks', text: "Notice 'Organic Apples' has a green ✅ because it is marked Complete (Ripe). Clicking Harvest collects all ripe fruits into your Harvest Basket and updates your Apple Tree progress bar!" },
+              { id: 'btn-season', title: '3. Seasons & Harvest Basket', text: "Click Season anytime to inspect your Harvest Basket, Prune empty disconnected notes, or change the seasonal phase of your tree." },
+              { id: 'btn-critical-path', title: '4. Critical Path', text: "Toggle Critical Path to automatically highlight the longest chain of incomplete tasks in glowing red." },
+              { id: 'btn-toggle-timeline', title: '5. Document View (Executive Spread)', text: "Click Document View at the top of the canvas to view your tree as a structured executive breakdown and export Word/Excel PM documents." },
+              { id: 'btn-grow', title: '6. You Are Ready to Grow!', text: "Click Finish below! You can now play around with this sample tree—try clicking Harvest—or click '^ Up' to return to your Forest." }
           );
-          setTimeout(() => { startTour(); }, 150);
+
+          render();
+          centerOn(5000, 5100);
+          setTimeout(() => {
+              preTourViewMode = 'tree';
+              currentTourStep = 0;
+              updateTourPosition();
+          }, 150);
       }
 
       function initTutorial() {
