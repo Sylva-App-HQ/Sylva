@@ -252,7 +252,7 @@
   <style>
     .lasso-box { position: absolute; border: 1px dashed var(--accent); background: rgba(45, 212, 191, 0.1); pointer-events: none; z-index: 100; display: none; }
   </style>
-  <main id="viewport">
+  <main id="viewport" oncontextmenu="event.preventDefault(); return false;" style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;">
     <div id="world">
       <svg id="canvas-svg"></svg>
       <div id="tree-layer"></div>
@@ -1009,7 +1009,11 @@ window.openCheckout = function(productType, platform) {
         return maxPath;
       }
       function render() {
-        const forest = getForest(), tree = getTree();
+    if (state.viewMode === 'tree' && typeof getTree === 'function' && !getTree()) {
+        state.viewMode = 'forest';
+        state.currentTreeId = null;
+    }
+    const forest = getForest(), tree = getTree();
         const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), bc = document.getElementById('breadcrumb-text');
         
         btnLock.className = `btn btn-small btn-lock ${state.isLocked ? '' : 'unlocked'}`;
@@ -2957,16 +2961,6 @@ if (isZeroState && state.isLocked) {
     }
 
     init();
-
-    // Post-Load Sanity Check: Prevent ghost views
-    // If the app loads into a tree that no longer exists, force it back to the forest
-    if (state.viewMode === 'tree' && typeof getTree === 'function' && !getTree()) {
-        state.viewMode = 'forest';
-        state.currentTreeId = null;
-        if (typeof render === 'function') render();
-    }
-
-      init();
   
       document.getElementById('btn-create-org').addEventListener('click', () => {
         const userInput = prompt("Enter a custom Group Code (or leave blank to auto-generate):");
