@@ -1011,7 +1011,7 @@ window.openCheckout = function(productType, platform) {
       function render() {
     if (state.viewMode === 'tree' && typeof getTree === 'function' && !getTree()) {
         state.viewMode = 'forest';
-        state.currentTreeId = null;
+        state.activeTreeId = null;
     }
     const forest = getForest(), tree = getTree();
         const btnLock = document.getElementById('btn-lock'), btnSwitchContext = document.getElementById('btn-switch-context'), bc = document.getElementById('breadcrumb-text');
@@ -1124,7 +1124,7 @@ if (isZeroState && state.isLocked) {
         canvasSvg.innerHTML = '';
         if (state.viewMode !== 'tree') return;
         const tree = getTree(); if (!tree) return;
-        tree.nodes.forEach(n => {
+        (tree.nodes || []).forEach(n => {
           if (n.parentId) {
             const p = tree.nodes.find(pn => pn.id === n.parentId);
             if (p) {
@@ -1215,7 +1215,7 @@ if (isZeroState && state.isLocked) {
 
       function renderTree() {
         const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if (!tree) return;
-        tree.nodes.forEach(node => {
+        (tree.nodes || []).forEach(node => {
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
@@ -1524,14 +1524,14 @@ if (isZeroState && state.isLocked) {
                         lassoEl.style.height = '0px';
                         if (navigator.vibrate) navigator.vibrate(50);
                     }
-                }, 500);
+                }, 1000);
             }
         });
 
         window.addEventListener('pointermove', (e) => {
             if (bgLongPressTimer && !isLassoing) {
-                // Increased tolerance to 15px so normal finger wobble doesn't cancel the lasso
-                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 15) {
+                // Increased tolerance to 20px so normal finger wobble doesn't cancel the lasso
+                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 20) {
                     clearTimeout(bgLongPressTimer);
                     bgLongPressTimer = null;
                 }
@@ -1793,11 +1793,11 @@ if (isZeroState && state.isLocked) {
                   const isTreeMode = state.viewMode === 'tree';
                   const items = isTreeMode ? (getTree()?.nodes || []) : (getForest()?.trees || []);
                   
-                  // Check 30-pixel hit radius
+                  // Check 20-pixel hit radius
                   for (let item of items) {
                     const itemPipX = offsetX + item.x * scale;
                     const itemPipY = offsetY + item.y * scale;
-                    if (Math.hypot(pipX - itemPipX, pipY - itemPipY) <= 30) {
+                    if (Math.hypot(pipX - itemPipX, pipY - itemPipY) <= 20) {
                       hitNode = item; break;
                     }
                   }
@@ -2478,7 +2478,7 @@ if (isZeroState && state.isLocked) {
       window.initialFocus = function() {
      if (state.viewMode === 'tree') {
          const t = getTree();
-         const root = t ? (t.nodes.find(nd => nd.type === 'trunk') || t.nodes[0]) : null;
+         const root = t ? ((t.nodes || []).find(nd => nd.type === 'trunk') || (t.nodes || [])[0]) : null;
          if (root) centerOn(root.x, root.y);
      } else if (state.viewMode === 'forest') {
          const f = getForest();
