@@ -628,25 +628,62 @@
   </div>
 
   <div class="modal-overlay" id="modal-help-index" style="display:none; z-index: 10000;">
-    <div class="modal-card" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
-      <div class="modal-header"><h3>📚 Sylva Feature Index</h3><button class="btn btn-small" id="btn-close-help-index">&times;</button></div>
-      <div class="modal-body" style="text-align: left; line-height: 1.5;">
-        <h4 style="color: var(--accent); margin-bottom: 5px;">🌳 Nodes & Trees</h4>
-        <p style="font-size: 13px; margin-bottom: 15px;"><strong>Nodes:</strong> The building blocks. Branches group ideas. Leaves are notes. Fruits are deliverables. Seeds link to other trees. Pine Cones & Acorns are specialized markers.<br>
-        <strong>Trees:</strong> A complete project map (e.g., Pine, Oak, Willow).<br>
-        <strong>Forests:</strong> Multiple trees on a single canvas.</p>
-        
-        <h4 style="color: var(--accent); margin-bottom: 5px;">🧺 Harvesting</h4>
-        <p style="font-size: 13px; margin-bottom: 15px;">When a Fruit (deliverable) is marked complete, clicking 'Harvest' removes it from the tree and safely stores it in your Harvest Basket for review.</p>
+    <div class="modal-card" style="max-width: 640px; max-height: 85vh; overflow: hidden;">
+      <div class="modal-header"><h3>📚 Sylva Complete Feature & Button Index</h3><button class="btn btn-small" id="btn-close-help-index">&times;</button></div>
+      <div class="modal-body" style="text-align: left; line-height: 1.55; overflow-y: auto; gap: 14px; font-size: 12.5px;">
 
-        <h4 style="color: var(--accent); margin-bottom: 5px;">🗺️ Navigation & Views</h4>
-        <p style="font-size: 13px; margin-bottom: 15px;"><strong>PIP Minimap:</strong> A picture-in-picture map to pan around large forests.<br>
-        <strong>Executive Spread:</strong> A high-level overview mode for rapid status checks.<br>
-        <strong>Critical Path:</strong> Highlights the most crucial path to completing a project.<br>
-        <strong>Seasons:</strong> Visual themes representing the phase of your project.</p>
+        <div>
+          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🧭 Top Header & Navigation Bar</h4>
+          <p style="margin-bottom: 6px;"><strong>☰ Forest / Nodes (Left Drawer Button):</strong> Opens the Directory drawer showing Pinned items and an A–Z list of all Trees (when in Forest View) or Nodes (when in Tree View). Tap any item's name to center the camera on it, or click <em>Pin This</em> to keep it at the top.</p>
+          <p style="margin-bottom: 6px;"><strong>+ Grow... (Center Accent Button):</strong> Creates new items on the canvas. In <em>Forest View</em>, grow a new <strong>Tree</strong> or a <strong>New Forest</strong> workspace. In <em>Tree View</em>, grow a child node attached to your currently selected node (or the Trunk if none is selected).</p>
+          <p style="margin-bottom: 6px;"><strong>Nursery ▾ (Right Drawer Button):</strong> Opens the Nursery & Sync drawer to export/import JSON files, browse the Template Library, switch between saved Forests, or sync with a group.</p>
+          <p style="margin-bottom: 6px;"><strong>^ Up Button:</strong> Steps backward one level in your hierarchy: from Document View back to Tree View, from a selected Node to the Tree root, or from Tree View back out to Forest View.</p>
+          <p style="margin-bottom: 6px;"><strong>Breadcrumb Bar:</strong> Shows your exact location (<code>🌲 Forest &gt; Tree &gt; Selected Node</code>). Tap the Forest or Tree name in the breadcrumb bar to jump directly to that level.</p>
+          <p style="margin-bottom: 6px;"><strong>🔒 / 🔓 Drag Lock Toggle:</strong> When <strong>Locked (🔒)</strong>, dragging pans the canvas safely and unlocks the <em>Grow</em> and <em>Season</em> buttons. When <strong>Unlocked (🔓)</strong>, you can freely drag Trees and Nodes to new positions; hovering a node over another node for 1.5 seconds while unlocked re-parents it.</p>
+          <p style="margin-bottom: 0;"><strong>📄 Document View Button:</strong> Appears beneath the navigation bar when inside a Tree. Toggles the <strong>Executive Spread</strong>, a structured document/spreadsheet view of all nodes sorted by Start Date, displaying hours, budget overruns (⚠️), and assignees.</p>
+        </div>
 
-        <h4 style="color: var(--accent); margin-bottom: 5px;">🤝 Local P2P Group Sync</h4>
-        <p style="font-size: 13px; margin-bottom: 15px;">Connect directly with other devices on your local network using a secure Group Code. No cloud servers required.</p>
+        <div>
+          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🌲 Tree Species (Mechanics)</h4>
+          <p style="margin-bottom: 6px;"><strong>Pine (Persistent Wiki / SOPs):</strong> Built for recurring checklists and standard operating procedures. Fruits become <em>Pine Cones</em>—when harvested, they automatically reset to incomplete instead of disappearing so you can reuse the checklist.</p>
+          <p style="margin-bottom: 6px;"><strong>Oak (Large Projects / Research / Acorn Links):</strong> Built for complex cross-referenced architectures. Selecting <em>Grow... &gt; Acorn (Link)</em> activates Acorn Target Mode, allowing you to link any two nodes across the tree and snap between them via the Node Inspector.</p>
+          <p style="margin-bottom: 6px;"><strong>Willow (Fluid Brainstorming / Journal):</strong> Uses curved organic canopy paths and adds a <em>Lengthen Branch</em> button inside the Node Inspector to rapidly chain sequential thoughts.</p>
+          <p style="margin-bottom: 0;"><strong>Apple (Tasks / Deliverables):</strong> Displays a live completion progress bar along the bottom of the navigation bar tracking harvested Fruits vs. total Fruits.</p>
+        </div>
+
+        <div>
+          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🍃 Node Types & Inspector</h4>
+          <p style="margin-bottom: 6px;"><strong>🪵 Trunk:</strong> The core goal or root node of a Tree. Cannot be deleted.</p>
+          <p style="margin-bottom: 6px;"><strong>🌳 Branch (Group):</strong> Structural category or phase used to organize child nodes.</p>
+          <p style="margin-bottom: 6px;"><strong>🍃 Leaf (Note / Document):</strong> Holds text, documentation, research notes, and details.</p>
+          <p style="margin-bottom: 6px;"><strong>🍎 Fruit (Task / Deliverable):</strong> Actionable items that can be marked <em>Complete (Ripe ✅)</em> and harvested.</p>
+          <p style="margin-bottom: 6px;"><strong>🌰 Seed (Link):</strong> Represents a linked sub-tree or external reference.</p>
+          <p style="margin-bottom: 0;"><strong>Advanced Metadata (Inside Node Inspector):</strong> Double-tap any node and click <em>Advanced Metadata</em> to set a <strong>Start Date</strong>, <strong>Estimated Hours</strong>, <strong>Time Spent</strong>, <strong>Budget ($)</strong>, <strong>Total Spent ($)</strong>, and multiple <strong>Assignees with RACI Roles</strong> (Responsible, Accountable, Consulted, Informed).</p>
+        </div>
+
+        <div>
+          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">⚡ Bottom-Right Action Buttons</h4>
+          <p style="margin-bottom: 6px;"><strong>Harvest:</strong> Collects all Fruit nodes marked <em>Complete (Ripe ✅)</em> across the current Tree or Forest. Harvested fruits are removed from the active timeline and stored in your Harvest Basket (except Pine Cones, which reset).</p>
+          <p style="margin-bottom: 6px;"><strong>Critical Path:</strong> Calculates and highlights in glowing red the longest chain of incomplete tasks based on remaining hours (<code>Est. Hours - Time Spent</code>), showing your project's primary bottleneck.</p>
+          <p style="margin-bottom: 6px;"><strong>Season:</strong> Opens the <em>Tree Life Cycle &amp; Harvest</em> modal. View nodes grouped by season (Spring, Summer, Autumn, Winter), <strong>Force</strong> a tree into a season, click <strong>Prune Tree</strong> to clean up blank disconnected notes, or click <strong>Inspect Basket</strong> to view harvested deliverables.</p>
+          <p style="margin-bottom: 0;"><strong>Project Management (Visible in Document View):</strong> Exports your live project structure directly to <strong>Project Plan</strong> (.doc), <strong>Project Charter</strong> (.doc), <strong>Work Breakdown Structure / WBS</strong> (.csv/.xlsx), or <strong>RACI Matrix</strong> (.csv/.xlsx).</p>
+        </div>
+
+        <div>
+          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🗺️ PIP Minimap & Canvas Gestures</h4>
+          <p style="margin-bottom: 6px;"><strong>Canvas Touch / Mouse Controls:</strong> Drag to pan; pinch with two fingers (or scroll wheel) to zoom; single-tap a node to select; double-tap a node or tree to open its Inspector; long-press a Tree (0.4s) in Forest View to enter it; long-press a Fruit (0.6s) to toggle Ripe ✅; double-tap empty canvas to zoom-to-fit all items; press-and-hold empty canvas for 1.5s to draw a Lasso box.</p>
+          <p style="margin-bottom: 0;"><strong>PIP Minimap (Bottom-Left):</strong> Shows a live radar of your workspace and orange viewport box. Drag inside the minimap to pan the radar; pinch with two fingers inside the minimap to zoom the radar; single-tap a node dot on the minimap to glide the main camera to it; double-tap the minimap to auto-fit the radar; long-press the minimap (0.8s) to snap back to initial focus.</p>
+        </div>
+
+        <div>
+          <h4 style="color: var(--accent); margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 4px;">🌱 Nursery, Templates, Sync & Branding</h4>
+          <p style="margin-bottom: 6px;"><strong>Auto Tidy Grid (Left Drawer):</strong> Automatically arranges all Trees in concentric rings (in Forest View) or formats all Nodes into a balanced organic tree canopy (in Tree View).</p>
+          <p style="margin-bottom: 6px;"><strong>Save / Load Tree &amp; Forest (Right Drawer):</strong> Exports or imports standalone <code>.json</code> backup files to your device.</p>
+          <p style="margin-bottom: 6px;"><strong>Template Library:</strong> Browse pre-built project and life templates by category, sorted with Free templates at the top and Premium templates below. Inject templates into your current forest or a brand-new forest.</p>
+          <p style="margin-bottom: 6px;"><strong>🤝 Sync w/ or Create Group:</strong> Generate or enter a Group Code to broadcast changes across local peer devices over chunked WebRTC data channels with Admin Password protection.</p>
+          <p style="margin-bottom: 0;"><strong>🎨 Custom Branding / Tree Hugger ($2):</strong> Unlocking Tree Hugger status unlocks all 50+ templates and converts the button into the <em>Custom Branding Panel</em>, allowing you to customize Canvas, Surface, and Accent hex colors and UI typography.</p>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1545,14 +1582,14 @@ if (isZeroState && state.isLocked) {
 
         const viewportEl = document.getElementById('viewport');
         viewportEl.addEventListener('pointerdown', (e) => {
-            if (activePointers.size >= 1 || isPinching) return; 
+            if (activePointers.size > 1 || isPinching) return; 
             
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
                 lpInitialX = e.clientX;
                 lpInitialY = e.clientY;
                 
                 bgLongPressTimer = setTimeout(() => {
-                    if (!isPinching) {
+                    if (!isPinching && activePointers.size === 1) {
                         isLassoing = true;
                         if (typeof viewportDragging !== 'undefined') viewportDragging = false; 
                         activePointers.clear(); // Forcibly stop the panning engine
@@ -1566,14 +1603,14 @@ if (isZeroState && state.isLocked) {
                         lassoEl.style.height = '0px';
                         if (navigator.vibrate) navigator.vibrate(50);
                     }
-                }, 1000);
+                }, 1500);
             }
         });
 
         window.addEventListener('pointermove', (e) => {
             if (bgLongPressTimer && !isLassoing) {
-                // Increased tolerance to 20px so normal finger wobble doesn't cancel the lasso
-                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 20) {
+                // 10px tolerance so any intentional panning immediately cancels the lasso timer
+                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 10) {
                     clearTimeout(bgLongPressTimer);
                     bgLongPressTimer = null;
                 }
@@ -2324,6 +2361,8 @@ if (isZeroState && state.isLocked) {
      function buildTemplateLibrary() {
         const list = document.getElementById('list-templates');
         list.innerHTML = '';
+        list.style.padding = '12px';
+        list.style.gap = '8px';
         
         if (!window.SYLVA_TEMPLATES) {
             list.innerHTML = '<div style="color:red; text-align:center;">Templates failed to load.</div>';
@@ -2331,79 +2370,100 @@ if (isZeroState && state.isLocked) {
         }
 
         const isVip = localStorage.getItem('sylva_is_vip') === 'true' || state.premiumUnlocked;
-
         const ownedSingles = JSON.parse(localStorage.getItem('sylva_owned_singles') || '[]');
 
-        const freeTemplates = window.SYLVA_TEMPLATES.filter(t => t.price === 'free' || t.tier === 'free');
-        const premiumTemplates = window.SYLVA_TEMPLATES.filter(t => t.price !== 'free' && t.tier !== 'free');
-        
-        const renderTemplateGroup = (title, templatesArray, container) => {
-            if (templatesArray.length === 0) return;
-            
-            const header = document.createElement('div');
-            header.className = 'template-tier-header';
-            header.innerHTML = title;
-            container.appendChild(header);
+        const categories = {};
+        window.SYLVA_TEMPLATES.forEach(tpl => {
+            const cat = tpl.category || 'Uncategorized';
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(tpl);
+        });
 
-            const categories = {};
-            templatesArray.forEach(tpl => {
-                const cat = tpl.category || 'Uncategorized';
-                if (!categories[cat]) categories[cat] = [];
-                categories[cat].push(tpl);
-            });
+        const showCategories = () => {
+            list.innerHTML = '';
+            const intro = document.createElement('div');
+            intro.style.cssText = 'font-size:12px; color:var(--text-muted); margin-bottom:6px; text-align:center;';
+            intro.innerText = 'Select a category to browse templates:';
+            list.appendChild(intro);
 
             Object.keys(categories).sort().forEach(catName => {
-                const catHeader = document.createElement('div');
-                catHeader.className = 'template-category-header';
-                catHeader.innerText = catName;
-                container.appendChild(catHeader);
-
-                const grid = document.createElement('div');
-                grid.className = 'template-grid';
-                
-                categories[catName].sort((a, b) => a.title.localeCompare(b.title)).forEach(tpl => {
-                    const isPremium = tpl.tier === 'premium' || tpl.price !== 'free';
-                    const locked = isPremium && !isVip && !ownedSingles.includes(tpl.title);
-                    
-                    const el = document.createElement('div');
-                    el.className = 'directory-item';
-                    el.style.display = 'flex';
-                    el.style.flexDirection = 'column';
-                    el.style.justifyContent = 'space-between';
-                    el.style.alignItems = 'flex-start';
-                    el.style.height = '100%';
-                    el.style.padding = '15px';
-                    
-                    el.innerHTML = `
-                        <div style="width: 100%;">
-                            <div style="font-weight:600; color:var(--text-main); font-size: 16px; margin-bottom: 5px;">${escapeHTML(tpl.title)} ${isPremium ? '💎' : ''}</div>
-                            <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;">${escapeHTML(tpl.type)} Tree</div>
-                            <div style="font-size:12px; color:#aaa; margin-bottom: 15px; line-height: 1.4;">${escapeHTML(tpl.description || '')}</div>
-                        </div>
-                        <button class="btn btn-small ${locked ? '' : 'btn-accent'}" style="width: 100%; ${locked ? 'border-color:#F59E0B; color:#F59E0B;' : ''}">
-                            ${locked ? 'Unlock' : 'Load Template'}
-                        </button>
-                    `;
-                    
-                    el.querySelector('button').addEventListener('click', () => {
-                        if (locked) {
-                            document.getElementById('modal-purchase-template').classList.add('open');
-                            document.getElementById('modal-templates').classList.remove('open');
-                            return;
-                        }
-                        window.pendingTemplateData = tpl;
-                        document.getElementById('tpl-prompt-name').innerText = tpl.title;
-                        document.getElementById('modal-template-prompt').classList.add('open');
-                        document.getElementById('modal-templates').classList.remove('open');
-                    });
-                    grid.appendChild(el);
-                });
-                container.appendChild(grid);
+                const count = categories[catName].length;
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.style.cssText = 'width:100%; justify-content:space-between; padding:14px 16px; height:auto; font-size:13px;';
+                btn.innerHTML = `<span>📁 ${escapeHTML(catName)}</span><span style="font-size:11px; color:var(--text-muted);">${count} templates ▸</span>`;
+                btn.onclick = () => showCategoryTemplates(catName);
+                list.appendChild(btn);
             });
         };
 
-        renderTemplateGroup('🌱 Free Templates', freeTemplates, list);
-        renderTemplateGroup('🌳 Premium Templates', premiumTemplates, list);
+        const showCategoryTemplates = (catName) => {
+            list.innerHTML = '';
+
+            const headerRow = document.createElement('div');
+            headerRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-subtle);';
+            
+            const backBtn = document.createElement('button');
+            backBtn.className = 'btn btn-small';
+            backBtn.innerHTML = '◂ Categories';
+            backBtn.onclick = showCategories;
+
+            const catTitle = document.createElement('strong');
+            catTitle.style.cssText = 'font-size:14px; color:var(--accent);';
+            catTitle.innerText = catName;
+
+            headerRow.appendChild(backBtn);
+            headerRow.appendChild(catTitle);
+            list.appendChild(headerRow);
+
+            const sorted = [...categories[catName]].sort((a, b) => {
+                const aFree = (a.price === 'free' || a.tier === 'free');
+                const bFree = (b.price === 'free' || b.tier === 'free');
+                if (aFree && !bFree) return -1;
+                if (!aFree && bFree) return 1;
+                return (a.title || '').localeCompare(b.title || '');
+            });
+
+            sorted.forEach(tpl => {
+                const isPremium = tpl.tier === 'premium' || (tpl.price && tpl.price !== 'free');
+                const locked = isPremium && !isVip && !ownedSingles.includes(tpl.title);
+
+                const row = document.createElement('li');
+                row.className = 'directory-item';
+                row.style.cssText = 'display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:10px 12px; gap:12px;';
+
+                row.innerHTML = `
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:600; color:var(--text-main); font-size:13px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                            <span>${escapeHTML(tpl.title)}</span>
+                            <span style="font-size:10px; padding:1px 6px; border-radius:4px; background:var(--bg-canvas); color:${isPremium ? '#F59E0B' : '#10B981'}; border:1px solid ${isPremium ? '#F59E0B' : '#10B981'};">${isPremium ? '💎 Premium' : '🌱 Free'}</span>
+                            <span style="font-size:10px; color:var(--text-muted);">(${escapeHTML(tpl.type)})</span>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:3px; line-height:1.3;">${escapeHTML(tpl.description || '')}</div>
+                    </div>
+                    <button class="btn btn-small ${locked ? '' : 'btn-accent'}" style="flex-shrink:0; ${locked ? 'border-color:#F59E0B; color:#F59E0B;' : ''}">
+                        ${locked ? 'Unlock' : 'Load'}
+                    </button>
+                `;
+
+                row.querySelector('button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.pendingTemplateData = tpl;
+                    if (locked) {
+                        document.getElementById('modal-purchase-template').classList.add('open');
+                        document.getElementById('modal-templates').classList.remove('open');
+                        return;
+                    }
+                    document.getElementById('tpl-prompt-name').innerText = tpl.title;
+                    document.getElementById('modal-template-prompt').classList.add('open');
+                    document.getElementById('modal-templates').classList.remove('open');
+                });
+
+                list.appendChild(row);
+            });
+        };
+
+        showCategories();
         
         // Translate Python JSON structures into Sylva JavaScript IDs
         function processNodes(tplNodes, startX, startY) {
@@ -2940,46 +3000,70 @@ if (isZeroState && state.isLocked) {
       }
 
       function startInteractiveWalkthrough() {
-          const tpl = window.SYLVA_TEMPLATES.find(t => t.id === 'tpl_free_01');
-          if (!tpl) {
-              showAppAlert("Template 'Master Grocery List' not found for walkthrough.");
-              return;
-          }
-          
-          let wTree = JSON.parse(JSON.stringify(tpl.treeData));
-          wTree.id = 'w_tree_' + Date.now();
-          wTree.nodes = wTree.nodes || [];
-          
-          const f = getForest() || (state.forests.length > 0 ? state.forests[0] : null);
-          if (f) {
-              wTree.x = f.panX + (window.innerWidth / 2);
-              wTree.y = f.panY + (window.innerHeight / 2);
-              f.trees.push(wTree);
-          } else {
-              state.forests.push({
-                  id: 'w_forest_' + Date.now(),
-                  name: 'Walkthrough Forest',
-                  trees: [wTree],
-                  panX: 0, panY: 0, scale: 1
+          const tpl = (window.SYLVA_TEMPLATES || []).find(t => t.title === 'Master Grocery List' || t.id === 'tpl_free_01') || (window.SYLVA_TEMPLATES || [])[0];
+          const suffix = '_' + Date.now();
+          let builtNodes = [];
+
+          if (tpl && Array.isArray(tpl.nodes) && tpl.nodes.length > 0) {
+              const idMap = {};
+              tpl.nodes.forEach(n => idMap[n.id] = n.id + suffix);
+              builtNodes = tpl.nodes.map(n => {
+                  const oldParent = n.parent !== undefined ? n.parent : n.parentId;
+                  return {
+                      id: idMap[n.id],
+                      title: n.title || 'Item',
+                      desc: n.desc || '',
+                      type: n.type || 'leaf',
+                      parentId: oldParent ? idMap[oldParent] : null,
+                      x: 5000,
+                      y: 5000,
+                      pinned: false,
+                      harvested: false,
+                      ripe: false
+                  };
               });
+          } else {
+              const trunkId = 'n_trunk' + suffix;
+              const branchId = 'n_branch' + suffix;
+              builtNodes = [
+                  { id: trunkId, title: 'Master Grocery List', desc: 'Walkthrough Sample Tree', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false },
+                  { id: branchId, title: 'Produce Section', desc: 'Fresh fruits and vegetables', type: 'branch', parentId: trunkId, x: 4900, y: 5160, pinned: false },
+                  { id: 'n_fruit' + suffix, title: 'Buy Apples & Greens', desc: 'Long-press or double-tap to mark Ripe!', type: 'fruit', parentId: branchId, x: 4900, y: 5320, pinned: false, ripe: true, harvested: false }
+              ];
           }
-          
-          state.activeForestId = state.forests[state.forests.length-1].id;
+
+          const wTree = {
+              id: 'w_tree_' + Date.now(),
+              title: (tpl && tpl.title) ? tpl.title : 'Master Grocery List',
+              type: (tpl && tpl.type) ? tpl.type : 'Apple',
+              season: 'Spring',
+              pinned: false,
+              x: 5000,
+              y: 5000,
+              nodes: builtNodes
+          };
+
+          const f = getForest() || state.forests[0];
+          f.trees.push(wTree);
+          state.activeForestId = f.id;
           state.activeTreeId = wTree.id;
           state.viewMode = 'tree';
+          state.selectedId = wTree.id;
+
+          autoTidyNodes();
+          saveData();
           render();
-          setTimeout(() => { window.initialFocus(); }, 100);
-          
-          tourSteps.length = 0; // Clear standard tutorial
+
+          tourSteps.length = 0;
           tourSteps.push(
-              { id: 'viewport', title: 'Interactive Walkthrough', text: "We just loaded the 'Master Grocery List' template for you! Let's get hands-on." },
-              { id: 'btn-harvest', title: 'Complete a Task', text: "Pretend you just bought your produce. Double-click the 'Produce' node, check the 'Complete' box, click Save, then click the Harvest button here to clear it from the tree." },
-              { id: 'btn-view-harvest', title: 'View Harvest Basket', text: "Click here to view your Harvest Basket. All completed fruits go here for safekeeping." },
-              { id: 'btn-toggle-critical', title: 'Critical Path', text: "Toggle this on. It highlights the most critical path to project completion." },
-              { id: 'btn-toggle-timeline', title: 'Executive Spread', text: "Click here to view the tree in a top-down, professional spreadsheet view." },
-              { id: 'btn-grow', title: 'You are ready to Grow!', text: "That's it! You know how to manage nodes, harvest tasks, and view data. Click here to start growing your own ideas!" }
+              { id: 'viewport', title: 'Interactive Walkthrough', text: `We just loaded a sample tree ('${wTree.title}') and arranged its nodes on your canvas! Let's walk through the core tools.` },
+              { id: 'btn-harvest-main', title: 'Complete & Harvest Tasks', text: "Double-tap any Fruit (task) node—or long-press it for 0.6s—to mark it Complete (Ripe ✅). Then click this Harvest button to clear ripe tasks from your tree." },
+              { id: 'btn-season', title: 'Seasons & Harvest Basket', text: "Click Season to view your Tree Life Cycle, Prune empty notes, or open your Harvest Basket to review completed tasks." },
+              { id: 'btn-critical-path', title: 'Critical Path', text: "Toggle Critical Path to highlight the longest chain of incomplete tasks in red so you know where bottlenecks are." },
+              { id: 'btn-toggle-timeline', title: 'Document View (Executive Spread)', text: "Click Document View to switch from the visual canvas to an executive breakdown of schedules, hours, budgets, and assignees." },
+              { id: 'btn-grow', title: 'You Are Ready to Grow!', text: "Click Grow... anytime to add new Branches, Leaves, Fruits, or Seeds to your tree!" }
           );
-          startTour();
+          setTimeout(() => { startTour(); }, 150);
       }
 
       function initTutorial() {
