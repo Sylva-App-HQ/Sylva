@@ -1171,7 +1171,6 @@ if (isZeroState && state.isLocked) {
              render(); 
          } 
      };
-     window.initialFocus();
         bc.appendChild(fCrumb);
 
         if (state.viewMode === 'forest') {
@@ -1610,41 +1609,40 @@ if (isZeroState && state.isLocked) {
 
         const viewportEl = document.getElementById('viewport');
         viewportEl.addEventListener('pointerdown', (e) => {
-            if (activePointers.size > 1 || isPinching) return; 
+            if (isPinching || activePointers.size > 1) return;
             
             if (e.target.id === 'viewport' || e.target.id === 'world' || e.target.id === 'canvas-svg' || e.target.id === 'tree-layer' || e.target.id === 'forest-layer') {
                 lpInitialX = e.clientX;
                 lpInitialY = e.clientY;
+                if (bgLongPressTimer) clearTimeout(bgLongPressTimer);
                 
                 bgLongPressTimer = setTimeout(() => {
-                    if (!isPinching && activePointers.size === 1) {
+                    if (!isPinching && activePointers.size <= 1) {
                         isLassoing = true;
-                        if (typeof viewportDragging !== 'undefined') viewportDragging = false; 
-                        activePointers.clear(); // Forcibly stop the panning engine
+                        viewportDragging = false;
                         
                         lassoStartX = lpInitialX;
                         lassoStartY = lpInitialY;
                         lassoEl.style.display = 'block';
                         lassoEl.style.left = `${lassoStartX}px`;
                         lassoEl.style.top = `${lassoStartY}px`;
-                        lassoEl.style.width = '0px';
-                        lassoEl.style.height = '0px';
+                        lassoEl.style.width = '4px';
+                        lassoEl.style.height = '4px';
                         if (navigator.vibrate) navigator.vibrate(50);
                     }
-                }, 1500);
+                }, 850);
             }
         });
 
         window.addEventListener('pointermove', (e) => {
             if (bgLongPressTimer && !isLassoing) {
-                // 10px tolerance so any intentional panning immediately cancels the lasso timer
-                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 10) {
+                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 25) {
                     clearTimeout(bgLongPressTimer);
                     bgLongPressTimer = null;
                 }
             }
             if (isLassoing) {
-                activePointers.clear(); // Continually suppress panning while lassoing
+                viewportDragging = false;
                 const currentX = e.clientX, currentY = e.clientY;
                 lassoEl.style.left = `${Math.min(lassoStartX, currentX)}px`;
                 lassoEl.style.top = `${Math.min(lassoStartY, currentY)}px`;
@@ -1661,8 +1659,12 @@ if (isZeroState && state.isLocked) {
             
             if (isLassoing) {
                 isLassoing = false;
+                const boxWidth = parseFloat(lassoEl.style.width) || 0;
+                const boxHeight = parseFloat(lassoEl.style.height) || 0;
                 lassoEl.style.display = 'none';
-                showAppAlert("Lasso selection complete. Bulk actions coming in V2!");
+                if (boxWidth > 15 || boxHeight > 15) {
+                    showAppAlert("Lasso selection complete. Bulk actions coming in V2!");
+                }
                 return;
             }
 
@@ -1839,8 +1841,10 @@ if (isZeroState && state.isLocked) {
               }
               prevPinchDist = dist; prevCx = cx; prevCy = cy;
             }
-          } else if (activePointers.size === 1 && viewportDragging && !isPinching && !pipPinching) {
-            state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
+          } else if (activePointers.size === 1 && viewportDragging && !isLassoing && !isPinching && !pipPinching) {
+            if (Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) > 8) {
+              state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
+            }
           }
         });
 
