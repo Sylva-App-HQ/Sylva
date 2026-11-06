@@ -48,9 +48,9 @@
     .nav-right { display: flex; align-items: center; z-index: 4; position: relative; gap: 6px; flex-shrink: 0; }
 
     /* Relocated Timeline Button */
-    #timeline-btn-container { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
+    #timeline-btn-container { position: absolute; top: 116px; left: 50%; transform: translateX(-50%); z-index: 25; pointer-events: auto; display: none; }
 
-    #apple-progress-bar { position: absolute; top: 100%; left: 12px; right: 12px; height: 4px; background: var(--bg-canvas); border-radius: 0 0 4px 4px; overflow: hidden; display: none; }
+    #apple-progress-bar { position: absolute; top: calc(100% + 6px); left: 12px; right: 12px; height: 4px; background: var(--bg-surface-elevated); border-radius: 4px; overflow: hidden; display: none; box-shadow: 0 1px 4px rgba(0,0,0,0.5); }
     #apple-progress-fill { height: 100%; background: var(--node-fruit); width: 0%; transition: width 0.3s ease; }
 
     .bottom-actions { position: absolute; right: 12px; bottom: 12px; height: 140px; display: flex; flex-direction: column; justify-content: space-between; z-index: 25; pointer-events: auto; }
@@ -286,10 +286,14 @@
     <div class="drawer-header"><strong>Nursery & Sync</strong><button class="btn btn-small" id="btn-close-right">&times;</button></div>
     <div class="drawer-body">
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn btn-accent" id="btn-save-tree" style="justify-content: flex-start; margin-bottom: 8px;">🪏 Save Tree</button>
-     <button class="btn" id="btn-load-tree" style="justify-content: flex-start; margin-bottom: 8px;">🌱 Load Tree</button>
-     <button class="btn btn-accent" id="btn-save-forest" style="justify-content: flex-start; margin-bottom: 8px;">🪏 Save Forest</button>
-     <button class="btn" id="btn-load-forest" style="justify-content: flex-start; margin-bottom: 8px;">🌱 Load Forest</button>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button class="btn btn-accent" id="btn-save-tree" style="flex: 1; min-width: 0; padding: 0 8px; font-size: 11px;">🪏 Save Tree</button>
+          <button class="btn" id="btn-load-tree" style="flex: 1; min-width: 0; padding: 0 8px; font-size: 11px;">🌱 Load Tree</button>
+        </div>
+        <div style="display: flex; gap: 8px; width: 100%;">
+          <button class="btn btn-accent" id="btn-save-forest" style="flex: 1; min-width: 0; padding: 0 8px; font-size: 11px;">🪏 Save Forest</button>
+          <button class="btn" id="btn-load-forest" style="flex: 1; min-width: 0; padding: 0 8px; font-size: 11px;">🌱 Load Forest</button>
+        </div>
         <button class="btn" id="btn-open-templates" style="border-color:var(--node-leaf); color:var(--node-leaf);">Template Library</button>
       </div>
       <hr style="border:0; border-top:1px solid var(--border-subtle); margin:4px 0;">
@@ -1150,8 +1154,7 @@ if (isZeroState && state.isLocked) {
         document.getElementById('btn-pm-tools').style.display = state.viewMode === 'timeline' ? 'inline-flex' : 'none';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
-        document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && tree.type === 'Apple') ? 'block' : 'none';
-        
+        document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && (tree.type === 'Apple' || tree.type === 'Pine')) ? 'block' : 'none';
         document.getElementById('btn-toggle-timeline').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
         document.getElementById('timeline-btn-container').style.display = state.viewMode === 'tree' ? 'block' : 'none';
 
@@ -1202,10 +1205,13 @@ if (isZeroState && state.isLocked) {
           else if (tree.type === 'Oak') { document.getElementById('btn-grow-fruit').innerText = "... an Acorn (Link)"; }
           else { document.getElementById('btn-grow-fruit').innerText = "... a Fruit (Task)"; }
 
-          if (tree.type === 'Apple') {
-            const fruits = tree.nodes.filter(n => n.type === 'fruit');
-            const total = fruits.length; const harvested = fruits.filter(n => n.harvested).length;
-            document.getElementById('apple-progress-fill').style.width = total === 0 ? '0%' : `${(harvested/total)*100}%`;
+          if (tree.type === 'Apple' || tree.type === 'Pine') {
+            const trackable = (tree.nodes || []).filter(n => n.type === 'fruit' || n.type === 'pinecone');
+            const total = trackable.length;
+            const done = trackable.filter(n => tree.type === 'Pine' ? (n.ripe || n.harvested) : (n.harvested || n.ripe)).length;
+            const fillEl = document.getElementById('apple-progress-fill');
+            fillEl.style.background = tree.type === 'Pine' ? 'var(--accent)' : 'var(--node-fruit)';
+            fillEl.style.width = total === 0 ? '0%' : `${(done / total) * 100}%`;
           }
 
           // Generate critical path universally for both tree and timeline views
@@ -1264,7 +1270,7 @@ if (isZeroState && state.isLocked) {
           startX = e.clientX; startY = e.clientY; draggedNodeId = entity.id;
 
           longPressTimer = setTimeout(() => {
-              if (isTreeMode && entity.type === 'fruit') {
+              if (isTreeMode && (entity.type === 'fruit' || entity.type === 'pinecone')) {
                   entity.ripe = !entity.ripe;
                   clickCount = 0;
                   saveData(); render();
@@ -1325,7 +1331,7 @@ if (isZeroState && state.isLocked) {
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-          const ripeBadge = (node.type === 'fruit' && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
+          const ripeBadge = ((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested)
           el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
           attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
@@ -1504,87 +1510,187 @@ if (isZeroState && state.isLocked) {
 
         document.querySelectorAll('.btn-export-doc').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const type = e.target.getAttribute('data-type');
-                const format = e.target.getAttribute('data-format');
-                const originalText = e.target.innerText;
-                e.target.innerText = 'Exporting...';
+                const type = e.currentTarget.getAttribute('data-type');
+                const format = e.currentTarget.getAttribute('data-format');
+                const originalText = e.currentTarget.innerText;
 
-                const currentData = state.viewMode === 'forest' ? getForest() : getTree();
-                const nodes = currentData.nodes || [];
-                const title = currentData.title || 'Sylva_Project';
+                const forest = getForest();
+                const tree = getTree();
+                const isForestExport = state.viewMode === 'forest' || !tree;
+                const baseTitle = (isForestExport ? forest?.title : tree?.title) || 'Sylva_Project';
+                const defaultName = `${baseTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${type.toUpperCase()}`;
+
+                const customName = prompt('Enter a file name for your exported document:', defaultName);
+                if (customName === null) return;
+                const cleanName = (customName.trim() || defaultName).replace(/\.(docx?|rtf|csv|xlsx|pages|numbers)$/i, '');
+
+                e.currentTarget.innerText = 'Exporting...';
+
+                // Build hierarchical WBS numbering (1, 1.1, 1.1.1) across nodes
+                const buildWBSList = (tObj, treePrefix = '') => {
+                    if (!tObj || !Array.isArray(tObj.nodes)) return [];
+                    const nodes = tObj.nodes;
+                    const childrenMap = {};
+                    nodes.forEach(n => childrenMap[n.id] = []);
+                    const roots = [];
+                    nodes.forEach(n => {
+                        if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n);
+                        else roots.push(n);
+                    });
+                    const out = [];
+                    const walk = (node, wbsCode, depth) => {
+                        out.push({ node, wbs: wbsCode, depth, treeTitle: tObj.title, treeType: tObj.type, treeSeason: tObj.season || 'Spring' });
+                        (childrenMap[node.id] || []).forEach((child, idx) => {
+                            walk(child, `${wbsCode}.${idx + 1}`, depth + 1);
+                        });
+                    };
+                    roots.forEach((r, idx) => walk(r, treePrefix ? `${treePrefix}.${idx + 1}` : `${idx + 1}`, 0));
+                    return out;
+                };
+
+                let wbsItems = [];
+                if (isForestExport && forest && Array.isArray(forest.trees)) {
+                    forest.trees.forEach((t, idx) => { wbsItems = wbsItems.concat(buildWBSList(t, `${idx + 1}`)); });
+                } else if (tree) {
+                    wbsItems = buildWBSList(tree, '1');
+                }
+
+                const getStatus = (n) => n.harvested ? 'Harvested (Archived)' : (n.ripe ? 'Complete (Ripe)' : 'In Progress');
+                const getAssignees = (n) => (n.assignees && n.assignees.length > 0) ? n.assignees.map(a => `${a.name} [${a.role}]`).join(', ') : (n.assignee || 'Unassigned');
+                const csvEsc = (v) => `"${String(v ?? '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+                const rtfEsc = (v) => String(v ?? '').replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}').replace(/\r?\n/g, '\\line ');
 
                 let blob, filename;
 
                 if (format === 'xlsx' || format === 'numbers') {
                     if (type === 'raci') {
-                        let csvContent = "WBS Level,Task Name,Node Type,Responsible (R),Accountable (A),Consulted (C),Informed (I)\n";
-                        nodes.forEach((n, idx) => {
+                        let csv = "WBS Code,Tree,Node Title,Node Type,Status,Season,Start Date,Responsible (R),Accountable (A),Consulted (C),Informed (I),Notes\n";
+                        wbsItems.forEach(({ node: n, wbs, treeTitle }) => {
                             const r = [], a = [], c = [], i = [];
-                            (n.assignees || []).forEach(assignee => {
-                                if (assignee.role === 'R') r.push(assignee.name);
-                                if (assignee.role === 'A') a.push(assignee.name);
-                                if (assignee.role === 'C') c.push(assignee.name);
-                                if (assignee.role === 'I') i.push(assignee.name);
+                            (n.assignees || []).forEach(asg => {
+                                if (asg.role === 'R') r.push(asg.name);
+                                if (asg.role === 'A') a.push(asg.name);
+                                if (asg.role === 'C') c.push(asg.name);
+                                if (asg.role === 'I') i.push(asg.name);
                             });
                             if ((!n.assignees || n.assignees.length === 0) && n.assignee) r.push(n.assignee);
-                            csvContent += `1.${idx + 1},"${(n.title || '').replace(/"/g, '""')}","${n.type}","${r.join(', ')}","${a.join(', ')}","${c.join(', ')}","${i.join(', ')}"\n`;
+                            csv += [
+                                csvEsc(wbs), csvEsc(treeTitle), csvEsc(n.title), csvEsc((n.type || '').toUpperCase()),
+                                csvEsc(getStatus(n)), csvEsc(n.season || 'Spring'), csvEsc(n.startDate || 'TBD'),
+                                csvEsc(r.join('; ')), csvEsc(a.join('; ')), csvEsc(c.join('; ')), csvEsc(i.join('; ')), csvEsc(n.desc || '')
+                            ].join(',') + "\n";
                         });
-                        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
                     } else {
-                        let csvContent = "WBS Level,Task Name,Node Type,Status,Assignees,Description\n";
-                        nodes.forEach((n, idx) => {
-                            const status = n.harvested ? "Complete" : (n.ripe ? "Ripe" : "Pending");
-                            const desc = (n.desc || '').replace(/"/g, '""').replace(/\n/g, ' ');
-                            const assigneesStr = (n.assignees || []).map(a => `${a.name} (${a.role})`).join('; ') || (n.assignee || '');
-                            csvContent += `1.${idx + 1},"${(n.title || '').replace(/"/g, '""')}","${n.type}","${status}","${assigneesStr}","${desc}"\n`;
+                        let csv = "WBS Code,Tree,Hierarchy Level,Task / Node Title,Node Type,Status,Season,Start Date,Est. Hours,Time Spent,Hours Variance,Budget ($),Actual Spent ($),Budget Variance ($),Assignees (RACI),Notes & Description\n";
+                        wbsItems.forEach(({ node: n, wbs, depth, treeTitle }) => {
+                            const estH = parseFloat(n.estHours) || 0, spentH = parseFloat(n.timeSpent) || 0;
+                            const bud = parseFloat(n.budget) || 0, spentB = parseFloat(n.totalSpent) || 0;
+                            const indentTitle = `${'  '.repeat(depth)}${n.title || 'Untitled'}`;
+                            csv += [
+                                csvEsc(wbs), csvEsc(treeTitle), csvEsc(depth + 1), csvEsc(indentTitle),
+                                csvEsc((n.type || '').toUpperCase()), csvEsc(getStatus(n)), csvEsc(n.season || 'Spring'),
+                                csvEsc(n.startDate || 'Unscheduled'), estH, spentH, (estH - spentH).toFixed(1),
+                                bud.toFixed(2), spentB.toFixed(2), (bud - spentB).toFixed(2),
+                                csvEsc(getAssignees(n)), csvEsc(n.desc || '')
+                            ].join(',') + "\n";
                         });
-                        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
                     }
-                    filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.csv`;
+                    filename = `${cleanName}.csv`;
                 } else {
-                    let docContent = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                 <head><meta charset='utf-8'><title>${title}</title>
-                 <style>
-                     body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; }
-                     h1 { color: #16222E; border-bottom: 2px solid #2DD4BF; padding-bottom: 10px; }
-                     h2 { color: #134E4A; margin-top: 20px; }
-                     table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
-                     th, td { border: 1px solid #94A3B8; padding: 10px; text-align: left; }
-                     th { background-color: #F1F5F9; font-weight: bold; }
-                     .sign-off { margin-top: 50px; width: 100%; }
-                     .sign-off td { border: none; border-top: 1px solid #333; padding-top: 5px; }
-                 </style></head><body>
-                 <div style="text-align: center; margin-bottom: 50px;">
-                     <h1 style="font-size: 28px; border: none;">${title}</h1>
-                     <h3 style="color: #475569;">Official Project ${type.toUpperCase()}</h3>
-                     <p>Generated by Sylva Project Management</p>
-                 </div>`;
+                    // Generate native corporate RTF document (opens cleanly in MS Word, Mac Pages & Mobile Viewers)
+                    let totalEstH = 0, totalSpentH = 0, totalBud = 0, totalSpentB = 0, completedCount = 0, deliverableCount = 0;
+                    wbsItems.forEach(({ node: n }) => {
+                        totalEstH += parseFloat(n.estHours) || 0;
+                        totalSpentH += parseFloat(n.timeSpent) || 0;
+                        totalBud += parseFloat(n.budget) || 0;
+                        totalSpentB += parseFloat(n.totalSpent) || 0;
+                        if (n.type === 'fruit' || n.type === 'pinecone') {
+                            deliverableCount++;
+                            if (n.ripe || n.harvested) completedCount++;
+                        }
+                    });
+                    if (forest && parseFloat(forest.budget) > 0 && totalBud === 0) totalBud = parseFloat(forest.budget);
+                    if (forest && parseFloat(forest.cost) > 0 && totalSpentB === 0) totalSpentB = parseFloat(forest.cost);
 
-                 if (type === 'charter') {
-                     docContent += `<h2>1. Executive Summary & Scope</h2><p>This charter formally authorizes the project based on the defined Sylva structure.</p>
-                     <h2>2. Key Deliverables (Fruit)</h2><table><tr><th>Deliverable</th><th>Assignees</th><th>Description</th></tr>`;
-                     nodes.filter(n => n.type === 'fruit').forEach(n => {
-                         const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
-                         docContent += `<tr><td><strong>${n.title}</strong></td><td>${assigneesStr}</td><td>${n.desc || 'N/A'}</td></tr>`;
-                     });
-                     docContent += `</table>
-                     <table class="sign-off"><tr><td style="width:40%;">Project Sponsor Signature</td><td style="width:20%;"></td><td style="width:40%;">Date</td></tr></table>`;
-                 } else if (type === 'plan') {
-                      docContent += `<h2>Project Schedule & Assignments</h2>
-                      <table><tr><th>Task / Node</th><th>Type</th><th>Time / Budget</th><th>Assignees & Roles</th></tr>`;
-                      nodes.forEach(n => { 
-                          const assigneesStr = (n.assignees || []).map(a => `${a.name} [${a.role}]`).join(', ') || n.assignee || 'Unassigned';
-                          docContent += `<tr><td><strong>${n.title}</strong></td><td>${n.type.toUpperCase()}</td><td>${n.estHours || 0} hrs / $${n.budget || 0}</td><td>${assigneesStr}</td></tr>`; 
-                      });
-                      docContent += `</table>`;
-                 } else {
-                     docContent += `<h2>Project Outline</h2><ul>`;
-                     nodes.forEach(n => { docContent += `<li><strong>${n.title}</strong> (${n.type})</li>`; });
-                     docContent += `</ul>`;
-                 }
-                 docContent += `</body></html>`;
-                 blob = new Blob([docContent], { type: 'application/msword' });
-                 filename = `${title.replace(/\s+/g, '_')}_${type.toUpperCase()}.doc`;
+                    const docTypeTitle = type === 'charter' ? 'OFFICIAL PROJECT CHARTER' : 'COMPREHENSIVE PROJECT PLAN';
+                    const dateStr = new Date().toLocaleDateString();
+                    const trunkNode = wbsItems.find(x => x.node.type === 'trunk')?.node;
+
+                    const makeRow = (cells, widths, isHeader = false) => {
+                        let rtfRow = `\\trowd\\trgaph108\\trleft0`;
+                        let pos = 0;
+                        widths.forEach(w => {
+                            pos += w;
+                            rtfRow += `\\clbrdrt\\brdrs\\brdrw10\\clbrdrl\\brdrs\\brdrw10\\clbrdrb\\brdrs\\brdrw10\\clbrdrr\\brdrs\\brdrw10${isHeader ? '\\clcbpat2' : ''}\\cellx${pos}`;
+                        });
+                        rtfRow += `\\pard\\intbl\\fs18 `;
+                        cells.forEach(c => {
+                            rtfRow += `${isHeader ? '\\b ' : ''}${rtfEsc(c)}${isHeader ? '\\b0 ' : ''}\\cell `;
+                        });
+                        rtfRow += `\\row\n`;
+                        return rtfRow;
+                    };
+
+                    let rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Segoe UI;}{\\f1 Arial;}}{\\colortbl;\\red19\\green78\\blue74;\\red226\\green232\\blue240;\\red71\\green85\\blue105;}\n`;
+                    rtf += `\\viewkind4\\uc1\\pard\\sa120\\sl276\\slmult1\\f0\\fs36\\b\\cf1 ${rtfEsc(baseTitle)}\\b0\\cf0\\par\n`;
+                    rtf += `\\fs22\\b\\cf3 ${docTypeTitle}\\b0  |  Generated: ${rtfEsc(dateStr)}\\cf0\\par\\pard\\sa200\\par\n`;
+
+                    // Section 1: Executive Overview Table
+                    rtf += `\\pard\\sa120\\fs26\\b\\cf1 1. Executive Summary & Project Parameters\\b0\\cf0\\par\n`;
+                    const metaWidths = [2400, 6600];
+                    rtf += makeRow(['Parameter', 'Official Value / Specification'], metaWidths, true);
+                    rtf += makeRow(['Workspace / Forest', forest?.title || 'My Workspace'], metaWidths);
+                    rtf += makeRow(['Project / Tree Name', `${baseTitle} (${tree?.type || 'Multi-Tree'} Architecture)`], metaWidths);
+                    rtf += makeRow(['Core Objective / Scope', (trunkNode && trunkNode.desc) ? trunkNode.desc : `Structured execution and delivery of ${baseTitle}.`], metaWidths);
+                    rtf += makeRow(['Team / Human Resources', forest?.hr || 'Assigned at Node Level'], metaWidths);
+                    rtf += makeRow(['Target Deadline & Days', `${forest?.deadline || 'Ongoing'} (${forest?.daysSpent || '0'} Days Logged)`], metaWidths);
+                    rtf += makeRow(['Total Hours (Spent / Est.)', `${totalSpentH.toFixed(1)} hrs / ${totalEstH.toFixed(1)} hrs`], metaWidths);
+                    rtf += makeRow(['Total Budget (Spent / Allocated)', `$${totalSpentB.toFixed(2)} / $${totalBud.toFixed(2)}`], metaWidths);
+                    rtf += makeRow(['Deliverable Completion', `${completedCount} of ${deliverableCount} Deliverables Completed`], metaWidths);
+                    rtf += `\\pard\\sa240\\par\n`;
+
+                    if (type === 'charter') {
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 2. High-Level Phases & Architecture (Branches)\\b0\\cf0\\par\n`;
+                        const branches = wbsItems.filter(x => x.node.type === 'branch' || x.node.type === 'trunk');
+                        const bWidths = [1100, 2800, 1800, 3300];
+                        rtf += makeRow(['WBS', 'Phase / Branch Title', 'Lead / RACI', 'Scope & Notes'], bWidths, true);
+                        branches.forEach(({ node: n, wbs }) => {
+                            rtf += makeRow([wbs, n.title, getAssignees(n), n.desc || 'Core structural phase'], bWidths);
+                        });
+                        rtf += `\\pard\\sa240\\par\n`;
+
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 3. Key Authorized Deliverables (Fruits & Pine Cones)\\b0\\cf0\\par\n`;
+                        const delivs = wbsItems.filter(x => x.node.type === 'fruit' || x.node.type === 'pinecone');
+                        const dWidths = [1000, 2500, 1500, 1800, 2200];
+                        rtf += makeRow(['WBS', 'Deliverable', 'Status', 'Target / Cost', 'Assignees'], dWidths, true);
+                        if (delivs.length === 0) {
+                            rtf += makeRow(['-', 'No Fruit/Deliverable nodes defined yet', '-', '-', '-'], dWidths);
+                        } else {
+                            delivs.forEach(({ node: n, wbs }) => {
+                                rtf += makeRow([wbs, n.title, getStatus(n), `${n.startDate || 'TBD'} ($${n.budget || 0})`, getAssignees(n)], dWidths);
+                            });
+                        }
+                        rtf += `\\pard\\sa360\\par\n`;
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 4. Executive Authorization & Sign-Off\\b0\\cf0\\par\n`;
+                        rtf += makeRow(['Project Sponsor Name & Title', 'Signature', 'Date'], [3800, 3400, 1800], true);
+                        rtf += makeRow([' ', ' ', ' '], [3800, 3400, 1800]);
+                    } else {
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 2. Complete Work Breakdown, Schedule & Resource Plan\\b0\\cf0\\par\n`;
+                        const pWidths = [900, 2300, 1000, 1300, 1300, 2200];
+                        rtf += makeRow(['WBS', 'Node / Task Title', 'Type', 'Status', 'Hrs / Budget', 'RACI & Notes'], pWidths, true);
+                        wbsItems.forEach(({ node: n, wbs, depth }) => {
+                            const indent = depth > 0 ? `${'- '.repeat(depth)}` : '';
+                            const hrsBud = `${n.timeSpent || 0}/${n.estHours || 0}h | $${n.totalSpent || 0}/$${n.budget || 0}`;
+                            const notesAndRaci = `${getAssignees(n)}${n.desc ? ' -- ' + n.desc : ''}`;
+                            rtf += makeRow([wbs, `${indent}${n.title}`, (n.type || '').toUpperCase(), getStatus(n), hrsBud, notesAndRaci], pWidths);
+                        });
+                    }
+
+                    rtf += `}`;
+                    blob = new Blob([rtf], { type: 'application/rtf' });
+                    filename = `${cleanName}.rtf`;
                 }
 
                 const url = window.URL.createObjectURL(blob);
@@ -1607,6 +1713,115 @@ if (isZeroState && state.isLocked) {
         let lpInitialX = 0, lpInitialY = 0;
         const lassoEl = document.getElementById('lasso-element');
 
+        let lassoSelectedIds = new Set();
+
+        window.openLassoBulkModal = function() {
+            const count = lassoSelectedIds.size;
+            if (count === 0) return;
+            document.getElementById('alert-header-text').innerText = `Lasso: ${count} Item${count > 1 ? 's' : ''} Selected`;
+            document.getElementById('alert-message-text').innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:10px; text-align:left;">
+                    <button class="btn btn-accent" id="btn-bulk-done" style="width:100%; justify-content:center;">✅ Mark Selected Done (Ripe)</button>
+                    <div style="border-top:1px solid var(--border-subtle); padding-top:8px;">
+                        <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-align:center;">🍂 Change Season for Selected:</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                            <button class="btn btn-small btn-bulk-season" data-season="Spring">🌱 Spring</button>
+                            <button class="btn btn-small btn-bulk-season" data-season="Summer">☀️ Summer</button>
+                            <button class="btn btn-small btn-bulk-season" data-season="Autumn">🍂 Autumn</button>
+                            <button class="btn btn-small btn-bulk-season" data-season="Winter">❄️ Winter</button>
+                        </div>
+                    </div>
+                    <button class="btn" id="btn-bulk-delete" style="width:100%; justify-content:center; color:#FCA5A5; border-color:#7F1D1D; margin-top:4px;">🗑️ Delete Selected</button>
+                </div>
+            `;
+            const footer = document.getElementById('alert-footer-actions');
+            footer.innerHTML = `<button class="btn" id="btn-bulk-cancel">Cancel</button>`;
+            document.getElementById('modal-alert').classList.add('open');
+
+            const clearLassoUI = () => {
+                lassoSelectedIds.clear();
+                document.querySelectorAll('.node-card.selected, .forest-tree-entity.selected').forEach(el => {
+                    if (el.id !== state.selectedId) el.classList.remove('selected');
+                });
+                document.getElementById('modal-alert').classList.remove('open');
+            };
+
+            document.getElementById('btn-bulk-cancel').onclick = clearLassoUI;
+
+            document.getElementById('btn-bulk-done').onclick = () => {
+                if (state.viewMode === 'tree') {
+                    const t = getTree();
+                    if (t && t.nodes) {
+                        t.nodes.forEach(n => {
+                            if (lassoSelectedIds.has(n.id)) n.ripe = true;
+                        });
+                    }
+                } else {
+                    const f = getForest();
+                    if (f && f.trees) {
+                        f.trees.forEach(t => {
+                            if (lassoSelectedIds.has(t.id)) {
+                                (t.nodes || []).forEach(n => { if (n.type === 'fruit' || n.type === 'pinecone') n.ripe = true; });
+                            }
+                        });
+                    }
+                }
+                clearLassoUI(); saveData(); render();
+            };
+
+            document.querySelectorAll('.btn-bulk-season').forEach(b => {
+                b.onclick = () => {
+                    const s = b.getAttribute('data-season');
+                    if (state.viewMode === 'tree') {
+                        const t = getTree();
+                        if (t && t.nodes) {
+                            t.nodes.forEach(n => { if (lassoSelectedIds.has(n.id)) n.season = s; });
+                        }
+                    } else {
+                        const f = getForest();
+                        if (f && f.trees) {
+                            f.trees.forEach(t => {
+                                if (lassoSelectedIds.has(t.id)) {
+                                    t.season = s;
+                                    (t.nodes || []).forEach(n => n.season = s);
+                                }
+                            });
+                        }
+                    }
+                    clearLassoUI(); saveData(); render();
+                };
+            });
+
+            document.getElementById('btn-bulk-delete').onclick = () => {
+                if (state.viewMode === 'tree') {
+                    const t = getTree();
+                    if (t && t.nodes) {
+                        const idsToDelete = new Set();
+                        t.nodes.forEach(n => {
+                            if (lassoSelectedIds.has(n.id) && n.type !== 'trunk') idsToDelete.add(n.id);
+                        });
+                        let added = true;
+                        while (added) {
+                            added = false;
+                            t.nodes.forEach(n => {
+                                if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) {
+                                    idsToDelete.add(n.id);
+                                    added = true;
+                                }
+                            });
+                        }
+                        t.nodes = t.nodes.filter(n => !idsToDelete.has(n.id));
+                    }
+                } else {
+                    const f = getForest();
+                    if (f && f.trees) {
+                        f.trees = f.trees.filter(t => !lassoSelectedIds.has(t.id));
+                    }
+                }
+                clearLassoUI(); saveData(); render();
+            };
+        };
+
         const viewportEl = document.getElementById('viewport');
         viewportEl.addEventListener('pointerdown', (e) => {
             if (isPinching || activePointers.size > 1) return;
@@ -1618,25 +1833,27 @@ if (isZeroState && state.isLocked) {
                 
                 bgLongPressTimer = setTimeout(() => {
                     if (!isPinching && activePointers.size <= 1) {
+                        bgLongPressTimer = null;
                         isLassoing = true;
                         viewportDragging = false;
+                        lassoSelectedIds.clear();
                         
                         lassoStartX = lpInitialX;
                         lassoStartY = lpInitialY;
                         lassoEl.style.display = 'block';
-                        lassoEl.style.left = `${lassoStartX}px`;
-                        lassoEl.style.top = `${lassoStartY}px`;
-                        lassoEl.style.width = '4px';
-                        lassoEl.style.height = '4px';
+                        lassoEl.style.left = `${lassoStartX - 12}px`;
+                        lassoEl.style.top = `${lassoStartY - 12}px`;
+                        lassoEl.style.width = '24px';
+                        lassoEl.style.height = '24px';
                         if (navigator.vibrate) navigator.vibrate(50);
                     }
-                }, 850);
+                }, 550);
             }
         });
 
         window.addEventListener('pointermove', (e) => {
             if (bgLongPressTimer && !isLassoing) {
-                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 25) {
+                if (Math.hypot(e.clientX - lpInitialX, e.clientY - lpInitialY) > 12) {
                     clearTimeout(bgLongPressTimer);
                     bgLongPressTimer = null;
                 }
@@ -1644,10 +1861,29 @@ if (isZeroState && state.isLocked) {
             if (isLassoing) {
                 viewportDragging = false;
                 const currentX = e.clientX, currentY = e.clientY;
-                lassoEl.style.left = `${Math.min(lassoStartX, currentX)}px`;
-                lassoEl.style.top = `${Math.min(lassoStartY, currentY)}px`;
-                lassoEl.style.width = `${Math.abs(currentX - lassoStartX)}px`;
-                lassoEl.style.height = `${Math.abs(currentY - lassoStartY)}px`;
+                const left = Math.min(lassoStartX, currentX);
+                const top = Math.min(lassoStartY, currentY);
+                const width = Math.abs(currentX - lassoStartX);
+                const height = Math.abs(currentY - lassoStartY);
+
+                lassoEl.style.left = `${left}px`;
+                lassoEl.style.top = `${top}px`;
+                lassoEl.style.width = `${width}px`;
+                lassoEl.style.height = `${height}px`;
+
+                const right = left + width, bottom = top + height;
+                lassoSelectedIds.clear();
+                const selector = state.viewMode === 'tree' ? '#tree-layer .node-card' : '#forest-layer .forest-tree-entity';
+                document.querySelectorAll(selector).forEach(el => {
+                    const r = el.getBoundingClientRect();
+                    const overlaps = !(r.right < left || r.left > right || r.bottom < top || r.top > bottom);
+                    if (overlaps) {
+                        lassoSelectedIds.add(el.id);
+                        el.classList.add('selected');
+                    } else if (el.id !== state.selectedId) {
+                        el.classList.remove('selected');
+                    }
+                });
             }
         });
 
@@ -1659,11 +1895,9 @@ if (isZeroState && state.isLocked) {
             
             if (isLassoing) {
                 isLassoing = false;
-                const boxWidth = parseFloat(lassoEl.style.width) || 0;
-                const boxHeight = parseFloat(lassoEl.style.height) || 0;
                 lassoEl.style.display = 'none';
-                if (boxWidth > 15 || boxHeight > 15) {
-                    showAppAlert("Lasso selection complete. Bulk actions coming in V2!");
+                if (lassoSelectedIds.size > 0) {
+                    window.openLassoBulkModal();
                 }
                 return;
             }
@@ -1841,10 +2075,8 @@ if (isZeroState && state.isLocked) {
               }
               prevPinchDist = dist; prevCx = cx; prevCy = cy;
             }
-          } else if (activePointers.size === 1 && viewportDragging && !isLassoing && !isPinching && !pipPinching) {
-            if (Math.hypot(e.clientX - panStartCX, e.clientY - panStartCY) > 8) {
-              state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
-            }
+          } else if (activePointers.size === 1 && viewportDragging && !isLassoing && !bgLongPressTimer && !isPinching && !pipPinching) {
+            state.panX = initPanX + (e.clientX - panStartCX); state.panY = initPanY + (e.clientY - panStartCY); updateWorldTransform();
           }
         });
 
@@ -2132,8 +2364,8 @@ if (isZeroState && state.isLocked) {
               trees.forEach(t => {
                   if (!t) return;
                   t.nodes.forEach(n => { 
-                      if (n.type === 'fruit' && !n.harvested && n.ripe) { n.harvested = true; count++; } 
-                      if (t.type === 'Pine' && n.type === 'fruit') { n.harvested = false; n.ripe = false; }
+                      if ((n.type === 'fruit' || n.type === 'pinecone') && !n.harvested && n.ripe) { n.harvested = true; count++; } 
+                 if (t.type === 'Pine' && (n.type === 'fruit' || n.type === 'pinecone')) { n.harvested = false; n.ripe = false; }
                   });
               });
               saveData(); render();
@@ -2636,7 +2868,7 @@ if (isZeroState && state.isLocked) {
           document.getElementById('node-type-trigger').style.pointerEvents = (node.type === 'trunk') ? 'none' : 'auto';
 
           document.getElementById('node-input-ripe').checked = !!node.ripe;
-          document.getElementById('node-ripe-container').style.display = (node.type === 'fruit') ? 'flex' : 'none';
+          document.getElementById('node-ripe-container').style.display = (node.type === 'fruit' || node.type === 'pinecone') ? 'flex' : 'none';
 
           document.getElementById('node-input-start').value = node.startDate || '';
           document.getElementById('node-input-hours').value = node.estHours || '';
@@ -2707,7 +2939,7 @@ if (isZeroState && state.isLocked) {
             e.preventDefault();
             node.title = document.getElementById('node-input-title').value.trim() || node.title; node.desc = document.getElementById('node-input-desc').value;
             if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
-            if (node.type === 'fruit') node.ripe = document.getElementById('node-input-ripe').checked;
+            if (node.type === 'fruit' || node.type === 'pinecone') node.ripe = document.getElementById('node-input-ripe').checked;
             
             node.startDate = document.getElementById('node-input-start').value; 
             node.estHours = document.getElementById('node-input-hours').value; 
