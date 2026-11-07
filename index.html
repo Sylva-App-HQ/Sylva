@@ -1620,862 +1620,201 @@ if (isZeroState && state.isLocked) {
             document.getElementById('modal-pm-tools').classList.remove('open');
         });
 
-        let currentArtifactType = 'plan';
-
-        function compileProjectArtifactData() {
-            const forest = getForest();
-            const tree = getTree();
-            const isForestMode = state.viewMode === 'forest' || !tree;
-            const baseTitle = (isForestMode ? forest?.title : tree?.title) || 'Sylva Project';
-            const species = isForestMode ? 'Multi-Tree Portfolio' : (tree?.type || 'Pine');
-
-            const rawTrees = isForestMode ? (forest?.trees || []) : [tree];
-            const phases = [];
-            const allTasks = [];
-            const stakeholderSet = new Set();
-
-            if (forest && forest.hr) {
-                forest.hr.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).forEach(s => stakeholderSet.add(s));
-            }
-
-            let trunkScope = '';
-            let globalTaskCounter = 0;
-            const baseStartObj = new Date();
-            baseStartObj.setHours(0, 0, 0, 0);
-
-            const fmtDate = (d) => {
-                const yr = d.getFullYear();
-                const mo = String(d.getMonth() + 1).padStart(2, '0');
-                const da = String(d.getDate()).padStart(2, '0');
-                return `${yr}-${mo}-${da}`;
-            };
-
-            rawTrees.forEach((tObj, tIdx) => {
-                if (!tObj || !Array.isArray(tObj.nodes)) return;
-                const nodes = tObj.nodes;
-                const root = nodes.find(n => n.type === 'trunk') || nodes[0];
-                if (root && root.desc && !trunkScope) trunkScope = root.desc;
-
-                const childrenMap = {};
-                nodes.forEach(n => childrenMap[n.id] = []);
-                nodes.forEach(n => {
-                    if (n.id !== root?.id) {
-                        const pid = (n.parentId && childrenMap[n.parentId]) ? n.parentId : root?.id;
-                        if (pid && childrenMap[pid]) childrenMap[pid].push(n);
-                    }
-                });
-
-                const topBranches = root ? (childrenMap[root.id] || []).filter(n => n.type === 'branch') : [];
-                const directLeaves = root ? (childrenMap[root.id] || []).filter(n => n.type !== 'branch') : [];
-
-                const processTaskNode = (n, wbsCode, phaseTitle, phaseIndex, itemIndex) => {
-                    globalTaskCounter++;
-                    const estH = parseFloat(n.estHours) || (n.type === 'fruit' || n.type === 'pinecone' ? 12 : 8);
-                    const isDone = !!(n.ripe || n.harvested);
-                    const spentH = parseFloat(n.timeSpent) || (isDone ? estH : 0);
-                    const durationDays = Math.max(1, Math.ceil(estH / 8));
-
-                    let sDateObj;
-                    if (n.startDate) {
-                        sDateObj = new Date(n.startDate + 'T00:00:00');
-                        if (isNaN(sDateObj)) sDateObj = new Date(baseStartObj.getTime() + ((phaseIndex * 5 + itemIndex * 2) * 86400000));
-                    } else {
-                        sDateObj = new Date(baseStartObj.getTime() + ((phaseIndex * 5 + itemIndex * 2) * 86400000));
-                    }
-                    const eDateObj = new Date(sDateObj.getTime() + (durationDays * 86400000));
-
-                    const bud = parseFloat(n.budget) || (n.type === 'fruit' ? 500 : 200);
-                    const spentB = parseFloat(n.totalSpent) || (isDone ? bud : 0);
-                    const overBudget = parseFloat(n.totalSpent) > parseFloat(n.budget) && parseFloat(n.budget) > 0;
-                    const overTime = parseFloat(n.timeSpent) > parseFloat(n.estHours) && parseFloat(n.estHours) > 0;
-                    const isCrit = criticalSet.has(n.id) || n.priority === 'Critical';
-                    const atRisk = overBudget || overTime || isCrit;
-
-                    const prio = n.priority || (isCrit ? 'Critical' : (n.type === 'fruit' || n.type === 'pinecone' ? 'High' : 'Medium'));
-                    const status = isDone ? 'Complete' : (atRisk ? 'At Risk' : (spentH > 0 ? 'In Progress' : 'Not Started'));
-
-                    const raciMap = {};
-                    if (Array.isArray(n.assignees) && n.assignees.length > 0) {
-                        n.assignees.forEach(a => {
-                            if (a.name) {
-                                stakeholderSet.add(a.name.trim());
-                                raciMap[a.name.trim()] = a.role || 'R';
-                            }
-                        });
-                    } else if (n.assignee) {
-                        stakeholderSet.add(n.assignee.trim());
-                        raciMap[n.assignee.trim()] = 'R';
-                    }
-
-                    const primaryOwner = Object.keys(raciMap)[0] || (Array.from(stakeholderSet)[globalTaskCounter % Math.max(1, stakeholderSet.size)] || 'Project Lead');
-
-                    return {
-                        id: n.id, wbs: wbsCode, title: n.title || 'Task', desc: n.desc || '',
-                        type: n.type || 'leaf', phaseTitle, phaseIndex,
-                        startDate: fmtDate(sDateObj), endDate: fmtDate(eDateObj),
-                        startObj: sDateObj, endObj: eDateObj, durationDays,
-                        estHours: estH, timeSpent: spentH, budget: bud, spent: spentB,
-                        priority: prio, atRisk, status, isDone, raciMap, primaryOwner,
-                        season: n.season || tObj.season || 'Spring'
-                    };
-                };
-
-                const collectDescendants = (parentBranch, prefix, pTitle, pIdx) => {
-                    const list = [];
-                    const kids = childrenMap[parentBranch.id] || [];
-                    kids.forEach((k, kIdx) => {
-                        const code = `${prefix}.${kIdx + 1}`;
-                        list.push(processTaskNode(k, code, pTitle, pIdx, kIdx));
-                        (childrenMap[k.id] || []).forEach((gk, gkIdx) => {
-                            list.push(processTaskNode(gk, `${code}.${gkIdx + 1}`, pTitle, pIdx, kIdx + gkIdx + 1));
-                        });
-                    });
-                    return list;
-                };
-
-                if (topBranches.length > 0) {
-                    topBranches.forEach((b, bIdx) => {
-                        const pNum = phases.length + 1;
-                        const pTasks = collectDescendants(b, `${pNum}`, b.title, pNum - 1);
-                        if (pTasks.length === 0) {
-                            pTasks.push(processTaskNode(b, `${pNum}.1`, b.title, pNum - 1, 0));
-                        }
-                        phases.push({ index: pNum, wbs: `${pNum}.0`, title: b.title, desc: b.desc || '', tasks: pTasks });
-                        pTasks.forEach(tk => allTasks.push(tk));
-                    });
-                }
-                if (directLeaves.length > 0 || topBranches.length === 0) {
-                    const pNum = phases.length + 1;
-                    const pTitle = topBranches.length === 0 ? (root?.title || 'Core Execution') : 'General Deliverables';
-                    const pTasks = directLeaves.map((dl, dIdx) => processTaskNode(dl, `${pNum}.${dIdx + 1}`, pTitle, pNum - 1, dIdx));
-                    if (pTasks.length === 0 && root) {
-                        pTasks.push(processTaskNode(root, `1.1`, pTitle, 0, 0));
-                    }
-                    phases.push({ index: pNum, wbs: `${pNum}.0`, title: pTitle, desc: root?.desc || '', tasks: pTasks });
-                    pTasks.forEach(tk => allTasks.push(tk));
-                }
-            });
-
-            // Ensure default roles exist for RACI Matrix if user hasn't typed custom names yet
-            if (stakeholderSet.size === 0) {
-                ['Project Sponsor', 'Project Manager', 'Technical Lead', 'Operations Lead', 'QA / Review'].forEach(r => stakeholderSet.add(r));
-            }
-            const stakeholders = Array.from(stakeholderSet);
-
-            // Auto-populate sensible R/A/C/I defaults on tasks that have no manual RACI entries
-            allTasks.forEach((tk, idx) => {
-                if (Object.keys(tk.raciMap).length === 0) {
-                    const rPerson = stakeholders[idx % stakeholders.length];
-                    const aPerson = stakeholders[0];
-                    tk.raciMap[rPerson] = 'R';
-                    if (aPerson !== rPerson) tk.raciMap[aPerson] = 'A';
-                    if (stakeholders.length > 2) tk.raciMap[stakeholders[(idx + 1) % stakeholders.length]] = tk.raciMap[stakeholders[(idx + 1) % stakeholders.length]] || 'C';
-                    if (stakeholders.length > 3) tk.raciMap[stakeholders[(idx + 2) % stakeholders.length]] = tk.raciMap[stakeholders[(idx + 2) % stakeholders.length]] || 'I';
-                    tk.primaryOwner = rPerson;
-                }
-            });
-
-            const totalEstH = allTasks.reduce((s, x) => s + x.estHours, 0);
-            const totalSpentH = allTasks.reduce((s, x) => s + x.timeSpent, 0);
-            const calcBud = allTasks.reduce((s, x) => s + x.budget, 0);
-            const calcSpent = allTasks.reduce((s, x) => s + x.spent, 0);
-            const totalBud = (forest && parseFloat(forest.budget) > 0) ? parseFloat(forest.budget) : calcBud;
-            const totalSpentB = (forest && parseFloat(forest.cost) > 0) ? parseFloat(forest.cost) : calcSpent;
-            const doneCount = allTasks.filter(x => x.isDone).length;
-            const progressPct = allTasks.length > 0 ? Math.round((doneCount / allTasks.length) * 100) : 0;
-
-            const minStart = allTasks.length ? new Date(Math.min(...allTasks.map(x => x.startObj.getTime()))) : baseStartObj;
-            const maxEnd = allTasks.length ? new Date(Math.max(...allTasks.map(x => x.endObj.getTime()))) : new Date(baseStartObj.getTime() + 14 * 86400000);
-
-            return {
-                baseTitle, species, forestTitle: forest?.title || 'My Workspace',
-                scopeStatement: trunkScope || `Execute and deliver all work packages, milestones, and quality gates for ${baseTitle}.`,
-                manager: stakeholders[0] || 'Project Lead',
-                deadline: forest?.deadline || fmtDate(maxEnd),
-                startDate: fmtDate(minStart), endDate: fmtDate(maxEnd),
-                minStart, maxEnd,
-                daysSpent: forest?.daysSpent || Math.ceil(totalSpentH / 8),
-                totalEstH, totalSpentH, totalBud, totalSpentB,
-                doneCount, totalCount: allTasks.length, progressPct,
-                phases, allTasks, stakeholders
-            };
-        }
-
-        function buildArtifactHTML(type, data) {
-            const statusBg = (st) => st === 'Complete' ? '#10B981' : (st === 'At Risk' ? '#EF4444' : (st === 'In Progress' ? '#F59E0B' : '#E2E8F0'));
-            const statusFg = (st) => st === 'Not Started' ? '#334155' : '#FFFFFF';
-            const prioBg = (pr) => pr === 'Critical' ? '#EF4444' : (pr === 'High' ? '#F97316' : (pr === 'Medium' ? '#FACC15' : '#38BDF8'));
-            const prioFg = (pr) => pr === 'Medium' ? '#1E293B' : '#FFFFFF';
-
-            if (type === 'raci') {
-                // Pivoted Color-Coded RACI Matrix (Screenshots 79 & 81)
-                const raciColor = (role) => {
-                    if (role === 'R') return 'background:#EF4444; color:#FFFFFF; font-weight:700;';
-                    if (role === 'A') return 'background:#F59E0B; color:#FFFFFF; font-weight:700;';
-                    if (role === 'C') return 'background:#3B82F6; color:#FFFFFF; font-weight:700;';
-                    if (role === 'I') return 'background:#8B5CF6; color:#FFFFFF; font-weight:700;';
-                    return 'background:#F8FAFC; color:#CBD5E1;';
-                };
-                let html = `
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #0F172A; padding-bottom:14px; margin-bottom:18px;">
-                        <div>
-                            <div style="font-size:11px; font-weight:700; color:#0D9488; text-transform:uppercase; letter-spacing:1px;">Responsibility Assignment Matrix</div>
-                            <h1 style="font-size:26px; margin:4px 0 0 0; color:#0F172A;">RACI MATRIX — ${escapeHTML(data.baseTitle)}</h1>
-                        </div>
-                        <div style="text-align:right; font-size:12px; color:#475569;">
-                            <div><strong>Roles &amp; Responsibilities</strong></div>
-                            <div>Responsible, Accountable, Consulted, Informed</div>
-                        </div>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:20px;">
-                        <thead>
-                            <tr style="background:#1E3A8A; color:#FFFFFF;">
-                                <th style="border:1px solid #CBD5E1; padding:10px; text-align:left; width:70px;">WBS</th>
-                                <th style="border:1px solid #CBD5E1; padding:10px; text-align:left;">Deliverable / Project Task</th>
-                                <th style="border:1px solid #CBD5E1; padding:10px; text-align:center; width:95px;">Status</th>
-                                ${data.stakeholders.map(person => `<th style="border:1px solid #CBD5E1; padding:10px 6px; text-align:center; min-width:78px; background:#1D4ED8;">${escapeHTML(person)}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                data.phases.forEach(p => {
-                    html += `
-                        <tr style="background:#DBEAFE; color:#1E3A8A; font-weight:700;">
-                            <td style="border:1px solid #CBD5E1; padding:8px 10px;">${escapeHTML(p.wbs)}</td>
-                            <td colspan="${2 + data.stakeholders.length}" style="border:1px solid #CBD5E1; padding:8px 10px;">Phase ${p.index}: ${escapeHTML(p.title)}</td>
-                        </tr>
-                    `;
-                    p.tasks.forEach(tk => {
-                        html += `
-                            <tr>
-                                <td style="border:1px solid #CBD5E1; padding:8px 10px; color:#64748B; font-weight:600;">${escapeHTML(tk.wbs)}</td>
-                                <td style="border:1px solid #CBD5E1; padding:8px 10px; font-weight:600; color:#0F172A;">${escapeHTML(tk.title)}</td>
-                                <td style="border:1px solid #CBD5E1; padding:6px; text-align:center;">
-                                    <span style="display:inline-block; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700; background:${statusBg(tk.status)}; color:${statusFg(tk.status)};">${tk.status}</span>
-                                </td>
-                                ${data.stakeholders.map(person => {
-                                    const r = tk.raciMap[person] || '';
-                                    return `<td style="border:1px solid #CBD5E1; padding:8px; text-align:center; ${raciColor(r)}">${r || '-'}</td>`;
-                                }).join('')}
-                            </tr>
-                        `;
-                    });
-                });
-                html += `
-                        </tbody>
-                    </table>
-                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; background:#F8FAFC; border:1px solid #CBD5E1; padding:12px; border-radius:6px; font-size:11px;">
-                        <div><span style="display:inline-block; width:22px; text-align:center; font-weight:700; background:#EF4444; color:#FFF; border-radius:3px; margin-right:6px;">R</span><strong>Responsible:</strong> Executes the task/deliverable.</div>
-                        <div><span style="display:inline-block; width:22px; text-align:center; font-weight:700; background:#F59E0B; color:#FFF; border-radius:3px; margin-right:6px;">A</span><strong>Accountable:</strong> Final decision &amp; approval authority.</div>
-                        <div><span style="display:inline-block; width:22px; text-align:center; font-weight:700; background:#3B82F6; color:#FFF; border-radius:3px; margin-right:6px;">C</span><strong>Consulted:</strong> Subject matter advisor (2-way).</div>
-                        <div><span style="display:inline-block; width:22px; text-align:center; font-weight:700; background:#8B5CF6; color:#FFF; border-radius:3px; margin-right:6px;">I</span><strong>Informed:</strong> Kept updated on progress (1-way).</div>
-                    </div>
-                `;
-                return html;
-            }
-
-            if (type === 'charter') {
-                // Structured PMI Box-Grid Project Charter (Screenshots 74 & 75)
-                const deliverables = data.allTasks.filter(t => t.type === 'fruit' || t.type === 'pinecone');
-                const delivList = deliverables.length ? deliverables : data.allTasks.slice(0, 6);
-                const riskTasks = data.allTasks.filter(t => t.atRisk || t.priority === 'Critical' || t.priority === 'High');
-
-                return `
-                    <div style="background:#0F172A; color:#FFFFFF; padding:18px 22px; border-radius:6px 6px 0 0; border-bottom:4px solid #2DD4BF; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:11px; color:#2DD4BF; font-weight:700; letter-spacing:1px;">EXECUTIVE AUTHORIZATION DOCUMENT</div>
-                            <h1 style="font-size:24px; margin:4px 0 0 0;">PROJECT CHARTER: ${escapeHTML(data.baseTitle)}</h1>
-                        </div>
-                        <div style="text-align:right; font-size:12px; color:#CBD5E1;">
-                            <div><strong>Date:</strong> ${new Date().toLocaleDateString()}</div>
-                            <div><strong>Architecture:</strong> ${escapeHTML(data.species)}</div>
-                        </div>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:14px;">
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#F1F5F9; font-weight:700; padding:8px 12px; width:18%;">Project Name</td>
-                            <td style="border:1px solid #94A3B8; padding:8px 12px; width:32%; font-weight:600;">${escapeHTML(data.baseTitle)}</td>
-                            <td style="border:1px solid #94A3B8; background:#F1F5F9; font-weight:700; padding:8px 12px; width:18%;">Project Manager</td>
-                            <td style="border:1px solid #94A3B8; padding:8px 12px; width:32%;">${escapeHTML(data.manager)}</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#F1F5F9; font-weight:700; padding:8px 12px;">Workspace / Sponsor</td>
-                            <td style="border:1px solid #94A3B8; padding:8px 12px;">${escapeHTML(data.forestTitle)}</td>
-                            <td style="border:1px solid #94A3B8; background:#F1F5F9; font-weight:700; padding:8px 12px;">Target Completion</td>
-                            <td style="border:1px solid #94A3B8; padding:8px 12px;">${escapeHTML(data.deadline)} (${data.progressPct}% Complete)</td>
-                        </tr>
-                    </table>
-
-                    <table style="width:100%; border-collapse:collapse; font-size:12px;">
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#E2E8F0; font-weight:700; padding:12px; width:22%; vertical-align:top;">1. Project Description &amp; Business Case</td>
-                            <td style="border:1px solid #94A3B8; padding:12px; line-height:1.5;">${escapeHTML(data.scopeStatement)}</td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#E2E8F0; font-weight:700; padding:12px; vertical-align:top;">2. Objectives &amp; Success Criteria</td>
-                            <td style="border:1px solid #94A3B8; padding:12px; line-height:1.5;">
-                                ${data.phases.map(p => `<div style="margin-bottom:4px;">• <strong>Phase ${p.index} (${escapeHTML(p.title)}):</strong> Complete ${p.tasks.length} work packages on schedule and within allocated budget.</div>`).join('')}
-                                <div style="margin-top:6px; color:#0D9488; font-weight:600;">• Target KPI: Achieve 100% Ripe/Harvested verification across all ${data.totalCount} defined project nodes.</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#E2E8F0; font-weight:700; padding:12px; vertical-align:top;">3. Constraints (In Priority Order)</td>
-                            <td style="border:1px solid #94A3B8; padding:0;">
-                                <table style="width:100%; border-collapse:collapse; font-size:11.5px;">
-                                    <tr><td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; background:#F8FAFC; font-weight:700; padding:7px 10px; width:18%;">Time</td><td style="border-bottom:1px solid #CBD5E1; padding:7px 10px;">Window: ${data.startDate} to ${data.endDate} | Total Est. Effort: ${data.totalEstH.toFixed(1)} hrs (${data.totalSpentH.toFixed(1)} hrs logged)</td></tr>
-                                    <tr><td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; background:#F8FAFC; font-weight:700; padding:7px 10px;">Budget</td><td style="border-bottom:1px solid #CBD5E1; padding:7px 10px;">Allocated Ceiling: $${data.totalBud.toFixed(2)} | Current Spend: $${data.totalSpentB.toFixed(2)} (Variance: $${(data.totalBud - data.totalSpentB).toFixed(2)})</td></tr>
-                                    <tr><td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; background:#F8FAFC; font-weight:700; padding:7px 10px;">Scope</td><td style="border-bottom:1px solid #CBD5E1; padding:7px 10px;">${data.phases.length} Core Phases encompassing ${data.totalCount} structured WBS nodes</td></tr>
-                                    <tr><td style="border-right:1px solid #CBD5E1; background:#F8FAFC; font-weight:700; padding:7px 10px;">Quality</td><td style="padding:7px 10px;">${escapeHTML(data.species)} lifecycle governance with mandatory RACI accountability</td></tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#E2E8F0; font-weight:700; padding:12px; vertical-align:top;">4. Key Milestones &amp; Deliverables</td>
-                            <td style="border:1px solid #94A3B8; padding:0;">
-                                <table style="width:100%; border-collapse:collapse; font-size:11.5px;">
-                                    <tr style="background:#F1F5F9; font-weight:700;">
-                                        <td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; padding:6px 10px; width:12%;">WBS</td>
-                                        <td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; padding:6px 10px;">Deliverable / Milestone</td>
-                                        <td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; padding:6px 10px; width:18%;">Owner</td>
-                                        <td style="border-bottom:1px solid #CBD5E1; border-right:1px solid #CBD5E1; padding:6px 10px; width:16%;">Target Date</td>
-                                        <td style="border-bottom:1px solid #CBD5E1; padding:6px 10px; width:16%; text-align:center;">Status</td>
-                                    </tr>
-                                    ${delivList.map(d => `
-                                        <tr>
-                                            <td style="border-bottom:1px solid #E2E8F0; border-right:1px solid #E2E8F0; padding:6px 10px; font-weight:600;">${escapeHTML(d.wbs)}</td>
-                                            <td style="border-bottom:1px solid #E2E8F0; border-right:1px solid #E2E8F0; padding:6px 10px; font-weight:600;">${escapeHTML(d.title)}</td>
-                                            <td style="border-bottom:1px solid #E2E8F0; border-right:1px solid #E2E8F0; padding:6px 10px;">${escapeHTML(d.primaryOwner)}</td>
-                                            <td style="border-bottom:1px solid #E2E8F0; border-right:1px solid #E2E8F0; padding:6px 10px;">${escapeHTML(d.endDate)}</td>
-                                            <td style="border-bottom:1px solid #E2E8F0; padding:6px 10px; text-align:center;"><span style="padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700; background:${statusBg(d.status)}; color:${statusFg(d.status)};">${d.status}</span></td>
-                                        </tr>
-                                    `).join('')}
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#E2E8F0; font-weight:700; padding:12px; vertical-align:top;">5. Potential Risks &amp; Mitigation</td>
-                            <td style="border:1px solid #94A3B8; padding:12px; line-height:1.5;">
-                                ${(riskTasks.length ? riskTasks : data.allTasks.slice(0, 3)).map((rt, idx) => `
-                                    <div style="margin-bottom:4px;"><strong>${idx + 1}. [${escapeHTML(rt.priority)}] ${escapeHTML(rt.title)} (${escapeHTML(rt.wbs)}):</strong> Monitor schedule (${rt.estHours}h est.) and budget ($${rt.budget}) closely under ${escapeHTML(rt.primaryOwner)}.</div>
-                                `).join('')}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid #94A3B8; background:#E2E8F0; font-weight:700; padding:12px; vertical-align:top;">6. Executive Approval &amp; Sign-Off</td>
-                            <td style="border:1px solid #94A3B8; padding:12px;">
-                                <div style="display:grid; grid-template-columns:1fr 1fr 140px; gap:16px; padding-top:14px;">
-                                    <div style="border-top:1px solid #0F172A; padding-top:4px;"><strong>Sponsor:</strong> ${escapeHTML(data.stakeholders[0] || 'Executive Sponsor')}</div>
-                                    <div style="border-top:1px solid #0F172A; padding-top:4px;"><strong>Project Manager:</strong> ${escapeHTML(data.manager)}</div>
-                                    <div style="border-top:1px solid #0F172A; padding-top:4px;"><strong>Date:</strong> ${new Date().toLocaleDateString()}</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                `;
-            }
-
-            if (type === 'gantt') {
-                // Visual Gantt Chart Timeline (Screenshots 72 & 73)
-                const totalSpanMs = Math.max(86400000 * 7, data.maxEnd.getTime() - data.minStart.getTime());
-                const totalWeeks = Math.min(16, Math.max(4, Math.ceil(totalSpanMs / (86400000 * 7))));
-                const weekHeaders = [];
-                for (let w = 0; w < totalWeeks; w++) {
-                    const wDate = new Date(data.minStart.getTime() + w * 7 * 86400000);
-                    const moShort = wDate.toLocaleString('default', { month: 'short' });
-                    weekHeaders.push({ label: `W${w + 1}`, sub: `${moShort} ${wDate.getDate()}` });
-                }
-                const phaseColors = ['#F59E0B', '#10B981', '#38BDF8', '#A855F7', '#EC4899', '#EF4444'];
-
-                let html = `
-                    <div style="background:#0F172A; color:#FFFFFF; padding:18px 22px; border-radius:6px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:11px; color:#38BDF8; font-weight:700; letter-spacing:1px;">EXECUTIVE TIMELINE &amp; SCHEDULE</div>
-                            <h1 style="font-size:24px; margin:4px 0 0 0;">GANTT CHART — ${escapeHTML(data.baseTitle)}</h1>
-                        </div>
-                        <div style="text-align:right; font-size:12px; color:#CBD5E1;">
-                            <div><strong>Timeline:</strong> ${data.startDate} &rarr; ${data.endDate}</div>
-                            <div><strong>Overall Completion:</strong> ${data.progressPct}% (${data.doneCount}/${data.totalCount} Tasks)</div>
-                        </div>
-                    </div>
-                    <table style="width:100%; border-collapse:collapse; font-size:11.5px; background:#0F172A; color:#F1F5F9; border-radius:6px; overflow:hidden;">
-                        <thead>
-                            <tr style="background:#1E293B; border-bottom:2px solid #334155;">
-                                <th style="padding:10px; text-align:left; width:230px; border-right:1px solid #334155;">PROJECT PHASE / TASK</th>
-                                <th style="padding:10px; text-align:center; width:90px; border-right:1px solid #334155;">OWNER</th>
-                                ${weekHeaders.map(wh => `<th style="padding:6px 4px; text-align:center; border-right:1px solid #334155; font-size:10px;"><div>${wh.label}</div><div style="color:#94A3B8; font-weight:400;">${wh.sub}</div></th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                data.phases.forEach((p, pIdx) => {
-                    const barColor = phaseColors[pIdx % phaseColors.length];
-                    html += `
-                        <tr style="background:#16222E; border-bottom:1px solid #334155;">
-                            <td colspan="${2 + totalWeeks}" style="padding:8px 10px; font-weight:700; color:${barColor};">${escapeHTML(p.wbs)} — ${escapeHTML(p.title.toUpperCase())}</td>
-                        </tr>
-                    `;
-                    p.tasks.forEach(tk => {
-                        const startOffsetPct = Math.max(0, Math.min(92, ((tk.startObj.getTime() - data.minStart.getTime()) / (totalWeeks * 7 * 86400000)) * 100));
-                        const widthPct = Math.max(6, Math.min(100 - startOffsetPct, ((tk.durationDays * 86400000) / (totalWeeks * 7 * 86400000)) * 100));
-                        html += `
-                            <tr style="border-bottom:1px solid #1E293B;">
-                                <td style="padding:8px 10px; border-right:1px solid #334155; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:230px;">
-                                    <span style="color:#94A3B8; margin-right:4px;">${escapeHTML(tk.wbs)}</span> ${escapeHTML(tk.title)} ${tk.isDone ? '✅' : ''}
-                                </td>
-                                <td style="padding:8px 6px; text-align:center; border-right:1px solid #334155; color:#CBD5E1; font-size:10.5px;">${escapeHTML(tk.primaryOwner)}</td>
-                                <td colspan="${totalWeeks}" style="padding:6px 0; position:relative; background:repeating-linear-gradient(to right, transparent, transparent calc(${100/totalWeeks}% - 1px), #1E293B calc(${100/totalWeeks}% - 1px), #1E293B calc(${100/totalWeeks}%));">
-                                    <div style="margin-left:${startOffsetPct}%; width:${widthPct}%; background:${tk.isDone ? '#10B981' : barColor}; height:16px; border-radius:8px; display:flex; align-items:center; padding:0 8px; font-size:9.5px; font-weight:700; color:#0F172A; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
-                                        ${tk.durationDays}d (${tk.status})
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                });
-                html += `</tbody></table>`;
-                return html;
-            }
-
-            // Default: Smartsheet-Style Project Work Plan ('plan') or WBS ('wbs') (Screenshots 77 & 80)
-            const phaseBannerColors = ['#D97706', '#2563EB', '#DC2626', '#059669', '#7C3AED'];
-            let html = `
-                <div style="display:grid; grid-template-columns:2fr 1.2fr; gap:14px; margin-bottom:16px;">
-                    <table style="width:100%; border-collapse:collapse; font-size:11.5px;">
-                        <tr style="background:#1E293B; color:#FFFFFF; font-weight:700;">
-                            <td style="padding:8px 10px; border:1px solid #CBD5E1;">Project Name</td>
-                            <td style="padding:8px 10px; border:1px solid #CBD5E1;">Project Lead</td>
-                            <td style="padding:8px 10px; border:1px solid #CBD5E1; text-align:center;">Start Date</td>
-                            <td style="padding:8px 10px; border:1px solid #CBD5E1; text-align:center;">End Date</td>
-                            <td style="padding:8px 10px; border:1px solid #CBD5E1; text-align:center;">Overall Progress</td>
-                        </tr>
-                        <tr style="background:#F8FAFC; font-weight:600; font-size:13px;">
-                            <td style="padding:12px 10px; border:1px solid #CBD5E1; color:#0F172A;">${escapeHTML(data.baseTitle)}</td>
-                            <td style="padding:12px 10px; border:1px solid #CBD5E1;">${escapeHTML(data.manager)}</td>
-                            <td style="padding:12px 10px; border:1px solid #CBD5E1; text-align:center;">${data.startDate}</td>
-                            <td style="padding:12px 10px; border:1px solid #CBD5E1; text-align:center;">${data.endDate}</td>
-                            <td style="padding:12px 10px; border:1px solid #CBD5E1; text-align:center; background:#DCFCE7; color:#166534; font-weight:700;">${data.progressPct}%</td>
-                        </tr>
-                    </table>
-                    <div style="border:1px solid #CBD5E1; border-radius:4px; overflow:hidden; display:flex; flex-direction:column;">
-                        <div style="background:#1E293B; color:#FFFFFF; font-size:11.5px; font-weight:700; padding:8px 10px;">Project Scope &amp; Financial Summary</div>
-                        <div style="padding:8px 10px; font-size:11px; color:#334155; background:#F8FAFC; flex:1;">
-                            <div>${escapeHTML(data.scopeStatement)}</div>
-                            <div style="margin-top:4px; font-weight:700; color:#0F172A;">Budget: $${data.totalSpentB.toFixed(2)} Spent / $${data.totalBud.toFixed(2)} Allocated | Hours: ${data.totalSpentH.toFixed(1)} / ${data.totalEstH.toFixed(1)}h</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Phase Ribbon Cards (Screenshot 77) -->
-                <div style="display:grid; grid-template-columns:repeat(${Math.min(4, Math.max(1, data.phases.length))}, 1fr); gap:10px; margin-bottom:18px;">
-                    ${data.phases.slice(0, 4).map((p, idx) => {
-                        const col = phaseBannerColors[idx % phaseBannerColors.length];
-                        const pHours = p.tasks.reduce((s, x) => s + x.estHours, 0);
-                        return `
-                            <div style="border:1px solid #CBD5E1; border-top:4px solid ${col}; border-radius:6px; background:#F8FAFC; padding:10px;">
-                                <div style="font-size:10px; font-weight:700; color:${col}; text-transform:uppercase;">Phase ${p.index} (${Math.ceil(pHours/8)} Days)</div>
-                                <div style="font-size:13px; font-weight:700; color:#0F172A; margin:2px 0 6px 0;">${escapeHTML(p.title)}</div>
-                                <div style="font-size:11px; color:#475569;">${p.tasks.slice(0, 3).map(t => `• ${escapeHTML(t.title)}`).join('<br>')}</div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-
-                <!-- Main Smartsheet-Style Schedule & WBS Table (Screenshot 80) -->
-                <table style="width:100%; border-collapse:collapse; font-size:11.5px;">
-                    <thead>
-                        <tr style="background:#1E293B; color:#FFFFFF;">
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:52px;">WBS</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:55px; text-align:center;">At Risk</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; text-align:left;">Phase / Task Deliverable</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:70px; text-align:center;">Type</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:100px; text-align:left;">Responsible</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:82px; text-align:center;">Start</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:82px; text-align:center;">End</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:55px; text-align:center;">Days</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:92px; text-align:center;">Status</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:78px; text-align:center;">Priority</th>
-                            <th style="border:1px solid #CBD5E1; padding:8px; width:95px; text-align:right;">Budget / Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            const rowBanners = ['#FEF3C7', '#DBEAFE', '#FCE7F3', '#D1FAE5', '#EDE9FE'];
-            data.phases.forEach((p, idx) => {
-                const bg = rowBanners[idx % rowBanners.length];
-                const pBud = p.tasks.reduce((s, x) => s + x.budget, 0);
-                html += `
-                    <tr style="background:${bg}; font-weight:700; color:#0F172A;">
-                        <td style="border:1px solid #CBD5E1; padding:7px 8px;">${escapeHTML(p.wbs)}</td>
-                        <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:center;">-</td>
-                        <td colspan="8" style="border:1px solid #CBD5E1; padding:7px 8px;">Phase ${p.index}: ${escapeHTML(p.title)} (${p.tasks.length} Work Packages)</td>
-                        <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:right;">$${pBud.toFixed(0)}</td>
-                    </tr>
-                `;
-                p.tasks.forEach(tk => {
-                    html += `
-                        <tr>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; color:#475569; font-weight:600;">${escapeHTML(tk.wbs)}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:center; font-weight:700; background:${tk.atRisk ? '#FEE2E2' : '#F0FDF4'}; color:${tk.atRisk ? '#DC2626' : '#16A34A'};">${tk.atRisk ? 'Yes' : 'No'}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; font-weight:600; color:#0F172A;">${escapeHTML(tk.title)}${tk.desc ? `<div style="font-size:10px; color:#64748B; font-weight:400;">${escapeHTML(tk.desc)}</div>` : ''}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:center; font-size:10px; text-transform:uppercase; color:#475569;">${escapeHTML(tk.type)}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px;">${escapeHTML(tk.primaryOwner)}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:center;">${tk.startDate}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:center;">${tk.endDate}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:center; font-weight:600;">${tk.durationDays}d</td>
-                            <td style="border:1px solid #CBD5E1; padding:6px; text-align:center; background:${statusBg(tk.status)}; color:${statusFg(tk.status)}; font-weight:700;">${tk.status}</td>
-                            <td style="border:1px solid #CBD5E1; padding:6px; text-align:center; background:${prioBg(tk.priority)}; color:${prioFg(tk.priority)}; font-weight:700;">${tk.priority}</td>
-                            <td style="border:1px solid #CBD5E1; padding:7px 8px; text-align:right; font-weight:600;">$${tk.spent.toFixed(0)} / $${tk.budget.toFixed(0)}</td>
-                        </tr>
-                    `;
-                });
-            });
-            html += `</tbody></table>`;
-            return html;
-        }
-
-        function downloadStyledExcel(type, data) {
-            const defaultName = `${data.baseTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${type.toUpperCase()}`;
-            const customName = prompt('Enter a file name for your Color Excel Workbook:', defaultName);
-            if (customName === null) return;
-            const cleanName = (customName.trim() || defaultName).replace(/\.(xls|xlsx|csv|numbers)$/i, '');
-
-            const innerTableHTML = buildArtifactHTML(type, data);
-            const excelDoc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${escapeHTML(type.toUpperCase())}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-            <style>body, table, td, th { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; }</style></head>
-            <body>${innerTableHTML}</body></html>`;
-
-            const blob = new Blob(["\uFEFF" + excelDoc], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${cleanName}.xls`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        }
-
-        function renderArtifactToCanvas(type, data) {
-            const c = document.createElement('canvas');
-            const scale = 2; // 2x Retina DPI for crystal-clear PDF and PNG output
-            const W = 1120;
-            const rowCount = data.allTasks.length + data.phases.length;
-            const H = Math.max(820, (type === 'charter' ? 880 : 320 + rowCount * 36));
-            c.width = W * scale;
-            c.height = H * scale;
-            const ctx = c.getContext('2d');
-            ctx.scale(scale, scale);
-
-            // White executive sheet background
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, W, H);
-
-            // Top Banner
-            ctx.fillStyle = '#0F172A';
-            ctx.fillRect(28, 24, W - 56, 68);
-            ctx.fillStyle = '#2DD4BF';
-            ctx.fillRect(28, 88, W - 56, 4);
-
-            const titles = { charter: 'OFFICIAL PROJECT CHARTER', plan: 'PROJECT WORK PLAN & SCHEDULE', wbs: 'WORK BREAKDOWN STRUCTURE (WBS)', raci: 'PIVOTED RACI RESPONSIBILITY MATRIX', gantt: 'EXECUTIVE GANTT CHART TIMELINE' };
-            ctx.fillStyle = '#2DD4BF';
-            ctx.font = 'bold 11px Segoe UI, Arial, sans-serif';
-            ctx.fillText(titles[type] || 'EXECUTIVE REPORT', 44, 46);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 22px Segoe UI, Arial, sans-serif';
-            ctx.fillText(`${data.baseTitle}`, 44, 74);
-
-            ctx.fillStyle = '#CBD5E1';
-            ctx.font = '12px Segoe UI, Arial, sans-serif';
-            ctx.textAlign = 'right';
-            ctx.fillText(`Lead: ${data.manager}  |  Window: ${data.startDate} to ${data.endDate}  |  Progress: ${data.progressPct}%`, W - 44, 68);
-            ctx.textAlign = 'left';
-
-            let y = 110;
-            const clipText = (txt, maxW) => {
-                let s = String(txt ?? '');
-                if (ctx.measureText(s).width <= maxW) return s;
-                while (s.length > 3 && ctx.measureText(s + '...').width > maxW) s = s.slice(0, -1);
-                return s + '...';
-            };
-            const drawCell = (x, cy, w, h, bg, fg, text, bold = false, align = 'left') => {
-                ctx.fillStyle = bg;
-                ctx.fillRect(x, cy, w, h);
-                ctx.strokeStyle = '#CBD5E1';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x, cy, w, h);
-                ctx.fillStyle = fg;
-                ctx.font = `${bold ? 'bold ' : ''}11.5px Segoe UI, Arial, sans-serif`;
-                const clipped = clipText(text, w - 12);
-                let tx = x + 6;
-                if (align === 'center') tx = x + (w - ctx.measureText(clipped).width) / 2;
-                else if (align === 'right') tx = x + w - ctx.measureText(clipped).width - 6;
-                ctx.fillText(clipped, tx, cy + (h / 2) + 4);
-            };
-
-            const statusBg = (st) => st === 'Complete' ? '#10B981' : (st === 'At Risk' ? '#EF4444' : (st === 'In Progress' ? '#F59E0B' : '#E2E8F0'));
-            const statusFg = (st) => st === 'Not Started' ? '#334155' : '#FFFFFF';
-            const prioBg = (pr) => pr === 'Critical' ? '#EF4444' : (pr === 'High' ? '#F97316' : (pr === 'Medium' ? '#FACC15' : '#38BDF8'));
-            const prioFg = (pr) => pr === 'Medium' ? '#1E293B' : '#FFFFFF';
-
-            if (type === 'raci') {
-                const stCols = data.stakeholders.slice(0, 7);
-                const fixedW = 390;
-                const personW = Math.floor((W - 56 - fixedW) / Math.max(1, stCols.length));
-                drawCell(28, y, 60, 32, '#1E3A8A', '#FFFFFF', 'WBS', true, 'center');
-                drawCell(88, y, 240, 32, '#1E3A8A', '#FFFFFF', 'Project Task / Deliverable', true);
-                drawCell(328, y, 90, 32, '#1E3A8A', '#FFFFFF', 'Status', true, 'center');
-                stCols.forEach((p, idx) => {
-                    drawCell(418 + idx * personW, y, personW, 32, '#1D4ED8', '#FFFFFF', p, true, 'center');
-                });
-                y += 32;
-
-                const raciBg = (r) => r === 'R' ? '#EF4444' : (r === 'A' ? '#F59E0B' : (r === 'C' ? '#3B82F6' : (r === 'I' ? '#8B5CF6' : '#F8FAFC')));
-                data.phases.forEach(p => {
-                    drawCell(28, y, 60, 26, '#DBEAFE', '#1E3A8A', p.wbs, true, 'center');
-                    drawCell(88, y, W - 56 - 60, 26, '#DBEAFE', '#1E3A8A', `Phase ${p.index}: ${p.title}`, true);
-                    y += 26;
-                    p.tasks.forEach(tk => {
-                        drawCell(28, y, 60, 26, '#FFFFFF', '#475569', tk.wbs, true, 'center');
-                        drawCell(88, y, 240, 26, '#FFFFFF', '#0F172A', tk.title, true);
-                        drawCell(328, y, 90, 26, statusBg(tk.status), statusFg(tk.status), tk.status, true, 'center');
-                        stCols.forEach((person, idx) => {
-                            const role = tk.raciMap[person] || '-';
-                            drawCell(418 + idx * personW, y, personW, 26, raciBg(role), role === '-' ? '#CBD5E1' : '#FFFFFF', role, true, 'center');
-                        });
-                        y += 26;
-                    });
-                });
-            } else if (type === 'gantt') {
-                const totalSpanMs = Math.max(86400000 * 7, data.maxEnd.getTime() - data.minStart.getTime());
-                const totalWeeks = Math.min(12, Math.max(4, Math.ceil(totalSpanMs / (86400000 * 7))));
-                const leftW = 340;
-                const chartW = W - 56 - leftW;
-                const wkW = chartW / totalWeeks;
-
-                drawCell(28, y, 240, 30, '#1E293B', '#FFFFFF', 'PHASE / TASK', true);
-                drawCell(268, y, 100, 30, '#1E293B', '#FFFFFF', 'OWNER', true, 'center');
-                for (let w = 0; w < totalWeeks; w++) {
-                    drawCell(368 + w * wkW, y, wkW, 30, '#0F172A', '#38BDF8', `W${w + 1}`, true, 'center');
-                }
-                y += 30;
-                const pCols = ['#F59E0B', '#10B981', '#38BDF8', '#A855F7', '#EC4899'];
-                data.phases.forEach((p, pIdx) => {
-                    const col = pCols[pIdx % pCols.length];
-                    drawCell(28, y, W - 56, 24, '#16222E', col, `${p.wbs} — ${p.title.toUpperCase()}`, true);
-                    y += 24;
-                    p.tasks.forEach(tk => {
-                        drawCell(28, y, 240, 26, '#0F172A', '#F1F5F9', `${tk.wbs} ${tk.title}`, false);
-                        drawCell(268, y, 100, 26, '#0F172A', '#94A3B8', tk.primaryOwner, false, 'center');
-                        ctx.fillStyle = '#0B1117';
-                        ctx.fillRect(368, y, chartW, 26);
-                        for (let w = 0; w < totalWeeks; w++) {
-                            ctx.strokeStyle = '#1E293B';
-                            ctx.strokeRect(368 + w * wkW, y, wkW, 26);
-                        }
-                        const sRatio = Math.max(0, Math.min(0.92, (tk.startObj.getTime() - data.minStart.getTime()) / (totalWeeks * 7 * 86400000)));
-                        const wRatio = Math.max(0.06, Math.min(1 - sRatio, (tk.durationDays * 86400000) / (totalWeeks * 7 * 86400000)));
-                        ctx.fillStyle = tk.isDone ? '#10B981' : col;
-                        ctx.fillRect(368 + sRatio * chartW, y + 5, wRatio * chartW, 16);
-                        ctx.fillStyle = '#0F172A';
-                        ctx.font = 'bold 9.5px Segoe UI, Arial, sans-serif';
-                        ctx.fillText(`${tk.durationDays}d`, 374 + sRatio * chartW, y + 16);
-                        y += 26;
-                    });
-                });
-            } else if (type === 'charter') {
-                const drawBoxRow = (label, valLines, rowH) => {
-                    drawCell(28, y, 220, rowH, '#E2E8F0', '#0F172A', label, true);
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(248, y, W - 276, rowH);
-                    ctx.strokeStyle = '#CBD5E1';
-                    ctx.strokeRect(248, y, W - 276, rowH);
-                    ctx.fillStyle = '#1E293B';
-                    ctx.font = '12px Segoe UI, Arial, sans-serif';
-                    valLines.forEach((ln, idx) => {
-                        ctx.fillText(clipText(ln, W - 296), 260, y + 20 + idx * 18);
-                    });
-                    y += rowH;
-                };
-                drawBoxRow('1. Project Scope & Business Case', [data.scopeStatement, `Workspace: ${data.forestTitle} | Methodology: ${data.species}`], 54);
-                drawBoxRow('2. Objectives & Success Criteria', data.phases.slice(0, 4).map(p => `• Phase ${p.index} (${p.title}): Deliver ${p.tasks.length} work packages on schedule.`), 86);
-                drawBoxRow('3. Project Constraints (Time/Budget)', [
-                    `• Time Window: ${data.startDate} to ${data.endDate} (${data.totalEstH.toFixed(1)} Est. Hours | ${data.totalSpentH.toFixed(1)} Logged)`,
-                    `• Financial Budget: $${data.totalBud.toFixed(2)} Allocated | $${data.totalSpentB.toFixed(2)} Spent`,
-                    `• Quality Target: ${data.doneCount} of ${data.totalCount} Deliverables Completed (${data.progressPct}%)`
-                ], 72);
-                drawBoxRow('4. Key Project Deliverables', data.allTasks.slice(0, 6).map(t => `• [${t.wbs}] ${t.title} — Owner: ${t.primaryOwner} | Due: ${t.endDate} | Status: ${t.status}`), 124);
-                drawBoxRow('5. Risks & Critical Path', data.allTasks.filter(t => t.atRisk).slice(0, 3).map(t => `• [${t.priority}] ${t.title}: Monitor hours (${t.estHours}h) & budget ($${t.budget})`).concat(['• Standard schedule & resource contention monitoring active.']).slice(0, 3), 72);
-                drawBoxRow('6. Executive Sign-Off', [`Sponsor Approval: ${data.stakeholders[0] || 'Sponsor'}   |   Project Manager: ${data.manager}   |   Date: ${new Date().toLocaleDateString()}`], 46);
-            } else {
-                // Project Plan & WBS Table
-                const cols = [
-                    { label: 'WBS', w: 56, align: 'center' },
-                    { label: 'Risk', w: 52, align: 'center' },
-                    { label: 'Phase / Task Deliverable', w: 280, align: 'left' },
-                    { label: 'Type', w: 68, align: 'center' },
-                    { label: 'Responsible', w: 120, align: 'left' },
-                    { label: 'Start', w: 86, align: 'center' },
-                    { label: 'End', w: 86, align: 'center' },
-                    { label: 'Days', w: 54, align: 'center' },
-                    { label: 'Status', w: 96, align: 'center' },
-                    { label: 'Priority', w: 78, align: 'center' },
-                    { label: 'Budget', w: 88, align: 'right' }
-                ];
-                let cx = 28;
-                cols.forEach(col => {
-                    drawCell(cx, y, col.w, 30, '#1E293B', '#FFFFFF', col.label, true, col.align);
-                    cx += col.w;
-                });
-                y += 30;
-
-                const banners = ['#FEF3C7', '#DBEAFE', '#FCE7F3', '#D1FAE5', '#EDE9FE'];
-                data.phases.forEach((p, idx) => {
-                    const bCol = banners[idx % banners.length];
-                    drawCell(28, y, 56, 26, bCol, '#0F172A', p.wbs, true, 'center');
-                    drawCell(84, y, W - 56 - 56, 26, bCol, '#0F172A', `Phase ${p.index}: ${p.title} (${p.tasks.length} Tasks)`, true);
-                    y += 26;
-                    p.tasks.forEach(tk => {
-                        let rx = 28;
-                        drawCell(rx, y, 56, 26, '#FFFFFF', '#475569', tk.wbs, true, 'center'); rx += 56;
-                        drawCell(rx, y, 52, 26, tk.atRisk ? '#FEE2E2' : '#F0FDF4', tk.atRisk ? '#DC2626' : '#16A34A', tk.atRisk ? 'Yes' : 'No', true, 'center'); rx += 52;
-                        drawCell(rx, y, 280, 26, '#FFFFFF', '#0F172A', tk.title, true, 'left'); rx += 280;
-                        drawCell(rx, y, 68, 26, '#FFFFFF', '#475569', tk.type.toUpperCase(), false, 'center'); rx += 68;
-                        drawCell(rx, y, 120, 26, '#FFFFFF', '#1E293B', tk.primaryOwner, false, 'left'); rx += 120;
-                        drawCell(rx, y, 86, 26, '#FFFFFF', '#334155', tk.startDate, false, 'center'); rx += 86;
-                        drawCell(rx, y, 86, 26, '#FFFFFF', '#334155', tk.endDate, false, 'center'); rx += 86;
-                        drawCell(rx, y, 54, 26, '#FFFFFF', '#0F172A', `${tk.durationDays}d`, true, 'center'); rx += 54;
-                        drawCell(rx, y, 96, 26, statusBg(tk.status), statusFg(tk.status), tk.status, true, 'center'); rx += 96;
-                        drawCell(rx, y, 78, 26, prioBg(tk.priority), prioFg(tk.priority), tk.priority, true, 'center'); rx += 78;
-                        drawCell(rx, y, 88, 26, '#FFFFFF', '#0F172A', `$${tk.spent.toFixed(0)}/$${tk.budget.toFixed(0)}`, true, 'right');
-                        y += 26;
-                    });
-                });
-            }
-            return c;
-        }
-
-        function downloadVisualPDF(type, data) {
-            const defaultName = `${data.baseTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${type.toUpperCase()}`;
-            const customName = prompt('Enter a file name for your Executive PDF:', defaultName);
-            if (customName === null) return;
-            const cleanName = (customName.trim() || defaultName).replace(/\.(pdf|png|xls)$/i, '');
-
-            const canvas = renderArtifactToCanvas(type, data);
-            const jpegUrl = canvas.toDataURL('image/jpeg', 0.95);
-            const rawBytes = atob(jpegUrl.split(',')[1]);
-            const imgW = canvas.width;
-            const imgH = canvas.height;
-
-            // Page size in points (Landscape 792pt wide, proportional height)
-            const pdfW = 792;
-            const pdfH = Math.round((imgH / imgW) * pdfW);
-
-            const enc = new TextEncoder();
-            const chunks = [];
-            let byteOffset = 0;
-            const offsets = [0];
-
-            const pushStr = (s) => {
-                const arr = enc.encode(s);
-                chunks.push(arr);
-                byteOffset += arr.length;
-            };
-            const pushBin = (binStr) => {
-                const arr = new Uint8Array(binStr.length);
-                for (let i = 0; i < binStr.length; i++) arr[i] = binStr.charCodeAt(i);
-                chunks.push(arr);
-                byteOffset += arr.length;
-            };
-
-            pushStr('%PDF-1.4\n');
-            offsets.push(byteOffset);
-            pushStr('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
-
-            offsets.push(byteOffset);
-            pushStr('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
-
-            offsets.push(byteOffset);
-            pushStr(`3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pdfW} ${pdfH}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>\nendobj\n`);
-
-            offsets.push(byteOffset);
-            pushStr(`4 0 obj\n<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${rawBytes.length} >>\nstream\n`);
-            pushBin(rawBytes);
-            pushStr('\nendstream\nendobj\n');
-
-            const contentCmd = `q\n${pdfW} 0 0 ${pdfH} 0 0 cm\n/Im1 Do\nQ`;
-            offsets.push(byteOffset);
-            pushStr(`5 0 obj\n<< /Length ${contentCmd.length} >>\nstream\n${contentCmd}\nendstream\nendobj\n`);
-
-            const xrefStart = byteOffset;
-            pushStr(`xref\n0 6\n0000000000 65535 f \n`);
-            for (let i = 1; i <= 5; i++) {
-                pushStr(`${String(offsets[i]).padStart(10, '0')} 00000 n \n`);
-            }
-            pushStr(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`);
-
-            const blob = new Blob(chunks, { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${cleanName}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        }
-
-        function downloadVisualPNG(type, data) {
-            const defaultName = `${data.baseTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${type.toUpperCase()}`;
-            const customName = prompt('Enter a file name for your High-Res PNG:', defaultName);
-            if (customName === null) return;
-            const cleanName = (customName.trim() || defaultName).replace(/\.(pdf|png|xls)$/i, '');
-
-            const canvas = renderArtifactToCanvas(type, data);
-            const a = document.createElement('a');
-            a.href = canvas.toDataURL('image/png');
-            a.download = `${cleanName}.png`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        }
-
-        function openArtifactStudio(type) {
-            currentArtifactType = type;
-            const data = compileProjectArtifactData();
-            const titles = { charter: 'Project Charter', plan: 'Project Work Plan', wbs: 'Work Breakdown Structure', raci: 'Pivoted RACI Matrix', gantt: 'Visual Gantt Chart' };
-            document.getElementById('studio-doc-title').innerText = `${titles[type] || 'Artifact'} — ${data.baseTitle}`;
-            document.getElementById('studio-paper').innerHTML = buildArtifactHTML(type, data);
-            document.getElementById('modal-pm-tools').classList.remove('open');
-            document.getElementById('modal-artifact-studio').classList.add('open');
-        }
-
-        document.getElementById('btn-close-studio').addEventListener('click', () => {
-            document.getElementById('modal-artifact-studio').classList.remove('open');
-        });
-        document.getElementById('btn-studio-back').addEventListener('click', () => {
-            document.getElementById('modal-artifact-studio').classList.remove('open');
-            document.getElementById('modal-pm-tools').classList.add('open');
-        });
-        document.getElementById('btn-studio-dl-pdf').addEventListener('click', () => {
-            downloadVisualPDF(currentArtifactType, compileProjectArtifactData());
-        });
-        document.getElementById('btn-studio-dl-xls').addEventListener('click', () => {
-            downloadStyledExcel(currentArtifactType, compileProjectArtifactData());
-        });
-        document.getElementById('btn-studio-dl-png').addEventListener('click', () => {
-            downloadVisualPNG(currentArtifactType, compileProjectArtifactData());
-        });
-
         document.querySelectorAll('.btn-export-doc').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const type = e.currentTarget.getAttribute('data-type');
                 const format = e.currentTarget.getAttribute('data-format');
-                if (format === 'xls') {
-                    downloadStyledExcel(type, compileProjectArtifactData());
-                } else {
-                    openArtifactStudio(type);
+                const originalText = e.currentTarget.innerText;
+
+                const forest = getForest();
+                const tree = getTree();
+                const isForestExport = state.viewMode === 'forest' || !tree;
+                const baseTitle = (isForestExport ? forest?.title : tree?.title) || 'Sylva_Project';
+                const defaultName = `${baseTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}_${type.toUpperCase()}`;
+
+                const customName = prompt('Enter a file name for your exported document:', defaultName);
+                if (customName === null) return;
+                const cleanName = (customName.trim() || defaultName).replace(/\.(docx?|rtf|csv|xlsx|pages|numbers)$/i, '');
+
+                e.currentTarget.innerText = 'Exporting...';
+
+                // Build hierarchical WBS numbering (1, 1.1, 1.1.1) across nodes
+                const buildWBSList = (tObj, treePrefix = '') => {
+                    if (!tObj || !Array.isArray(tObj.nodes)) return [];
+                    const nodes = tObj.nodes;
+                    const childrenMap = {};
+                    nodes.forEach(n => childrenMap[n.id] = []);
+                    const roots = [];
+                    nodes.forEach(n => {
+                        if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n);
+                        else roots.push(n);
+                    });
+                    const out = [];
+                    const walk = (node, wbsCode, depth) => {
+                        out.push({ node, wbs: wbsCode, depth, treeTitle: tObj.title, treeType: tObj.type, treeSeason: tObj.season || 'Spring' });
+                        (childrenMap[node.id] || []).forEach((child, idx) => {
+                            walk(child, `${wbsCode}.${idx + 1}`, depth + 1);
+                        });
+                    };
+                    roots.forEach((r, idx) => walk(r, treePrefix ? `${treePrefix}.${idx + 1}` : `${idx + 1}`, 0));
+                    return out;
+                };
+
+                let wbsItems = [];
+                if (isForestExport && forest && Array.isArray(forest.trees)) {
+                    forest.trees.forEach((t, idx) => { wbsItems = wbsItems.concat(buildWBSList(t, `${idx + 1}`)); });
+                } else if (tree) {
+                    wbsItems = buildWBSList(tree, '1');
                 }
+
+                const getStatus = (n) => n.harvested ? 'Harvested (Archived)' : (n.ripe ? 'Complete (Ripe)' : 'In Progress');
+                const getAssignees = (n) => (n.assignees && n.assignees.length > 0) ? n.assignees.map(a => `${a.name} [${a.role}]`).join(', ') : (n.assignee || 'Unassigned');
+                const csvEsc = (v) => `"${String(v ?? '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+                const rtfEsc = (v) => String(v ?? '').replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}').replace(/\r?\n/g, '\\line ');
+
+                let blob, filename;
+
+                if (format === 'xlsx' || format === 'numbers') {
+                    if (type === 'raci') {
+                        let csv = "WBS Code,Tree,Node Title,Node Type,Status,Season,Start Date,Responsible (R),Accountable (A),Consulted (C),Informed (I),Notes\n";
+                        wbsItems.forEach(({ node: n, wbs, treeTitle }) => {
+                            const r = [], a = [], c = [], i = [];
+                            (n.assignees || []).forEach(asg => {
+                                if (asg.role === 'R') r.push(asg.name);
+                                if (asg.role === 'A') a.push(asg.name);
+                                if (asg.role === 'C') c.push(asg.name);
+                                if (asg.role === 'I') i.push(asg.name);
+                            });
+                            if ((!n.assignees || n.assignees.length === 0) && n.assignee) r.push(n.assignee);
+                            csv += [
+                                csvEsc(wbs), csvEsc(treeTitle), csvEsc(n.title), csvEsc((n.type || '').toUpperCase()),
+                                csvEsc(getStatus(n)), csvEsc(n.season || 'Spring'), csvEsc(n.startDate || 'TBD'),
+                                csvEsc(r.join('; ')), csvEsc(a.join('; ')), csvEsc(c.join('; ')), csvEsc(i.join('; ')), csvEsc(n.desc || '')
+                            ].join(',') + "\n";
+                        });
+                        blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+                    } else {
+                        let csv = "WBS Code,Tree,Hierarchy Level,Task / Node Title,Node Type,Status,Season,Start Date,Est. Hours,Time Spent,Hours Variance,Budget ($),Actual Spent ($),Budget Variance ($),Assignees (RACI),Notes & Description\n";
+                        wbsItems.forEach(({ node: n, wbs, depth, treeTitle }) => {
+                            const estH = parseFloat(n.estHours) || 0, spentH = parseFloat(n.timeSpent) || 0;
+                            const bud = parseFloat(n.budget) || 0, spentB = parseFloat(n.totalSpent) || 0;
+                            const indentTitle = `${'  '.repeat(depth)}${n.title || 'Untitled'}`;
+                            csv += [
+                                csvEsc(wbs), csvEsc(treeTitle), csvEsc(depth + 1), csvEsc(indentTitle),
+                                csvEsc((n.type || '').toUpperCase()), csvEsc(getStatus(n)), csvEsc(n.season || 'Spring'),
+                                csvEsc(n.startDate || 'Unscheduled'), estH, spentH, (estH - spentH).toFixed(1),
+                                bud.toFixed(2), spentB.toFixed(2), (bud - spentB).toFixed(2),
+                                csvEsc(getAssignees(n)), csvEsc(n.desc || '')
+                            ].join(',') + "\n";
+                        });
+                        blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+                    }
+                    filename = `${cleanName}.csv`;
+                } else {
+                    // Generate native corporate RTF document (opens cleanly in MS Word, Mac Pages & Mobile Viewers)
+                    let totalEstH = 0, totalSpentH = 0, totalBud = 0, totalSpentB = 0, completedCount = 0, deliverableCount = 0;
+                    wbsItems.forEach(({ node: n }) => {
+                        totalEstH += parseFloat(n.estHours) || 0;
+                        totalSpentH += parseFloat(n.timeSpent) || 0;
+                        totalBud += parseFloat(n.budget) || 0;
+                        totalSpentB += parseFloat(n.totalSpent) || 0;
+                        if (n.type === 'fruit' || n.type === 'pinecone') {
+                            deliverableCount++;
+                            if (n.ripe || n.harvested) completedCount++;
+                        }
+                    });
+                    if (forest && parseFloat(forest.budget) > 0 && totalBud === 0) totalBud = parseFloat(forest.budget);
+                    if (forest && parseFloat(forest.cost) > 0 && totalSpentB === 0) totalSpentB = parseFloat(forest.cost);
+
+                    const docTypeTitle = type === 'charter' ? 'OFFICIAL PROJECT CHARTER' : 'COMPREHENSIVE PROJECT PLAN';
+                    const dateStr = new Date().toLocaleDateString();
+                    const trunkNode = wbsItems.find(x => x.node.type === 'trunk')?.node;
+
+                    const makeRow = (cells, widths, isHeader = false) => {
+                        let rtfRow = `\\trowd\\trgaph108\\trleft0`;
+                        let pos = 0;
+                        widths.forEach(w => {
+                            pos += w;
+                            rtfRow += `\\clbrdrt\\brdrs\\brdrw10\\clbrdrl\\brdrs\\brdrw10\\clbrdrb\\brdrs\\brdrw10\\clbrdrr\\brdrs\\brdrw10${isHeader ? '\\clcbpat2' : ''}\\cellx${pos}`;
+                        });
+                        rtfRow += `\\pard\\intbl\\fs18 `;
+                        cells.forEach(c => {
+                            rtfRow += `${isHeader ? '\\b ' : ''}${rtfEsc(c)}${isHeader ? '\\b0 ' : ''}\\cell `;
+                        });
+                        rtfRow += `\\row\n`;
+                        return rtfRow;
+                    };
+
+                    let rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Segoe UI;}{\\f1 Arial;}}{\\colortbl;\\red19\\green78\\blue74;\\red226\\green232\\blue240;\\red71\\green85\\blue105;}\n`;
+                    rtf += `\\viewkind4\\uc1\\pard\\sa120\\sl276\\slmult1\\f0\\fs36\\b\\cf1 ${rtfEsc(baseTitle)}\\b0\\cf0\\par\n`;
+                    rtf += `\\fs22\\b\\cf3 ${docTypeTitle}\\b0  |  Generated: ${rtfEsc(dateStr)}\\cf0\\par\\pard\\sa200\\par\n`;
+
+                    // Section 1: Executive Overview Table
+                    rtf += `\\pard\\sa120\\fs26\\b\\cf1 1. Executive Summary & Project Parameters\\b0\\cf0\\par\n`;
+                    const metaWidths = [2400, 6600];
+                    rtf += makeRow(['Parameter', 'Official Value / Specification'], metaWidths, true);
+                    rtf += makeRow(['Workspace / Forest', forest?.title || 'My Workspace'], metaWidths);
+                    rtf += makeRow(['Project / Tree Name', `${baseTitle} (${tree?.type || 'Multi-Tree'} Architecture)`], metaWidths);
+                    rtf += makeRow(['Core Objective / Scope', (trunkNode && trunkNode.desc) ? trunkNode.desc : `Structured execution and delivery of ${baseTitle}.`], metaWidths);
+                    rtf += makeRow(['Team / Human Resources', forest?.hr || 'Assigned at Node Level'], metaWidths);
+                    rtf += makeRow(['Target Deadline & Days', `${forest?.deadline || 'Ongoing'} (${forest?.daysSpent || '0'} Days Logged)`], metaWidths);
+                    rtf += makeRow(['Total Hours (Spent / Est.)', `${totalSpentH.toFixed(1)} hrs / ${totalEstH.toFixed(1)} hrs`], metaWidths);
+                    rtf += makeRow(['Total Budget (Spent / Allocated)', `$${totalSpentB.toFixed(2)} / $${totalBud.toFixed(2)}`], metaWidths);
+                    rtf += makeRow(['Deliverable Completion', `${completedCount} of ${deliverableCount} Deliverables Completed`], metaWidths);
+                    rtf += `\\pard\\sa240\\par\n`;
+
+                    if (type === 'charter') {
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 2. High-Level Phases & Architecture (Branches)\\b0\\cf0\\par\n`;
+                        const branches = wbsItems.filter(x => x.node.type === 'branch' || x.node.type === 'trunk');
+                        const bWidths = [1100, 2800, 1800, 3300];
+                        rtf += makeRow(['WBS', 'Phase / Branch Title', 'Lead / RACI', 'Scope & Notes'], bWidths, true);
+                        branches.forEach(({ node: n, wbs }) => {
+                            rtf += makeRow([wbs, n.title, getAssignees(n), n.desc || 'Core structural phase'], bWidths);
+                        });
+                        rtf += `\\pard\\sa240\\par\n`;
+
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 3. Key Authorized Deliverables (Fruits & Pine Cones)\\b0\\cf0\\par\n`;
+                        const delivs = wbsItems.filter(x => x.node.type === 'fruit' || x.node.type === 'pinecone');
+                        const dWidths = [1000, 2500, 1500, 1800, 2200];
+                        rtf += makeRow(['WBS', 'Deliverable', 'Status', 'Target / Cost', 'Assignees'], dWidths, true);
+                        if (delivs.length === 0) {
+                            rtf += makeRow(['-', 'No Fruit/Deliverable nodes defined yet', '-', '-', '-'], dWidths);
+                        } else {
+                            delivs.forEach(({ node: n, wbs }) => {
+                                rtf += makeRow([wbs, n.title, getStatus(n), `${n.startDate || 'TBD'} ($${n.budget || 0})`, getAssignees(n)], dWidths);
+                            });
+                        }
+                        rtf += `\\pard\\sa360\\par\n`;
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 4. Executive Authorization & Sign-Off\\b0\\cf0\\par\n`;
+                        rtf += makeRow(['Project Sponsor Name & Title', 'Signature', 'Date'], [3800, 3400, 1800], true);
+                        rtf += makeRow([' ', ' ', ' '], [3800, 3400, 1800]);
+                    } else {
+                        rtf += `\\pard\\sa120\\fs26\\b\\cf1 2. Complete Work Breakdown, Schedule & Resource Plan\\b0\\cf0\\par\n`;
+                        const pWidths = [900, 2300, 1000, 1300, 1300, 2200];
+                        rtf += makeRow(['WBS', 'Node / Task Title', 'Type', 'Status', 'Hrs / Budget', 'RACI & Notes'], pWidths, true);
+                        wbsItems.forEach(({ node: n, wbs, depth }) => {
+                            const indent = depth > 0 ? `${'- '.repeat(depth)}` : '';
+                            const hrsBud = `${n.timeSpent || 0}/${n.estHours || 0}h | $${n.totalSpent || 0}/$${n.budget || 0}`;
+                            const notesAndRaci = `${getAssignees(n)}${n.desc ? ' -- ' + n.desc : ''}`;
+                            rtf += makeRow([wbs, `${indent}${n.title}`, (n.type || '').toUpperCase(), getStatus(n), hrsBud, notesAndRaci], pWidths);
+                        });
+                    }
+
+                    rtf += `}`;
+                    blob = new Blob([rtf], { type: 'application/rtf' });
+                    filename = `${cleanName}.rtf`;
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+                setTimeout(() => { e.target.innerText = originalText; }, 500);
             });
         });
             let bgClickCount = 0;
@@ -3316,6 +2655,8 @@ if (isZeroState && state.isLocked) {
           startInteractiveWalkthrough();
       });
 
+        }
+
       function setupCustomDropdowns() {
         const configs = [
           { trig: 'node-type-trigger', drop: 'node-type-dropdown', inp: 'node-input-type' },
@@ -4114,94 +3455,91 @@ if (isZeroState && state.isLocked) {
       }
 
       function initTutorial() {
-        if (!localStorage.getItem('sylva_tutorial_seen')) {
-          document.getElementById('modal-tut-prompt').classList.add('open');
-        } else {
-          setTimeout(window.initialFocus, 100);
-        }
+     if (!localStorage.getItem('sylva_tutorial_seen')) {
+       document.getElementById('modal-tut-prompt').classList.add('open');
+     } else {
+       setTimeout(window.initialFocus, 100);
+     }
 
-        document.getElementById('btn-tut-yes').onclick = () => {
-          document.getElementById('modal-tut-prompt').classList.remove('open');
-          localStorage.setItem('sylva_tutorial_seen', 'true');
-          startTour();
-        };
+     document.getElementById('btn-tut-yes').onclick = () => {
+       document.getElementById('modal-tut-prompt').classList.remove('open');
+       localStorage.setItem('sylva_tutorial_seen', 'true');
+       startTour();
+     };
 
-        document.getElementById('btn-tut-no').onclick = () => {
-          document.getElementById('modal-tut-prompt').classList.remove('open');
-          localStorage.setItem('sylva_tutorial_seen', 'true');
-          setTimeout(window.initialFocus, 100);
-        };
-      }
+     document.getElementById('btn-tut-no').onclick = () => {
+        document.getElementById('modal-tut-prompt').classList.remove('open');
+        localStorage.setItem('sylva_tutorial_seen', 'true');
+        setTimeout(window.initialFocus, 100);
+      };
+    }
 
-      init();
-
+    init();
+  
       document.getElementById('btn-create-org').addEventListener('click', () => {
-        const userInput = prompt('Enter a custom Group Code (or leave blank to auto-generate):');
+        const userInput = prompt("Enter a custom Group Code (or leave blank to auto-generate):");
+        
+        // If the user clicks Cancel, stop here
+        if (userInput === null) return; 
 
-        if (userInput === null) return;
-
+        // Use their input, or generate a random one if they left it blank
         let newOrgCode = userInput.trim();
-        if (newOrgCode === '') {
-          newOrgCode = 'GROUP-' + Math.floor(1000 + Math.random() * 9000);
+        if (newOrgCode === "") {
+            newOrgCode = 'GROUP-' + Math.floor(1000 + Math.random() * 9000);
         }
-
+        
         showAppAlert(`Your Group Code is: ${newOrgCode}. Share this with your team!`);
-      });
+    });
+const urlParams = new URLSearchParams(window.location.search);
+const unlockData = urlParams.get('unlock');
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const unlockData = urlParams.get('unlock');
-
-      if (unlockData) {
-        if (unlockData === 'treehugger') {
-          localStorage.setItem('sylva_treehugger', 'true');
-          showAppAlert('Tree Hugger Edition Unlocked! All templates available.');
-        } else if (unlockData === 'credit') {
-          const currentCredits = parseInt(localStorage.getItem('sylva_credits') || '0', 10);
-          localStorage.setItem('sylva_credits', String(currentCredits + 1));
-          showAppAlert('1 Template Credit Added! Click any locked template to use it.');
-        } else {
-          localStorage.setItem(`sylva_template_${unlockData}`, 'true');
-          showAppAlert('Template Unlocked!');
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-
-      function tryUnlockTemplate(templateId) {
-        const templateKey = `sylva_template_${templateId}`;
-        if (localStorage.getItem('sylva_treehugger') === 'true' || localStorage.getItem(templateKey) === 'true') {
-          return true;
-        }
-
-        const credits = parseInt(localStorage.getItem('sylva_credits') || '0', 10);
-        if (credits > 0) {
-          if (confirm(`Use 1 credit to unlock this template? You have ${credits} credits left.`)) {
-            localStorage.setItem('sylva_credits', String(credits - 1));
-            localStorage.setItem(templateKey, 'true');
+if (unlockData) {
+    if (unlockData === 'treehugger') {
+        localStorage.setItem('sylva_treehugger', 'true');
+    showAppAlert('Tree Hugger Edition Unlocked! All templates available.');
+  } else if (unlockData === 'credit') {
+    let currentCredits = parseInt(localStorage.getItem('sylva_credits') || '0');
+    localStorage.setItem('sylva_credits', currentCredits + 1);
+    showAppAlert('1 Template Credit Added! Click any locked template to use it.');
+    } else {
+        localStorage.setItem(`sylva_template_${unlockData}`, 'true');
+        showAppAlert('Template Unlocked!');
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+function tryUnlockTemplate(templateId) {
+    if (localStorage.getItem('sylva_treehugger') === 'true' || localStorage.getItem(`sylva_template_${templateId}`) === 'true') {
+        return true; 
+    }
+    let credits = parseInt(localStorage.getItem('sylva_credits') || '0');
+    if (credits > 0) {
+        if (confirm(`Use 1 credit to unlock this template? You have ${credits} credits left.`)) {
+            localStorage.setItem('sylva_credits', credits - 1);
+            localStorage.setItem(`sylva_template_${templateId}`, 'true');
             showAppAlert('Template Unlocked!');
             return true;
-          }
-          return false;
         }
-
+    } else {
         showAppAlert('Template locked. Purchase a Template Credit or the Tree Hugger edition to unlock.');
-        return false;
-      }
+    }
+    return false;
+}
+window.addEventListener('DOMContentLoaded', () => {
+    const isTreeHugger = localStorage.getItem('sylva_treehugger') === 'true';
+    const isEnterprise = localStorage.getItem('sylva_enterprise') === 'true';
 
-      document.addEventListener('DOMContentLoaded', () => {
-        const isTreeHugger = localStorage.getItem('sylva_treehugger') === 'true';
-        const isEnterprise = localStorage.getItem('sylva_enterprise') === 'true';
-
-        if (isTreeHugger || isEnterprise) {
-          const buttons = document.querySelectorAll('button');
-          buttons.forEach((btn) => {
+    if (isTreeHugger || isEnterprise) {
+        // Search by the visible text if the exact ID varies in your code
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
             if (btn.textContent.includes('Tree Hugger')) {
-              btn.style.display = 'none';
+                btn.style.display = 'none';
             }
-          });
-        }
-      });
-      }
-    </script>
+        });
+    }
+});
+  </script>
+
 
 </body>
 </html>
