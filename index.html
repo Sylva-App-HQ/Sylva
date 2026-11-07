@@ -1331,7 +1331,7 @@ if (isZeroState && state.isLocked) {
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-          const ripeBadge = ((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested)
+          const ripeBadge = ((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
           el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
           attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
@@ -1426,73 +1426,133 @@ if (isZeroState && state.isLocked) {
       }
 
      function autoTidyNodes() {
-     if (state.viewMode === 'forest') {
-       const f = getForest(); if(!f || !f.trees) return;
-       f.trees.forEach((t, i) => {
-           if (i === 0) { t.x = 5000; t.y = 5000; }
-           else {
-               let currentRing = 1, capacity = 6, processed = 1; 
-               while (i >= processed + capacity) { processed += capacity; currentRing++; capacity = currentRing * 6; }
-               const indexInRing = i - processed;
-               const radius = currentRing * 350; 
-               const angle = (indexInRing / capacity) * Math.PI * 2;
-               t.x = 5000 + (radius * Math.cos(angle));
-               t.y = 5000 + (radius * Math.sin(angle));
-           }
-       });
-       saveData(); centerOn(5000, 5000); render();
-     } else {
-          const t = getTree(); if (!t) return;
-          const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0]; if (!root) return;
-          const childrenMap = {}; t.nodes.forEach(n => childrenMap[n.id] = []);
-          t.nodes.forEach(n => { if (n.parentId && childrenMap[n.parentId]) childrenMap[n.parentId].push(n); });
-          
-          const nodeWidth = 210; // Tightened from 280px to heavily restrict horizontal sprawling
-          const vSpacing = 160;
-          const widths = {};
-
-          function calculateSubtreeWidths(nodeId) {
-              const kids = childrenMap[nodeId];
-              if (kids.length === 0) {
-                  widths[nodeId] = nodeWidth;
-                  return nodeWidth;
-              }
-              let totalWidth = 0;
-              for (let k of kids) {
-                  totalWidth += calculateSubtreeWidths(k.id);
-              }
-              widths[nodeId] = totalWidth;
-              return totalWidth;
-          }
-
-          function assignCoordinates(nodeId, depth, startX) {
-              const node = t.nodes.find(n => n.id === nodeId); if (!node) return;
-              const kids = childrenMap[nodeId];
-              const myWidth = widths[nodeId];
-
-              node.x = startX + (myWidth / 2) - 95; 
-              node.y = 5000 + (depth * vSpacing);
-
-              let currentX = startX;
-              for (let k of kids) {
-                  assignCoordinates(k.id, depth + 1, currentX);
-                  currentX += widths[k.id];
-              }
-          }
-          
-          calculateSubtreeWidths(root.id);
-          assignCoordinates(root.id, 0, 5000 - (widths[root.id] / 2));
-
-          // Apply organic canopy curve mimicking physical trees
-          t.nodes.forEach(n => {
-             if (n.type !== 'trunk') {
-                 const distFromCenter = Math.abs(n.x - root.x);
-                 n.y += (distFromCenter * 0.15);
-             }
+        if (state.viewMode === 'forest') {
+          const f = getForest(); if (!f || !f.trees) return;
+          f.trees.forEach((t, i) => {
+            if (i === 0) { t.x = 5000; t.y = 5000; }
+            else {
+              let currentRing = 1, capacity = 6, processed = 1;
+              while (i >= processed + capacity) { processed += capacity; currentRing++; capacity = currentRing * 6; }
+              const indexInRing = i - processed;
+              const radius = currentRing * 350;
+              const angle = (indexInRing / capacity) * Math.PI * 2;
+              t.x = 5000 + (radius * Math.cos(angle));
+              t.y = 5000 + (radius * Math.sin(angle));
+            }
           });
-          
+          saveData(); centerOn(5000, 5000); render();
+        } else {
+          const t = getTree(); if (!t || !t.nodes || t.nodes.length === 0) return;
+          const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0]; if (!root) return;
+
+          const childrenMap = {};
+          t.nodes.forEach(n => childrenMap[n.id] = []);
+          t.nodes.forEach(n => {
+            if (n.id !== root.id) {
+              const pid = (n.parentId && childrenMap[n.parentId]) ? n.parentId : root.id;
+              childrenMap[pid].push(n);
+            }
+          });
+
+          // 1. Place Trunk at top center
+          root.x = 5000 - 95;
+          root.y = 5000;
+
+          // 2. Lay out a branch's descendants by pushing downward and flaring outward
+          function layoutBough(branchNode, startX, startY, outDir) {
+            branchNode.x = startX - 95;
+            branchNode.y = startY;
+
+            const kids = childrenMap[branchNode.id] || [];
+            if (kids.length === 0) return startY + 85;
+
+            let cursorY = startY + 125;
+            const pairHSpacing = 215;
+            const vStep = 115;
+
+            for (let i = 0; i < kids.length; i += 2) {
+              const rowKids = kids.slice(i, i + 2);
+              const rowIndex = Math.floor(i / 2);
+              // Push each successive row slightly further outward from the center trunk
+              const flareShift = outDir * ((rowIndex + 1) * 38);
+              const rowCenterX = startX + flareShift;
+
+              if (rowKids.length === 1) {
+                const k = rowKids[0];
+                k.x = rowCenterX - 95;
+                k.y = cursorY;
+                let subBottom = cursorY + 85;
+                if ((childrenMap[k.id] || []).length > 0) {
+                  subBottom = layoutBough(k, rowCenterX, cursorY, outDir);
+                }
+                cursorY = Math.max(cursorY + vStep, subBottom + 30);
+              } else {
+                const leftKid = rowKids[0];
+                const rightKid = rowKids[1];
+                const leftX = rowCenterX - (pairHSpacing / 2);
+                const rightX = rowCenterX + (pairHSpacing / 2);
+
+                // Curve outer nodes slightly downward for a rounded canopy bough
+                const leftDrop = outDir < 0 ? 18 : 0;
+                const rightDrop = outDir > 0 ? 18 : 0;
+
+                leftKid.x = leftX - 95;
+                leftKid.y = cursorY + leftDrop;
+                rightKid.x = rightX - 95;
+                rightKid.y = cursorY + rightDrop;
+
+                let maxSubBottom = cursorY + 85 + Math.max(leftDrop, rightDrop);
+                if ((childrenMap[leftKid.id] || []).length > 0) {
+                  maxSubBottom = Math.max(maxSubBottom, layoutBough(leftKid, leftX, leftKid.y, outDir <= 0 ? -1 : 1));
+                }
+                if ((childrenMap[rightKid.id] || []).length > 0) {
+                  maxSubBottom = Math.max(maxSubBottom, layoutBough(rightKid, rightX, rightKid.y, outDir >= 0 ? 1 : -1));
+                }
+                cursorY = Math.max(cursorY + vStep, maxSubBottom + 30);
+              }
+            }
+            return cursorY;
+          }
+
+          // 3. Arrange primary branches in a rounded upside-down tree crown
+          const topBranches = childrenMap[root.id] || [];
+          const totalB = topBranches.length;
+
+          if (totalB <= 3) {
+            const spread = 340;
+            const startX = 5000 - ((totalB - 1) * spread) / 2;
+            topBranches.forEach((b, idx) => {
+              const bx = startX + (idx * spread);
+              const outDir = bx < 4990 ? -1 : (bx > 5010 ? 1 : 0);
+              const centerDrop = outDir === 0 ? 50 : 0;
+              layoutBough(b, bx, 5165 + centerDrop, outDir);
+            });
+          } else {
+            const totalTiers = Math.ceil(totalB / 2);
+            let tierStartY = 5160;
+
+            for (let tier = 0; tier < totalTiers; tier++) {
+              const leftB = topBranches[tier * 2];
+              const rightB = topBranches[tier * 2 + 1];
+
+              if (leftB && rightB) {
+                // Rounded canopy silhouette: wide at the upper/middle crown, tapering toward the bottom
+                let spreadFromCenter = 380;
+                if (totalTiers >= 3 && tier === 1) spreadFromCenter = 430;
+                else if (tier === totalTiers - 1) spreadFromCenter = 245;
+
+                const b1Bottom = layoutBough(leftB, 5000 - spreadFromCenter, tierStartY, -1);
+                const b2Bottom = layoutBough(rightB, 5000 + spreadFromCenter, tierStartY, 1);
+                tierStartY = Math.max(b1Bottom, b2Bottom) + 25;
+              } else if (leftB) {
+                // Odd final branch forms the rounded bottom-center tip of the canopy
+                tierStartY = layoutBough(leftB, 5000, tierStartY + 10, 0) + 25;
+              }
+            }
+          }
+
           saveData(); render();
-          setTimeout(() => centerOn(root.x, root.y), 100);
+          setTimeout(() => smoothFocusOnTree(t), 80);
         }
       }
 
