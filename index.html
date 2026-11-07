@@ -6,8 +6,7 @@
   <title>Sylva | Visual Thought & Project Trees</title>
   <meta name="description" content="Organize ideas, projects, and notes into visual growth trees. 100% private and offline.">
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="favicon.png?v=2">  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --bg-canvas: #070B0E; --bg-surface: #0F171F; --bg-surface-elevated: #16222E;
@@ -433,8 +432,7 @@
             <!-- Dynamically populated via JS -->
         </div>
 
-        <div class="field-group" style="margin-top: 20px;"><label>Prune (Clean Inactive)</label><p style="font-size:11px; color:var(--text-muted);">Safely archives blank, disconnected notes so your tree stays clean.</p><button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button></div>
-        
+<div class="field-group" style="margin-top: 20px;"><label>Prune (Clean Inactive)</label><p style="font-size:11px; color:var(--text-muted);">Safely removes nodes whose details window has not been opened for 2 weeks or more.</p><button class="btn" style="margin-top:6px;" id="btn-action-prune">Prune Tree</button></div>        
         <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
            <div style="display:flex; align-items:center; gap:8px;">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--node-fruit)" stroke-width="2"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>
@@ -684,8 +682,7 @@
     <div class="modal-card">
       <div class="modal-header"><h3>💡 Help Options</h3><button class="btn btn-small" id="btn-close-help-options">&times;</button></div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px; text-align: center;">
-        <button class="btn" id="btn-opt-tutorial" style="padding: 15px;">🎬 View Quick Tutorial</button>
-        <button class="btn" id="btn-opt-walkthrough" style="padding: 15px; border-color: var(--accent); color: var(--accent);">🚀 Start Guided Walkthrough</button>
+<button class="btn" id="btn-opt-tutorial" style="display: none;">🎬 View Quick Tutorial</button>        <button class="btn" id="btn-opt-walkthrough" style="padding: 15px; border-color: var(--accent); color: var(--accent);">🚀 Start Guided Walkthrough</button>
         <button class="btn" id="btn-opt-index" style="padding: 15px;">📚 View Feature Index</button>
       </div>
     </div>
@@ -1388,6 +1385,7 @@ if (isZeroState && state.isLocked) {
       function renderTree() {
         const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if (!tree) return;
         (tree.nodes || []).forEach(node => {
+          if (!node.lastInspected) node.lastInspected = Date.now();
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
@@ -3159,11 +3157,31 @@ viewport.addEventListener('wheel', (e) => {
         });
         document.getElementById('btn-season-done').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); render(); });
         document.getElementById('btn-action-prune').addEventListener('click', () => {
-          const t = getTree(); if (!t) return;
-          const parentIds = new Set(t.nodes.map(n => n.parentId).filter(Boolean));
-          t.nodes = t.nodes.filter(n => n.type === 'trunk' || parentIds.has(n.id) || (n.desc && n.desc.trim().length > 0));
-          document.getElementById('modal-season').classList.remove('open'); render();
-        });
+       const t = getTree(); if (!t || !t.nodes) return;
+       const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+       const now = Date.now();
+       const root = t.nodes.find(n => n.type === 'trunk') || t.nodes[0];
+       const beforeCount = t.nodes.length;
+
+       t.nodes = t.nodes.filter(n => {
+         if (n.type === 'trunk' || (root && n.id === root.id)) return true;
+         const lastOpened = n.lastInspected || now;
+         return (now - lastOpened) < TWO_WEEKS_MS;
+       });
+
+       const remainingIds = new Set(t.nodes.map(n => n.id));
+       t.nodes.forEach(n => {
+         if (n.parentId && !remainingIds.has(n.parentId) && root && n.id !== root.id) {
+           n.parentId = root.id;
+         }
+       });
+
+       const prunedCount = beforeCount - t.nodes.length;
+       document.getElementById('modal-season').classList.remove('open');
+       saveData();
+       render();
+       showAppAlert(prunedCount > 0 ? `Pruned ${prunedCount} node(s) unopened for 2+ weeks.` : 'No inactive nodes found (all nodes have been opened within the last 2 weeks).');
+     });
         
         document.getElementById('btn-inspect-basket').addEventListener('click', () => { document.getElementById('modal-season').classList.remove('open'); document.getElementById('modal-basket').classList.add('open'); });
         document.getElementById('btn-close-basket').addEventListener('click', () => { document.getElementById('modal-basket').classList.remove('open'); });
@@ -3668,6 +3686,7 @@ viewport.addEventListener('wheel', (e) => {
    };
       
       function openInspector(node) {
+        node.lastInspected = Date.now(); try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e){}
         setTimeout(() => {
           document.getElementById('node-input-title').value = node.title;
           document.getElementById('node-input-desc').value = node.desc || '';
@@ -4009,23 +4028,29 @@ viewport.addEventListener('wheel', (e) => {
         });
       }
 
-      /* --- GUIDED TOUR ENGINE --- */
+      /* --- GUIDED TOUR ENGINE (COMBINED WALKTHROUGH) --- */
       const tourSteps = [
             { id: 'welcome-placard', title: 'Welcome to Sylva - Think like a Tree!', text: 'Use this workspace for everything: brainstorming, project management, tracking goals, and building knowledge bases. Give life to your ideas and watch them grow!' },
-            { id: 'btn-grow', title: 'Give it life!', text: 'Click here to grow your ideas, projects, lists, databases and more! Forests are your Master Folder, Trees act as project containers, branches are for grouping things, fruits for tasks, leaves for text and docs, acorns link things, seeds hold trees within them, and pinecones are recurrent tasks.' },
+            { id: 'welcome-placard', title: '🚀 Interactive Walkthrough', text: "Howdy stranger! What you are currently looking at is a sample Tree (a project or idea) set up as a 'Grocery List' Apple Tree (Apple Trees are for tasks and checklists)! Click Next to walk through your main workspace and project tools." },
+            { id: 'viewport', title: 'Your Visual Tree', text: 'This window is your main canvas, here you can visually see all the steps and pieces of your projects and ideas and how they are connected. This view also allows for at-a-glance progress checks and cross referencing.' },
             { id: 'viewport', title: 'Navigate the Canvas', text: 'Drag the screen to pan around your workspace. Tap any node to select it, double tap it to see its details, and double-tap the background to deselect something. You can tell its a tree because of the way it is!' },
+            { id: 'btn-grow', title: 'Give it life!', text: 'Click here to grow your ideas, projects, lists, databases and more! Forests are your Master Folder, Trees act as project containers, branches are for grouping things, fruits for tasks, leaves for text and docs, acorns link things, seeds hold trees within them, and pinecones are recurrent tasks.' },
             { id: 'btn-lock', title: 'Messy Tree? Rearrange!', text: 'Click the lock icon to unlock trees and nodes and rearrange them as needed. How neat is that? Dats perty neat!' },
-            { id: 'pip-canvas', title: 'The Minimap', text: 'Keep your bearings with the PIP minimap. Pinch-to-zoom directly on this map to get your bearings, click a node to pan to it, and double click to center the view on a tree or forest.' },
-            { id: 'bottom-actions-container', title: 'Track Your Progress', text: 'Use these tools to highlight Critical Paths, view Season Details and Settings, or track and complete tasks with Harvest.' },
-            { id: 'btn-toggle-timeline', title: 'Executive Spread', text: 'Click here to see a breakdown of your tree in a professionally structured format.' },
-            { id: 'btn-pm-tools', title: 'Export Instantly', text: 'When you are ready, click here to instantly generate spreadsheets and documents straight from your tree and save them wherever you need.' },
+            { id: 'pip-canvas', title: 'The Minimap', text: 'Keep your bearings with the PIP minimap. Pinch-to-zoom (or scroll) directly on this map to get your bearings, click a node to pan to it, and double click to center the view on a tree or forest.' },
+            { id: 'bottom-actions-container', title: 'Track Your Progress', text: 'Use these bottom-right tools to highlight Critical Paths, view Season Details and Settings, or track and complete tasks with Harvest.' },
+            { id: 'btn-harvest-main', title: 'Complete & Harvest Tasks', text: 'This is your Harvest Button. Clicking this will automatically remove all fruit nodes marked as complete, move them to your Harvest Basket for later review, and update your progress bar.' },
+            { id: 'btn-season', title: 'Seasons & Harvest Basket', text: 'Click Season anytime to inspect your Harvest Basket, Prune inactive nodes unopened for 2+ weeks, or change the season (stage) of your tree.' },
+            { id: 'btn-critical-path', title: 'Critical Path', text: 'Clicking the Critical Path button will automatically highlight the longest chain of incomplete tasks in glowing red, letting you instantly see what parts of your project need the most attention or priority.' },
+            { id: 'btn-toggle-timeline', title: 'Executive Spread (Document View)', text: 'Click Document View at the top of the canvas to see a breakdown of your tree in a professionally structured format and export it as a PDF, Color Excel spreadsheet, or PM document.' },
             { id: 'btn-toggle-directory', title: 'This is your Table of Contents', text: 'Here you can find a list of all of your trees and nodes. Pin something to keep it at the top for faster access!' },
             { id: 'btn-toggle-nursery', title: 'Finally, SAVE THE TREES!', text: 'Click here to save and import trees and forests, load templates, and manage your workspace.' },
+            { id: 'btn-grow', title: 'You Are Ready to Grow!', text: "Click Finish below! You can now play around with this sample tree—try clicking Harvest—or click '^ Up' to return to your Forest." }
       ];
 
       let currentTourStep = 0;
       let activeTourElement = null;
       let preTourViewMode = null;
+      let isWalkthroughActive = false;
 
       function updateTourPosition() {
           const highlightBox = document.getElementById('tour-highlight');
@@ -4036,37 +4061,35 @@ viewport.addEventListener('wheel', (e) => {
 
           const step = tourSteps[currentTourStep];
 
-       // Custom logic for the center-screen welcome placard
-       if (step.id === 'welcome-placard') {
-           document.getElementById('tour-highlight').style.display = 'none';
-           const tooltipBox = document.getElementById('tour-tooltip');
-           tooltipBox.style.display = 'flex';
+          if (step.id === 'welcome-placard') {
+              highlightBox.style.display = 'none';
+              tooltipBox.style.display = 'flex';
 
-           const ttRect = tooltipBox.getBoundingClientRect();
-           const ttWidth = ttRect.width || 300;
-           const ttHeight = ttRect.height || 190;
+              const ttRect = tooltipBox.getBoundingClientRect();
+              const ttWidth = ttRect.width || 300;
+              const ttHeight = ttRect.height || 190;
 
-           tooltipBox.style.top = `${(window.innerHeight - ttHeight) / 2}px`;
-           tooltipBox.style.left = `${(window.innerWidth - ttWidth) / 2}px`;
-           setTimeout(() => tooltipBox.style.opacity = '1', 50);
+              tooltipBox.style.top = `${(window.innerHeight - ttHeight) / 2}px`;
+              tooltipBox.style.left = `${(window.innerWidth - ttWidth) / 2}px`;
+              setTimeout(() => tooltipBox.style.opacity = '1', 50);
 
-           document.getElementById('tour-title').innerText = step.title; 
-           document.getElementById('tour-desc').innerText = step.text;
-           document.getElementById('tour-progress').innerText = `${currentTourStep + 1} / ${tourSteps.length}`;
-           document.getElementById('tour-prev').style.visibility = 'hidden';
-           document.getElementById('tour-next').innerText = 'Next';
+              document.getElementById('tour-title').innerText = step.title; 
+              document.getElementById('tour-desc').innerText = step.text;
+              document.getElementById('tour-progress').innerText = `${currentTourStep + 1} / ${tourSteps.length}`;
+              document.getElementById('tour-prev').style.visibility = currentTourStep === 0 ? 'hidden' : 'visible';
+              document.getElementById('tour-next').innerText = 'Next';
 
-           if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
-           activeTourElement = null;
-           return;
-       }
+              if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
+              activeTourElement = null;
+              return;
+          }
 
-       const target = document.getElementById(step.id);
-       if (!target || target.style.display === 'none') {
-           currentTourStep++; updateTourPosition(); return;
-       }
+          const target = document.getElementById(step.id);
+          if (!target || target.style.display === 'none') {
+              currentTourStep++; updateTourPosition(); return;
+          }
 
-       if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
+          if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
           activeTourElement = target;
           if (step.id !== 'viewport') {
               activeTourElement.classList.add('tour-active-element');
@@ -4122,9 +4145,6 @@ viewport.addEventListener('wheel', (e) => {
           document.getElementById('tour-next').innerText = currentTourStep === tourSteps.length - 1 ? 'Finish' : 'Next';
       }
 
-      const defaultTourSteps = [...tourSteps];
-      let isWalkthroughActive = false;
-
       function endTour() {
           const highlightBox = document.getElementById('tour-highlight');
           const tooltipBox = document.getElementById('tour-tooltip');
@@ -4134,12 +4154,7 @@ viewport.addEventListener('wheel', (e) => {
           if (activeTourElement) activeTourElement.classList.remove('tour-active-element');
           currentTourStep = 0;
           activeTourElement = null;
-
-          if (isWalkthroughActive) {
-              isWalkthroughActive = false;
-              tourSteps.length = 0;
-              defaultTourSteps.forEach(s => tourSteps.push(s));
-          }
+          isWalkthroughActive = false;
 
           if (preTourViewMode) {
               state.viewMode = preTourViewMode;
@@ -4165,47 +4180,11 @@ viewport.addEventListener('wheel', (e) => {
           updateTourPosition();
       };
       document.getElementById('tour-close').onclick = endTour;
-      
-      function startTour() {
-          currentTourStep = 0;
-          preTourViewMode = state.viewMode;
-          if (getTree()) {
-              state.viewMode = 'tree';
-          } else {
-              state.viewMode = 'forest';
-          }
-          render();
-          setTimeout(() => { updateTourPosition(); }, 50);
-      }
 
       function startInteractiveWalkthrough() {
           document.getElementById('drawer-left').classList.remove('open');
           document.getElementById('drawer-right').classList.remove('open');
           document.getElementById('modal-help-options').style.display = 'none';
-
-          const suffix = '_' + Date.now();
-          const trunkId = 'n_trunk' + suffix;
-          const b1 = 'n_b1' + suffix;
-          const b2 = 'n_b2' + suffix;
-
-          const builtNodes = [
-              { id: trunkId, title: 'Master Grocery List', desc: 'Interactive Walkthrough Tree', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false },
-              { id: b1, title: 'Produce Section', desc: 'Fresh fruits and greens', type: 'branch', parentId: trunkId, x: 4850, y: 5160, pinned: false },
-              { id: b2, title: 'Pantry Staples', desc: 'Dry goods and canned items', type: 'branch', parentId: trunkId, x: 5150, y: 5160, pinned: false },
-              { id: 'n_f1' + suffix, title: 'Organic Apples', desc: 'Marked Ripe and ready to harvest!', type: 'fruit', parentId: b1, x: 4850, y: 5320, pinned: false, ripe: true, harvested: false, estHours: 2, timeSpent: 0 },
-              { id: 'n_l1' + suffix, title: 'Shopping Notes', desc: 'Bring reusable bags', type: 'leaf', parentId: b2, x: 5150, y: 5320, pinned: false, estHours: 1, timeSpent: 0 }
-          ];
-
-          const wTree = {
-              id: 'w_tree_' + Date.now(),
-              title: 'Master Grocery List (Walkthrough)',
-              type: 'Apple',
-              season: 'Spring',
-              pinned: false,
-              x: 5000,
-              y: 5000,
-              nodes: builtNodes
-          };
 
           if (!state.forests || state.forests.length === 0) {
               state.forests = [{ id: 'forest-1', title: 'My Workspace', pinned: false, trees: [] }];
@@ -4213,27 +4192,45 @@ viewport.addEventListener('wheel', (e) => {
           }
 
           const f = getForest();
-          f.trees.push(wTree);
+          let wTree = (f.trees || []).find(t => t.title === 'Master Grocery List (Walkthrough)');
+
+          if (!wTree) {
+              const now = Date.now();
+              const suffix = '_' + now;
+              const trunkId = 'n_trunk' + suffix;
+              const b1 = 'n_b1' + suffix;
+              const b2 = 'n_b2' + suffix;
+
+              const builtNodes = [
+                  { id: trunkId, title: 'Master Grocery List', desc: 'Interactive Walkthrough Tree', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false, lastInspected: now },
+                  { id: b1, title: 'Produce Section', desc: 'Fresh fruits and greens', type: 'branch', parentId: trunkId, x: 4850, y: 5160, pinned: false, lastInspected: now },
+                  { id: b2, title: 'Pantry Staples', desc: 'Dry goods and canned items', type: 'branch', parentId: trunkId, x: 5150, y: 5160, pinned: false, lastInspected: now },
+                  { id: 'n_f1' + suffix, title: 'Organic Apples', desc: 'Marked Ripe and ready to harvest!', type: 'fruit', parentId: b1, x: 4850, y: 5320, pinned: false, ripe: true, harvested: false, estHours: 2, timeSpent: 0, lastInspected: now },
+                  { id: 'n_l1' + suffix, title: 'Shopping Notes', desc: 'Bring reusable bags', type: 'leaf', parentId: b2, x: 5150, y: 5320, pinned: false, estHours: 1, timeSpent: 0, lastInspected: now }
+              ];
+
+              wTree = {
+                  id: 'w_tree_' + now,
+                  title: 'Master Grocery List (Walkthrough)',
+                  type: 'Apple',
+                  season: 'Spring',
+                  pinned: false,
+                  x: 5000,
+                  y: 5000,
+                  nodes: builtNodes
+              };
+              f.trees.push(wTree);
+          }
+
           state.activeForestId = f.id;
           state.activeTreeId = wTree.id;
           state.viewMode = 'tree';
-          state.selectedId = trunkId;
+          state.selectedId = wTree.nodes[0].id;
           state.isLocked = true;
 
           try { localStorage.setItem('sylva_v13_state', JSON.stringify(state)); } catch(e) {}
 
           isWalkthroughActive = true;
-          tourSteps.length = 0;
-          tourSteps.push(
-              { id: 'welcome-placard', title: '🚀 Interactive Walkthrough', text: "Howdy stranger! What you are currently looking at is a sample Tree (a project or idea) set up as a 'Grocery List' Apple Tree (Apple Trees are for tasks and checklists)! Click Next to walk through your main project tools." },
-              { id: 'viewport', title: '1. Your Visual Tree', text: "This window is your main canvas, here you can visually see all the steps and pieces of your projects and ideas and how they are connected. This view also allows for at-a-glance progress checks and cross referencing." },
-              { id: 'btn-harvest-main', title: '2. Complete & Harvest Tasks', text: "This is your Harvest Button. Clicking this will automatically remove all fruit nodes marked as complete, move them to your Harvest Basket for later review, and update your progress bar." },
-              { id: 'btn-season', title: '3. Seasons & Harvest Basket', text: "Click Season anytime to inspect your Harvest Basket, Prune empty unused notes, or change the season (stage) of your tree." },
-              { id: 'btn-critical-path', title: '4. Critical Path', text: "Clicking the Critical Path button will automatically highlight the longest chain of incomplete tasks in glowing red, letting you instantly see what parts of your project need the most attention or priority." },
-              { id: 'btn-toggle-timeline', title: '5. Document View (Executive Spread)', text: "Click Document View at the top of the canvas to view your tree in a structured professional format and export it as a Word/Excel PM document automatically formatted to industry standards." },
-              { id: 'btn-grow', title: '6. You Are Ready to Grow!', text: "Click Finish below! You can now play around with this sample tree—try clicking Harvest—or click '^ Up' to return to your Forest." }
-          );
-
           render();
           centerOn(5000, 5100);
           setTimeout(() => {
@@ -4243,25 +4240,29 @@ viewport.addEventListener('wheel', (e) => {
           }, 150);
       }
 
+      function startTour() {
+          startInteractiveWalkthrough();
+      }
+
       function initTutorial() {
-     if (!localStorage.getItem('sylva_tutorial_seen')) {
-       document.getElementById('modal-tut-prompt').classList.add('open');
-     } else {
-       setTimeout(window.initialFocus, 100);
-     }
+        if (!localStorage.getItem('sylva_tutorial_seen')) {
+          document.getElementById('modal-tut-prompt').classList.add('open');
+        } else {
+          setTimeout(window.initialFocus, 100);
+        }
 
-     document.getElementById('btn-tut-yes').onclick = () => {
-       document.getElementById('modal-tut-prompt').classList.remove('open');
-       localStorage.setItem('sylva_tutorial_seen', 'true');
-       startTour();
-     };
+        document.getElementById('btn-tut-yes').onclick = () => {
+          document.getElementById('modal-tut-prompt').classList.remove('open');
+          localStorage.setItem('sylva_tutorial_seen', 'true');
+          startInteractiveWalkthrough();
+        };
 
-     document.getElementById('btn-tut-no').onclick = () => {
-        document.getElementById('modal-tut-prompt').classList.remove('open');
-        localStorage.setItem('sylva_tutorial_seen', 'true');
-        setTimeout(window.initialFocus, 100);
-      };
-    }
+        document.getElementById('btn-tut-no').onclick = () => {
+          document.getElementById('modal-tut-prompt').classList.remove('open');
+          localStorage.setItem('sylva_tutorial_seen', 'true');
+          setTimeout(window.initialFocus, 100);
+        };
+      }
 
     init();
   

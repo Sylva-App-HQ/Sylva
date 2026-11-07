@@ -9,13 +9,13 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "favicon.png?v=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "favicon.png?v=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -27,14 +27,14 @@
       "short_name": "New Tree",
       "description": "Start a new blank tree",
       "url": "/?action=new",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "favicon.png?v=2", "sizes": "192x192" }]
     },
     {
       "name": "View Templates",
       "short_name": "Templates",
       "description": "Open the template library",
       "url": "/?action=templates",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "favicon.png?v=2", "sizes": "192x192" }]
     }
   ]
 }
