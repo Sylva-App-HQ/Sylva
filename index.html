@@ -333,6 +333,14 @@
           <input type="checkbox" id="node-input-ripe" style="width: 16px; height: 16px; cursor: pointer;">
           <label for="node-input-ripe" style="color:#10B981; font-weight: bold; cursor: pointer;">Complete (Ripe for the Pickin')</label>
         </div>
+        <div class="field-group" id="leaf-attachments-container" style="display:none; margin-top: 8px; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; background: var(--bg-surface-elevated);">
+          <label style="display: flex; justify-content: space-between; align-items: center; color: var(--node-leaf); font-weight: 700;">
+            <span>📎 Attached Documents</span>
+            <button type="button" class="btn btn-small" id="btn-attach-leaf-doc" style="height: 24px; padding: 0 8px; border-color: var(--node-leaf); color: var(--node-leaf);">+ Attach File</button>
+          </label>
+          <input type="file" id="input-leaf-file" multiple accept=".pdf,.doc,.docx,.txt,.md,.rtf,.csv,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.json" style="display: none;">
+          <div id="leaf-attachments-list" style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;"></div>
+        </div>
 
         <div style="margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
            <button class="btn btn-small" id="btn-toggle-advanced" style="width: 100%; justify-content: space-between; border: 1px solid var(--border-subtle);"><span>Advanced Metadata</span><span id="adv-arrow">▾</span></button>
@@ -1383,8 +1391,8 @@ if (isZeroState && state.isLocked) {
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-          const ripeBadge = ((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '';
-          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
+const docCount = Array.isArray(node.attachments) ? node.attachments.length : 0;
+          const ripeBadge = (((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '') + (docCount > 0 ? `<span style="margin-left:6px; font-size:11px; color:var(--node-leaf);" title="${docCount} Attached Document(s)">📎${docCount}</span>` : '');          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
           attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
       }
@@ -2865,8 +2873,38 @@ if (isZeroState && state.isLocked) {
           }
         };
         window.addEventListener('pointerup', endPointer); window.addEventListener('pointercancel', endPointer);
-        viewport.addEventListener('wheel', (e) => { e.preventDefault(); const zoom = e.deltaY < 0 ? 1.08 : 0.92; state.scale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0); updateWorldTransform(); }, { passive: false });
+viewport.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const zoom = e.deltaY < 0 ? 1.08 : 0.92;
+          const newScale = Math.min(Math.max(state.scale * zoom, 0.1), 5.0);
+          const cx = e.clientX;
+          const cy = e.clientY;
+          state.panX = cx - (cx - state.panX) * (newScale / state.scale);
+          state.panY = cy - (cy - state.panY) * (newScale / state.scale);
+          state.scale = newScale;
+          updateWorldTransform();
+        }, { passive: false });
 
+        pipCanvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+          const newScale = Math.min(Math.max(state.pipScale * zoom, 0.02), 1.0);
+          const rect = pipCanvas.getBoundingClientRect();
+          const localCx = e.clientX - rect.left - 70;
+          const localCy = e.clientY - rect.top - 70;
+          state.pipPanX = localCx - (localCx - state.pipPanX) * (newScale / state.pipScale);
+          state.pipPanY = localCy - (localCy - state.pipPanY) * (newScale / state.pipScale);
+          state.pipScale = newScale;
+          renderMinimap();
+        }, { passive: false });
+
+        window.addEventListener('blur', () => {
+          activePointers.clear();
+          viewportDragging = false;
+          isPinching = false;
+          pipPinching = false;
+        });
         let pipDragging = false, pipHoldTimer = null, pipStartX = 0, pipStartY = 0, pipHasMoved = false;
         let pipClickCount = 0, pipClickTimer = null, pipLongPressed = false;
         
@@ -3642,6 +3680,96 @@ if (isZeroState && state.isLocked) {
 
           document.getElementById('node-input-ripe').checked = !!node.ripe;
           document.getElementById('node-ripe-container').style.display = (node.type === 'fruit' || node.type === 'pinecone') ? 'flex' : 'none';
+          if (!Array.isArray(node.attachments)) node.attachments = [];
+          const leafAttContainer = document.getElementById('leaf-attachments-container');
+          const leafAttList = document.getElementById('leaf-attachments-list');
+          const fileInput = document.getElementById('input-leaf-file');
+
+          const updateTypeSpecificUI = (currentType) => {
+            document.getElementById('node-ripe-container').style.display = (currentType === 'fruit' || currentType === 'pinecone') ? 'flex' : 'none';
+            leafAttContainer.style.display = (currentType === 'leaf' || node.attachments.length > 0) ? 'flex' : 'none';
+          };
+          updateTypeSpecificUI(node.type);
+
+          document.querySelectorAll('#node-type-dropdown .custom-opt').forEach(optBtn => {
+            optBtn.addEventListener('click', () => {
+              updateTypeSpecificUI(optBtn.getAttribute('data-val'));
+            });
+          });
+
+          const formatBytes = (bytes) => {
+            if (!bytes) return '0 KB';
+            return bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(2)} MB`;
+          };
+
+          const renderLeafAttachments = () => {
+            leafAttList.innerHTML = '';
+            if (node.attachments.length === 0) {
+              leafAttList.innerHTML = `<div style="font-size:11px; color:var(--text-faint);">No documents attached yet.</div>`;
+              return;
+            }
+            node.attachments.forEach((att, idx) => {
+              const row = document.createElement('div');
+              row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:8px; background:var(--bg-canvas); border:1px solid var(--border-subtle); border-radius:6px; padding:6px 8px;';
+              row.innerHTML = `
+                <div style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--text-main);" title="${escapeHTML(att.name)}">
+                  📄 <strong>${escapeHTML(att.name)}</strong> <span style="font-size:10px; color:var(--text-muted);">(${formatBytes(att.size)})</span>
+                </div>
+                <div style="display:flex; gap:4px; flex-shrink:0;">
+                  <button type="button" class="btn btn-small btn-open-att" style="height:22px; padding:0 8px; border-color:var(--accent); color:var(--accent);">Open / Save</button>
+                  <button type="button" class="btn btn-small btn-del-att" style="height:22px; padding:0 6px; border-color:#EF4444; color:#EF4444;">&times;</button>
+                </div>
+              `;
+              row.querySelector('.btn-open-att').onclick = (e) => {
+                e.preventDefault();
+                const a = document.createElement('a');
+                a.href = att.dataUrl;
+                a.download = att.name || 'document';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+              };
+              row.querySelector('.btn-del-att').onclick = (e) => {
+                e.preventDefault();
+                node.attachments.splice(idx, 1);
+                saveData();
+                render();
+                renderLeafAttachments();
+              };
+              leafAttList.appendChild(row);
+            });
+          };
+          renderLeafAttachments();
+
+          document.getElementById('btn-attach-leaf-doc').onclick = (e) => {
+            e.preventDefault();
+            fileInput.value = '';
+            fileInput.click();
+          };
+
+          fileInput.onchange = (e) => {
+            const files = Array.from(e.target.files || []);
+            files.forEach(file => {
+              if (file.size > 3.5 * 1024 * 1024) {
+                showAppAlert(`"${file.name}" is over 3.5 MB. Please attach a smaller document so your browser's offline storage doesn't fill up.`);
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                node.attachments.push({
+                  id: 'att_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                  name: file.name,
+                  size: file.size,
+                  type: file.type || 'application/octet-stream',
+                  dataUrl: ev.target.result
+                });
+                saveData();
+                render();
+                renderLeafAttachments();
+              };
+              reader.readAsDataURL(file);
+            });
+          };
 
           document.getElementById('node-input-start').value = node.startDate || '';
           document.getElementById('node-input-priority').value = node.priority || 'Medium';
