@@ -1,24 +1,32 @@
 {
+  "id": "/",
   "name": "Sylva",
   "short_name": "Sylva",
   "description": "Local-first hierarchical thought and tree management engine.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#070B0E",
   "theme_color": "#0F171F",
   "orientation": "any",
   "icons": [
     {
-      "src": "favicon.png?v=2",
+      "src": "./icon-192.png?v=3",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "favicon.png?v=2",
+      "src": "./icon-512.png?v=3",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -26,15 +34,15 @@
       "name": "Create New Tree",
       "short_name": "New Tree",
       "description": "Start a new blank tree",
-      "url": "/?action=new",
-      "icons": [{ "src": "favicon.png?v=2", "sizes": "192x192" }]
+      "url": "./index.html?action=new",
+      "icons": [{ "src": "./icon-192.png?v=3", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "View Templates",
       "short_name": "Templates",
       "description": "Open the template library",
-      "url": "/?action=templates",
-      "icons": [{ "src": "favicon.png?v=2", "sizes": "192x192" }]
+      "url": "./index.html?action=templates",
+      "icons": [{ "src": "./icon-192.png?v=3", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

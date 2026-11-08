@@ -857,7 +857,7 @@
     }
     if (type === 'fruit') return '🍎';
     if (type === 'seed' || linkId) return '🌰';
-    if (type === 'pinecone') return '🌲';
+    if (type === 'pinecone') return '<img src="./pinecone.png" alt="Pinecone" style="width:16px; height:16px; object-fit:contain; vertical-align:middle;">';
     return '🍃';
 }
 
@@ -2145,13 +2145,278 @@ const docCount = Array.isArray(node.attachments) ? node.attachments.length : 0;
             if (customName === null) return;
             const cleanName = (customName.trim() || defaultName).replace(/\.(xls|xlsx|csv|numbers)$/i, '');
 
-            const innerTableHTML = buildArtifactHTML(type, data);
-            const excelDoc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-            <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${escapeHTML(type.toUpperCase())}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-            <style>body, table, td, th { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; }</style></head>
-            <body>${innerTableHTML}</body></html>`;
+            // Open Office Calc Converter
+            const xlsEsc = (str) => String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/[^\x20-\x7E]/g, (ch) => `&#${ch.charCodeAt(0)};`);
 
-            const blob = new Blob(["\uFEFF" + excelDoc], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            const cell = (text, opts = {}) => {
+                const tag = opts.th ? 'th' : 'td';
+                const bg = opts.bg ? ` bgcolor="${opts.bg}"` : '';
+                const align = opts.align ? ` align="${opts.align}"` : ' align="left"';
+                const colspan = opts.colspan ? ` colspan="${opts.colspan}"` : '';
+                const width = opts.width ? ` width="${opts.width}"` : '';
+                const fg = opts.fg || '#0F172A';
+                const size = opts.size || 2;
+                const styleBg = opts.bg ? `background-color:${opts.bg};` : '';
+                const styleW = opts.width ? `width:${opts.width}px;` : '';
+                const styleWrap = `white-space:normal; word-wrap:break-word; padding:6px 8px; border:1px solid #94A3B8; color:${fg}; ${styleBg} ${styleW}`;
+                const rawVal = (text === '' || text === null || text === undefined || text === '-') ? '&nbsp;' : xlsEsc(text);
+                const inner = opts.bold ? `<b>${rawVal}</b>` : rawVal;
+                return `<${tag}${bg}${align} valign="middle"${colspan}${width} style="${styleWrap}"><font face="Arial" size="${size}" color="${fg}">${inner}</font></${tag}>`;
+            };
+
+            const statusBg = (st) => st === 'Complete' ? '#10B981' : (st === 'At Risk' ? '#EF4444' : (st === 'In Progress' ? '#F59E0B' : '#E2E8F0'));
+            const statusFg = (st) => st === 'Not Started' ? '#1E293B' : '#FFFFFF';
+            const prioBg = (pr) => pr === 'Critical' ? '#EF4444' : (pr === 'High' ? '#F97316' : (pr === 'Medium' ? '#FEF08A' : '#BAE6FD'));
+            const prioFg = (pr) => (pr === 'Medium' || pr === 'Low') ? '#0F172A' : '#FFFFFF';
+
+            let tableRows = '';
+            let colDefs = '';
+
+            if (type === 'raci') {
+                const totalCols = 3 + data.stakeholders.length;
+                colDefs = `<col width="75"><col width="280"><col width="115">` + data.stakeholders.map(() => `<col width="105">`).join('');
+                tableRows += `<tr height="38">${cell(`RACI RESPONSIBILITY MATRIX - ${data.baseTitle}`, { colspan: totalCols, bg: '#0F172A', fg: '#2DD4BF', bold: true, size: 4 })}</tr>`;
+                tableRows += `<tr height="26">${cell(`Workspace: ${data.forestTitle}  |  Lead: ${data.manager}  |  Roles: R = Responsible, A = Accountable, C = Consulted, I = Informed`, { colspan: totalCols, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="30">
+                    ${cell('WBS', { th: true, bg: '#1E3A8A', fg: '#FFFFFF', bold: true, align: 'center', width: 75 })}
+                    ${cell('Deliverable / Project Task', { th: true, bg: '#1E3A8A', fg: '#FFFFFF', bold: true, width: 280 })}
+                    ${cell('Status', { th: true, bg: '#1E3A8A', fg: '#FFFFFF', bold: true, align: 'center', width: 115 })}
+                    ${data.stakeholders.map(p => cell(p, { th: true, bg: '#1D4ED8', fg: '#FFFFFF', bold: true, align: 'center', width: 105 })).join('')}
+                </tr>`;
+
+                const raciColor = (r) => r === 'R' ? { bg: '#EF4444', fg: '#FFFFFF' } : (r === 'A' ? { bg: '#F59E0B', fg: '#FFFFFF' } : (r === 'C' ? { bg: '#3B82F6', fg: '#FFFFFF' } : (r === 'I' ? { bg: '#8B5CF6', fg: '#FFFFFF' } : { bg: '#F8FAFC', fg: '#94A3B8' })));
+
+                data.phases.forEach(p => {
+                    tableRows += `<tr height="26">
+                        ${cell(p.wbs, { bg: '#DBEAFE', fg: '#1E3A8A', bold: true, align: 'center' })}
+                        ${cell(`Phase ${p.index}: ${p.title}`, { colspan: totalCols - 1, bg: '#DBEAFE', fg: '#1E3A8A', bold: true })}
+                    </tr>`;
+                    p.tasks.forEach(tk => {
+                        tableRows += `<tr height="24">
+                            ${cell(tk.wbs, { bg: '#FFFFFF', fg: '#475569', bold: true, align: 'center' })}
+                            ${cell(tk.title, { bg: '#FFFFFF', fg: '#0F172A', bold: true })}
+                            ${cell(tk.status, { bg: statusBg(tk.status), fg: statusFg(tk.status), bold: true, align: 'center' })}
+                            ${data.stakeholders.map(person => {
+                                const role = tk.raciMap[person] || '';
+                                const rc = raciColor(role);
+                                return cell(role, { bg: rc.bg, fg: rc.fg, bold: true, align: 'center' });
+                            }).join('')}
+                        </tr>`;
+                    });
+                });
+
+                tableRows += `<tr height="26">${cell('R = Responsible (Executes Task)', { colspan: 2, bg: '#FEE2E2', fg: '#991B1B', bold: true })}${cell('A = Accountable (Approves)', { bg: '#FEF3C7', fg: '#92400E', bold: true })}${cell('C = Consulted  |  I = Informed', { colspan: Math.max(1, data.stakeholders.length), bg: '#E0E7FF', fg: '#1E40AF', bold: true })}</tr>`;
+
+            } else if (type === 'charter') {
+                colDefs = `<col width="90"><col width="260"><col width="140"><col width="140"><col width="150">`;
+                tableRows += `<tr height="38">${cell(`OFFICIAL PROJECT CHARTER: ${data.baseTitle}`, { colspan: 5, bg: '#0F172A', fg: '#2DD4BF', bold: true, size: 4 })}</tr>`;
+                tableRows += `<tr height="26">
+                    ${cell('Project Name', { bg: '#E2E8F0', bold: true })}
+                    ${cell(data.baseTitle, { bg: '#FFFFFF', bold: true })}
+                    ${cell('Project Manager', { bg: '#E2E8F0', bold: true })}
+                    ${cell(data.manager, { colspan: 2, bg: '#FFFFFF', bold: true })}
+                </tr>`;
+                tableRows += `<tr height="26">
+                    ${cell('Workspace', { bg: '#E2E8F0', bold: true })}
+                    ${cell(data.forestTitle, { bg: '#FFFFFF' })}
+                    ${cell('Target Completion', { bg: '#E2E8F0', bold: true })}
+                    ${cell(`${data.deadline} (${data.progressPct}% Complete)`, { colspan: 2, bg: '#DCFCE7', fg: '#166534', bold: true })}
+                </tr>`;
+                tableRows += `<tr height="28">${cell('1. PROJECT SCOPE & BUSINESS CASE', { colspan: 5, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="32">${cell('Scope Statement', { bg: '#F1F5F9', bold: true })}${cell(data.scopeStatement, { colspan: 4, bg: '#FFFFFF' })}</tr>`;
+
+                tableRows += `<tr height="28">${cell('2. OBJECTIVES & PHASE STRUCTURE', { colspan: 5, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                data.phases.forEach(p => {
+                    tableRows += `<tr height="24">
+                        ${cell(`Phase ${p.index}`, { bg: '#DBEAFE', fg: '#1E3A8A', bold: true, align: 'center' })}
+                        ${cell(p.title, { bg: '#FFFFFF', bold: true })}
+                        ${cell(`${p.tasks.length} Work Packages`, { bg: '#F8FAFC', align: 'center' })}
+                        ${cell(`Deliver on schedule & within budget`, { colspan: 2, bg: '#FFFFFF' })}
+                    </tr>`;
+                });
+
+                tableRows += `<tr height="28">${cell('3. CONSTRAINTS (TIME, BUDGET, SCOPE & QUALITY)', { colspan: 5, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="24">${cell('Time Window', { bg: '#FEF3C7', bold: true })}${cell(`${data.startDate} to ${data.endDate}`, { bg: '#FFFFFF' })}${cell('Effort (Spent / Est.)', { bg: '#FEF3C7', bold: true })}${cell(`${data.totalSpentH.toFixed(1)} hrs / ${data.totalEstH.toFixed(1)} hrs`, { colspan: 2, bg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="24">${cell('Budget Ceiling', { bg: '#D1FAE5', bold: true })}${cell(`$${data.totalBud.toFixed(2)} Allocated`, { bg: '#FFFFFF', bold: true })}${cell('Actual Spend', { bg: '#D1FAE5', bold: true })}${cell(`$${data.totalSpentB.toFixed(2)} (Remaining: $${(data.totalBud - data.totalSpentB).toFixed(2)})`, { colspan: 2, bg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="24">${cell('Quality & Method', { bg: '#E0E7FF', bold: true })}${cell(`${data.species} Architecture`, { bg: '#FFFFFF' })}${cell('Deliverable KPI', { bg: '#E0E7FF', bold: true })}${cell(`${data.doneCount} of ${data.totalCount} Completed`, { colspan: 2, bg: '#FFFFFF', bold: true })}</tr>`;
+
+                tableRows += `<tr height="28">${cell('4. KEY AUTHORIZED DELIVERABLES & MILESTONES', { colspan: 5, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="26">
+                    ${cell('WBS', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true, align: 'center' })}
+                    ${cell('Deliverable / Milestone', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true })}
+                    ${cell('Owner', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true })}
+                    ${cell('Target Date', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true, align: 'center' })}
+                    ${cell('Status', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true, align: 'center' })}
+                </tr>`;
+                const delivs = data.allTasks.filter(t => t.type === 'fruit' || t.type === 'pinecone');
+                (delivs.length ? delivs : data.allTasks.slice(0, 8)).forEach(d => {
+                    tableRows += `<tr height="24">
+                        ${cell(d.wbs, { bg: '#FFFFFF', bold: true, align: 'center' })}
+                        ${cell(d.title, { bg: '#FFFFFF', bold: true })}
+                        ${cell(d.primaryOwner, { bg: '#FFFFFF' })}
+                        ${cell(d.endDate, { bg: '#FFFFFF', align: 'center' })}
+                        ${cell(d.status, { bg: statusBg(d.status), fg: statusFg(d.status), bold: true, align: 'center' })}
+                    </tr>`;
+                });
+
+                tableRows += `<tr height="28">${cell('5. POTENTIAL RISKS & MITIGATION', { colspan: 5, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                const riskTasks = data.allTasks.filter(t => t.atRisk || t.priority === 'Critical' || t.priority === 'High');
+                (riskTasks.length ? riskTasks : data.allTasks.slice(0, 3)).forEach(rt => {
+                    tableRows += `<tr height="24">
+                        ${cell(rt.priority, { bg: prioBg(rt.priority), fg: prioFg(rt.priority), bold: true, align: 'center' })}
+                        ${cell(`${rt.title} (WBS ${rt.wbs})`, { bg: '#FFFFFF', bold: true })}
+                        ${cell(rt.primaryOwner, { bg: '#FFFFFF' })}
+                        ${cell(`Monitor ${rt.estHours}h schedule & $${rt.budget} budget ceiling`, { colspan: 2, bg: '#FFFBEB', fg: '#92400E' })}
+                    </tr>`;
+                });
+
+                tableRows += `<tr height="28">${cell('6. EXECUTIVE AUTHORIZATION & SIGN-OFF', { colspan: 5, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="30">
+                    ${cell('Sponsor Approval', { bg: '#E2E8F0', bold: true })}
+                    ${cell(data.stakeholders[0] || 'Executive Sponsor', { bg: '#FFFFFF', bold: true })}
+                    ${cell('Project Manager', { bg: '#E2E8F0', bold: true })}
+                    ${cell(data.manager, { bg: '#FFFFFF', bold: true })}
+                    ${cell(`Date: ${new Date().toLocaleDateString()}`, { bg: '#FFFFFF', bold: true, align: 'center' })}
+                </tr>`;
+
+            } else if (type === 'gantt') {
+                const totalSpanMs = Math.max(86400000 * 7, data.maxEnd.getTime() - data.minStart.getTime());
+                const totalWeeks = Math.min(12, Math.max(4, Math.ceil(totalSpanMs / (86400000 * 7))));
+                const weekWindows = [];
+                for (let w = 0; w < totalWeeks; w++) {
+                    const wStart = new Date(data.minStart.getTime() + w * 7 * 86400000);
+                    const wEnd = new Date(wStart.getTime() + 7 * 86400000);
+                    const moShort = wStart.toLocaleString('default', { month: 'short' });
+                    weekWindows.push({ start: wStart, end: wEnd, label: `W${w + 1} (${moShort} ${wStart.getDate()})` });
+                }
+                const totalCols = 5 + totalWeeks;
+                colDefs = `<col width="65"><col width="240"><col width="110"><col width="75"><col width="100">` + weekWindows.map(() => `<col width="85">`).join('');
+
+                tableRows += `<tr height="38">${cell(`EXECUTIVE GANTT CHART TIMELINE - ${data.baseTitle}`, { colspan: totalCols, bg: '#0F172A', fg: '#38BDF8', bold: true, size: 4 })}</tr>`;
+                tableRows += `<tr height="26">${cell(`Schedule Window: ${data.startDate} to ${data.endDate}  |  Overall Completion: ${data.progressPct}% (${data.doneCount}/${data.totalCount} Tasks)`, { colspan: totalCols, bg: '#1E293B', fg: '#FFFFFF', bold: true })}</tr>`;
+                tableRows += `<tr height="30">
+                    ${cell('WBS', { th: true, bg: '#0F172A', fg: '#FFFFFF', bold: true, align: 'center', width: 65 })}
+                    ${cell('Project Phase / Task', { th: true, bg: '#0F172A', fg: '#FFFFFF', bold: true, width: 240 })}
+                    ${cell('Owner', { th: true, bg: '#0F172A', fg: '#FFFFFF', bold: true, align: 'center', width: 110 })}
+                    ${cell('Duration', { th: true, bg: '#0F172A', fg: '#FFFFFF', bold: true, align: 'center', width: 75 })}
+                    ${cell('Status', { th: true, bg: '#0F172A', fg: '#FFFFFF', bold: true, align: 'center', width: 100 })}
+                    ${weekWindows.map(ww => cell(ww.label, { th: true, bg: '#1E3A8A', fg: '#FFFFFF', bold: true, align: 'center', width: 85 })).join('')}
+                </tr>`;
+
+                const phaseColors = ['#F59E0B', '#3B82F6', '#8B5CF6', '#EC4899', '#14B8A6'];
+                const phaseTint = ['#FEF3C7', '#DBEAFE', '#EDE9FE', '#FCE7F3', '#CCFBF1'];
+
+                data.phases.forEach((p, pIdx) => {
+                    const barColor = phaseColors[pIdx % phaseColors.length];
+                    const tint = phaseTint[pIdx % phaseTint.length];
+                    tableRows += `<tr height="26">
+                        ${cell(p.wbs, { bg: tint, fg: '#0F172A', bold: true, align: 'center' })}
+                        ${cell(`PHASE ${p.index}: ${p.title.toUpperCase()}`, { colspan: totalCols - 1, bg: tint, fg: '#0F172A', bold: true })}
+                    </tr>`;
+                    p.tasks.forEach(tk => {
+                        tableRows += `<tr height="24">
+                            ${cell(tk.wbs, { bg: '#FFFFFF', fg: '#475569', bold: true, align: 'center' })}
+                            ${cell(tk.title, { bg: '#FFFFFF', fg: '#0F172A', bold: true })}
+                            ${cell(tk.primaryOwner, { bg: '#FFFFFF', fg: '#334155', align: 'center' })}
+                            ${cell(`${tk.durationDays}d`, { bg: '#FFFFFF', fg: '#0F172A', bold: true, align: 'center' })}
+                            ${cell(tk.status, { bg: statusBg(tk.status), fg: statusFg(tk.status), bold: true, align: 'center' })}
+                            ${weekWindows.map(ww => {
+                                const active = tk.startObj < ww.end && tk.endObj >= ww.start;
+                                if (active) {
+                                    const cBg = tk.isDone ? '#10B981' : (tk.atRisk ? '#EF4444' : barColor);
+                                    return cell(`${tk.durationDays}d`, { bg: cBg, fg: '#FFFFFF', bold: true, align: 'center' });
+                                }
+                                return cell('', { bg: '#F8FAFC' });
+                            }).join('')}
+                        </tr>`;
+                    });
+                });
+
+            } else {
+                // Project Work Plan ('plan') & WBS ('wbs')
+                colDefs = `<col width="65"><col width="70"><col width="260"><col width="85"><col width="115"><col width="95"><col width="95"><col width="65"><col width="105"><col width="90"><col width="120">`;
+                tableRows += `<tr height="38">${cell(`${type === 'wbs' ? 'WORK BREAKDOWN STRUCTURE (WBS)' : 'PROJECT WORK PLAN & SCHEDULE'} - ${data.baseTitle}`, { colspan: 11, bg: '#0F172A', fg: '#2DD4BF', bold: true, size: 4 })}</tr>`;
+                tableRows += `<tr height="26">
+                    ${cell('Project Lead', { bg: '#E2E8F0', bold: true, colspan: 2 })}
+                    ${cell(data.manager, { bg: '#FFFFFF', bold: true })}
+                    ${cell('Schedule Window', { bg: '#E2E8F0', bold: true, colspan: 2 })}
+                    ${cell(`${data.startDate} to ${data.endDate}`, { bg: '#FFFFFF', bold: true, colspan: 2, align: 'center' })}
+                    ${cell('Progress', { bg: '#E2E8F0', bold: true })}
+                    ${cell(`${data.progressPct}%`, { bg: '#DCFCE7', fg: '#166534', bold: true, align: 'center' })}
+                    ${cell('Total Budget', { bg: '#E2E8F0', bold: true })}
+                    ${cell(`$${data.totalSpentB.toFixed(0)} / $${data.totalBud.toFixed(0)}`, { bg: '#FFFFFF', bold: true, align: 'right' })}
+                </tr>`;
+                tableRows += `<tr height="26">
+                    ${cell('Project Scope', { bg: '#E2E8F0', bold: true, colspan: 2 })}
+                    ${cell(data.scopeStatement, { bg: '#FFFFFF', colspan: 6 })}
+                    ${cell('Total Hours', { bg: '#E2E8F0', bold: true })}
+                    ${cell(`${data.totalSpentH.toFixed(1)} / ${data.totalEstH.toFixed(1)} hrs`, { bg: '#FFFFFF', bold: true, colspan: 2, align: 'right' })}
+                </tr>`;
+                tableRows += `<tr height="30">
+                    ${cell('WBS', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 65 })}
+                    ${cell('At Risk', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 70 })}
+                    ${cell('Phase / Task Deliverable', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, width: 260 })}
+                    ${cell('Type', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 85 })}
+                    ${cell('Responsible', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, width: 115 })}
+                    ${cell('Start Date', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 95 })}
+                    ${cell('End Date', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 95 })}
+                    ${cell('Days', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 65 })}
+                    ${cell('Status', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 105 })}
+                    ${cell('Priority', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'center', width: 90 })}
+                    ${cell('Spent / Budget', { th: true, bg: '#1E293B', fg: '#FFFFFF', bold: true, align: 'right', width: 120 })}
+                </tr>`;
+
+                const rowBanners = ['#FEF3C7', '#DBEAFE', '#FCE7F3', '#D1FAE5', '#EDE9FE'];
+                data.phases.forEach((p, idx) => {
+                    const bg = rowBanners[idx % rowBanners.length];
+                    const pBud = p.tasks.reduce((s, x) => s + x.budget, 0);
+                    const pSpent = p.tasks.reduce((s, x) => s + x.spent, 0);
+                    const pDays = p.tasks.reduce((s, x) => s + x.durationDays, 0);
+                    tableRows += `<tr height="26">
+                        ${cell(p.wbs, { bg, fg: '#0F172A', bold: true, align: 'center' })}
+                        ${cell('', { bg })}
+                        ${cell(`Phase ${p.index}: ${p.title} (${p.tasks.length} Work Packages)`, { colspan: 5, bg, fg: '#0F172A', bold: true })}
+                        ${cell(`${pDays}d`, { bg, fg: '#0F172A', bold: true, align: 'center' })}
+                        ${cell('PHASE', { colspan: 2, bg, fg: '#475569', bold: true, align: 'center' })}
+                        ${cell(`$${pSpent.toFixed(0)} / $${pBud.toFixed(0)}`, { bg, fg: '#0F172A', bold: true, align: 'right' })}
+                    </tr>`;
+                    p.tasks.forEach(tk => {
+                        tableRows += `<tr height="24">
+                            ${cell(tk.wbs, { bg: '#FFFFFF', fg: '#475569', bold: true, align: 'center' })}
+                            ${cell(tk.atRisk ? 'YES' : 'No', { bg: tk.atRisk ? '#FEE2E2' : '#DCFCE7', fg: tk.atRisk ? '#DC2626' : '#166534', bold: true, align: 'center' })}
+                            ${cell(tk.title + (tk.desc ? ` - ${tk.desc}` : ''), { bg: '#FFFFFF', fg: '#0F172A', bold: true })}
+                            ${cell(tk.type.toUpperCase(), { bg: '#F8FAFC', fg: '#475569', align: 'center' })}
+                            ${cell(tk.primaryOwner, { bg: '#FFFFFF', fg: '#0F172A' })}
+                            ${cell(tk.startDate, { bg: '#FFFFFF', fg: '#334155', align: 'center' })}
+                            ${cell(tk.endDate, { bg: '#FFFFFF', fg: '#334155', align: 'center' })}
+                            ${cell(`${tk.durationDays}d`, { bg: '#FFFFFF', fg: '#0F172A', bold: true, align: 'center' })}
+                            ${cell(tk.status, { bg: statusBg(tk.status), fg: statusFg(tk.status), bold: true, align: 'center' })}
+                            ${cell(tk.priority, { bg: prioBg(tk.priority), fg: prioFg(tk.priority), bold: true, align: 'center' })}
+                            ${cell(`$${tk.spent.toFixed(0)} / $${tk.budget.toFixed(0)}`, { bg: '#FFFFFF', fg: '#0F172A', bold: true, align: 'right' })}
+                        </tr>`;
+                    });
+                });
+            }
+
+            const excelDoc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${xlsEsc(type.toUpperCase())}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head>
+<body>
+<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse; font-family:Arial, sans-serif; font-size:10pt;">
+${colDefs}
+${tableRows}
+</table>
+</body>
+</html>`;
+
+            const blob = new Blob([excelDoc], { type: 'application/vnd.ms-excel;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
