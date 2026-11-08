@@ -76,6 +76,7 @@
     .node-card.type-branch { border-left: 5px solid var(--node-branch); }
     .node-card.type-leaf { border-left: 5px solid var(--node-leaf); }
     .node-card.type-fruit { border-left: 5px solid var(--node-fruit); }
+    .node-card.type-pinecone { border-left: 5px solid var(--accent); }
     .node-card.type-seed { border-left: 5px solid var(--node-seed); }
     .node-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; pointer-events: none; position: relative; }
     .acorn-badge { position: absolute; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; width: 18px; height: 18px; background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; color: #B45309; }
@@ -202,6 +203,8 @@
             <button class="custom-opt btn-grow-opt" id="btn-grow-branch" data-type="branch">... a Branch (Group)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-leaf" data-type="leaf">... a Leaf (Note)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-fruit" data-type="fruit">... a Fruit (Task)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-pinecone" data-type="pinecone" style="display:none;">... a Pine Cone (Checklist)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-acorn" data-type="acorn" style="display:none;">... an Acorn (Link)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-seed" data-type="seed">... a Seed (Link)</button>
           </div>
           <div id="grow-opts-forest" style="display:none;">
@@ -310,7 +313,7 @@
   </aside>
 
   <!-- Standard Modals -->
-  <div class="modal-overlay" id="modal-inspector">
+  <div class="modal-overlay" id="modal-inspector" style="z-index: 10003;">
     <div class="modal-card">
     <div class="modal-header"><h3 id="inspect-header-title">Details</h3><button class="btn btn-small" id="btn-close-inspector">&times;</button></div>
     <div class="modal-body" style="flex: 1; min-height: 0; padding-bottom: 40px;">
@@ -323,9 +326,20 @@
             <button class="custom-opt" data-val="branch">Branch (Group)</button>
             <button class="custom-opt" data-val="leaf">Leaf (Notes/Documents)</button>
             <button class="custom-opt" id="opt-node-fruit" data-val="fruit">Fruit (Task/Deliverable)</button>
+            <button class="custom-opt" id="opt-node-pinecone" data-val="pinecone">Pine Cone (Recurring Task)</button>
             <button class="custom-opt" data-val="seed">Seed (Linked Tree)</button>
           </div>
           <input type="hidden" id="node-input-type" value="branch">
+        </div>
+
+        <div class="field-group" style="margin-top: 4px;">
+          <label>Node Season (Life Cycle Stage)</label>
+          <select id="node-input-season" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; width: 100%; outline: none;">
+            <option value="Spring">🌱 Spring (New / Planning)</option>
+            <option value="Summer">☀️ Summer (Active / In Progress)</option>
+            <option value="Autumn">🍂 Autumn (Review / Finalizing)</option>
+            <option value="Winter">❄️ Winter (Completed / Evergreen)</option>
+          </select>
         </div>
         
         <div class="field-group" id="node-ripe-container" style="display:none; flex-direction: row; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer;">
@@ -399,6 +413,7 @@
             <button class="custom-opt" data-val="Oak">Oak (Large Projects/Research/Acorn Links)</button>
             <button class="custom-opt" data-val="Willow">Willow (Fluid Brainstorming/Notes/Journal)</button>
             <button class="custom-opt" data-val="Apple">Apple (Tasks/Deliverables)</button>
+            <button class="custom-opt" data-val="Larch">Larch (Hybrid - All Features &amp; Nodes)</button>
           </div>
           <input type="hidden" id="tree-input-type" value="Pine">
         </div>
@@ -476,6 +491,14 @@
             <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
                 Synthesize your live tree hierarchy, RACI roles, budgets, and timelines into color-coded executive documents and spreadsheets.
             </p>
+            <div style="background: rgba(45, 212, 191, 0.08); border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                <div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--accent);">📥 Offline Document &amp; Gantt Importer</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">Import MS Project (.xml), Color Excel (.xls), or WBS/Gantt (.csv) into a live Tree.</div>
+                </div>
+                <input type="file" id="input-import-pm-file" accept=".csv,.xls,.xml,.html,.txt" style="display:none;">
+                <button class="btn btn-small btn-accent" id="btn-trigger-pm-import">📂 Import File (.csv / .xls / .xml)</button>
+            </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px;">
                 <!-- Project Charter -->
@@ -845,24 +868,54 @@
       const pipCanvas = document.getElementById('pip-canvas');
       const timelineLayer = document.getElementById('timeline-layer');
 
+      function findUnoccupiedSpot(startX, startY, existingItems, w = 195, h = 86, buffer = 28) {
+        const isFree = (cx, cy) => {
+          return !(existingItems || []).some(item => {
+            if (typeof item.x !== 'number' || typeof item.y !== 'number') return false;
+            return (
+              cx < item.x + w + buffer &&
+              cx + w + buffer > item.x &&
+              cy < item.y + h + buffer &&
+              cy + h + buffer > item.y
+            );
+          });
+        };
+        if (isFree(startX, startY)) return { x: Math.round(startX), y: Math.round(startY) };
+
+        let angle = 0;
+        let radius = 44;
+        for (let attempt = 0; attempt < 240; attempt++) {
+          const testX = Math.round(startX + Math.cos(angle) * radius);
+          const testY = Math.round(startY + Math.sin(angle) * radius);
+          if (isFree(testX, testY)) return { x: testX, y: testY };
+          angle += Math.PI / 4;
+          if (angle >= Math.PI * 2) {
+            angle = 0;
+            radius += 42;
+          }
+        }
+        return { x: Math.round(startX + 60), y: Math.round(startY + 120) };
+      }
+
       function escapeHTML(str) {
         if (str === null || str === undefined) return '';
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       }
 
       function getNodeIcon(type, linkId = null) {
-    if (type === 'trunk') return '🪵';
-    if (type === 'branch') {
-        return linkId ? '🌰' : '🌳';
-    }
-    if (type === 'fruit') return '🍎';
-    if (type === 'seed' || linkId) return '🌰';
-    if (type === 'pinecone') return '<img src="./pinecone.png" alt="Pinecone" style="width:16px; height:16px; object-fit:contain; vertical-align:middle;">';
-    return '🍃';
-}
+        if (type === 'trunk') return '🪵';
+        if (type === 'branch') return linkId ? '🌰' : '🌳';
+        if (type === 'fruit') return '🍎';
+        if (type === 'seed') return '🌱';
+        if (linkId) return '🌰';
+        if (type === 'pinecone') return '<img src="./pinecone.png" alt="Pinecone" style="width:16px; height:16px; object-fit:contain; vertical-align:middle;">';
+        return '🍃';
+      }
 
       function getTreeIcon(species) {
         switch (species) {
+          case 'Larch':
+            return '<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V10M24 8L12 22H36L24 8ZM24 18L8 34H40L24 18Z"/><circle cx="14" cy="30" r="2.2" fill="#F59E0B"/><circle cx="34" cy="30" r="2.2" fill="#2DD4BF"/></svg>';
           case 'Oak':
             return '<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V26 M24 26L12 14 M18 20L8 16 M24 26L36 14 M30 20L40 16 M24 26V10 M24 16L16 8 M24 16L32 8" /></svg>';
           case 'Willow':
@@ -912,8 +965,7 @@
           });
         } else if (tree) {
           document.getElementById('left-title').innerText = 'Node Directory';
-          const items = [...(tree.nodes || [])].sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-          items.forEach(n => {
+const items = [...(tree.nodes || []).filter(n => !n.harvested)].sort((a, b) => (a.title || '').localeCompare(b.title || ''));          items.forEach(n => {
             const createRow = () => {
               const li = document.createElement('li');
               li.className = 'directory-item';
@@ -975,20 +1027,19 @@
           const tree = getTree();
           if (tree) {
             ctx.strokeStyle = '#33485E'; ctx.lineWidth = 1;
-            (tree.nodes || []).forEach(n => {
-              if (n.parentId) {
-                const p = (tree.nodes || []).find(pn => pn.id === n.parentId);
-                if (p) {
-                  // +95 and +60 aligns the lines to the center of the node cards
-                  ctx.beginPath(); ctx.moveTo(ox + (p.x + 95) * scale, oy + (p.y + 60) * scale); ctx.lineTo(ox + (n.x + 95) * scale, oy + (n.y + 60) * scale); ctx.stroke();
-                }
-              }
-            });
-            (tree.nodes || []).forEach(n => {
-              ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
-              // +95 and +60 aligns the squares to the center of the node cards
-              ctx.fillRect(ox + (n.x + 95) * scale - 5, oy + (n.y + 60) * scale - 4, 10, 8);
-            });
+            const activeNodes = (tree.nodes || []).filter(n => !n.harvested);
+       activeNodes.forEach(n => {
+         if (n.parentId) {
+           const p = activeNodes.find(pn => pn.id === n.parentId);
+           if (p) {
+             ctx.beginPath(); ctx.moveTo(ox + (p.x + 95) * scale, oy + (p.y + 60) * scale); ctx.lineTo(ox + (n.x + 95) * scale, oy + (n.y + 60) * scale); ctx.stroke();
+           }
+         }
+       });
+       activeNodes.forEach(n => {
+         ctx.fillStyle = n.id === state.selectedId ? '#10B981' : '#38BDF8';
+         ctx.fillRect(ox + (n.x + 95) * scale - 5, oy + (n.y + 60) * scale - 4, 10, 8);
+       });
           }
         }
 
@@ -1211,7 +1262,7 @@ if (isZeroState && state.isLocked) {
         document.getElementById('btn-pm-tools').style.display = state.viewMode === 'timeline' ? 'inline-flex' : 'none';
         document.getElementById('grow-opts-tree').style.display = state.viewMode === 'tree' ? 'block' : 'none';
         document.getElementById('grow-opts-forest').style.display = state.viewMode === 'forest' ? 'block' : 'none';
-        document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && (tree.type === 'Apple' || tree.type === 'Pine')) ? 'block' : 'none';
+        document.getElementById('apple-progress-bar').style.display = (state.viewMode === 'tree' && tree && (tree.type === 'Apple' || tree.type === 'Pine' || tree.type === 'Larch')) ? 'block' : 'none';
         document.getElementById('btn-toggle-timeline').style.display = state.viewMode === 'tree' ? 'inline-flex' : 'none';
         document.getElementById('timeline-btn-container').style.display = state.viewMode === 'tree' ? 'block' : 'none';
 
@@ -1258,16 +1309,22 @@ if (isZeroState && state.isLocked) {
             }
           }
           
-          if (tree.type === 'Pine') { document.getElementById('btn-grow-fruit').innerText = "... a Pine Cone (Checklist)"; }
-          else if (tree.type === 'Oak') { document.getElementById('btn-grow-fruit').innerText = "... an Acorn (Link)"; }
-          else { document.getElementById('btn-grow-fruit').innerText = "... a Fruit (Task)"; }
+          const btnGFruit = document.getElementById('btn-grow-fruit');
+          const btnGPine = document.getElementById('btn-grow-pinecone');
+          const btnGAcorn = document.getElementById('btn-grow-acorn');
+          if (btnGFruit && btnGPine && btnGAcorn) {
+            btnGFruit.innerText = "... a Fruit (Task)";
+            btnGFruit.style.display = (tree.type === 'Apple' || tree.type === 'Willow' || tree.type === 'Oak' || tree.type === 'Larch') ? 'block' : 'none';
+            btnGPine.style.display = (tree.type === 'Pine' || tree.type === 'Larch') ? 'block' : 'none';
+            btnGAcorn.style.display = (tree.type === 'Oak' || tree.type === 'Larch') ? 'block' : 'none';
+          }
 
-          if (tree.type === 'Apple' || tree.type === 'Pine') {
-            const trackable = (tree.nodes || []).filter(n => n.type === 'fruit' || n.type === 'pinecone');
+          if (tree.type === 'Apple' || tree.type === 'Pine' || tree.type === 'Larch') {
+            const trackable = (tree.nodes || []).filter(n => (n.type === 'fruit' || n.type === 'pinecone') && !n.isBasketCopy);
             const total = trackable.length;
-            const done = trackable.filter(n => tree.type === 'Pine' ? (n.ripe || n.harvested) : (n.harvested || n.ripe)).length;
+            const done = trackable.filter(n => n.ripe || n.harvested).length;
             const fillEl = document.getElementById('apple-progress-fill');
-            fillEl.style.background = tree.type === 'Pine' ? 'var(--accent)' : 'var(--node-fruit)';
+            fillEl.style.background = tree.type === 'Pine' ? 'var(--accent)' : (tree.type === 'Larch' ? '#A855F7' : 'var(--node-fruit)');
             fillEl.style.width = total === 0 ? '0%' : `${(done / total) * 100}%`;
           }
 
@@ -1293,24 +1350,74 @@ if (isZeroState && state.isLocked) {
         canvasSvg.innerHTML = '';
         if (state.viewMode !== 'tree') return;
         const tree = getTree(); if (!tree) return;
+
+        // 1. Non-Destructive Shadow Ripple Calculation (never overwrites user dates)
+        let cumulativeDelayDays = 0;
+        let cumulativeCostOverrun = 0;
         (tree.nodes || []).forEach(n => {
+          const hrOver = (parseFloat(n.timeSpent) || 0) - (parseFloat(n.estHours) || 0);
+          const budOver = (parseFloat(n.totalSpent) || 0) - (parseFloat(n.budget) || 0);
+          if (hrOver > 0) cumulativeDelayDays += Math.ceil(hrOver / 8);
+          if (budOver > 0) cumulativeCostOverrun += budOver;
+          n._rippleDays = (!n.ripe && !n.harvested && hrOver <= 0) ? cumulativeDelayDays : 0;
+          n._rippleCost = (!n.ripe && !n.harvested && budOver <= 0) ? cumulativeCostOverrun : 0;
+        });
+
+        // 2. Unconstrained Jumping Critical Path across project bottlenecks
+        let jumpChain = [];
+        if (state.showCriticalPath) {
+          criticalSet.clear();
+          const root = (tree.nodes || []).find(n => n.type === 'trunk') || tree.nodes[0];
+          if (root) criticalSet.add(root.id);
+
+          const candidates = (tree.nodes || []).filter(n => n.type !== 'trunk' && !n.harvested && !n.ripe);
+          const scored = candidates.map(n => {
+            const prioScore = n.priority === 'Critical' ? 60 : (n.priority === 'High' ? 30 : 10);
+            const effortScore = (parseFloat(n.estHours) || 8) * 2 + ((parseFloat(n.budget) || 0) / 100);
+            const overrunScore = Math.max(0, (parseFloat(n.timeSpent) || 0) - (parseFloat(n.estHours) || 0)) * 8;
+            return { node: n, score: prioScore + effortScore + overrunScore };
+          }).sort((a, b) => b.score - a.score);
+
+          const topBottlenecks = scored.slice(0, Math.min(6, Math.max(2, Math.ceil(scored.length * 0.35)))).map(x => x.node).sort((a, b) => a.y - b.y);
+          jumpChain = [root, ...topBottlenecks].filter(Boolean);
+          jumpChain.forEach(n => criticalSet.add(n.id));
+        }
+
+        // 3. Draw standard tree branches (with Willow sway on Willow & Larch)
+        (tree.nodes || []).forEach(n => {
+          if (n.harvested) return;
           if (n.parentId) {
-            const p = tree.nodes.find(pn => pn.id === n.parentId);
+            const p = tree.nodes.find(pn => pn.id === n.parentId && !pn.harvested);
             if (p) {
               const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
               const sx = p.x + 95, sy = p.y + 60, ex = n.x + 95, ey = n.y;
-              if (tree.type === 'Willow') {
+              if (tree.type === 'Willow' || tree.type === 'Larch') {
                 path.setAttribute('d', `M ${sx} ${sy} Q ${sx} ${ey}, ${ex} ${ey}`);
               } else {
                 const my = (sy + ey) / 2;
                 path.setAttribute('d', `M ${sx} ${sy} C ${sx} ${my}, ${ex} ${my}, ${ex} ${ey}`);
               }
-              path.setAttribute('stroke', (criticalSet.has(p.id) && criticalSet.has(n.id)) ? '#EF4444' : '#33485E'); 
+              path.setAttribute('stroke', (criticalSet.has(p.id) && criticalSet.has(n.id)) ? '#EF4444' : '#33485E');
               path.setAttribute('stroke-width', '2.5'); path.setAttribute('fill', 'none');
               canvasSvg.appendChild(path);
             }
           }
         });
+
+        // 4. Draw Crimson Jumping Critical Path connectors across bottleneck nodes
+        if (state.showCriticalPath && jumpChain.length > 1) {
+          for (let i = 0; i < jumpChain.length - 1; i++) {
+            const a = jumpChain[i], b = jumpChain[i + 1];
+            const x1 = a.x + 95, y1 = a.y + 50, x2 = b.x + 95, y2 = b.y + 10;
+            const jumpPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            jumpPath.setAttribute('d', `M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}`);
+            jumpPath.setAttribute('fill', 'none');
+            jumpPath.setAttribute('stroke', '#EF4444');
+            jumpPath.setAttribute('stroke-width', '3');
+            jumpPath.setAttribute('stroke-dasharray', '7,5');
+            canvasSvg.appendChild(jumpPath);
+          }
+        }
       }
 
      function attachGestureEvents(el, entity, isTreeMode) {
@@ -1330,8 +1437,8 @@ if (isZeroState && state.isLocked) {
               if (isTreeMode && (entity.type === 'fruit' || entity.type === 'pinecone')) {
                   entity.ripe = !entity.ripe;
                   clickCount = 0;
+                  if (navigator.vibrate) navigator.vibrate(40);
                   saveData(); render();
-                  showAppAlert(entity.ripe ? 'Fruit is Complete (Ripe for the Pickin\'!) ✅' : 'Fruit marked incomplete.');
               }
           }, 600);
 
@@ -1385,12 +1492,15 @@ if (isZeroState && state.isLocked) {
       function renderTree() {
         const tree = getTree(); treeLayer.innerHTML = ''; updateSVGPaths(); if (!tree) return;
         (tree.nodes || []).forEach(node => {
+          if (node.harvested) return;
           if (!node.lastInspected) node.lastInspected = Date.now();
           const el = document.createElement('div'); el.id = node.id; 
           el.className = `node-card type-${node.type} ${node.id === state.selectedId ? 'selected' : ''} ${node.acornTarget ? 'has-acorn' : ''} ${criticalSet.has(node.id) ? 'critical-node' : ''}`; 
           el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
-const docCount = Array.isArray(node.attachments) ? node.attachments.length : 0;
-          const ripeBadge = (((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '') + (docCount > 0 ? `<span style="margin-left:6px; font-size:11px; color:var(--node-leaf);" title="${docCount} Attached Document(s)">📎${docCount}</span>` : '');          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>`;
+          const docCount = Array.isArray(node.attachments) ? node.attachments.length : 0;
+          const ripeBadge = (((node.type === 'fruit' || node.type === 'pinecone') && node.ripe && !node.harvested) ? `<span style="margin-left:6px; font-size:12px;" title="Ripe for the Pickin'">✅</span>` : '') + (docCount > 0 ? `<span style="margin-left:6px; font-size:11px; color:var(--node-leaf);" title="${docCount} Attached Document(s)">📎${docCount}</span>` : '');
+          const rippleBadge = (node._rippleDays > 0 || node._rippleCost > 0) ? `<div style="font-size:9.5px; color:#F59E0B; background:rgba(245,158,11,0.14); border:1px solid rgba(245,158,11,0.4); border-radius:4px; padding:2px 5px; margin-top:4px; font-weight:600; pointer-events:none;">⚠️ Ripple: ${node._rippleDays > 0 ? `+${node._rippleDays}d Slip ` : ''}${node._rippleCost > 0 ? `+$${node._rippleCost.toFixed(0)} Burn` : ''}</div>` : '';
+          el.innerHTML = `<div class="node-header-row">${getNodeIcon(node.type)}<div class="node-title">${escapeHTML(node.title)}${ripeBadge}</div><div class="acorn-badge" title="Acorn Linked"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="10" r="5"/><path d="M12 2v3M9 5h6M7 10h10M12 15v7M10 22h4"/></svg></div></div><div class="node-desc">${escapeHTML(node.desc || '')}</div>${rippleBadge}`;
           attachGestureEvents(el, node, true); treeLayer.appendChild(el);
         });
       }
@@ -1882,7 +1992,7 @@ const docCount = Array.isArray(node.attachments) ? node.attachments.length : 0;
 
             if (type === 'charter') {
                 // Structured PMI Box-Grid Project Charter (Screenshots 74 & 75)
-                const deliverables = data.allTasks.filter(t => t.type === 'fruit' || t.type === 'pinecone');
+                const deliverables = data.allTasks.filter(t => t.rawType === 'fruit' || t.rawType === 'pinecone');
                 const delivList = deliverables.length ? deliverables : data.allTasks.slice(0, 6);
                 const riskTasks = data.allTasks.filter(t => t.atRisk || t.priority === 'Critical' || t.priority === 'High');
 
@@ -2253,7 +2363,7 @@ const docCount = Array.isArray(node.attachments) ? node.attachments.length : 0;
                     ${cell('Target Date', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true, align: 'center' })}
                     ${cell('Status', { th: true, bg: '#334155', fg: '#FFFFFF', bold: true, align: 'center' })}
                 </tr>`;
-                const delivs = data.allTasks.filter(t => t.type === 'fruit' || t.type === 'pinecone');
+                const delivs = data.allTasks.filter(t => t.rawType === 'fruit' || t.rawType === 'pinecone');
                 (delivs.length ? delivs : data.allTasks.slice(0, 8)).forEach(d => {
                     tableRows += `<tr height="24">
                         ${cell(d.wbs, { bg: '#FFFFFF', bold: true, align: 'center' })}
@@ -2738,6 +2848,112 @@ ${tableRows}
             downloadVisualPNG(currentArtifactType, compileProjectArtifactData());
         });
 
+        const importBtn = document.getElementById('btn-trigger-pm-import');
+        const importInput = document.getElementById('input-import-pm-file');
+        if (importBtn && importInput) {
+            importBtn.addEventListener('click', () => importInput.click());
+            importInput.addEventListener('change', (ev) => {
+                const file = ev.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = e.target.result;
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                    const importedNodes = [{ id: 'n_root', title: cleanTitle, desc: `Imported from ${file.name}`, type: 'trunk', parentId: null, x: 4905, y: 5000 }];
+                    const wbsMap = { '0': 'n_root' };
+                    let counter = 1;
+
+                    const addImportedRow = (wbsStr, titleStr, typeStr, ownerStr, startStr, hoursNum, budgetNum, statusStr) => {
+                        if (!titleStr || /Deliverable \/ Project Task|Phase \/ Task Deliverable|Task Name/i.test(titleStr)) return;
+                        const id = `imp_${counter++}`;
+                        const cleanWbs = String(wbsStr || counter).trim().replace(/\.0$/, '');
+                        const parts = cleanWbs.split('.');
+                        let parentId = 'n_root';
+                        if (parts.length > 1) {
+                            const parentWbs = parts.slice(0, -1).join('.');
+                            parentId = wbsMap[parentWbs] || 'n_root';
+                        }
+                        wbsMap[cleanWbs] = id;
+
+                        const isPhase = parts.length === 1 && (/phase/i.test(titleStr) || /phase|branch/i.test(typeStr));
+                        const nType = isPhase ? 'branch' : (/deliverable|fruit|milestone/i.test(typeStr) ? 'fruit' : (/recurring|pinecone/i.test(typeStr) ? 'pinecone' : 'leaf'));
+                        const isDone = /complete|ripe|done|harvested/i.test(statusStr || '');
+
+                        importedNodes.push({
+                            id, title: titleStr.replace(/^Phase \d+:\s*/i, '').replace(/\(\d+ Work Packages\)/i, '').trim(),
+                            desc: '', type: nType, parentId,
+                            assignee: ownerStr || '',
+                            assignees: ownerStr ? [{ name: ownerStr, role: 'R' }] : [],
+                            startDate: /^\d{4}-\d{2}-\d{2}/.test(startStr || '') ? startStr.slice(0, 10) : '',
+                            estHours: parseFloat(hoursNum) || 8,
+                            budget: parseFloat(String(budgetNum || '0').replace(/[^0-9.]/g, '')) || 0,
+                            ripe: isDone, harvested: false, x: 5000, y: 5150
+                        });
+                    };
+
+                    if (ext === 'xml' || text.trim().startsWith('<?xml')) {
+                        const xmlDoc = new DOMParser().parseFromString(text, 'text/xml');
+                        xmlDoc.querySelectorAll('Task').forEach(tk => {
+                            const name = tk.querySelector('Name')?.textContent;
+                            const wbs = tk.querySelector('WBS')?.textContent || tk.querySelector('OutlineNumber')?.textContent;
+                            const start = tk.querySelector('Start')?.textContent || '';
+                            const cost = tk.querySelector('Cost')?.textContent || '0';
+                            const outlineLevel = parseInt(tk.querySelector('OutlineLevel')?.textContent || '1', 10);
+                            if (name && outlineLevel > 0) {
+                                addImportedRow(wbs || `${outlineLevel}.${counter}`, name, outlineLevel === 1 ? 'branch' : 'fruit', '', start, 8, parseFloat(cost) / 100, '');
+                            }
+                        });
+                    } else if (ext === 'xls' || ext === 'html' || /<table/i.test(text)) {
+                        const doc = new DOMParser().parseFromString(text, 'text/html');
+                        doc.querySelectorAll('tr').forEach(tr => {
+                            const cells = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
+                            if (cells.length >= 3 && /^\d+(\.\d+)*$/.test(cells[0])) {
+                                if (cells.length >= 9) {
+                                    addImportedRow(cells[0], cells[2], cells[3], cells[4], cells[5], (parseFloat(cells[7]) || 1) * 8, cells[10]?.split('/').pop(), cells[8]);
+                                } else {
+                                    addImportedRow(cells[0], cells[1], cells[2] === 'PHASE' ? 'branch' : 'fruit', cells[2], cells[3], 8, 0, cells[4]);
+                                }
+                            }
+                        });
+                    } else {
+                        const parseCSVLine = (line) => {
+                            const res = []; let cur = '', inQ = false;
+                            for (let i = 0; i < line.length; i++) {
+                                const ch = line[i];
+                                if (ch === '"') inQ = !inQ;
+                                else if (ch === ',' && !inQ) { res.push(cur.trim()); cur = ''; }
+                                else cur += ch;
+                            }
+                            res.push(cur.trim()); return res;
+                        };
+                        text.split(/\r?\n/).slice(1).forEach(line => {
+                            if (!line.trim()) return;
+                            const cols = parseCSVLine(line);
+                            if (cols.length >= 2) {
+                                addImportedRow(cols[0], cols[3] || cols[1], cols[4] || cols[2], cols[5] || '', cols[7] || '', cols[8] || 8, cols[11] || 0, cols[5] || '');
+                            }
+                        });
+                    }
+
+                    if (importedNodes.length <= 1) {
+                        showAppAlert('Could not find valid WBS/Task rows in that file.');
+                        return;
+                    }
+                    const f = getForest();
+                    const newTree = { id: 'tree_' + Date.now(), title: cleanTitle, type: 'Larch', season: 'Spring', x: 5000, y: 5000, nodes: importedNodes };
+                    f.trees.push(newTree);
+                    state.activeTreeId = newTree.id;
+                    state.viewMode = 'tree';
+                    document.getElementById('modal-pm-tools').classList.remove('open');
+                    autoTidyNodes();
+                    saveData(); render();
+                    ev.target.value = '';
+                };
+                reader.readAsText(file);
+            });
+        }
+
         document.querySelectorAll('.btn-export-doc').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const type = e.currentTarget.getAttribute('data-type');
@@ -2975,15 +3191,21 @@ ${tableRows}
                                 if (item.y + h > maxY) maxY = item.y + h;
                             });
                             
-                            const targetScale = Math.min((window.innerWidth - 120) / Math.max(maxX - minX, 1), (window.innerHeight - 120) / Math.max(maxY - minY, 1), 1.2);
+                            const topSafe = isTreeMode ? 165 : 120;
+                            const botSafe = 75;
+                            const usableH = Math.max(200, window.innerHeight - topSafe - botSafe);
+                            const usableW = Math.max(200, window.innerWidth - 120);
+
+                            const targetScale = Math.min(usableW / Math.max(maxX - minX, 1), usableH / Math.max(maxY - minY, 1), 1.0);
                             const centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+                            const usableCenterY = topSafe + (usableH / 2);
                             
                             const worldEl = document.getElementById('world');
                             worldEl.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
                             
                             state.scale = targetScale;
                             state.panX = (window.innerWidth / 2) - (centerX * targetScale);
-                            state.panY = (window.innerHeight / 2) - (centerY * targetScale);
+                            state.panY = usableCenterY - (centerY * targetScale);
                             state.pipScale = 0.1; 
                             state.pipPanX = -centerX * 0.1; 
                             state.pipPanY = -centerY * 0.1;
@@ -3328,11 +3550,12 @@ viewport.addEventListener('wheel', (e) => {
             const type = e.currentTarget.getAttribute('data-type');
             if (state.viewMode === 'tree') {
               const tree = getTree(), parent = tree.nodes.find(n => n.id === state.selectedId) || tree.nodes[0];
-              if (tree.type === 'Oak' && type === 'fruit') {
+              if (type === 'acorn') {
                 acornTargetMode = true; document.getElementById('overlay-acorn-target').style.display = 'flex'; document.getElementById('grow-dropdown').style.display = 'none'; return;
               }
-              const node = { id: 'n_' + Date.now(), title: 'New Node', desc: '', type: type, parentId: parent.id, x: parent.x + (Math.random() * 60 - 30), y: parent.y + 160, pinned: false };
-              if (tree.type === 'Pine' && type === 'fruit') { node.title = "New Task"; node.harvested = false; }
+              const safeSpot = findUnoccupiedSpot(parent.x, parent.y + 150, tree.nodes, 195, 86, 28);
+              const defaultTitles = { branch: 'New Branch', leaf: 'New Note', fruit: 'New Deliverable', pinecone: 'New Checklist Item', seed: 'Linked Seed' };
+              const node = { id: 'n_' + Date.now(), title: defaultTitles[type] || 'New Node', desc: '', type: type, parentId: parent.id, x: safeSpot.x, y: safeSpot.y, pinned: false, harvested: false, ripe: false };
               tree.nodes.push(node); state.selectedId = node.id;
               document.getElementById('grow-dropdown').style.display = 'none';
               render(); openInspector(node);
@@ -3453,17 +3676,43 @@ viewport.addEventListener('wheel', (e) => {
 
         document.getElementById('btn-harvest-main').addEventListener('click', () => {
           showAppAlert("Would you like to harvest all ripe tasks?", "Harvest Time", true, () => {
-              let count = 0;
               const trees = state.viewMode === 'forest' ? getForest().trees : [getTree()];
               trees.forEach(t => {
-                  if (!t) return;
-                  t.nodes.forEach(n => { 
-                      if ((n.type === 'fruit' || n.type === 'pinecone') && !n.harvested && n.ripe) { n.harvested = true; count++; } 
-                 if (t.type === 'Pine' && (n.type === 'fruit' || n.type === 'pinecone')) { n.harvested = false; n.ripe = false; }
+                  if (!t || !Array.isArray(t.nodes)) return;
+                  const pineconeCopies = [];
+
+                  t.nodes.forEach(n => {
+                      if (n.harvested) return;
+
+                      if (n.type === 'fruit' && n.ripe) {
+                          // Re-attach any unharvested child nodes to this fruit's parent before removing from canvas
+                          t.nodes.forEach(child => {
+                              if (child.parentId === n.id) child.parentId = n.parentId;
+                          });
+                          n.harvested = true;
+                          n.harvestedAt = new Date().toLocaleDateString();
+                          if (state.selectedId === n.id) state.selectedId = null;
+                      } else if (n.type === 'pinecone' && n.ripe) {
+                          // Keep Pinecone on canvas, uncheck it, and send a copy of its details to the Harvest Basket
+                          const copy = JSON.parse(JSON.stringify(n));
+                          copy.id = 'harv_pc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+                          copy.harvested = true;
+                          copy.ripe = true;
+                          copy.isBasketCopy = true;
+                          copy.parentId = null;
+                          copy.harvestedAt = new Date().toLocaleDateString();
+                          pineconeCopies.push(copy);
+
+                          n.ripe = false;
+                          n.harvested = false;
+                      }
                   });
+
+                  if (pineconeCopies.length > 0) {
+                      t.nodes.push(...pineconeCopies);
+                  }
               });
               saveData(); render();
-              setTimeout(() => { showAppAlert(`Harvested ${count} completed goals!`, "Successful Pickin's!"); }, 400);
           });
         });
         
@@ -3912,26 +4161,32 @@ viewport.addEventListener('wheel', (e) => {
           if (n.y < minY) minY = n.y;
           if (n.y > maxY) maxY = n.y;
         });
-        const treeWidth = (maxX - minX) + 190 + 200; 
-        const treeHeight = (maxY - minY) + 80 + 200;
-        
-        const targetScale = Math.min(window.innerWidth / treeWidth, window.innerHeight / treeHeight, 1.0);
+
+        const topSafeZone = 165;
+        const bottomSafeZone = 75;
+        const usableHeight = Math.max(220, window.innerHeight - topSafeZone - bottomSafeZone);
+        const usableWidth = Math.max(220, window.innerWidth - 120);
+
+        const treeWidth = Math.max(1, (maxX - minX) + 190);
+        const treeHeight = Math.max(1, (maxY - minY) + 80);
+
+        const targetScale = Math.min(usableWidth / treeWidth, usableHeight / treeHeight, 1.0);
         const centerX = (minX + maxX + 190) / 2;
         const centerY = (minY + maxY + 80) / 2;
-        
+        const usableCenterY = topSafeZone + (usableHeight / 2);
+
         const worldEl = document.getElementById('world');
         worldEl.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
-        
+
         state.scale = targetScale;
-     state.panX = (window.innerWidth / 2) - (centerX * targetScale);
-     state.panY = (window.innerHeight / 2) - (centerY * targetScale);
+        state.panX = (window.innerWidth / 2) - (centerX * targetScale);
+        state.panY = usableCenterY - (centerY * targetScale);
 
-     state.pipScale = 0.1;
-     state.pipPanX = -centerX * state.pipScale;
-     state.pipPanY = -centerY * state.pipScale;
+        state.pipScale = 0.1;
+        state.pipPanX = -centerX * state.pipScale;
+        state.pipPanY = -centerY * state.pipScale;
 
-     updateWorldTransform();
-        
+        updateWorldTransform();
         setTimeout(() => { worldEl.style.transition = 'none'; }, 850);
       }
 
@@ -4057,6 +4312,7 @@ viewport.addEventListener('wheel', (e) => {
 
           document.getElementById('node-input-start').value = node.startDate || '';
           document.getElementById('node-input-priority').value = node.priority || 'Medium';
+          document.getElementById('node-input-season').value = node.season || 'Spring';
           document.getElementById('node-input-hours').value = node.estHours || '';
           document.getElementById('node-input-timespent').value = node.timeSpent || '';
           document.getElementById('node-input-budget').value = node.budget || '';
@@ -4089,8 +4345,8 @@ viewport.addEventListener('wheel', (e) => {
           };
 
           const t = getTree();
-          document.getElementById('willow-actions').style.display = (t.type === 'Willow' && node.type === 'branch') ? 'block' : 'none';
-          document.getElementById('oak-actions').style.display = (t.type === 'Oak' && node.acornTarget) ? 'block' : 'none';
+          document.getElementById('willow-actions').style.display = ((t.type === 'Willow' || t.type === 'Larch') && node.type === 'branch') ? 'block' : 'none';
+          document.getElementById('oak-actions').style.display = ((t.type === 'Oak' || t.type === 'Larch') || node.acornTarget) ? 'block' : 'none';
 
           if (node.acornTarget) {
             const tNode = getNode(node.acornTarget);
@@ -4111,15 +4367,17 @@ viewport.addEventListener('wheel', (e) => {
           }
 
           document.getElementById('btn-willow-lengthen').onclick = () => {
-            const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: node.x + (Math.random() * 40 - 20), y: node.y + 160, pinned: false };
+            const safeSpot = findUnoccupiedSpot(node.x, node.y + 150, t.nodes, 195, 86, 28);
+            const newNode = { id: 'n_' + Date.now(), title: 'New Branch', desc: '', type: 'branch', parentId: node.id, x: safeSpot.x, y: safeSpot.y, pinned: false };
             t.nodes.push(newNode); node.title = document.getElementById('node-input-title').value; node.desc = document.getElementById('node-input-desc').value;
             if (node.type !== 'trunk') node.type = document.getElementById('node-input-type').value;
             saveData(); render(); openInspector(newNode);
           };
 
-          if (t.type === 'Pine') { document.getElementById('opt-node-fruit').innerText = 'Pine Cone (Checklist)'; }
-          else if (t.type === 'Oak') { document.getElementById('opt-node-fruit').innerText = 'Acorn (Link)'; }
-          else { document.getElementById('opt-node-fruit').innerText = 'Fruit (Task/Deliverable)'; }
+          const optFruit = document.getElementById('opt-node-fruit');
+          const optPine = document.getElementById('opt-node-pinecone');
+          if (optFruit) optFruit.style.display = (t.type === 'Pine') ? 'none' : 'block';
+          if (optPine) optPine.style.display = (t.type === 'Pine' || t.type === 'Larch') ? 'block' : 'none';
 
           document.getElementById('btn-save-node').onclick = (e) => {
             e.preventDefault();
@@ -4128,7 +4386,8 @@ viewport.addEventListener('wheel', (e) => {
             if (node.type === 'fruit' || node.type === 'pinecone') node.ripe = document.getElementById('node-input-ripe').checked;
             
             node.startDate = document.getElementById('node-input-start').value;
-            node.priority = document.getElementById('node-input-priority').value; 
+            node.priority = document.getElementById('node-input-priority').value;
+            node.season = document.getElementById('node-input-season').value; 
             node.estHours = document.getElementById('node-input-hours').value; 
             node.timeSpent = document.getElementById('node-input-timespent').value;
             node.budget = document.getElementById('node-input-budget').value; 
@@ -4184,7 +4443,7 @@ viewport.addEventListener('wheel', (e) => {
         
         let allNodes = [];
         trees.forEach(t => {
-            if (t && t.nodes) allNodes = allNodes.concat(t.nodes);
+            if (t && t.nodes) allNodes = allNodes.concat(t.nodes.filter(n => !n.harvested));
         });
 
         const seasonGroups = { 'Spring': [], 'Summer': [], 'Autumn': [], 'Winter': [] };
@@ -4281,16 +4540,31 @@ viewport.addEventListener('wheel', (e) => {
         const list = document.getElementById('list-harvest'); list.innerHTML = '';
         let allHarvested = [];
         trees.forEach(t => {
-            if (t) { allHarvested = allHarvested.concat(t.nodes.filter(n => n.type === 'fruit' && n.harvested)); }
+            if (t && Array.isArray(t.nodes)) {
+                allHarvested = allHarvested.concat(t.nodes.filter(n => n.harvested));
+            }
         });
         
         document.getElementById('harvest-total').innerText = allHarvested.length;
-        allHarvested.forEach(f => {
-          const li = document.createElement('li'); li.className = 'directory-item';
-          li.innerHTML = `<span>${escapeHTML(f.title)}</span><button class="btn btn-small">Inspect</button>`;
-          li.querySelector('button').addEventListener('click', () => openInspector(f));
-          list.appendChild(li);
-        });
+        if (allHarvested.length === 0) {
+            list.innerHTML = `<li style="padding:12px; text-align:center; color:var(--text-muted); font-size:12px;">Your Harvest Basket is empty. Mark a Fruit or Pine Cone complete and click Harvest!</li>`;
+        } else {
+            allHarvested.forEach(f => {
+              const li = document.createElement('li');
+              li.className = 'directory-item';
+              const badge = f.type === 'pinecone' ? '🌲 Pine Cone' : '🍎 Fruit';
+              const dateTag = f.harvestedAt ? ` • ${escapeHTML(f.harvestedAt)}` : '';
+              li.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:2px; min-width:0; flex:1;">
+                  <strong style="font-size:13px; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(f.title)}</strong>
+                  <span style="font-size:10px; color:var(--text-muted);">${badge}${dateTag}</span>
+                </div>
+                <button class="btn btn-small btn-accent">Inspect</button>
+              `;
+              li.onclick = () => openInspector(f);
+              list.appendChild(li);
+            });
+        }
       }
 
       /* --- GUIDED TOUR ENGINE (COMBINED WALKTHROUGH) --- */
@@ -4373,10 +4647,14 @@ viewport.addEventListener('wheel', (e) => {
 
           highlightBox.style.display = 'block';
           if (step.id === 'viewport') {
-              highlightBox.style.top = '112px';
-              highlightBox.style.left = '12px';
-              highlightBox.style.width = `${window.innerWidth - 24}px`;
-              highlightBox.style.height = `${window.innerHeight - 280}px`;
+              const navRect = document.querySelector('.nav-bar')?.getBoundingClientRect();
+              const pipRect = document.getElementById('pip-minimap')?.getBoundingClientRect();
+              const topEdge = navRect ? Math.max(6, navRect.top - 6) : 54;
+              const botEdge = pipRect ? Math.min(window.innerHeight - 6, pipRect.bottom + 6) : window.innerHeight - 8;
+              highlightBox.style.top = `${topEdge}px`;
+              highlightBox.style.left = '8px';
+              highlightBox.style.width = `${window.innerWidth - 16}px`;
+              highlightBox.style.height = `${botEdge - topEdge}px`;
           } else {
               highlightBox.style.top = `${rect.top - 8}px`;
               highlightBox.style.left = `${rect.left - 8}px`;
