@@ -172,8 +172,7 @@
         </div>
         <!-- Removed duplicate Deadline and Days Spent fields -->
       </div>
-      <div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-forest">Delete Forest</button><button class="btn btn-accent" id="btn-save-forest">Save Changes</button></div>
-    </div>
+<div class="modal-footer"><button class="btn" style="color:#FCA5A5; border-color:#7F1D1D;" id="btn-delete-forest">Delete Forest</button><button class="btn btn-accent" id="btn-save-forest-settings">Save Changes</button></div>    </div>
   </div>
   <div id="update-toast" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--accent); color:#000; padding:12px 24px; border-radius:8px; z-index:9999; font-weight:bold; box-shadow:0 4px 12px rgba(0,0,0,0.5); align-items:center; gap:12px;">
     <span>New version available!</span>
@@ -198,18 +197,22 @@
       <div class="top-row-left"><button class="btn" id="btn-toggle-directory"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span id="label-directory">Nodes</span></button></div>
       <div class="top-row-center">
         <button class="btn btn-accent" id="btn-grow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg><span>Grow...</span></button>
-        <div id="grow-dropdown" class="custom-dropdown">
+        <div id="grow-dropdown" class="custom-dropdown" style="width: 195px;">
           <div id="grow-opts-tree">
             <button class="custom-opt btn-grow-opt" id="btn-grow-branch" data-type="branch">... a Branch (Group)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-leaf" data-type="leaf">... a Leaf (Note)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-fruit" data-type="fruit">... a Fruit (Task)</button>
-            <button class="custom-opt btn-grow-opt" id="btn-grow-pinecone" data-type="pinecone" style="display:none;">... a Pine Cone (Checklist)</button>
+            <button class="custom-opt btn-grow-opt" id="btn-grow-pinecone" data-type="pinecone" style="display:none;"><img src="./pinecone.png" style="width:14px; height:14px; vertical-align:middle; margin-right:4px;">... a Pine Cone</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-acorn" data-type="acorn" style="display:none;">... an Acorn (Link)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-seed" data-type="seed">... a Seed (Link)</button>
+            <button class="custom-opt btn-open-autogrow" data-tab="wizard" style="color:var(--accent); border-top:1px solid var(--border-strong);">✨ Auto-Grow (Wizard)</button>
+            <button class="custom-opt btn-open-autogrow" data-tab="list" style="color:#F59E0B;">📋 Auto-Grow (Quick List)</button>
           </div>
           <div id="grow-opts-forest" style="display:none;">
             <button class="custom-opt btn-grow-opt" id="btn-grow-tree" data-type="tree">... a Tree</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-forest" data-type="forest">... a New Forest</button>
+            <button class="custom-opt btn-open-autogrow" data-tab="wizard" style="color:var(--accent); border-top:1px solid var(--border-strong);">✨ Auto-Grow (Wizard)</button>
+            <button class="custom-opt btn-open-autogrow" data-tab="list" style="color:#F59E0B;">📋 Auto-Grow (Quick List)</button>
           </div>
         </div>
       </div>
@@ -232,8 +235,100 @@
     </button>
   </div>
 
-  <aside id="pip-minimap"><canvas id="pip-canvas" width="140" height="140"></canvas></aside>
+<aside id="pip-minimap"><canvas id="pip-canvas" width="140" height="140"></canvas></aside>
 
+  <!-- Bottom-Center Voice Command Microphone Button (Flush at bottom: 12px) -->
+  <button class="btn" id="btn-voice-cmd" title="Voice Commands (Tap & Speak)" style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 38px; height: 38px; padding: 0; z-index: 25; font-size: 18px; display: inline-flex; align-items: center; justify-content: center;">🎙️</button>
+  <div id="voice-status-pill" style="display: none; position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%); background: var(--bg-surface-elevated); border: 1px solid var(--accent); color: var(--text-main); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; z-index: 35; box-shadow: 0 6px 20px rgba(0,0,0,0.6); white-space: nowrap; pointer-events: none;">🎙️ Listening...</div>
+
+  <!-- Whimsey Tree FX Layer (Fireflies, Seasonal Falling Leaves & Friendly Squirrel) -->
+  <canvas id="whimsey-firefly-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 12; display: none;"></canvas>
+  <div id="whimsey-anim-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998; overflow: hidden;"></div>
+
+  <!-- Auto-Grow (Project Wizard & Quick List to Tree) Modal -->
+  <div class="modal-overlay" id="modal-autogrow" style="z-index: 10003;">
+    <div class="modal-card" style="max-width: 540px; max-height: 88vh;">
+      <div class="modal-header">
+        <h3 style="color: var(--accent);">✨ Auto-Grow Tree Builder</h3>
+        <button class="btn btn-small" id="btn-close-autogrow">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; gap: 12px;">
+        <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+          <button class="btn btn-small btn-accent" id="tab-autogrow-wizard" style="flex: 1;">🪄 Guided Project Wizard</button>
+          <button class="btn btn-small" id="tab-autogrow-list" style="flex: 1;">📋 Quick List to Tree</button>
+        </div>
+
+        <!-- TAB 1: Guided Project Wizard -->
+        <div id="panel-autogrow-wizard" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 8px;">
+            <div class="field-group" style="flex: 1.4;">
+              <label>Project / Tree Title</label>
+              <input type="text" id="ag-wiz-title" placeholder="e.g., Q4 Product Launch">
+            </div>
+            <div class="field-group" style="flex: 1;">
+              <label>Tree Species</label>
+              <select id="ag-wiz-species" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 10px; font-size: 13px; outline: none;">
+                <option value="Larch">Larch (All Features)</option>
+                <option value="Apple">Apple (Deliverables)</option>
+                <option value="Pine">Pine (Recurring SOP)</option>
+                <option value="Oak">Oak (Research/Links)</option>
+                <option value="Willow">Willow (Brainstorm)</option>
+                <option value="Whimsey">Whimsey (Fun/Chimes)</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div class="field-group" style="flex: 1;">
+              <label>Total Budget ($)</label>
+              <input type="number" id="ag-wiz-budget" placeholder="e.g., 15000">
+            </div>
+            <div class="field-group" style="flex: 1;">
+              <label>Target Deadline</label>
+              <input type="date" id="ag-wiz-deadline">
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Team Members &amp; Roles (Comma separated, e.g. Sarah:A, Mike:R, Alex:C)</label>
+            <input type="text" id="ag-wiz-team" placeholder="e.g., Sarah:A, Mike:R, Jenna:R, Dave:C">
+          </div>
+          <div class="field-group">
+            <label>Departments / Phases (Branches — comma or line separated)</label>
+            <textarea id="ag-wiz-phases" rows="2" placeholder="e.g., Research & Design, Engineering, QA & Testing, Marketing Rollout"></textarea>
+          </div>
+          <div class="field-group">
+            <label>Key Deliverables / Tasks (One per line; optional 'Phase: Task' format)</label>
+            <textarea id="ag-wiz-tasks" rows="4" placeholder="Approve Wireframes&#10;Build Core Database&#10;Run Security Audit&#10;Publish Launch Video"></textarea>
+          </div>
+          <button class="btn btn-accent" id="btn-run-autogrow-wizard" style="width: 100%; height: 40px;">🌱 Auto-Grow Project Tree</button>
+        </div>
+
+        <!-- TAB 2: Quick List to Tree -->
+        <div id="panel-autogrow-list" style="display: none; flex-direction: column; gap: 10px;">
+          <div class="field-group">
+            <label>List / Tree Title</label>
+            <input type="text" id="ag-list-title" placeholder="e.g., Weekend Packing & Errands">
+          </div>
+          <div class="field-group">
+            <label>Generate List Items As:</label>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-small btn-accent" id="btn-ql-type-fruit" style="flex: 1;">🍎 Fruits (Apple Tree)</button>
+              <button type="button" class="btn btn-small" id="btn-ql-type-pinecone" style="flex: 1;"><img src="./pinecone.png" style="width:15px; height:15px; object-fit:contain; vertical-align:middle; margin-right:4px;">Pine Cones (Pine Tree)</button>
+            </div>
+            <input type="hidden" id="ag-list-item-type" value="fruit">
+          </div>
+          <div class="field-group">
+            <label style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Paste or Type List (Lines ending in ':' become Branches, items become Tasks)</span>
+              <button type="button" class="btn btn-small" id="btn-ql-upload-txt" style="height: 22px;">📂 Load .txt</button>
+            </label>
+            <input type="file" id="input-ql-txt-file" accept=".txt,.md,.csv" style="display: none;">
+            <textarea id="ag-list-content" rows="7" placeholder="Garage:&#10;- Clean workbench&#10;- Pack up Xmas decorations&#10;- Put boxes on top shelf&#10;Kitchen:&#10;- Restock coffee beans&#10;- Wipe down counters"></textarea>
+          </div>
+          <button class="btn btn-accent" id="btn-run-autogrow-list" style="width: 100%; height: 40px;">🌲 Auto-Grow List Tree</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="bottom-actions" id="bottom-actions-container">
     <button class="btn btn-accent" id="btn-harvest-main" style="border-color:#F59E0B; color:#F59E0B; background:#322615;">Harvest</button>
     <button class="btn" id="btn-critical-path" style="display:none; border-color:#EF4444; color:#EF4444; background:#311C21;">Critical Path</button>
@@ -341,7 +436,16 @@
             <option value="Winter">❄️ Winter (Completed / Evergreen)</option>
           </select>
         </div>
-        
+        <div class="field-group" id="seed-tree-container" style="display:none; margin-top: 8px; border: 1px solid var(--node-seed); border-radius: 8px; padding: 10px; background: var(--bg-surface-elevated);">
+          <label style="color: var(--node-seed); font-weight: 700; display:flex; justify-content:space-between; align-items:center;">
+            <span>🌱 Contained / Linked Tree</span>
+            <button type="button" class="btn btn-small" id="btn-sprout-seed-tree" style="height:22px; padding:0 8px; border-color:var(--node-seed); color:var(--node-seed);">+ Sprout New Tree</button>
+          </label>
+          <select id="node-input-seed-tree" style="background: var(--bg-canvas); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 6px; padding: 8px; font-size: 12px; width: 100%; margin-top: 4px; outline: none;">
+            <option value="">-- Select a Tree to Contain --</option>
+          </select>
+          <button type="button" class="btn btn-accent" id="btn-open-seed-tree" style="display:none; width:100%; margin-top:6px; border-color:var(--node-seed); color:#F3E8FF; background:rgba(168,85,247,0.2);">🌲 Open Contained Tree</button>
+        </div>
         <div class="field-group" id="node-ripe-container" style="display:none; flex-direction: row; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer;">
           <input type="checkbox" id="node-input-ripe" style="width: 16px; height: 16px; cursor: pointer;">
           <label for="node-input-ripe" style="color:#10B981; font-weight: bold; cursor: pointer;">Complete (Ripe for the Pickin')</label>
@@ -409,11 +513,12 @@
           <label>Species (Mechanic)</label>
           <div class="custom-select-trigger" id="tree-type-trigger"><span>Pine (Persistent Wiki/SOPs)</span> <span>▾</span></div>
           <div class="custom-dropdown custom-select-dropdown" id="tree-type-dropdown">
-            <button class="custom-opt" data-val="Pine">Pine (Recurring Nodes/SOPs)</button>
+            <button class="custom-opt" data-val="Pine">Pine (Recurring Tasks/SOPs)</button>
             <button class="custom-opt" data-val="Oak">Oak (Large Projects/Research/Acorn Links)</button>
             <button class="custom-opt" data-val="Willow">Willow (Fluid Brainstorming/Notes/Journal)</button>
             <button class="custom-opt" data-val="Apple">Apple (Tasks/Deliverables)</button>
             <button class="custom-opt" data-val="Larch">Larch (Hybrid - All Features &amp; Nodes)</button>
+            <button class="custom-opt" data-val="Whimsey">Squirrel Tree (Squirrels?)</button>
           </div>
           <input type="hidden" id="tree-input-type" value="Pine">
         </div>
@@ -507,9 +612,22 @@
                         <h4 style="margin: 0 0 6px 0; color: var(--accent);">📜 Project Charter</h4>
                         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">PMI box-grid authorization document with Scope, Constraints (Time/Budget/Quality), Milestones, Risks &amp; Sign-Off.</p>
                     </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn btn-small btn-accent btn-export-doc" data-type="charter" data-format="studio" style="flex: 1;">Preview / PDF</button>
-                        <button class="btn btn-small btn-export-doc" data-type="charter" data-format="xls" style="flex: 1;">Color Excel (.xls)</button>
+                    <div style="display: flex; gap: 6px; position: relative;">
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-accent btn-pm-menu-trig" style="width: 100%;">Preview... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; left: 0; width: 155px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="preview-pdf" data-type="charter">...as PDF</button>
+                                <button class="custom-opt btn-pm-action" data-action="preview-sheet" data-type="charter">...as Spread Sheet</button>
+                            </div>
+                        </div>
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-pm-menu-trig" style="width: 100%;">Export... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; right: 0; width: 185px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="export-pdf" data-type="charter">...as PDF (.pdf)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-xls" data-type="charter">...as Color Excel (.xls)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-png" data-type="charter">...as High-Res Image (.png)</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -519,9 +637,22 @@
                         <h4 style="margin: 0 0 6px 0; color: #38BDF8;">📅 Project Work Plan</h4>
                         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Smartsheet-style roadmap with KPI header, Phase ribbons, auto-calculated End Dates, Status pills &amp; Priority flags.</p>
                     </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn btn-small btn-accent btn-export-doc" data-type="plan" data-format="studio" style="flex: 1;">Preview / PDF</button>
-                        <button class="btn btn-small btn-export-doc" data-type="plan" data-format="xls" style="flex: 1;">Color Excel (.xls)</button>
+                    <div style="display: flex; gap: 6px; position: relative;">
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-accent btn-pm-menu-trig" style="width: 100%;">Preview... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; left: 0; width: 155px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="preview-pdf" data-type="plan">...as PDF</button>
+                                <button class="custom-opt btn-pm-action" data-action="preview-sheet" data-type="plan">...as Spread Sheet</button>
+                            </div>
+                        </div>
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-pm-menu-trig" style="width: 100%;">Export... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; right: 0; width: 185px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="export-pdf" data-type="plan">...as PDF (.pdf)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-xls" data-type="plan">...as Color Excel (.xls)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-png" data-type="plan">...as High-Res Image (.png)</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -531,9 +662,22 @@
                         <h4 style="margin: 0 0 6px 0; color: #F59E0B;">👥 Pivoted RACI Matrix</h4>
                         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Cross-functional responsibility grid pivoting team members into columns with color-coded R, A, C, and I cells.</p>
                     </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn btn-small btn-accent btn-export-doc" data-type="raci" data-format="studio" style="flex: 1;">Preview / PDF</button>
-                        <button class="btn btn-small btn-export-doc" data-type="raci" data-format="xls" style="flex: 1;">Color Excel (.xls)</button>
+                    <div style="display: flex; gap: 6px; position: relative;">
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-accent btn-pm-menu-trig" style="width: 100%;">Preview... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; left: 0; width: 155px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="preview-pdf" data-type="raci">...as PDF</button>
+                                <button class="custom-opt btn-pm-action" data-action="preview-sheet" data-type="raci">...as Spread Sheet</button>
+                            </div>
+                        </div>
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-pm-menu-trig" style="width: 100%;">Export... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; right: 0; width: 185px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="export-pdf" data-type="raci">...as PDF (.pdf)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-xls" data-type="raci">...as Color Excel (.xls)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-png" data-type="raci">...as High-Res Image (.png)</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -543,9 +687,22 @@
                         <h4 style="margin: 0 0 6px 0; color: #10B981;">🗂️ Work Breakdown (WBS)</h4>
                         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Hierarchical phase &amp; deliverable decomposition with financial rollups, variance tracking, and completion metrics.</p>
                     </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn btn-small btn-accent btn-export-doc" data-type="wbs" data-format="studio" style="flex: 1;">Preview / PDF</button>
-                        <button class="btn btn-small btn-export-doc" data-type="wbs" data-format="xls" style="flex: 1;">Color Excel (.xls)</button>
+                    <div style="display: flex; gap: 6px; position: relative;">
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-accent btn-pm-menu-trig" style="width: 100%;">Preview... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; left: 0; width: 155px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="preview-pdf" data-type="wbs">...as PDF</button>
+                                <button class="custom-opt btn-pm-action" data-action="preview-sheet" data-type="wbs">...as Spread Sheet</button>
+                            </div>
+                        </div>
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-pm-menu-trig" style="width: 100%;">Export... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; right: 0; width: 185px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="export-pdf" data-type="wbs">...as PDF (.pdf)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-xls" data-type="wbs">...as Color Excel (.xls)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-png" data-type="wbs">...as High-Res Image (.png)</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -555,9 +712,22 @@
                         <h4 style="margin: 0 0 6px 0; color: #A855F7;">📊 Visual Gantt Chart Timeline</h4>
                         <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">Executive timeline mapping Phases and Tasks across weekly schedule columns with color-coded duration bars and assignees.</p>
                     </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="btn btn-small btn-accent btn-export-doc" data-type="gantt" data-format="studio" style="flex: 1;">Preview / PDF &amp; PNG</button>
-                        <button class="btn btn-small btn-export-doc" data-type="gantt" data-format="xls" style="flex: 1;">Color Excel (.xls)</button>
+                    <div style="display: flex; gap: 6px; position: relative;">
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-accent btn-pm-menu-trig" style="width: 100%;">Preview... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; left: 0; width: 165px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="preview-pdf" data-type="gantt">...as PDF</button>
+                                <button class="custom-opt btn-pm-action" data-action="preview-sheet" data-type="gantt">...as Spread Sheet</button>
+                            </div>
+                        </div>
+                        <div style="flex: 1; position: relative;">
+                            <button class="btn btn-small btn-pm-menu-trig" style="width: 100%;">Export... ▾</button>
+                            <div class="custom-dropdown pm-sub-menu" style="bottom: 100%; right: 0; width: 185px; margin-bottom: 4px;">
+                                <button class="custom-opt btn-pm-action" data-action="export-pdf" data-type="gantt">...as PDF (.pdf)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-xls" data-type="gantt">...as Color Excel (.xls)</button>
+                                <button class="custom-opt btn-pm-action" data-action="export-png" data-type="gantt">...as High-Res Image (.png)</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -567,16 +737,28 @@
 
 <!-- Artifact Preview & Export Studio Modal -->
 <div class="modal-overlay" id="modal-artifact-studio" style="z-index: 10004;">
-    <div class="modal-card" style="width: 96vw; max-width: 1120px; height: 90vh; max-height: 90vh; background: #0B1117; border: 1px solid var(--border-strong); display: flex; flex-direction: column; overflow: hidden;">
-        <div class="modal-header" style="background: var(--bg-surface); flex-wrap: wrap; gap: 8px;">
+    <div class="modal-card" style="width: 96vw; max-width: 1120px; height: 90vh; max-height: 90vh; background: #0B1117; border: 1px solid var(--border-strong); display: flex; flex-direction: column; overflow: visible;">
+        <div class="modal-header" style="background: var(--bg-surface); flex-wrap: wrap; gap: 8px; position: relative; z-index: 20;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <button class="btn btn-small" id="btn-studio-back">&larr; Back</button>
                 <h3 id="studio-doc-title" style="font-size: 14px; color: var(--accent); margin: 0;">Executive Artifact Preview</h3>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                <button class="btn btn-small btn-accent" id="btn-studio-dl-pdf">📄 Download PDF (.pdf)</button>
-                <button class="btn btn-small" id="btn-studio-dl-xls" style="border-color: #10B981; color: #10B981;">📊 Color Excel (.xls)</button>
-                <button class="btn btn-small" id="btn-studio-dl-png" style="border-color: #38BDF8; color: #38BDF8;">🖼️ High-Res PNG</button>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <div style="position: relative;">
+                    <button class="btn btn-small btn-pm-menu-trig">Preview... ▾</button>
+                    <div class="custom-dropdown pm-sub-menu" style="top: 100%; right: 0; width: 160px; margin-top: 4px;">
+                        <button class="custom-opt" id="btn-studio-prev-pdf">...as PDF</button>
+                        <button class="custom-opt" id="btn-studio-prev-sheet">...as Spread Sheet</button>
+                    </div>
+                </div>
+                <div style="position: relative;">
+                    <button class="btn btn-small btn-accent btn-pm-menu-trig">Export... ▾</button>
+                    <div class="custom-dropdown pm-sub-menu" style="top: 100%; right: 0; width: 185px; margin-top: 4px;">
+                        <button class="custom-opt" id="btn-studio-dl-pdf">...as PDF (.pdf)</button>
+                        <button class="custom-opt" id="btn-studio-dl-xls">...as Color Excel (.xls)</button>
+                        <button class="custom-opt" id="btn-studio-dl-png">...as High-Res Image (.png)</button>
+                    </div>
+                </div>
                 <button class="btn btn-small" id="btn-close-studio">&times;</button>
             </div>
         </div>
@@ -706,8 +888,8 @@
       <div class="modal-header"><h3>💡 Help Options</h3><button class="btn btn-small" id="btn-close-help-options">&times;</button></div>
       <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px; text-align: center;">
 <button class="btn" id="btn-opt-tutorial" style="display: none;">🎬 View Quick Tutorial</button>        <button class="btn" id="btn-opt-walkthrough" style="padding: 15px; border-color: var(--accent); color: var(--accent);">🚀 Start Guided Walkthrough</button>
-        <button class="btn" id="btn-opt-index" style="padding: 15px;">📚 View Feature Index</button>
-      </div>
+<button class="btn" id="btn-opt-index" style="padding: 15px;">📚 View Feature Index</button>
+        <button class="btn" id="btn-opt-contact" style="padding: 15px; border-color: var(--border-strong); color: var(--text-main);" onclick="window.location.href='mailto:founder@sylvatree.com?subject=Sylva%20Support%20%26%20Inquiry'">✉️ Contact Us</button>      </div>
     </div>
   </div>
 
@@ -1174,7 +1356,7 @@ window.openCheckout = function(productType, platform) {
         document.getElementById('forest-input-deadline').value = f.deadline || '';
         document.getElementById('forest-input-days').value = f.daysSpent || '';
         
-        document.getElementById('btn-save-forest').onclick = (e) => {
+        document.getElementById('btn-save-forest-settings').onclick = (e) => {
             e.preventDefault();
             f.title = document.getElementById('forest-input-title').value.trim() || f.title;
             f.hr = document.getElementById('forest-input-hr').value; f.budget = document.getElementById('forest-input-budget').value;
@@ -1891,8 +2073,14 @@ if (isZeroState && state.isLocked) {
                 }
             });
 
-            const totalEstH = allTasks.reduce((s, x) => s + x.estHours, 0);
-            const totalSpentH = allTasks.reduce((s, x) => s + x.timeSpent, 0);
+            let runningShadowSlip = 0;
+            allTasks.forEach(tk => {
+                const ownOverrunDays = (!tk.isDone && tk.timeSpent > tk.estHours) ? Math.ceil((tk.timeSpent - tk.estHours) / 8) : (tk.atRisk && !tk.isDone ? 2 : 0);
+                tk.ghostSlipDays = !tk.isDone ? (runningShadowSlip + ownOverrunDays) : 0;
+                runningShadowSlip += ownOverrunDays;
+            });
+
+            const totalEstH = allTasks.reduce((s, x) => s + x.estHours, 0);            const totalSpentH = allTasks.reduce((s, x) => s + x.timeSpent, 0);
             const calcBud = allTasks.reduce((s, x) => s + x.budget, 0);
             const calcSpent = allTasks.reduce((s, x) => s + x.spent, 0);
             const totalBud = (forest && parseFloat(forest.budget) > 0) ? parseFloat(forest.budget) : calcBud;
@@ -2143,6 +2331,7 @@ if (isZeroState && state.isLocked) {
                                     <div style="margin-left:${startOffsetPct}%; width:${widthPct}%; background:${tk.isDone ? '#10B981' : barColor}; height:16px; border-radius:8px; display:flex; align-items:center; padding:0 8px; font-size:9.5px; font-weight:700; color:#0F172A; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,0.4);">
                                         ${tk.durationDays}d (${tk.status})
                                     </div>
+                                    ${tk.ghostSlipDays > 0 ? `<div title="Non-Destructive Shadow Forecast (+${tk.ghostSlipDays}d slip)" style="margin-top:3px; margin-left:${Math.min(90, startOffsetPct + ((tk.ghostSlipDays * 86400000) / (totalWeeks * 7 * 86400000)) * 100)}%; width:${widthPct}%; background:rgba(245,158,11,0.22); border:1.5px dashed #F59E0B; height:14px; border-radius:8px; display:flex; align-items:center; padding:0 6px; font-size:8.5px; font-weight:700; color:#FDE68A; white-space:nowrap;">👻 Ghost +${tk.ghostSlipDays}d</div>` : ''}
                                 </td>
                             </tr>
                         `;
@@ -2661,7 +2850,17 @@ ${tableRows}
                         ctx.fillStyle = '#0F172A';
                         ctx.font = 'bold 9.5px Segoe UI, Arial, sans-serif';
                         ctx.fillText(`${tk.durationDays}d`, 374 + sRatio * chartW, y + 16);
-                        y += 26;
+                        if (tk.ghostSlipDays > 0) {
+                            const gShift = Math.min(0.92 - sRatio, (tk.ghostSlipDays * 86400000) / (totalWeeks * 7 * 86400000));
+                            ctx.save();
+                            ctx.fillStyle = 'rgba(245, 158, 11, 0.28)';
+                            ctx.strokeStyle = '#F59E0B';
+                            ctx.setLineDash([4, 3]);
+                            ctx.lineWidth = 1.5;
+                            ctx.fillRect(368 + (sRatio + gShift) * chartW, y + 8, wRatio * chartW, 13);
+                            ctx.strokeRect(368 + (sRatio + gShift) * chartW, y + 8, wRatio * chartW, 13);
+                            ctx.restore();
+                        }                        y += 26;
                     });
                 });
             } else if (type === 'charter') {
@@ -2821,12 +3020,35 @@ ${tableRows}
             a.remove();
         }
 
-        function openArtifactStudio(type) {
+        let currentPreviewFormat = 'pdf';
+
+        function openArtifactStudio(type, previewFormat = 'pdf') {
             currentArtifactType = type;
+            currentPreviewFormat = previewFormat;
             const data = compileProjectArtifactData();
             const titles = { charter: 'Project Charter', plan: 'Project Work Plan', wbs: 'Work Breakdown Structure', raci: 'Pivoted RACI Matrix', gantt: 'Visual Gantt Chart' };
-            document.getElementById('studio-doc-title').innerText = `${titles[type] || 'Artifact'} — ${data.baseTitle}`;
-            document.getElementById('studio-paper').innerHTML = buildArtifactHTML(type, data);
+            const modeLabel = previewFormat === 'pdf' ? 'PDF Document Preview' : 'Spreadsheet Preview';
+            document.getElementById('studio-doc-title').innerText = `${titles[type] || 'Artifact'} (${modeLabel}) — ${data.baseTitle}`;
+
+            const paper = document.getElementById('studio-paper');
+            if (previewFormat === 'pdf') {
+                const canvas = renderArtifactToCanvas(type, data);
+                paper.style.padding = '0';
+                paper.style.background = 'transparent';
+                paper.innerHTML = `<img src="${canvas.toDataURL('image/png')}" style="width:100%; height:auto; display:block; border-radius:6px; box-shadow:0 8px 28px rgba(0,0,0,0.5);">`;
+            } else {
+                paper.style.padding = '24px';
+                paper.style.background = '#FFFFFF';
+                paper.innerHTML = `
+                    <div style="background:#107C41; color:#FFFFFF; padding:8px 14px; border-radius:4px 4px 0 0; font-size:11px; font-weight:700; display:flex; justify-content:space-between;">
+                        <span>📊 SPREADSHEET WORKBOOK PREVIEW (${escapeHTML(type.toUpperCase())}.XLS)</span>
+                        <span>Ready for Excel / Calc / Numbers</span>
+                    </div>
+                    <div style="border:2px solid #107C41; padding:14px; background:#FFFFFF; overflow-x:auto;">
+                        ${buildArtifactHTML(type, data)}
+                    </div>
+                `;
+            }
             document.getElementById('modal-pm-tools').classList.remove('open');
             document.getElementById('modal-artifact-studio').classList.add('open');
         }
@@ -2838,16 +3060,58 @@ ${tableRows}
             document.getElementById('modal-artifact-studio').classList.remove('open');
             document.getElementById('modal-pm-tools').classList.add('open');
         });
-        document.getElementById('btn-studio-dl-pdf').addEventListener('click', () => {
+        document.getElementById('btn-studio-prev-pdf').addEventListener('click', (e) => {
+            e.stopPropagation(); closeAllDropdowns();
+            openArtifactStudio(currentArtifactType, 'pdf');
+        });
+        document.getElementById('btn-studio-prev-sheet').addEventListener('click', (e) => {
+            e.stopPropagation(); closeAllDropdowns();
+            openArtifactStudio(currentArtifactType, 'sheet');
+        });
+        document.getElementById('btn-studio-dl-pdf').addEventListener('click', (e) => {
+            e.stopPropagation(); closeAllDropdowns();
             downloadVisualPDF(currentArtifactType, compileProjectArtifactData());
         });
-        document.getElementById('btn-studio-dl-xls').addEventListener('click', () => {
+        document.getElementById('btn-studio-dl-xls').addEventListener('click', (e) => {
+            e.stopPropagation(); closeAllDropdowns();
             downloadStyledExcel(currentArtifactType, compileProjectArtifactData());
         });
-        document.getElementById('btn-studio-dl-png').addEventListener('click', () => {
+        document.getElementById('btn-studio-dl-png').addEventListener('click', (e) => {
+            e.stopPropagation(); closeAllDropdowns();
             downloadVisualPNG(currentArtifactType, compileProjectArtifactData());
         });
 
+        // Toggle Preview... and Export... dropdown menus
+        document.querySelectorAll('.btn-pm-menu-trig').forEach(trig => {
+            trig.addEventListener('pointerdown', (e) => e.stopPropagation());
+            trig.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const menu = trig.nextElementSibling;
+                const isVis = menu && menu.style.display === 'flex';
+                closeAllDropdowns();
+                if (menu && !isVis) {
+                    menu.style.display = 'flex';
+                    menu.style.zIndex = '10005';
+                }
+            });
+        });
+
+        document.querySelectorAll('.btn-pm-action').forEach(btn => {
+            btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllDropdowns();
+                const action = e.currentTarget.getAttribute('data-action');
+                const type = e.currentTarget.getAttribute('data-type');
+                if (action === 'preview-pdf') openArtifactStudio(type, 'pdf');
+                else if (action === 'preview-sheet') openArtifactStudio(type, 'sheet');
+                else if (action === 'export-pdf') downloadVisualPDF(type, compileProjectArtifactData());
+                else if (action === 'export-xls') downloadStyledExcel(type, compileProjectArtifactData());
+                else if (action === 'export-png') downloadVisualPNG(type, compileProjectArtifactData());
+            });
+        });
+
+        // --- FIXED OFFLINE WBS / GANTT / MS PROJECT (.CSV, .XLS, .XML) IMPORTER ---
         const importBtn = document.getElementById('btn-trigger-pm-import');
         const importInput = document.getElementById('input-import-pm-file');
         if (importBtn && importInput) {
@@ -2859,13 +3123,23 @@ ${tableRows}
                 reader.onload = (e) => {
                     const text = e.target.result;
                     const ext = file.name.split('.').pop().toLowerCase();
-                    const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
-                    const importedNodes = [{ id: 'n_root', title: cleanTitle, desc: `Imported from ${file.name}`, type: 'trunk', parentId: null, x: 4905, y: 5000 }];
+                    const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/_(PLAN|WBS|GANTT|RACI|CHARTER)$/i, '').replace(/_/g, ' ');
+                    const importedNodes = [{ id: 'n_root', title: cleanTitle, desc: '', type: 'trunk', parentId: null, x: 4905, y: 5000 }];
                     const wbsMap = { '0': 'n_root' };
                     let counter = 1;
 
-                    const addImportedRow = (wbsStr, titleStr, typeStr, ownerStr, startStr, hoursNum, budgetNum, statusStr) => {
-                        if (!titleStr || /Deliverable \/ Project Task|Phase \/ Task Deliverable|Task Name/i.test(titleStr)) return;
+                    const addImportedRow = (wbsStr, rawTitleStr, typeStr, ownerStr, startStr, hoursNum, budgetNum, statusStr, explicitDesc = '') => {
+                        if (!rawTitleStr || /Deliverable \/ Project Task|Phase \/ Task Deliverable|Task Name|Project Phase \/ Task/i.test(rawTitleStr)) return;
+                        let cleanedTitle = rawTitleStr.replace(/^Phase \d+:\s*/i, '').replace(/^PHASE \d+:\s*/i, '').replace(/\(\d+ Work Packages\)/i, '').trim();
+                        let extractedDesc = explicitDesc || '';
+
+                        // Separate "Title - Description" if exported from a Work Plan/WBS sheet
+                        if (!extractedDesc && cleanedTitle.includes(' - ')) {
+                            const splitIdx = cleanedTitle.indexOf(' - ');
+                            extractedDesc = cleanedTitle.slice(splitIdx + 3).trim();
+                            cleanedTitle = cleanedTitle.slice(0, splitIdx).trim();
+                        }
+
                         const id = `imp_${counter++}`;
                         const cleanWbs = String(wbsStr || counter).trim().replace(/\.0$/, '');
                         const parts = cleanWbs.split('.');
@@ -2876,15 +3150,17 @@ ${tableRows}
                         }
                         wbsMap[cleanWbs] = id;
 
-                        const isPhase = parts.length === 1 && (/phase/i.test(titleStr) || /phase|branch/i.test(typeStr));
+                        const isPhase = parts.length === 1 && (/phase/i.test(rawTitleStr) || /phase|branch/i.test(typeStr));
                         const nType = isPhase ? 'branch' : (/deliverable|fruit|milestone/i.test(typeStr) ? 'fruit' : (/recurring|pinecone/i.test(typeStr) ? 'pinecone' : 'leaf'));
                         const isDone = /complete|ripe|done|harvested/i.test(statusStr || '');
 
+                        const cleanOwner = (ownerStr && !/^(Complete|Not Started|In Progress|At Risk|R|A|C|I|-|\d+d)$/i.test(ownerStr.trim())) ? ownerStr.trim() : '';
+
                         importedNodes.push({
-                            id, title: titleStr.replace(/^Phase \d+:\s*/i, '').replace(/\(\d+ Work Packages\)/i, '').trim(),
-                            desc: '', type: nType, parentId,
-                            assignee: ownerStr || '',
-                            assignees: ownerStr ? [{ name: ownerStr, role: 'R' }] : [],
+                            id, title: cleanedTitle,
+                            desc: extractedDesc, type: nType, parentId,
+                            assignee: cleanOwner,
+                            assignees: cleanOwner ? [{ name: cleanOwner, role: 'R' }] : [],
                             startDate: /^\d{4}-\d{2}-\d{2}/.test(startStr || '') ? startStr.slice(0, 10) : '',
                             estHours: parseFloat(hoursNum) || 8,
                             budget: parseFloat(String(budgetNum || '0').replace(/[^0-9.]/g, '')) || 0,
@@ -2899,20 +3175,44 @@ ${tableRows}
                             const wbs = tk.querySelector('WBS')?.textContent || tk.querySelector('OutlineNumber')?.textContent;
                             const start = tk.querySelector('Start')?.textContent || '';
                             const cost = tk.querySelector('Cost')?.textContent || '0';
+                            const notes = tk.querySelector('Notes')?.textContent || '';
                             const outlineLevel = parseInt(tk.querySelector('OutlineLevel')?.textContent || '1', 10);
                             if (name && outlineLevel > 0) {
-                                addImportedRow(wbs || `${outlineLevel}.${counter}`, name, outlineLevel === 1 ? 'branch' : 'fruit', '', start, 8, parseFloat(cost) / 100, '');
+                                addImportedRow(wbs || `${outlineLevel}.${counter}`, name, outlineLevel === 1 ? 'branch' : 'fruit', '', start, 8, parseFloat(cost) / 100, '', notes);
                             }
                         });
                     } else if (ext === 'xls' || ext === 'html' || /<table/i.test(text)) {
                         const doc = new DOMParser().parseFromString(text, 'text/html');
+                        const headerText = Array.from(doc.querySelectorAll('th')).map(th => th.textContent.trim()).join(' | ');
+                        const isPlanOrWbs = /At Risk/i.test(headerText);
+                        const isGantt = /Duration/i.test(headerText) || /Project Phase \/ Task/i.test(headerText);
+                        const isRaci = /Deliverable \/ Project Task/i.test(headerText);
+
                         doc.querySelectorAll('tr').forEach(tr => {
-                            const cells = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim());
-                            if (cells.length >= 3 && /^\d+(\.\d+)*$/.test(cells[0])) {
-                                if (cells.length >= 9) {
-                                    addImportedRow(cells[0], cells[2], cells[3], cells[4], cells[5], (parseFloat(cells[7]) || 1) * 8, cells[10]?.split('/').pop(), cells[8]);
+                            const cells = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.replace(/\u00A0/g, ' ').trim());
+                            if (cells.length === 2 && /Scope Statement|Project Scope/i.test(cells[0]) && cells[1]) {
+                                importedNodes[0].desc = cells[1];
+                                return;
+                            }
+                            if (cells.length >= 2 && /^\d+(\.\d+)*$/.test(cells[0])) {
+                                const wbsCode = cells[0];
+                                const isPhaseBanner = /\.0$/.test(wbsCode) || /^Phase \d+/i.test(cells[1]) || /^Phase \d+/i.test(cells[2] || '');
+
+                                if (isPhaseBanner) {
+                                    const bannerTitle = /^Phase \d+/i.test(cells[2] || '') ? cells[2] : cells[1];
+                                    addImportedRow(wbsCode, bannerTitle, 'branch', '', '', 8, 0, '');
+                                } else if (isPlanOrWbs || /^(YES|No|-)$/i.test(cells[1])) {
+                                    // Plan or WBS table: cells[0]=WBS, cells[1]=AtRisk, cells[2]=Title, cells[3]=Type, cells[4]=Owner, cells[5]=Start, cells[7]=Days, cells[8]=Status, cells[10]=Budget
+                                    addImportedRow(wbsCode, cells[2], cells[3], cells[4], cells[5], (parseFloat(cells[7]) || 1) * 8, (cells[10] || '').split('/').pop(), cells[8]);
+                                } else if (isGantt) {
+                                    // Gantt table: cells[0]=WBS, cells[1]=Title, cells[2]=Owner, cells[3]=Duration, cells[4]=Status
+                                    addImportedRow(wbsCode, cells[1], 'fruit', cells[2], '', (parseFloat(cells[3]) || 1) * 8, 0, cells[4]);
+                                } else if (isRaci) {
+                                    // RACI table: cells[0]=WBS, cells[1]=Title, cells[2]=Status
+                                    addImportedRow(wbsCode, cells[1], 'fruit', '', '', 8, 0, cells[2]);
                                 } else {
-                                    addImportedRow(cells[0], cells[1], cells[2] === 'PHASE' ? 'branch' : 'fruit', cells[2], cells[3], 8, 0, cells[4]);
+                                    // Charter table: cells[0]=WBS, cells[1]=Title, cells[2]=Owner, cells[3]=TargetDate, cells[4]=Status
+                                    addImportedRow(wbsCode, cells[1], 'fruit', cells[2], cells[3], 8, 0, cells[4]);
                                 }
                             }
                         });
@@ -2953,18 +3253,6 @@ ${tableRows}
                 reader.readAsText(file);
             });
         }
-
-        document.querySelectorAll('.btn-export-doc').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const type = e.currentTarget.getAttribute('data-type');
-                const format = e.currentTarget.getAttribute('data-format');
-                if (format === 'xls') {
-                    downloadStyledExcel(type, compileProjectArtifactData());
-                } else {
-                    openArtifactStudio(type);
-                }
-            });
-        });
             let bgClickCount = 0;
         let bgClickTimer = null;
         let bgLongPressTimer = null;
@@ -3933,6 +4221,7 @@ viewport.addEventListener('wheel', (e) => {
         if (nDrop) nDrop.style.display = 'none';
         if (tDrop) tDrop.style.display = 'none';
         if (sDrop) sDrop.style.display = 'none';
+      document.querySelectorAll('.pm-sub-menu').forEach(m => m.style.display = 'none');
       }
 
       function getTemplateSpecies(title) {
@@ -4224,9 +4513,78 @@ viewport.addEventListener('wheel', (e) => {
           const leafAttList = document.getElementById('leaf-attachments-list');
           const fileInput = document.getElementById('input-leaf-file');
 
+          const seedContainer = document.getElementById('seed-tree-container');
+          const seedSelect = document.getElementById('node-input-seed-tree');
+          const btnOpenSeedTree = document.getElementById('btn-open-seed-tree');
+          const btnSproutSeedTree = document.getElementById('btn-sprout-seed-tree');
+
+          const refreshSeedTreeUI = () => {
+            const forest = getForest();
+            const currentTreeId = state.activeTreeId;
+            seedSelect.innerHTML = '<option value="">-- Select a Tree in This Forest --</option>';
+            (forest.trees || []).forEach(tr => {
+              if (tr.id !== currentTreeId) {
+                const opt = document.createElement('option');
+                opt.value = tr.id;
+                opt.textContent = `🌲 ${tr.title || 'Untitled Tree'} (${tr.type || 'Pine'})`;
+                if (node.seedTreeId === tr.id) opt.selected = true;
+                seedSelect.appendChild(opt);
+              }
+            });
+            const linkedTree = (forest.trees || []).find(tr => tr.id === node.seedTreeId);
+            if (linkedTree) {
+              btnOpenSeedTree.style.display = 'inline-flex';
+              btnOpenSeedTree.innerText = `🌲 Open "${linkedTree.title}"`;
+              btnOpenSeedTree.onclick = (e) => {
+                e.preventDefault();
+                document.getElementById('modal-inspector').classList.remove('open');
+                state.activeTreeId = linkedTree.id;
+                state.viewMode = 'tree';
+                state.selectedId = null;
+                const root = (linkedTree.nodes || []).find(nd => nd.type === 'trunk') || (linkedTree.nodes || [])[0];
+                if (root) centerOn(root.x, root.y);
+                saveData();
+                render();
+              };
+            } else {
+              btnOpenSeedTree.style.display = 'none';
+            }
+          };
+
+          seedSelect.onchange = () => {
+            node.seedTreeId = seedSelect.value || null;
+            saveData();
+            refreshSeedTreeUI();
+          };
+
+          btnSproutSeedTree.onclick = (e) => {
+            e.preventDefault();
+            const forest = getForest();
+            const newTreeTitle = (document.getElementById('node-input-title').value.trim() || node.title || 'Sub-Tree');
+            const safePos = findUnoccupiedSpot(5000, 5000, forest.trees, 140, 140, 36);
+            const sprouted = {
+              id: 't_' + Date.now(),
+              title: newTreeTitle,
+              type: 'Pine',
+              season: 'Spring',
+              pinned: false,
+              x: safePos.x,
+              y: safePos.y,
+              nodes: [{ id: 'r_' + Date.now(), title: newTreeTitle, desc: '', type: 'trunk', parentId: null, x: 5000, y: 5000, pinned: false }]
+            };
+            forest.trees.push(sprouted);
+            node.seedTreeId = sprouted.id;
+            saveData();
+            refreshSeedTreeUI();
+          };
+
           const updateTypeSpecificUI = (currentType) => {
             document.getElementById('node-ripe-container').style.display = (currentType === 'fruit' || currentType === 'pinecone') ? 'flex' : 'none';
             leafAttContainer.style.display = (currentType === 'leaf' || node.attachments.length > 0) ? 'flex' : 'none';
+            if (seedContainer) {
+              seedContainer.style.display = (currentType === 'seed') ? 'flex' : 'none';
+              if (currentType === 'seed') refreshSeedTreeUI();
+            }
           };
           updateTypeSpecificUI(node.type);
 
@@ -4440,18 +4798,27 @@ viewport.addEventListener('wheel', (e) => {
         document.getElementById('modal-season').classList.add('open');
         const isForest = state.viewMode === 'forest';
         const trees = isForest ? (getForest()?.trees || []) : [getTree()];
-        
-        let allNodes = [];
-        trees.forEach(t => {
-            if (t && t.nodes) allNodes = allNodes.concat(t.nodes.filter(n => !n.harvested));
-        });
 
         const seasonGroups = { 'Spring': [], 'Summer': [], 'Autumn': [], 'Winter': [] };
 
-        allNodes.forEach(n => {
-            const s = n.season || 'Spring';
-            if (seasonGroups[s]) seasonGroups[s].push(n);
-        });
+        if (isForest) {
+            // In Forest View: group and list Trees instead of Nodes
+            trees.forEach(t => {
+                if (!t) return;
+                const s = t.season || 'Spring';
+                if (seasonGroups[s]) seasonGroups[s].push(t);
+            });
+        } else {
+            // In Tree View: group and list active Nodes
+            trees.forEach(t => {
+                if (t && Array.isArray(t.nodes)) {
+                    t.nodes.filter(n => !n.harvested).forEach(n => {
+                        const s = n.season || 'Spring';
+                        if (seasonGroups[s]) seasonGroups[s].push(n);
+                    });
+                }
+            });
+        }
 
         let maxCount = -1;
         let majoritySeason = 'Spring';
@@ -4498,22 +4865,29 @@ viewport.addEventListener('wheel', (e) => {
             title.innerText = `${s} (${seasonGroups[s].length})`;
             headerDiv.appendChild(title);
 
-            if (!isForest) {
-                const forceBtn = document.createElement('button');
-                forceBtn.className = 'btn btn-small';
-                forceBtn.innerText = 'Force';
-                forceBtn.onclick = () => {
+            const forceBtn = document.createElement('button');
+            forceBtn.className = 'btn btn-small';
+            forceBtn.innerText = 'Force';
+            forceBtn.onclick = () => {
+                if (isForest) {
+                    const f = getForest();
+                    if (f && f.trees) {
+                        f.trees.forEach(tr => {
+                            tr.season = s;
+                            (tr.nodes || []).forEach(nd => nd.season = s);
+                        });
+                        saveData(); render(); openSeasonModal();
+                    }
+                } else {
                     const t = getTree();
                     if (t) {
                         t.nodes.forEach(n => n.season = s);
                         t.season = s;
-                        saveData();
-                        render();
-                        openSeasonModal(); 
+                        saveData(); render(); openSeasonModal();
                     }
-                };
-                headerDiv.appendChild(forceBtn);
-            }
+                }
+            };
+            headerDiv.appendChild(forceBtn);
 
             groupDiv.appendChild(headerDiv);
 
@@ -4523,13 +4897,13 @@ viewport.addEventListener('wheel', (e) => {
             listDiv.style.fontSize = '12px';
             
             if (seasonGroups[s].length === 0) {
-                listDiv.innerHTML = '<span style="color:var(--text-muted)">No nodes in this season</span>';
+                listDiv.innerHTML = `<span style="color:var(--text-muted)">No ${isForest ? 'trees' : 'nodes'} in this season</span>`;
             } else {
-                seasonGroups[s].forEach(n => {
-                    const nodeDiv = document.createElement('div');
-                    nodeDiv.style.padding = '3px 0';
-                    nodeDiv.innerText = `• ${n.title || 'Untitled'}`;
-                    listDiv.appendChild(nodeDiv);
+                seasonGroups[s].forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.style.padding = '3px 0';
+                    itemDiv.innerText = `• ${item.title || 'Untitled'}`;
+                    listDiv.appendChild(itemDiv);
                 });
             }
 
@@ -4862,7 +5236,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const isEnterprise = localStorage.getItem('sylva_enterprise') === 'true';
 
     if (isTreeHugger || isEnterprise) {
-        // Search by the visible text if the exact ID varies in your code
         const buttons = document.querySelectorAll('button');
         buttons.forEach(btn => {
             if (btn.textContent.includes('Tree Hugger')) {
@@ -4871,8 +5244,667 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+      /* ============================================================================
+         SYLVA EXPANSION ENGINE: WHIMSEY TREE, GHOST TREE, AUTO-GROW & VOICE COMMANDS
+         ============================================================================ */
+      (function initSylvaExpansion() {
+        // 1. Add Whimsey Tree Icon & Zen Sway CSS
+        const styleEl = document.createElement('style');
+        styleEl.textContent = `
+          @keyframes whimseySway {
+            0%, 100% { transform: rotate(0deg) translateY(0px); }
+            25% { transform: rotate(1.1deg) translateY(-2px); }
+            75% { transform: rotate(-1.1deg) translateY(2px); }
+          }
+          .whimsey-sway-card { animation: whimseySway 4.5s ease-in-out infinite; }
+          .ghost-shadow-node {
+            position: absolute; width: 190px; height: 74px; border-radius: 10px;
+            border: 1.5px dashed #F59E0B; background: rgba(245, 158, 11, 0.07);
+            color: #FDE68A; font-size: 9.5px; font-weight: 700; padding: 6px 10px;
+            display: flex; align-items: flex-end; justify-content: flex-end;
+            pointer-events: none; z-index: 1; opacity: 0.65;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.15);
+          }
+          @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); border-color: #EF4444; }
+            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); border-color: #EF4444; }
+          }
+          #btn-voice-cmd.listening { animation: micPulse 1.2s infinite; background: rgba(239, 68, 68, 0.2); }
+        `;
+        document.head.appendChild(styleEl);
+
+        const _origGetTreeIcon = getTreeIcon;
+        getTreeIcon = function(species) {
+          if (species === 'Whimsey') {
+            return '<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#F472B6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V24"/><path d="M24 24C14 24 10 16 16 11C14 4 24 3 24 9C24 3 34 4 32 11C38 16 34 24 24 24Z"/><circle cx="13" cy="29" r="2" fill="#FACC15"/><circle cx="35" cy="27" r="2" fill="#38BDF8"/><circle cx="24" cy="5" r="2" fill="#A855F7"/></svg>';
+          }
+          return _origGetTreeIcon(species);
+        };
+
+        // 2. Pentatonic Wind-Chime Synthesizer for Whimsey Tree
+        let audioCtx = null;
+        const pentatonicFreqs = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+        function playWhimseyChime(seedIndex = 0) {
+          try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const freq = pentatonicFreqs[Math.abs(seedIndex) % pentatonicFreqs.length];
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.14, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.45);
+          } catch (e) {}
+        }
+
+        // 3. Bioluminescent Firefly Engine for Whimsey Tree
+        const ffCanvas = document.getElementById('whimsey-firefly-canvas');
+        const ffCtx = ffCanvas ? ffCanvas.getContext('2d') : null;
+        let fireflies = [];
+        let ffAnimId = null;
+
+        function updateFireflies() {
+          if (!ffCanvas || !ffCtx) return;
+          const t = getTree();
+          const isWhimseyTree = state.viewMode === 'tree' && t && t.type === 'Whimsey';
+          if (!isWhimseyTree) {
+            ffCanvas.style.display = 'none';
+            if (ffAnimId) { cancelAnimationFrame(ffAnimId); ffAnimId = null; }
+            return;
+          }
+          ffCanvas.style.display = 'block';
+          if (ffCanvas.width !== window.innerWidth || ffCanvas.height !== window.innerHeight) {
+            ffCanvas.width = window.innerWidth;
+            ffCanvas.height = window.innerHeight;
+          }
+          if (fireflies.length === 0) {
+            for (let i = 0; i < 28; i++) {
+              fireflies.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                vx: (Math.random() - 0.5) * 0.7,
+                vy: (Math.random() - 0.5) * 0.7,
+                r: 1.5 + Math.random() * 2.2,
+                phase: Math.random() * Math.PI * 2,
+                hue: Math.random() > 0.3 ? '#FACC15' : '#2DD4BF'
+              });
+            }
+          }
+
+          ffCtx.clearRect(0, 0, ffCanvas.width, ffCanvas.height);
+          const selEl = state.selectedId ? document.getElementById(state.selectedId) : null;
+          const selRect = selEl ? selEl.getBoundingClientRect() : null;
+
+          fireflies.forEach(f => {
+            f.phase += 0.04;
+            if (selRect) {
+              const tx = selRect.left + selRect.width / 2;
+              const ty = selRect.top + selRect.height / 2;
+              f.vx += (tx - f.x) * 0.00015;
+              f.vy += (ty - f.y) * 0.00015;
+            }
+            f.vx = Math.max(-1.1, Math.min(1.1, f.vx + (Math.random() - 0.5) * 0.06));
+            f.vy = Math.max(-1.1, Math.min(1.1, f.vy + (Math.random() - 0.5) * 0.06));
+            f.x = (f.x + f.vx + ffCanvas.width) % ffCanvas.width;
+            f.y = (f.y + f.vy + ffCanvas.height) % ffCanvas.height;
+
+            const alpha = 0.25 + 0.65 * Math.abs(Math.sin(f.phase));
+            ffCtx.save();
+            ffCtx.globalAlpha = alpha;
+            ffCtx.fillStyle = f.hue;
+            ffCtx.shadowColor = f.hue;
+            ffCtx.shadowBlur = 10;
+            ffCtx.beginPath();
+            ffCtx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+            ffCtx.fill();
+            ffCtx.restore();
+          });
+
+          ffAnimId = requestAnimationFrame(updateFireflies);
+        }
+
+        // 4. Wrap renderTree & render for Ghost/Shadow Tree Nodes & Whimsey Features
+        const _origRenderTree = renderTree;
+        renderTree = function() {
+          _origRenderTree();
+          const t = getTree();
+          if (!t || !Array.isArray(t.nodes)) return;
+          const isWhimsey = t.type === 'Whimsey';
+
+          t.nodes.forEach((n, idx) => {
+            if (n.harvested) return;
+            const el = document.getElementById(n.id);
+            if (!el) return;
+
+            if (isWhimsey) {
+              el.classList.add('whimsey-sway-card');
+              el.style.animationDelay = `${(idx * 0.35) % 3}s`;
+              el.addEventListener('pointerdown', () => playWhimseyChime(idx), { passive: true });
+            }
+
+            // Render Visual Ghost/Shadow Tree Card behind nodes with upstream slip or overrun
+            const ownHrOver = Math.max(0, (parseFloat(n.timeSpent) || 0) - (parseFloat(n.estHours) || 0));
+            const totalSlipDays = (n._rippleDays || 0) + (ownHrOver > 0 ? Math.ceil(ownHrOver / 8) : 0);
+            if (!n.ripe && (totalSlipDays > 0 || (n._rippleCost || 0) > 0)) {
+              const ghost = document.createElement('div');
+              ghost.className = 'ghost-shadow-node';
+              ghost.style.left = `${n.x + 18}px`;
+              ghost.style.top = `${n.y + 22}px`;
+              ghost.innerHTML = `<span>👻 Shadow Shift ${totalSlipDays > 0 ? `+${totalSlipDays}d` : ''} ${(n._rippleCost || 0) > 0 ? `+$${n._rippleCost.toFixed(0)}` : ''}</span>`;
+              treeLayer.insertBefore(ghost, el);
+            }
+          });
+        };
+
+        const _origRender = render;
+        render = function() {
+          _origRender();
+          const t = getTree();
+          if (state.viewMode === 'tree' && t && t.type === 'Whimsey') {
+            document.getElementById('apple-progress-bar').style.display = 'block';
+            const btnGFruit = document.getElementById('btn-grow-fruit');
+            const btnGPine = document.getElementById('btn-grow-pinecone');
+            const btnGAcorn = document.getElementById('btn-grow-acorn');
+            if (btnGFruit) btnGFruit.style.display = 'block';
+            if (btnGPine) btnGPine.style.display = 'block';
+            if (btnGAcorn) btnGAcorn.style.display = 'block';
+            if (!ffAnimId) updateFireflies();
+          } else {
+            updateFireflies();
+          }
+        };
+
+        // 5. Whimsey Tree: Friendly Squirrel + Seasonal Falling Leaves + Dad Joke Easter Egg
+        const DAD_JOKES_POOL = [
+          "Why do trees have so many friends? They branch out a lot!",
+          "How do trees get on the internet? They log in.",
+          "What did the tree wear to the pool party? Swimming trunks!",
+          "Why was the weeping willow so sad? It watched a sappy story.",
+          "What is a pine tree's favorite singer? Spruce Springsteen!",
+          "Why did the squirrel swim on its back? To keep its nuts dry!",
+          "How do you identify a dogwood tree? By its bark!",
+          "Why did the scarecrow win an award? Because he was out standing in his field!",
+          "I'm reading a book on anti-gravity. I just can't put it down!",
+          "Why don't skeletons fight each other? They don't have the guts.",
+          "What do you call fake spaghetti? An impasta!",
+          "Why did the bicycle fall over? Because it was two-tired!",
+          "What is a pirate's favorite letter? Rrrrr? You'd think, but it be the C!",
+          "Why can't your nose be 12 inches long? Because then it would be a foot!",
+          "How does a penguin build its house? Igloos it together!",
+          "Why did the math book look so sad? Because it had too many problems.",
+          "What do you call a factory that makes just okay-ish products? A satisfactory.",
+          "Why did the golfer bring two pairs of pants? In case he got a hole in one!",
+          "What do you call a bear with no teeth? A gummy bear!",
+          "Why don't eggs tell jokes? They'd crack each other up!",
+          "What do you call an alligator in a vest? An in-vest-igator!",
+          "Why did the coffee file a police report? It got mugged!",
+          "How do you organize a space party? You planet!",
+          "What did the ocean say to the beach? Nothing, it just waved.",
+          "Why do seagulls fly over the ocean? Because if they flew over the bay, they'd be bagels!"
+        ];
+        const FORTUNE_COOKIE_EASTER_EGG = "Help, I'm stuck in a Chinese Fortune Cookie Factory";
+        let usedDadJokeIndices = new Set();
+
+        function pickNextDadJoke() {
+          // Rare Easter Egg check: 1-in-25 window / rare roll for the Fortune Cookie Factory joke
+          if (Math.floor(Math.random() * 25) === 0 && Math.random() < 0.05) {
+            return FORTUNE_COOKIE_EASTER_EGG;
+          }
+          if (usedDadJokeIndices.size >= DAD_JOKES_POOL.length) usedDadJokeIndices.clear();
+          const available = DAD_JOKES_POOL.map((j, idx) => idx).filter(idx => !usedDadJokeIndices.has(idx));
+          const chosenIdx = available[Math.floor(Math.random() * available.length)];
+          usedDadJokeIndices.add(chosenIdx);
+          return DAD_JOKES_POOL[chosenIdx];
+        }
+
+        let whimseyHarvestRunning = false;
+        function triggerWhimseySquirrelHarvest() {
+          const t = getTree();
+          if (!t || t.type !== 'Whimsey' || whimseyHarvestRunning) return;
+          whimseyHarvestRunning = true;
+
+          // Play a rising wind-chime arpeggio
+          [0, 1, 2, 3, 4, 5].forEach((n, idx) => setTimeout(() => playWhimseyChime(n), idx * 110));
+
+          const animLayer = document.getElementById('whimsey-anim-layer');
+          const season = t.season || 'Spring';
+          const seasonParticles = {
+            Spring: ['🌸', '🌱', '🌷', '✨'],
+            Summer: ['🍃', '🌿', '☀️', '✨'],
+            Autumn: ['🍂', '🍁', '🌰', '🌾'],
+            Winter: ['❄️', '🌨️', '🌲', '✨']
+          }[season] || ['🍃', '🌸', '🍂'];
+
+          // 1. Spawn Falling Seasonal Leaves
+          for (let i = 0; i < 32; i++) {
+            const leaf = document.createElement('div');
+            leaf.innerText = seasonParticles[i % seasonParticles.length];
+            const startX = Math.random() * 100;
+            const duration = 2.6 + Math.random() * 2.2;
+            const drift = (Math.random() - 0.5) * 180;
+            leaf.style.cssText = `position:absolute; top:-40px; left:${startX}vw; font-size:${16 + Math.random() * 14}px; transition: transform ${duration}s linear, opacity ${duration}s ease-in; z-index:9998;`;
+            animLayer.appendChild(leaf);
+            requestAnimationFrame(() => {
+              leaf.style.transform = `translate(${drift}px, ${window.innerHeight + 80}px) rotate(${360 + Math.random() * 360}deg)`;
+              leaf.style.opacity = '0.2';
+            });
+            setTimeout(() => leaf.remove(), duration * 1000 + 100);
+          }
+
+          // 2. Scurry the Friendly Squirrel Across the Tree to Gather Ripe Fruits
+          const squirrel = document.createElement('div');
+          squirrel.innerHTML = '🐿️<span style="font-size:18px;">🍎</span>';
+          squirrel.style.cssText = `position:absolute; top:48%; left:-80px; font-size:38px; transition: all 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); z-index:9999; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));`;
+          animLayer.appendChild(squirrel);
+
+          setTimeout(() => {
+            squirrel.style.left = `${Math.round(window.innerWidth * 0.48)}px`;
+            squirrel.style.top = '38%';
+          }, 40);
+
+          setTimeout(() => {
+            squirrel.style.left = `${window.innerWidth + 100}px`;
+            squirrel.style.top = '28%';
+          }, 1250);
+
+          setTimeout(() => {
+            squirrel.remove();
+
+            // 3. Auto-Harvest Ripe Items on the Whimsey Tree
+            (t.nodes || []).forEach(n => {
+              if (n.harvested) return;
+              if (n.type === 'fruit' && n.ripe) {
+                t.nodes.forEach(c => { if (c.parentId === n.id) c.parentId = n.parentId; });
+                n.harvested = true;
+                n.harvestedAt = new Date().toLocaleDateString();
+              } else if (n.type === 'pinecone' && n.ripe) {
+                const copy = JSON.parse(JSON.stringify(n));
+                copy.id = 'harv_pc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+                copy.harvested = true; copy.ripe = true; copy.isBasketCopy = true;
+                copy.harvestedAt = new Date().toLocaleDateString();
+                t.nodes.push(copy);
+                n.ripe = false; n.harvested = false;
+              }
+            });
+
+            // 4. Drop a Brand-New Dad Joke Fruit Node from the Squirrel
+            const jokeText = pickNextDadJoke();
+            const root = (t.nodes || []).find(n => n.type === 'trunk') || t.nodes[0];
+            const safeSpot = findUnoccupiedSpot(root ? root.x : 5000, (root ? root.y : 5000) + 165, (t.nodes || []).filter(n => !n.harvested), 195, 86, 28);
+            const jokeFruit = {
+              id: 'n_joke_' + Date.now(),
+              title: '🐿️ Squirrel Gift (Dad Joke)',
+              desc: jokeText,
+              type: 'fruit',
+              parentId: root ? root.id : null,
+              x: safeSpot.x,
+              y: safeSpot.y,
+              pinned: false,
+              ripe: false,
+              harvested: false,
+              season: t.season || 'Spring'
+            };
+            t.nodes.push(jokeFruit);
+            state.selectedId = jokeFruit.id;
+            saveData();
+            render();
+            showAppAlert(`🐿️ The Friendly Squirrel harvested your Whimsey Tree and dropped a fresh Dad Joke Fruit:\n\n"${jokeText}"`, "✨ Whimsey Harvest!");
+            whimseyHarvestRunning = false;
+          }, 2150);
+        }
+
+        // Hook Phone Shake Gesture (DeviceMotion) for Whimsey Tree
+        let lastShakeTime = 0;
+        let lastAcc = { x: null, y: null, z: null };
+        window.addEventListener('devicemotion', (e) => {
+          const acc = e.accelerationIncludingGravity;
+          if (!acc) return;
+          if (lastAcc.x !== null) {
+            const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
+            if (delta > 23 && Date.now() - lastShakeTime > 3000) {
+              const t = getTree();
+              if (state.viewMode === 'tree' && t && t.type === 'Whimsey') {
+                lastShakeTime = Date.now();
+                triggerWhimseySquirrelHarvest();
+              }
+            }
+          }
+          lastAcc = { x: acc.x, y: acc.y, z: acc.z };
+        });
+
+        // Also trigger Whimsey Squirrel Harvest if user clicks Harvest inside a Whimsey Tree
+        document.getElementById('btn-harvest-main').addEventListener('click', (e) => {
+          const t = getTree();
+          if (state.viewMode === 'tree' && t && t.type === 'Whimsey') {
+            e.stopImmediatePropagation();
+            triggerWhimseySquirrelHarvest();
+          }
+        }, true);
+
+        // 6. Auto-Grow Modal (Project Wizard & Quick List to Tree with pinecone.png)
+        const agModal = document.getElementById('modal-autogrow');
+        const tabWiz = document.getElementById('tab-autogrow-wizard');
+        const tabList = document.getElementById('tab-autogrow-list');
+        const panelWiz = document.getElementById('panel-autogrow-wizard');
+        const panelList = document.getElementById('panel-autogrow-list');
+
+        function switchAutoGrowTab(mode) {
+          if (mode === 'list') {
+            tabList.classList.add('btn-accent'); tabWiz.classList.remove('btn-accent');
+            panelList.style.display = 'flex'; panelWiz.style.display = 'none';
+          } else {
+            tabWiz.classList.add('btn-accent'); tabList.classList.remove('btn-accent');
+            panelWiz.style.display = 'flex'; panelList.style.display = 'none';
+          }
+        }
+
+        document.querySelectorAll('.btn-open-autogrow').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAllDropdowns();
+            switchAutoGrowTab(btn.getAttribute('data-tab') || 'wizard');
+            agModal.classList.add('open');
+          });
+        });
+
+        tabWiz.addEventListener('click', () => switchAutoGrowTab('wizard'));
+        tabList.addEventListener('click', () => switchAutoGrowTab('list'));
+        document.getElementById('btn-close-autogrow').addEventListener('click', () => agModal.classList.remove('open'));
+
+        // Quick List Item Type Toggle (Fruit vs Pinecone with pinecone.png)
+        const btnQlFruit = document.getElementById('btn-ql-type-fruit');
+        const btnQlPine = document.getElementById('btn-ql-type-pinecone');
+        const inpQlType = document.getElementById('ag-list-item-type');
+        btnQlFruit.addEventListener('click', () => {
+          inpQlType.value = 'fruit';
+          btnQlFruit.classList.add('btn-accent'); btnQlPine.classList.remove('btn-accent');
+        });
+        btnQlPine.addEventListener('click', () => {
+          inpQlType.value = 'pinecone';
+          btnQlPine.classList.add('btn-accent'); btnQlFruit.classList.remove('btn-accent');
+        });
+
+        // Upload .txt into Quick List
+        const btnUploadTxt = document.getElementById('btn-ql-upload-txt');
+        const inpTxtFile = document.getElementById('input-ql-txt-file');
+        btnUploadTxt.addEventListener('click', () => inpTxtFile.click());
+        inpTxtFile.addEventListener('change', (ev) => {
+          const f = ev.target.files[0]; if (!f) return;
+          const r = new FileReader();
+          r.onload = (e) => {
+            document.getElementById('ag-list-content').value = e.target.result;
+            if (!document.getElementById('ag-list-title').value.trim()) {
+              document.getElementById('ag-list-title').value = f.name.replace(/\.[^/.]+$/, '');
+            }
+          };
+          r.readAsText(f);
+        });
+
+        // Build Tree from Quick List
+        function buildTreeFromQuickList(listTitle, rawLines, itemNodeType = 'fruit') {
+          const cleanTitle = (listTitle || 'Quick List Tree').trim();
+          const treeSpecies = itemNodeType === 'pinecone' ? 'Pine' : 'Apple';
+          const now = Date.now();
+          const rootId = 'n_root_' + now;
+          const nodes = [{ id: rootId, title: cleanTitle, desc: '', type: 'trunk', parentId: null, x: 4905, y: 5000, pinned: false }];
+
+          let currentBranchId = rootId;
+          let counter = 1;
+
+          rawLines.forEach(rawLine => {
+            const line = rawLine.replace(/^[\s•\-\*\d\.\)\[\]xX]+/, '').trim();
+            if (!line) return;
+            const id = `n_ql_${now}_${counter++}`;
+            if (rawLine.trim().endsWith(':')) {
+              const branchTitle = line.replace(/:$/, '').trim();
+              nodes.push({ id, title: branchTitle, desc: '', type: 'branch', parentId: rootId, x: 5000, y: 5150, pinned: false });
+              currentBranchId = id;
+            } else {
+              nodes.push({ id, title: line, desc: '', type: itemNodeType, parentId: currentBranchId, x: 5000, y: 5300, pinned: false, ripe: false, harvested: false });
+            }
+          });
+
+          const f = getForest();
+          const safeTreePos = findUnoccupiedSpot(5000, 5000, f.trees, 140, 140, 36);
+          const newTree = { id: 't_' + now, title: cleanTitle, type: treeSpecies, season: 'Spring', pinned: false, x: safeTreePos.x, y: safeTreePos.y, nodes };
+          f.trees.push(newTree);
+          state.activeTreeId = newTree.id;
+          state.viewMode = 'tree';
+          agModal.classList.remove('open');
+          autoTidyNodes();
+          saveData();
+          render();
+        }
+
+        document.getElementById('btn-run-autogrow-list').addEventListener('click', () => {
+          const title = document.getElementById('ag-list-title').value.trim() || 'Quick List';
+          const rawText = document.getElementById('ag-list-content').value.trim();
+          const itemType = document.getElementById('ag-list-item-type').value || 'fruit';
+          if (!rawText) return showAppAlert('Please paste or type at least one list item.');
+          buildTreeFromQuickList(title, rawText.split(/\r?\n/), itemType);
+        });
+
+        // Build Project Tree from Guided Wizard
+        document.getElementById('btn-run-autogrow-wizard').addEventListener('click', () => {
+          const title = document.getElementById('ag-wiz-title').value.trim() || 'Auto-Grown Project';
+          const species = document.getElementById('ag-wiz-species').value || 'Larch';
+          const totalBudget = parseFloat(document.getElementById('ag-wiz-budget').value) || 0;
+          const deadline = document.getElementById('ag-wiz-deadline').value || '';
+          const teamRaw = document.getElementById('ag-wiz-team').value.trim();
+          const phasesRaw = document.getElementById('ag-wiz-phases').value.trim();
+          const tasksRaw = document.getElementById('ag-wiz-tasks').value.trim();
+
+          const f = getForest();
+          if (totalBudget > 0) f.budget = totalBudget;
+          if (deadline) f.deadline = deadline;
+
+          const parsedTeam = [];
+          if (teamRaw) {
+            teamRaw.split(/[,;\n]+/).forEach(entry => {
+              const [namePart, rolePart] = entry.split(':').map(s => (s || '').trim());
+              if (namePart) {
+                const role = /^[RACI]$/i.test(rolePart) ? rolePart.toUpperCase() : 'R';
+                parsedTeam.push({ name: namePart, role });
+              }
+            });
+            f.hr = parsedTeam.map(p => p.name).join(', ');
+          }
+
+          const now = Date.now();
+          const rootId = 'n_root_' + now;
+          const nodes = [{ id: rootId, title, desc: '', type: 'trunk', parentId: null, x: 4905, y: 5000, pinned: false }];
+
+          const phaseNames = phasesRaw ? phasesRaw.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean) : ['Phase 1: Planning', 'Phase 2: Execution'];
+          const branchIds = [];
+          phaseNames.forEach((pName, idx) => {
+            const bId = `n_br_${now}_${idx}`;
+            branchIds.push({ id: bId, name: pName.toLowerCase() });
+            nodes.push({ id: bId, title: pName, desc: '', type: 'branch', parentId: rootId, x: 5000, y: 5160, pinned: false });
+          });
+
+          const taskLines = tasksRaw ? tasksRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : ['Initial Milestone'];
+          const perTaskBudget = totalBudget > 0 ? Math.round(totalBudget / Math.max(1, taskLines.length)) : 250;
+          const taskNodeType = species === 'Pine' ? 'pinecone' : 'fruit';
+          const todayMs = Date.now();
+
+          taskLines.forEach((tLine, idx) => {
+            let targetBranchId = branchIds[idx % branchIds.length].id;
+            let cleanTaskTitle = tLine;
+            if (tLine.includes(':')) {
+              const [prefix, rest] = tLine.split(':');
+              const matchedBranch = branchIds.find(b => b.name.includes(prefix.trim().toLowerCase()));
+              if (matchedBranch && rest.trim()) {
+                targetBranchId = matchedBranch.id;
+                cleanTaskTitle = rest.trim();
+              }
+            }
+            const assignedList = parsedTeam.length > 0 ? [parsedTeam[idx % parsedTeam.length]] : [];
+            const startD = new Date(todayMs + idx * 2 * 86400000).toISOString().slice(0, 10);
+            nodes.push({
+              id: `n_tk_${now}_${idx}`,
+              title: cleanTaskTitle,
+              desc: '',
+              type: taskNodeType,
+              parentId: targetBranchId,
+              x: 5000,
+              y: 5320,
+              estHours: 8,
+              timeSpent: 0,
+              budget: perTaskBudget,
+              totalSpent: 0,
+              startDate: startD,
+              priority: idx === 0 ? 'High' : 'Medium',
+              assignees: assignedList,
+              assignee: assignedList.map(a => a.name).join(', '),
+              ripe: false,
+              harvested: false
+            });
+          });
+
+          const safeTreePos = findUnoccupiedSpot(5000, 5000, f.trees, 140, 140, 36);
+          const newTree = { id: 't_' + now, title, type: species, season: 'Spring', pinned: false, x: safeTreePos.x, y: safeTreePos.y, nodes };
+          f.trees.push(newTree);
+          state.activeTreeId = newTree.id;
+          state.viewMode = 'tree';
+          agModal.classList.remove('open');
+          autoTidyNodes();
+          saveData();
+          render();
+        });
+
+        // 7. Voice Command Engine (Bottom-Center 🎙️ Button)
+        const voiceBtn = document.getElementById('btn-voice-cmd');
+        const voicePill = document.getElementById('voice-status-pill');
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        function executeVoiceCommand(transcript) {
+          const raw = transcript.trim();
+          const lower = raw.toLowerCase();
+
+          // Pattern 1: "Make me a to do list / checklist [called X]: item 1, item 2..."
+          if (/(make|create|build|start)\s+(me\s+)?(a\s+)?(to-?do\s*list|checklist|grocery\s*list|list)/i.test(lower)) {
+            const isChecklist = /checklist|grocery|pine/i.test(lower);
+            const itemType = isChecklist ? 'pinecone' : 'fruit';
+            let listTitle = isChecklist ? 'Voice Checklist' : 'Voice To-Do List';
+            let itemsPart = raw;
+
+            if (raw.includes(':')) {
+              const parts = raw.split(':');
+              const headerMatch = parts[0].match(/(?:called|named|for)\s+(.+)$/i);
+              if (headerMatch) listTitle = headerMatch[1].trim();
+              itemsPart = parts.slice(1).join(':');
+            } else {
+              itemsPart = raw.replace(/^.*?(to-?do\s*list|checklist|grocery\s*list|list)\s*/i, '');
+            }
+
+            const items = itemsPart.split(/,|;|\band\b|\bthen\b/i).map(s => s.trim()).filter(Boolean);
+            if (items.length > 0) {
+              buildTreeFromQuickList(listTitle, items, itemType);
+              return;
+            }
+          }
+
+          // Pattern 2: Export commands
+          if (lower.includes('export') || lower.includes('download')) {
+            const data = compileProjectArtifactData();
+            const artType = lower.includes('gantt') ? 'gantt' : (lower.includes('raci') ? 'raci' : (lower.includes('charter') ? 'charter' : (lower.includes('wbs') ? 'wbs' : 'plan')));
+            if (lower.includes('spreadsheet') || lower.includes('excel') || lower.includes('xls')) {
+              downloadStyledExcel(artType, data);
+              return;
+            }
+            if (lower.includes('image') || lower.includes('png')) {
+              downloadVisualPNG(artType, data);
+              return;
+            }
+            downloadVisualPDF(artType, data);
+            return;
+          }
+
+          // Pattern 3: Canvas & Tree commands
+          if (lower.includes('auto tidy') || lower.includes('tidy') || lower.includes('organize')) {
+            autoTidyNodes();
+            return;
+          }
+          if (lower.includes('critical path')) {
+            document.getElementById('btn-critical-path').click();
+            return;
+          }
+          if (lower.includes('harvest')) {
+            document.getElementById('btn-harvest-main').click();
+            return;
+          }
+          if (lower.includes('auto grow') || lower.includes('wizard')) {
+            agModal.classList.add('open');
+            return;
+          }
+
+          // Pattern 4: "Add / Grow a [branch/fruit/pinecone/leaf] called [Title]"
+          const addMatch = raw.match(/(?:add|grow|create)\s+(?:a\s+)?(branch|fruit|pine\s*cone|pinecone|leaf|task|note)\s+(?:called|named)?\s*(.+)$/i);
+          if (addMatch && state.viewMode === 'tree') {
+            const kind = addMatch[1].toLowerCase();
+            const nTitle = addMatch[2].trim();
+            const nType = kind.includes('branch') ? 'branch' : (kind.includes('pine') ? 'pinecone' : (kind.includes('leaf') || kind.includes('note') ? 'leaf' : 'fruit'));
+            const t = getTree();
+            const parent = (t.nodes || []).find(n => n.id === state.selectedId) || t.nodes[0];
+            const safeSpot = findUnoccupiedSpot(parent.x, parent.y + 150, t.nodes, 195, 86, 28);
+            const newNode = { id: 'n_' + Date.now(), title: nTitle, desc: '', type: nType, parentId: parent.id, x: safeSpot.x, y: safeSpot.y, pinned: false, ripe: false, harvested: false };
+            t.nodes.push(newNode);
+            state.selectedId = newNode.id;
+            saveData(); render();
+            return;
+          }
+
+          // Fallback: if user dictated a comma-separated list directly, build a checklist tree
+          if (raw.includes(',')) {
+            buildTreeFromQuickList('Voice List', raw.split(',').map(s => s.trim()).filter(Boolean), 'pinecone');
+          } else {
+            showAppAlert(`Heard: "${raw}"\n\nTry saying:\n• "Make me a to do list: Clean garage, pack decorations, put boxes away"\n• "Export this tree as a spreadsheet"\n• "Add a fruit called Final Review"\n• "Auto tidy"`, "🎙️ Voice Command");
+          }
+        }
+
+        if (voiceBtn) {
+          voiceBtn.addEventListener('click', () => {
+            if (!SpeechRec) {
+              const fallbackCmd = prompt('Voice Command (or type your command below):\nExample: "Make me a to do list: Clean garage, take down xmas tree, pack decorations"');
+              if (fallbackCmd) executeVoiceCommand(fallbackCmd);
+              return;
+            }
+            const rec = new SpeechRec();
+            rec.lang = 'en-US';
+            rec.interimResults = false;
+            rec.maxAlternatives = 1;
+
+            voiceBtn.classList.add('listening');
+            voicePill.style.display = 'block';
+            voicePill.innerText = '🎙️ Listening... Speak your command';
+
+            rec.onresult = (event) => {
+              const transcript = event.results[0][0].transcript;
+              voicePill.innerText = `✨ "${transcript}"`;
+              setTimeout(() => {
+                voiceBtn.classList.remove('listening');
+                voicePill.style.display = 'none';
+                executeVoiceCommand(transcript);
+              }, 500);
+            };
+            rec.onerror = () => {
+              voiceBtn.classList.remove('listening');
+              voicePill.style.display = 'none';
+            };
+            rec.onend = () => {
+              voiceBtn.classList.remove('listening');
+              setTimeout(() => { voicePill.style.display = 'none'; }, 600);
+            };
+            rec.start();
+          });
+        }
+      })();
   </script>
-
-
 </body>
 </html>
