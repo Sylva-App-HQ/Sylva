@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.sylvatree.twa",
+        "sha256_cert_fingerprints": ["CC:27:B5:4B:9C:32:B3:90:A2:F9:1F:BD:2A:1D:ED:B2:94:09:76:53:5B:31:44:AA:CF:6D:43:98:7B:0C:94:7C"]
+      }
+    }]
