@@ -905,11 +905,11 @@
         <div>
           <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🧭 Top Header &amp; Navigation</div>
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('☰ Forest / Nodes', 'This is your directory, here you can find an alphabetical (A–Z) list of all your Trees and Nodes, as well as any pinned items.\n\n• Tap any item\'s title to smoothly center the camera on it.\n• Tap \'Pin This\' to pin important trees or nodes to the top of the list.')"><span>☰ Forest / Nodes</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('+ Grow...', 'This button adds new trees to your forest or attaches new nodes to your tree.\n\n• In Forest View: Grow a new Tree or create a New Forest workspace.\n• In Tree View: Grow a new node of any type that will be connected to your currently selected node (or attached to the Trunk if no node is selected).\n\nNote: The Grow buttons are disabled when the lock icon (🔒) is unlocked for rearranging.')"><span>+ Grow...</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('Nursery', 'The Nursery is where you save and load things, access templates, and connect with other users!\n\nFrom here you can:\n• Save your current forest or tree, or load one a previously used one. \n• Open and browse the Template Library.\n• Connect to or create a group via secure WebRTC.\n• Access Custom Branding / Tree Hugger upgrades.')"><span>Nursery</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('^ Up &amp; Navigation Bar', '• The Up (^) button always takes you back (up) one page in your work space (from tree view back to forest, executive view back to tree, etc.) .\n\n• Navigation Bar: Displays your current location in the workspace (Forest > Tree > Selected Node). Tap the Forest or Tree name inside the bar to jump directly to that its view.')"><span>^ Up &amp; Navigation Bar</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🔒 / 🔓 Rearrange Lock Toggle', 'Allows you to unlock the canvas to rearrange nodes and trees as needed.\n\n• When Locked (🔒): Clicking and dragging pans around the canvas, and all buttons are enabled.\n• When Unlocked (🔓): Dragging moves individual Trees or Nodes across the canvas. You may also drag and hold a node over another node for 1.5 seconds to move its connection to that node..')"><span>🔒 / 🔓 Rearrange Lock Toggle</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('☰ Forest / Nodes', 'This is your directory, here you can find an alphabetical (A–Z) list of all your Trees and Nodes, as well as any pinned items.\n\nTap any item\'s title to smoothly center the camera on it.\nTap \'Pin This\' to pin important trees or nodes to the top of the list.')"><span>☰ Forest / Nodes</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('+ Grow...', 'This button adds new trees to your forest or attaches new nodes to your tree.\n\nIn Forest View: Grow a new Tree or create a New Forest workspace.\nIn Tree View: Grow a new node of any type that will be connected to your currently selected node (or attached to the Trunk if no node is selected).\n\nNote: The Grow buttons are disabled when the lock icon (🔒) is unlocked for rearranging.')"><span>+ Grow...</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('Nursery', 'The Nursery is where you save and load things, access templates, and connect with other users!\n\nFrom here you can:\nSave your current forest or tree, or load one a previously used one. \nOpen and browse the Template Library.\nConnect to or create a group via secure WebRTC.\nAccess Custom Branding / Tree Hugger upgrades.')"><span>Nursery</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('^ Up &amp; Navigation Bar', '• The Up (^) button always takes you back (up) one page in your work space (from tree view back to forest, executive view back to tree, etc.) .\n\nNavigation Bar: Displays your current location in the workspace (Forest > Tree > Selected Node). Tap the Forest or Tree name inside the bar to jump directly to that its view.')"><span>^ Up &amp; Navigation Bar</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🔒 / 🔓 Rearrange Lock Toggle', 'Allows you to unlock the canvas to rearrange nodes and trees as needed.\n\nWhen Locked (🔒): Clicking and dragging pans around the canvas, and all buttons are enabled.\nWhen Unlocked (🔓): Dragging moves individual Trees or Nodes across the canvas. You may also drag and hold a node over another node for 1.5 seconds to move its connection to that node..')"><span>🔒 / 🔓 Rearrange Lock Toggle</span><span style="color:var(--text-muted);">▸</span></button>
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📄 Document View (Executive Spread)', 'Appears below the navigation bar when viewing a Tree.\n\nSwitches from the visual canvas to a professional spreadsheet/document style breakdown of all tasks and nodes sorted by their start dates. Automatically flags budget and deadline discrepencies with a red ⚠️ OVERRUN badge.')"><span>📄 Document View (Executive Spread)</span><span style="color:var(--text-muted);">▸</span></button>
           </div>
         </div>
@@ -921,14 +921,24 @@
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌳 Oak Tree (Large Projects / Acorn Links)', 'Designed for large projects and databases where cross-referencing is not only common but necessary.\n\nIn an Oak Tree, selecting Grow... > Acorn creates an Acorn Link to a node of your choice. An acorn (🌰) icon will appear on your selected node; you can then open the details for that node where you will find an Acorn Link to the node you chose that will instantly take you to that node when clicked!')"><span>🌳 Oak (Large Projects / Acorn Links)</span><span style="color:var(--text-muted);">▸</span></button>
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌿 Willow Tree (Brainstorms / Journaling)', 'Designed for fluid brainstorming, journaling, and quick thought flows on the fly.\n\nWillow trees give you the option to \'Lengthen Branch\' inside a branches details window so you can rapidly chain ideas as they come, which lets you later visually see how things connected and gives you room to go back and add details (leaf nodes) to each idea (branch) whenever you are ready.')"><span>🌿 Willow (Brainstorms / Journaling)</span><span style="color:var(--text-muted);">▸</span></button>
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🍎 Apple Tree (Tasks / Deliverables)', 'Designed for task tracking and visualizing deliverable pathways.\n\nThese trees show a progress bar along the top of the canvas that fills up as Fruit nodes (tasks or deliverables) are harvested (marked complete).')"><span>🍎 Apple (Tasks / Deliverables)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('✨ Larch Tree (Hybrid Master)', 'The Larch is the ultimate power-user tree.\n\nIt unlocks every single mechanic from all the other trees at once: Apple progress bars, Willow branch lengthening, Oak Acorn links, and the ability to grow both one-off Fruits and recurring Pine Cones side-by-side.')"><span>✨ Larch (Hybrid Master Tree)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌸 Whimsey Tree (Easter Eggs)', 'A tree designed just for fun and relaxation!\n\nWhimsey trees feature musical pentatonic wind-chimes when you click nodes, drifting bioluminescent fireflies, and a zen-sway gravity effect. Shake your phone to trigger a seasonal falling-leaf harvest where the Friendly Squirrel (🐿️) gathers your completed tasks and leaves you a brand-new Dad Joke fruit!')"><span>🌸 Whimsey (Fun &amp; Easter Eggs)</span><span style="color:var(--text-muted);">▸</span></button>
           </div>
         </div>
 
         <div>
           <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🍃 Node Types &amp; Metadata</div>
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🪵 Trunk, 🌳 Branch, 🍃 Leaf, 🍎 Fruit, 🌰 Seed', '• 🪵 Trunk: The core root node of your tree (cannot be deleted).\n• 🌳 Branch (Group): These are for a category or project phase.\n• 🍃 Leaf (Note): These hold text, notes, and documents.\n• 🍎 Fruit (Task): These are actionable deliverable/completeable tasks. Long-press (0.6s) or double-tap to mark a fruit node to mark it Complete (Ripe ✅).\n• 🌰 Seed (Link): These icons represent a linked node for reference, context, or additional information.')"><span>🪵 Node Types Overview</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📊 Advanced Metadata &amp; RACI Roles', 'Double-tap any node to open the Node Details window, then click \'Advanced Metadata\'.\n\nHere you can track:\n• Start Dates\n• Estimated Hours vs. Time Spent\n• Budgets ($) vs. Totals Spent ($)\n• And add as many Assignees (with RACI roles) as needed.).')"><span>📊 Advanced Metadata &amp; RACI</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🪵 Trunk, 🌳 Branch, 🍃 Leaf, 🍎 Fruit, 🌰 Seed', '• 🪵 Trunk: The core root node of your tree (cannot be deleted).\n🌳 Branch (Group): These are for a category or project phase.\n🍃 Leaf (Note): These hold text, notes, and documents.\n🍎 Fruit (Task): These are actionable deliverable/completeable tasks. Long-press (0.6s) or double-tap to mark a fruit node to mark it Complete (Ripe ✅).\n🌰 Seed (Link): These icons represent a linked node for reference, context, or additional information.')"><span>🪵 Node Types Overview</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📊 Advanced Metadata &amp; RACI Roles', 'Double-tap any node to open the Node Details window, then click \'Advanced Metadata\'.\n\nHere you can track:\nStart Dates\nEstimated Hours vs. Time Spent\nBudgets ($) vs. Totals Spent ($)\nAnd add as many Assignees (with RACI roles) as needed.).')"><span>📊 Advanced Metadata &amp; RACI</span><span style="color:var(--text-muted);">▸</span></button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🪄 Auto-Grow &amp; Voice Tools</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('...Auto Tree ✨ (Wizard &amp; Quick List)', 'Located inside the + Grow... menu.\n\n• 🪄 Guided Project Wizard: Fill out a quick form (Team, Budget, Phases, Tasks) and Sylva builds a fully structured project tree automatically.\n• 📋 Quick List to Tree: Paste any plain-text list or upload a .txt file (lines ending in \':\' become Branches, items become Fruits or Pine Cones) to instantly generate a tree.')"><span>✨ ...Auto Tree (Wizard &amp; Quick List)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🎙️ Voice Commands', 'Tap the Microphone (🎙️) button at the bottom center of your screen to use hands-free voice commands.\n\nTry saying:\n• \'Make me a to-do list: Clean garage, wash car, buy groceries\'\n• \'Auto tidy\'\n• \'Harvest\'\n• \'Export this tree as a spreadsheet\'\n• \'Add a fruit called Final Review\'')"><span>🎙️ Voice Commands (Bottom Mic)</span><span style="color:var(--text-muted);">▸</span></button>
           </div>
         </div>
 
@@ -937,18 +947,19 @@
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🧺 Harvest Button', 'Collects all Fruit or Pinecone nodes marked as Complete (Ripe ✅) across your current Tree or Forest.\n\nHarvested tasks (except for Pinecones) are removed from the active Tree and Document View and stored safely in your Harvest Basket for later review (accessible via the Season menu).')"><span>🧺 Harvest Button</span><span style="color:var(--text-muted);">▸</span></button>
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🔥 Critical Path Toggle', 'This button automatically calculates and highlights in glowing red the longest chain of incomplete tasks based on remaining duration (Est. Hours minus Time Spent).\n\nUse this to immediately spot project bottlenecks and priority deliverables.')"><span>🔥 Critical Path Toggle</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🍂 Season, Prune &amp; Harvest Basket', 'These buttons open the Tree Season & Harvest Basket windows, and clear the tree of any dead (inactive) nodes:\n\n• Seasons: Lets you view nodes grouped by Spring (New/Early Development Stage), Summer (Active/Working Stage), Autumn (Finalization and Review Stage), or Winter (Completed/Delivered/Archived Stage), or Force your whole tree into a specific season. Trees automatically calculate the overall season (stage) of the project (the tree); the tree tracks the total number of each season type across all its nodes and sets itself to the season which has the highest node count (if most of your leaves are in winter, your whole tree will automatically be in winter).\n• Prune Tree: This safely removes blank or inactive nodes from the tree (anything uninspected for longer than 30 days).\n• Inspect Basket: lets you view and inspect all previously harvested Fruit or Pinecone tasks.')"><span>🍂 Season, Prune &amp; Basket</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📋 Project Management Exports', 'Visible in the bottom-right corner while inside Document View.\n\nThis button lets you generate and save industry-standard project artifacts directly from your tree data:\n• Project Plans (.doc)\n• Project Charters (.doc)\n• Work Breakdown Structures / WBS (.csv/.xlsx)\n• RACI Matrices (.csv/.xlsx)')"><span>📋 Project Management Exports</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🍂 Season, Prune &amp; Harvest Basket', 'These buttons open the Tree Season & Harvest Basket windows, and clear the tree of any dead (inactive) nodes:\n\nSeasons: Lets you view nodes grouped by Spring (New/Early Development Stage), Summer (Active/Working Stage), Autumn (Finalization and Review Stage), or Winter (Completed/Delivered/Archived Stage), or Force your whole tree into a specific season. Trees automatically calculate the overall season (stage) of the project (the tree); the tree tracks the total number of each season type across all its nodes and sets itself to the season which has the highest node count (if most of your leaves are in winter, your whole tree will automatically be in winter).\nPrune Tree: This safely removes blank or inactive nodes from the tree (anything uninspected for longer than 30 days).\nInspect Basket: lets you view and inspect all previously harvested Fruit or Pinecone tasks.')"><span>🍂 Season, Prune &amp; Basket</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('📋 Project Management Exports', 'Visible in the bottom-right corner while inside Document View.\n\nThis button lets you generate and save industry-standard project artifacts directly from your tree data:\nProject Plans (.doc)\nProject Charters (.doc)\nWork Breakdown Structures / WBS (.csv/.xlsx)\nRACI Matrices (.csv/.xlsx)')"><span>📋 Project Management Exports</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('👻 Ghost / Shadow Tree &amp; Gantt Bars', 'When an incomplete task goes over its estimated hours or triggers an upstream schedule delay, Sylva automatically renders a non-destructive translucent dashed Ghost Card behind affected nodes on the canvas and a shifted Ghost Bar on your Gantt Chart.\n\nThis lets you visualize schedule slippage and cost ripple effects in real time without overwriting your original baseline dates.')"><span>👻 Ghost / Shadow Forecast</span><span style="color:var(--text-muted);">▸</span></button>
           </div>
         </div>
 
         <div>
           <div style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">🗺️ Minimap, Gestures &amp; Sync</div>
           <div style="display: flex; flex-direction: column; gap: 6px;">
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🖐️ Canvas Touch &amp; Mouse Gestures', '• Pan & Zoom: Click and drag the canvas to pan around your view; pinch with two fingers (or scroll wheel) to zoom.\n• Select & Inspect: Single-tap a node or tree to select it; double-tap to open its Details Window.\n• Enter Tree: In Forest View, press-and-hold a Tree for 0.4s to open that tree.\n• Quick Complete: In Tree View, press-and-hold a Fruit node for 0.6s to toggle Ripe ✅.\n• Zoom-to-Fit: Double-tap the empty canvas background to fit all items on screen.\n• Lasso Select: Press-and-hold empty canvas for 1.5s without moving to draw a selection box.')"><span>🖐️ Canvas Touch &amp; Mouse Gestures</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🗺️ PIP Minimap Controls', 'The bottom-left minimap shows all your items and an orange box representing your current camera viewport.\n\n• Click and drag inside the minimap to pan around.\n• Pinch with two fingers inside the minimap to zoom in and out.\n• Single-tap a node dot in the minimap to glide your main camera directly to it.\n• Double-tap the minimap to stretch-to-fit all your items inside the minimap view.\n• Long-press (0.8s) inside the minimap to reset the minimap camera focus.')"><span>🗺️ PIP Minimap Controls</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('✨ Auto Tidy Button', 'Located at the top of the left Forests/Nodes Directory drawer.\n\n• While in Forest View: Arranges all Trees into balanced concentric rings.\n• While in Tree View: Automatically formats all Nodes into a clean, non-overlapping hierarchical canopy.')"><span>✨ Auto Tidy Button</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🤝 Create/ Join Group Sync &amp; Branding', '• Sync w/ or Create Group: Located in the Nursery drawer. Generate or enter a Group Code to link devices on your local network via private, secure WebRTC channels with Admin Password authorization.\n\n• Custom Branding: Unlocking Tree Hugger Expanded Edition ($2) unlocks all 50+ premium templates and enables the Custom Branding Panel to customize Canvas, Surface, and Accent colors and fonts.')"><span>🤝 Create/Join Group Sync &amp; Custom Branding</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🖐️ Canvas Touch &amp; Mouse Gestures', '• Pan & Zoom: Click and drag the canvas to pan around your view; pinch with two fingers (or scroll wheel) to zoom.\nSelect & Inspect: Single-tap a node or tree to select it; double-tap to open its Details Window.\nEnter Tree: In Forest View, press-and-hold a Tree for 0.4s to open that tree.\nQuick Complete: In Tree View, press-and-hold a Fruit node for 0.6s to toggle Ripe ✅.\nZoom-to-Fit: Double-tap the empty canvas background to fit all items on screen.\nLasso Select: Press-and-hold empty canvas for 1.5s without moving to draw a selection box.')"><span>🖐️ Canvas Touch &amp; Mouse Gestures</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🗺️ PIP Minimap Controls', 'The bottom-left minimap shows all your items and an orange box representing your current camera viewport.\n\nClick and drag inside the minimap to pan around.\nPinch with two fingers inside the minimap to zoom in and out.\nSingle-tap a node dot in the minimap to glide your main camera directly to it.\nDouble-tap the minimap to stretch-to-fit all your items inside the minimap view.\nLong-press (0.8s) inside the minimap to reset the minimap camera focus.')"><span>🗺️ PIP Minimap Controls</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('✨ Auto Tidy Button', 'Located at the top of the left Forests/Nodes Directory drawer.\n\nWhile in Forest View: Arranges all Trees into balanced concentric rings.\nWhile in Tree View: Automatically formats all Nodes into a clean, non-overlapping hierarchical canopy.')"><span>✨ Auto Tidy Button</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🤝 Create/ Join Group Sync &amp; Branding', '• Sync w/ or Create Group: Located in the Nursery drawer. Generate or enter a Group Code to link devices on your local network via private, secure WebRTC channels with Admin Password authorization.\n\nCustom Branding: Unlocking Tree Hugger Expanded Edition ($2) unlocks all 50+ premium templates and enables the Custom Branding Panel to customize Canvas, Surface, and Accent colors and fonts.')"><span>🤝 Create/Join Group Sync &amp; Custom Branding</span><span style="color:var(--text-muted);">▸</span></button>
           </div>
         </div>
 
@@ -5231,19 +5242,186 @@ function tryUnlockTemplate(templateId) {
     }
     return false;
 }
-window.addEventListener('DOMContentLoaded', () => {
-    const isTreeHugger = localStorage.getItem('sylva_treehugger') === 'true';
-    const isEnterprise = localStorage.getItem('sylva_enterprise') === 'true';
+/* ============================================================================
+   SYLVA PERMANENT AUTO-HEALING LICENSE VAULT (ZERO-CLICK PERSISTENCE)
+   ============================================================================ */
+(function initSylvaLicenseVault() {
+    const VAULT_CACHE_NAME = 'sylva-permanent-license-v1';
+    const VAULT_CACHE_URL  = '/__sylva_license_vault__.json';
+    const VAULT_DB_NAME    = 'SylvaLicenseVaultDB';
+    const VAULT_STORE_NAME = 'licenses';
 
-    if (isTreeHugger || isEnterprise) {
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(btn => {
-            if (btn.textContent.includes('Tree Hugger')) {
-                btn.style.display = 'none';
-            }
+    // 1. Request OS-Level Persistent Storage so Android/Windows never evicts Sylva data
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().catch(() => {});
+    }
+
+    // Helper: Read & Write Cookie (10-Year Expiry)
+    function setVaultCookie(dataObj) {
+        try {
+            const encoded = encodeURIComponent(JSON.stringify(dataObj));
+            document.cookie = `sylva_vault=${encoded}; max-age=315360000; path=/; SameSite=Lax`;
+        } catch (e) {}
+    }
+    function getVaultCookie() {
+        try {
+            const match = document.cookie.match(/(?:^|;\s*)sylva_vault=([^;]*)/);
+            return match ? JSON.parse(decodeURIComponent(match[1])) : null;
+        } catch (e) { return null; }
+    }
+
+    // Helper: Read & Write IndexedDB
+    function openVaultDB() {
+        return new Promise((resolve, reject) => {
+            if (!window.indexedDB) return reject();
+            const req = indexedDB.open(VAULT_DB_NAME, 1);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(VAULT_STORE_NAME)) {
+                    db.createObjectStore(VAULT_STORE_NAME);
+                }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject();
         });
     }
-});
+    async function setVaultIDB(dataObj) {
+        try {
+            const db = await openVaultDB();
+            const tx = db.transaction(VAULT_STORE_NAME, 'readwrite');
+            tx.objectStore(VAULT_STORE_NAME).put(dataObj, 'master_record');
+        } catch (e) {}
+    }
+    async function getVaultIDB() {
+        try {
+            const db = await openVaultDB();
+            return await new Promise((resolve) => {
+                const tx = db.transaction(VAULT_STORE_NAME, 'readonly');
+                const req = tx.objectStore(VAULT_STORE_NAME).get('master_record');
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => resolve(null);
+            });
+        } catch (e) { return null; }
+    }
+
+    // Helper: Read & Write Service Worker CacheStorage (Shared across Browser & Installed App)
+    async function setVaultCache(dataObj) {
+        try {
+            if (!('caches' in window)) return;
+            const cache = await caches.open(VAULT_CACHE_NAME);
+            const res = new Response(JSON.stringify(dataObj), {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            await cache.put(VAULT_CACHE_URL, res);
+        } catch (e) {}
+    }
+    async function getVaultCache() {
+        try {
+            if (!('caches' in window)) return null;
+            const cache = await caches.open(VAULT_CACHE_NAME);
+            const res = await cache.match(VAULT_CACHE_URL);
+            return res ? await res.json() : null;
+        } catch (e) { return null; }
+    }
+
+    // Gather all current purchase & template keys from localStorage
+    function collectLocalPurchases() {
+        const snapshot = { isVip: false, keys: {} };
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('sylva_') && k !== 'sylva_v13_state') {
+                snapshot.keys[k] = localStorage.getItem(k);
+            }
+        }
+        if (
+            localStorage.getItem('sylva_is_vip') === 'true' ||
+            localStorage.getItem('sylva_treehugger') === 'true' ||
+            (typeof state !== 'undefined' && state.premiumUnlocked === true)
+        ) {
+            snapshot.isVip = true;
+        }
+        return snapshot;
+    }
+
+    // Merge purchase records so unlocked items can only be added, never lost
+    function mergeVaultRecords(records) {
+        const merged = { isVip: false, keys: {} };
+        records.forEach(rec => {
+            if (!rec) return;
+            if (rec.isVip) merged.isVip = true;
+            if (rec.keys && typeof rec.keys === 'object') {
+                Object.keys(rec.keys).forEach(k => {
+                    const val = rec.keys[k];
+                    if (!val) return;
+                    // If key stores a JSON array of unlocked template IDs, merge the arrays
+                    if (val.startsWith('[') && merged.keys[k] && merged.keys[k].startsWith('[')) {
+                        try {
+                            const arr1 = JSON.parse(merged.keys[k]);
+                            const arr2 = JSON.parse(val);
+                            merged.keys[k] = JSON.stringify(Array.from(new Set([...arr1, ...arr2])));
+                            return;
+                        } catch (e) {}
+                    }
+                    // Otherwise keep 'true' or non-empty values
+                    if (val === 'true' || !merged.keys[k]) {
+                        merged.keys[k] = val;
+                    }
+                });
+            }
+        });
+        if (merged.isVip) {
+            merged.keys['sylva_is_vip'] = 'true';
+            merged.keys['sylva_treehugger'] = 'true';
+        }
+        return merged;
+    }
+
+    // Synchronize and auto-heal all 5 layers
+    async function syncAndHealVault() {
+        const localRec  = collectLocalPurchases();
+        const cookieRec = getVaultCookie();
+        const idbRec    = await getVaultIDB();
+        const cacheRec  = await getVaultCache();
+
+        const master = mergeVaultRecords([localRec, cookieRec, idbRec, cacheRec]);
+
+        // If any layer had purchases or VIP status, restore them across all layers
+        const hasAnyUnlock = master.isVip || Object.keys(master.keys).length > 0;
+        if (hasAnyUnlock) {
+            Object.keys(master.keys).forEach(k => {
+                if (localStorage.getItem(k) !== master.keys[k]) {
+                    localStorage.setItem(k, master.keys[k]);
+                }
+            });
+            if (master.isVip && typeof state !== 'undefined') {
+                state.premiumUnlocked = true;
+            }
+            setVaultCookie(master);
+            await setVaultIDB(master);
+            await setVaultCache(master);
+
+            if (typeof updatePremiumUI === 'function') updatePremiumUI();
+        }
+    }
+
+    // Intercept localStorage.setItem so new purchases immediately back up to all 5 layers
+    const _origSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(key, value) {
+        _origSetItem(key, value);
+        if (key && key.startsWith('sylva_') && key !== 'sylva_v13_state') {
+            if (key === 'sylva_is_vip' && value === 'true') {
+                _origSetItem('sylva_treehugger', 'true');
+            }
+            syncAndHealVault();
+        }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+        syncAndHealVault();
+    });
+    // Also run immediately in case DOMContentLoaded already fired
+    syncAndHealVault();
+})();
 
       /* ============================================================================
          SYLVA EXPANSION ENGINE: WHIMSEY TREE, GHOST TREE, AUTO-GROW & VOICE COMMANDS
