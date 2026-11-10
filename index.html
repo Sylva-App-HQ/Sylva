@@ -242,8 +242,8 @@
   <div id="voice-status-pill" style="display: none; position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%); background: var(--bg-surface-elevated); border: 1px solid var(--accent); color: var(--text-main); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; z-index: 35; box-shadow: 0 6px 20px rgba(0,0,0,0.6); white-space: nowrap; pointer-events: none;">🎙️ Listening...</div>
 
   <!-- Squirrel Tree FX Layer (Fireflies, Seasonal Falling Leaves & Friendly Squirrel) -->
-  <canvas id="whimsey-firefly-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 12; display: none;"></canvas>
-  <div id="whimsey-anim-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998; overflow: hidden;"></div>
+  <canvas id="squirrel-firefly-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 12; display: none;"></canvas>
+  <div id="squirrel-anim-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998; overflow: hidden;"></div>
 
   <!-- Auto-Grow (Project Wizard & Quick List to Tree) Modal -->
   <div class="modal-overlay" id="modal-autogrow" style="z-index: 10003;">
@@ -5429,12 +5429,12 @@ function tryUnlockTemplate(templateId) {
         // 1. Add Squirrel Tree Icon & Zen Sway CSS
         const styleEl = document.createElement('style');
         styleEl.textContent = `
-          @keyframes whimseySway {
+          @keyframes squirrelSway {
             0%, 100% { transform: rotate(0deg) translateY(0px); }
             25% { transform: rotate(1.1deg) translateY(-2px); }
             75% { transform: rotate(-1.1deg) translateY(2px); }
           }
-          .whimsey-sway-card { animation: whimseySway 4.5s ease-in-out infinite; }
+          .squirrel-sway-card { animation: squirrelSway 4.5s ease-in-out infinite; }
           .ghost-shadow-node {
             position: absolute; width: 190px; height: 74px; border-radius: 10px;
             border: 1.5px dashed #F59E0B; background: rgba(245, 158, 11, 0.07);
@@ -5481,7 +5481,7 @@ function tryUnlockTemplate(templateId) {
         }
 
         // 3. Bioluminescent Firefly Engine for Squirrel Tree
-        const ffCanvas = document.getElementById('whimsey-firefly-canvas');
+        const ffCanvas = document.getElementById('squirrel-firefly-canvas');
         const ffCtx = ffCanvas ? ffCanvas.getContext('2d') : null;
         let fireflies = [];
         let ffAnimId = null;
@@ -5489,7 +5489,7 @@ function tryUnlockTemplate(templateId) {
         function updateFireflies() {
           if (!ffCanvas || !ffCtx) return;
           const t = getTree();
-          const isWhimseyTree = state.viewMode === 'tree' && t && t.type === 'Squirrel';
+          const isSquirrelTree = state.viewMode === 'tree' && t && t.type === 'Squirrel';
           if (!isSquirrelTree) {
             ffCanvas.style.display = 'none';
             if (ffAnimId) { cancelAnimationFrame(ffAnimId); ffAnimId = null; }
@@ -5560,7 +5560,7 @@ function tryUnlockTemplate(templateId) {
             if (!el) return;
 
             if (isSquirrel) {
-              el.classList.add('whimsey-sway-card');
+              el.classList.add('squirrel-sway-card');
               el.style.animationDelay = `${(idx * 0.35) % 3}s`;
               el.addEventListener('pointerdown', () => playWhimseyChime(idx), { passive: true });
             }
@@ -5649,7 +5649,7 @@ function tryUnlockTemplate(templateId) {
           // Play a rising wind-chime arpeggio
           [0, 1, 2, 3, 4, 5, 6, 7].forEach((n, idx) => setTimeout(() => playWhimseyChime(n), idx * 110));
 
-          const animLayer = document.getElementById('whimsey-anim-layer');
+          const animLayer = document.getElementById('squirrel-anim-layer');
           const season = t.season || 'Spring';
           const seasonParticles = {
             Spring: ['🌸', '🌱', '🌷', '✨'],
