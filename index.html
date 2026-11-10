@@ -205,14 +205,12 @@
             <button class="custom-opt btn-grow-opt" id="btn-grow-pinecone" data-type="pinecone" style="display:none;"><img src="./pinecone.png" style="width:14px; height:14px; vertical-align:middle; margin-right:4px;">... a Pine Cone</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-acorn" data-type="acorn" style="display:none;">... an Acorn (Link)</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-seed" data-type="seed">... a Seed (Link)</button>
-            <button class="custom-opt btn-open-autogrow" data-tab="wizard" style="color:var(--accent); border-top:1px solid var(--border-strong);">✨ Auto-Grow (Wizard)</button>
-            <button class="custom-opt btn-open-autogrow" data-tab="list" style="color:#F59E0B;">📋 Auto-Grow (Quick List)</button>
+            <button class="custom-opt btn-open-autogrow" data-tab="wizard" style="color:var(--accent); border-top:1px solid var(--border-strong);">...Auto Tree ✨</button>
           </div>
           <div id="grow-opts-forest" style="display:none;">
             <button class="custom-opt btn-grow-opt" id="btn-grow-tree" data-type="tree">... a Tree</button>
             <button class="custom-opt btn-grow-opt" id="btn-grow-forest" data-type="forest">... a New Forest</button>
-            <button class="custom-opt btn-open-autogrow" data-tab="wizard" style="color:var(--accent); border-top:1px solid var(--border-strong);">✨ Auto-Grow (Wizard)</button>
-            <button class="custom-opt btn-open-autogrow" data-tab="list" style="color:#F59E0B;">📋 Auto-Grow (Quick List)</button>
+            <button class="custom-opt btn-open-autogrow" data-tab="wizard" style="color:var(--accent); border-top:1px solid var(--border-strong);">...Auto Tree ✨</button>
           </div>
         </div>
       </div>
@@ -241,9 +239,9 @@
   <button class="btn" id="btn-voice-cmd" title="Voice Commands (Tap & Speak)" style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 38px; height: 38px; padding: 0; z-index: 25; font-size: 18px; display: inline-flex; align-items: center; justify-content: center;">🎙️</button>
   <div id="voice-status-pill" style="display: none; position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%); background: var(--bg-surface-elevated); border: 1px solid var(--accent); color: var(--text-main); padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; z-index: 35; box-shadow: 0 6px 20px rgba(0,0,0,0.6); white-space: nowrap; pointer-events: none;">🎙️ Listening...</div>
 
-  <!-- Whimsey Tree FX Layer (Fireflies, Seasonal Falling Leaves & Friendly Squirrel) -->
-  <canvas id="whimsey-firefly-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 12; display: none;"></canvas>
-  <div id="whimsey-anim-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998; overflow: hidden;"></div>
+  <!-- Squirrel Tree FX Layer (Fireflies, Seasonal Falling Leaves & Friendly Squirrel) -->
+  <canvas id="squirrel-firefly-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 12; display: none;"></canvas>
+  <div id="squirrel-anim-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998; overflow: hidden;"></div>
 
   <!-- Auto-Grow (Project Wizard & Quick List to Tree) Modal -->
   <div class="modal-overlay" id="modal-autogrow" style="z-index: 10003;">
@@ -254,8 +252,7 @@
       </div>
       <div class="modal-body" style="overflow-y: auto; gap: 12px;">
         <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
-          <button class="btn btn-small btn-accent" id="tab-autogrow-wizard" style="flex: 1;">🪄 Guided Project Wizard</button>
-          <button class="btn btn-small" id="tab-autogrow-list" style="flex: 1;">📋 Quick List to Tree</button>
+          <button class="btn btn-small btn-accent" id="tab-autogrow-wizard" style="flex: 1;">Import List/Guided Project Wizard🪄</button>
         </div>
 
         <!-- TAB 1: Guided Project Wizard -->
@@ -273,7 +270,7 @@
                 <option value="Pine">Pine (Recurring SOP)</option>
                 <option value="Oak">Oak (Research/Links)</option>
                 <option value="Willow">Willow (Brainstorm)</option>
-                <option value="Whimsey">Whimsey (Fun/Chimes)</option>
+                <option value="Squirrel">Squirrel (Squirrels?)</option>
               </select>
             </div>
           </div>
@@ -518,7 +515,7 @@
             <button class="custom-opt" data-val="Willow">Willow (Fluid Brainstorming/Notes/Journal)</button>
             <button class="custom-opt" data-val="Apple">Apple (Tasks/Deliverables)</button>
             <button class="custom-opt" data-val="Larch">Larch (Hybrid - All Features &amp; Nodes)</button>
-            <button class="custom-opt" data-val="Whimsey">Squirrel Tree (Squirrels?)</button>
+            <button class="custom-opt" data-val="Squirrel">Squirrel Tree (Squirrels?)</button>
           </div>
           <input type="hidden" id="tree-input-type" value="Pine">
         </div>
@@ -922,7 +919,7 @@
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌿 Willow Tree (Brainstorms / Journaling)', 'Designed for fluid brainstorming, journaling, and quick thought flows on the fly.\n\nWillow trees give you the option to \'Lengthen Branch\' inside a branches details window so you can rapidly chain ideas as they come, which lets you later visually see how things connected and gives you room to go back and add details (leaf nodes) to each idea (branch) whenever you are ready.')"><span>🌿 Willow (Brainstorms / Journaling)</span><span style="color:var(--text-muted);">▸</span></button>
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🍎 Apple Tree (Tasks / Deliverables)', 'Designed for task tracking and visualizing deliverable pathways.\n\nThese trees show a progress bar along the top of the canvas that fills up as Fruit nodes (tasks or deliverables) are harvested (marked complete).')"><span>🍎 Apple (Tasks / Deliverables)</span><span style="color:var(--text-muted);">▸</span></button>
             <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('✨ Larch Tree (Hybrid Master)', 'The Larch is the ultimate power-user tree.\n\nIt unlocks every single mechanic from all the other trees at once: Apple progress bars, Willow branch lengthening, Oak Acorn links, and the ability to grow both one-off Fruits and recurring Pine Cones side-by-side.')"><span>✨ Larch (Hybrid Master Tree)</span><span style="color:var(--text-muted);">▸</span></button>
-            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🌸 Whimsey Tree (Easter Eggs)', 'A tree designed just for fun and relaxation!\n\nWhimsey trees feature musical pentatonic wind-chimes when you click nodes, drifting bioluminescent fireflies, and a zen-sway gravity effect. Shake your phone to trigger a seasonal falling-leaf harvest where the Friendly Squirrel (🐿️) gathers your completed tasks and leaves you a brand-new Dad Joke fruit!')"><span>🌸 Whimsey (Fun &amp; Easter Eggs)</span><span style="color:var(--text-muted);">▸</span></button>
+            <button class="btn" style="justify-content: space-between; width: 100%;" onclick="openHelpDetail('🐿️ Squirrel Tree (Squirrels?)', 'Squirrels!\n\nSquirrel trees feature squirrels. Shake your phone. Squirrels.')"><span>🐿️ Squirrel (Squirrels)</span><span style="color:var(--text-muted);">▸</span></button>
           </div>
         </div>
 
@@ -5424,18 +5421,18 @@ function tryUnlockTemplate(templateId) {
 })();
 
       /* ============================================================================
-         SYLVA EXPANSION ENGINE: WHIMSEY TREE, GHOST TREE, AUTO-GROW & VOICE COMMANDS
+         SYLVA EXPANSION ENGINE: Squirrel TREE, GHOST TREE, AUTO-GROW & VOICE COMMANDS
          ============================================================================ */
       (function initSylvaExpansion() {
-        // 1. Add Whimsey Tree Icon & Zen Sway CSS
+        // 1. Add Squirrel Tree Icon & Zen Sway CSS
         const styleEl = document.createElement('style');
         styleEl.textContent = `
-          @keyframes whimseySway {
+          @keyframes squirrelSway {
             0%, 100% { transform: rotate(0deg) translateY(0px); }
             25% { transform: rotate(1.1deg) translateY(-2px); }
             75% { transform: rotate(-1.1deg) translateY(2px); }
           }
-          .whimsey-sway-card { animation: whimseySway 4.5s ease-in-out infinite; }
+          .squirrel-sway-card { animation: squirrelSway 4.5s ease-in-out infinite; }
           .ghost-shadow-node {
             position: absolute; width: 190px; height: 74px; border-radius: 10px;
             border: 1.5px dashed #F59E0B; background: rgba(245, 158, 11, 0.07);
@@ -5454,13 +5451,13 @@ function tryUnlockTemplate(templateId) {
 
         const _origGetTreeIcon = getTreeIcon;
         getTreeIcon = function(species) {
-          if (species === 'Whimsey') {
+          if (species === 'Squirrel') {
             return '<svg width="38" height="38" viewBox="0 0 48 48" fill="none" stroke="#F472B6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 44V24"/><path d="M24 24C14 24 10 16 16 11C14 4 24 3 24 9C24 3 34 4 32 11C38 16 34 24 24 24Z"/><circle cx="13" cy="29" r="2" fill="#FACC15"/><circle cx="35" cy="27" r="2" fill="#38BDF8"/><circle cx="24" cy="5" r="2" fill="#A855F7"/></svg>';
           }
           return _origGetTreeIcon(species);
         };
 
-        // 2. Pentatonic Wind-Chime Synthesizer for Whimsey Tree
+        // 2. Pentatonic Wind-Chime Synthesizer for Squirrel Tree
         let audioCtx = null;
         const pentatonicFreqs = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
         function playWhimseyChime(seedIndex = 0) {
@@ -5481,8 +5478,8 @@ function tryUnlockTemplate(templateId) {
           } catch (e) {}
         }
 
-        // 3. Bioluminescent Firefly Engine for Whimsey Tree
-        const ffCanvas = document.getElementById('whimsey-firefly-canvas');
+        // 3. Bioluminescent Firefly Engine for Squirrel Tree
+        const ffCanvas = document.getElementById('squirrel-firefly-canvas');
         const ffCtx = ffCanvas ? ffCanvas.getContext('2d') : null;
         let fireflies = [];
         let ffAnimId = null;
@@ -5490,8 +5487,8 @@ function tryUnlockTemplate(templateId) {
         function updateFireflies() {
           if (!ffCanvas || !ffCtx) return;
           const t = getTree();
-          const isWhimseyTree = state.viewMode === 'tree' && t && t.type === 'Whimsey';
-          if (!isWhimseyTree) {
+          const isSquirrelTree = state.viewMode === 'tree' && t && t.type === 'Squirrel';
+          if (!isSquirrelTree) {
             ffCanvas.style.display = 'none';
             if (ffAnimId) { cancelAnimationFrame(ffAnimId); ffAnimId = null; }
             return;
@@ -5547,21 +5544,21 @@ function tryUnlockTemplate(templateId) {
           ffAnimId = requestAnimationFrame(updateFireflies);
         }
 
-        // 4. Wrap renderTree & render for Ghost/Shadow Tree Nodes & Whimsey Features
+        // 4. Wrap renderTree & render for Ghost/Shadow Tree Nodes & Squirrel Features
         const _origRenderTree = renderTree;
         renderTree = function() {
           _origRenderTree();
           const t = getTree();
           if (!t || !Array.isArray(t.nodes)) return;
-          const isWhimsey = t.type === 'Whimsey';
+          const isSquirrel = t.type === 'Squirrel';
 
           t.nodes.forEach((n, idx) => {
             if (n.harvested) return;
             const el = document.getElementById(n.id);
             if (!el) return;
 
-            if (isWhimsey) {
-              el.classList.add('whimsey-sway-card');
+            if (isSquirrel) {
+              el.classList.add('squirrel-sway-card');
               el.style.animationDelay = `${(idx * 0.35) % 3}s`;
               el.addEventListener('pointerdown', () => playWhimseyChime(idx), { passive: true });
             }
@@ -5584,7 +5581,7 @@ function tryUnlockTemplate(templateId) {
         render = function() {
           _origRender();
           const t = getTree();
-          if (state.viewMode === 'tree' && t && t.type === 'Whimsey') {
+          if (state.viewMode === 'tree' && t && t.type === 'Squirrel') {
             document.getElementById('apple-progress-bar').style.display = 'block';
             const btnGFruit = document.getElementById('btn-grow-fruit');
             const btnGPine = document.getElementById('btn-grow-pinecone');
@@ -5598,7 +5595,7 @@ function tryUnlockTemplate(templateId) {
           }
         };
 
-        // 5. Whimsey Tree: Friendly Squirrel + Seasonal Falling Leaves + Dad Joke Easter Egg
+        // 5. Squirrel Tree: Friendly Squirrel + Seasonal Falling Leaves + Dad Joke Easter Egg
         const DAD_JOKES_POOL = [
           "Why do trees have so many friends? They branch out a lot!",
           "How do trees get on the internet? They log in.",
@@ -5644,13 +5641,13 @@ function tryUnlockTemplate(templateId) {
         let whimseyHarvestRunning = false;
         function triggerWhimseySquirrelHarvest() {
           const t = getTree();
-          if (!t || t.type !== 'Whimsey' || whimseyHarvestRunning) return;
+          if (!t || t.type !== 'Squirrel' || whimseyHarvestRunning) return;
           whimseyHarvestRunning = true;
 
           // Play a rising wind-chime arpeggio
-          [0, 1, 2, 3, 4, 5].forEach((n, idx) => setTimeout(() => playWhimseyChime(n), idx * 110));
+          [0, 1, 2, 3, 4, 5, 6, 7].forEach((n, idx) => setTimeout(() => playWhimseyChime(n), idx * 110));
 
-          const animLayer = document.getElementById('whimsey-anim-layer');
+          const animLayer = document.getElementById('squirrel-anim-layer');
           const season = t.season || 'Spring';
           const seasonParticles = {
             Spring: ['🌸', '🌱', '🌷', '✨'],
@@ -5694,7 +5691,7 @@ function tryUnlockTemplate(templateId) {
           setTimeout(() => {
             squirrel.remove();
 
-            // 3. Auto-Harvest Ripe Items on the Whimsey Tree
+            // 3. Auto-Harvest Ripe Items on the Squirrel Tree
             (t.nodes || []).forEach(n => {
               if (n.harvested) return;
               if (n.type === 'fruit' && n.ripe) {
@@ -5732,12 +5729,12 @@ function tryUnlockTemplate(templateId) {
             state.selectedId = jokeFruit.id;
             saveData();
             render();
-            showAppAlert(`🐿️ The Friendly Squirrel harvested your Whimsey Tree and dropped a fresh Dad Joke Fruit:\n\n"${jokeText}"`, "✨ Whimsey Harvest!");
+            showAppAlert(`🐿️ The Friendly Squirrel harvested your Squirrel Tree and dropped a fresh Dad Joke Fruit:\n\n"${jokeText}"`, "✨ Squirrel Harvest!");
             whimseyHarvestRunning = false;
           }, 2150);
         }
 
-        // Hook Phone Shake Gesture (DeviceMotion) for Whimsey Tree
+        // Hook Phone Shake Gesture (DeviceMotion) for Squirrel Tree
         let lastShakeTime = 0;
         let lastAcc = { x: null, y: null, z: null };
         window.addEventListener('devicemotion', (e) => {
@@ -5747,7 +5744,7 @@ function tryUnlockTemplate(templateId) {
             const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
             if (delta > 23 && Date.now() - lastShakeTime > 3000) {
               const t = getTree();
-              if (state.viewMode === 'tree' && t && t.type === 'Whimsey') {
+              if (state.viewMode === 'tree' && t && t.type === 'Squirrel') {
                 lastShakeTime = Date.now();
                 triggerWhimseySquirrelHarvest();
               }
@@ -5756,10 +5753,10 @@ function tryUnlockTemplate(templateId) {
           lastAcc = { x: acc.x, y: acc.y, z: acc.z };
         });
 
-        // Also trigger Whimsey Squirrel Harvest if user clicks Harvest inside a Whimsey Tree
+        // Also trigger Whimsey Squirrel Harvest if user clicks Harvest inside a Squirrel Tree
         document.getElementById('btn-harvest-main').addEventListener('click', (e) => {
           const t = getTree();
-          if (state.viewMode === 'tree' && t && t.type === 'Whimsey') {
+          if (state.viewMode === 'tree' && t && t.type === 'Squirrel') {
             e.stopImmediatePropagation();
             triggerWhimseySquirrelHarvest();
           }
