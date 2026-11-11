@@ -31,8 +31,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && cacheName !== 'sylva-permanent-license-v1') {
-            console.log('[Sylva SW] Deleting old cache:', cacheName);
+if (cacheName !== CACHE_NAME && cacheName !== 'sylva-permanent-license-v1' && cacheName !== 'transformers-cache') {            console.log('[Sylva SW] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })

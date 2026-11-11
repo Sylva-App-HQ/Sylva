@@ -5954,18 +5954,480 @@ function tryUnlockTemplate(templateId) {
           render();
         });
 
-        // 7. Voice Command Engine (Bottom-Center 🎙️ Button)
+        // 7. Voice Command Engine (3-Tier Hybrid: window.ai + Transformers.js + Compromise.js NLP)
         const voiceBtn = document.getElementById('btn-voice-cmd');
         const voicePill = document.getElementById('voice-status-pill');
         const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        function executeVoiceCommand(transcript) {
-          const raw = transcript.trim();
-          const lower = raw.toLowerCase();
+        // --------------------------------------------------------------------
+        // TIER 3A: Load & Cache Compromise.js NLP for Offline Grammar Parsing
+        // --------------------------------------------------------------------
+        const COMPROMISE_CDN = 'https://unpkg.com/compromise@14.14.3/builds/compromise.min.js';
+        async function loadCompromiseNLP() {
+          if (window.nlp) return window.nlp;
+          try {
+            const cache = await caches.open('sylva-permanent-license-v1');
+            let res = await cache.match(COMPROMISE_CDN);
+            if (!res) {
+              res = await fetch(COMPROMISE_CDN);
+              if (res && res.ok) await cache.put(COMPROMISE_CDN, res.clone());
+            }
+            if (res) {
+              const code = await res.text();
+              const s = document.createElement('script');
+              s.textContent = code;
+              document.head.appendChild(s);
+            }
+          } catch (e) {}
+          return window.nlp || null;
+        }
+        loadCompromiseNLP();
 
-          // Pattern 1: "Make me a to do list / checklist [called X]: item 1, item 2..."
-          if (/(make|create|build|start)\s+(me\s+)?(a\s+)?(to-?do\s*list|checklist|grocery\s*list|list)/i.test(lower)) {
-            const isChecklist = /checklist|grocery|pine/i.test(lower);
+        // --------------------------------------------------------------------
+        // AI BRAIN SETTINGS MODAL & COMPANION BUTTON (🧠 NEXT TO 🎙️)
+        // --------------------------------------------------------------------
+        const aiBtn = document.createElement('button');
+        aiBtn.className = 'btn';
+        aiBtn.id = 'btn-voice-ai-settings';
+        aiBtn.title = 'Offline Voice AI Brain Settings';
+        aiBtn.style.cssText = 'position:absolute; bottom:12px; left:calc(50% + 36px); width:30px; height:38px; padding:0; z-index:25; font-size:14px; display:inline-flex; align-items:center; justify-content:center;';
+        aiBtn.innerHTML = '🧠';
+        document.body.appendChild(aiBtn);
+
+        const aiModal = document.createElement('div');
+        aiModal.className = 'modal-overlay';
+        aiModal.id = 'modal-voice-ai';
+        aiModal.style.zIndex = '10006';
+        aiModal.innerHTML = `
+          <div class="modal-card" style="max-width:460px;">
+            <div class="modal-header">
+              <h3 style="color:var(--accent);">🧠 3-Tier Offline Voice AI Engine</h3>
+              <button class="btn btn-small" id="btn-close-voice-ai">&times;</button>
+            </div>
+            <div class="modal-body" style="gap:12px; font-size:12px; line-height:1.45;">
+              <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:10px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:var(--text-main);">Tier 1: Built-In Browser AI (window.ai)</strong>
+                  <span id="ai-tier1-badge" style="font-size:10px; padding:2px 6px; border-radius:4px; background:var(--bg-canvas); color:var(--text-muted);">Checking...</span>
+                </div>
+                <div style="color:var(--text-muted); font-size:11px; margin-top:4px;">Uses your device's native on-device LLM (Chrome Gemini Nano / Edge Phi) with 0 KB download size when supported.</div>
+              </div>
+
+              <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:10px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:var(--text-main);">Tier 2: WebGPU Micro-LLM (Transformers.js)</strong>
+                  <span id="ai-tier2-badge" style="font-size:10px; padding:2px 6px; border-radius:4px; background:var(--bg-canvas); color:#F59E0B;">Opt-In</span>
+                </div>
+                <div style="color:var(--text-muted); font-size:11px; margin-top:4px;">Downloads a compact local model (Qwen2.5-0.5B) directly into your browser cache so you can speak freeform ideas and generate full trees 100% offline.</div>
+                <div id="ai-tier2-progress-wrap" style="display:none; margin-top:8px;">
+                  <div style="height:6px; background:var(--bg-canvas); border-radius:4px; overflow:hidden;">
+                    <div id="ai-tier2-progress-bar" style="height:100%; width:0%; background:var(--accent); transition:width 0.2s;"></div>
+                  </div>
+                  <div id="ai-tier2-status-text" style="font-size:10px; color:var(--accent); margin-top:4px; text-align:center;">Initializing...</div>
+                </div>
+                <button class="btn btn-small btn-accent" id="btn-download-tier2" style="width:100%; margin-top:8px;">⚡ Enable &amp; Cache Offline AI Brain</button>
+              </div>
+
+              <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-subtle); border-radius:8px; padding:10px 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:var(--text-main);">Tier 3: Compromise.js NLP + Intent Parser</strong>
+                  <span id="ai-tier3-badge" style="font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(16,185,129,0.15); color:#10B981; font-weight:700;">Active</span>
+                </div>
+                <div style="color:var(--text-muted); font-size:11px; margin-top:4px;">Instant offline grammar, verb/clause splitter, budget ($), hours, and fuzzy node matcher. Works immediately with zero wait.</div>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(aiModal);
+
+        // --------------------------------------------------------------------
+        // TIER 1 & TIER 2 LLM CONTROLLERS
+        // --------------------------------------------------------------------
+        let tier1Available = false;
+        let tier2Generator = null;
+        let tier2Loading = false;
+
+        async function checkTier1Availability() {
+          const badge = document.getElementById('ai-tier1-badge');
+          try {
+            if (window.ai && window.ai.languageModel) {
+              const cap = await window.ai.languageModel.capabilities();
+              if (cap && cap.available !== 'no') {
+                tier1Available = true;
+                if (badge) { badge.innerText = 'Ready (0 KB)'; badge.style.color = '#10B981'; }
+                return true;
+              }
+            } else if (window.LanguageModel && typeof window.LanguageModel.availability === 'function') {
+              const avail = await window.LanguageModel.availability();
+              if (avail !== 'unavailable' && avail !== 'no') {
+                tier1Available = true;
+                if (badge) { badge.innerText = 'Ready (0 KB)'; badge.style.color = '#10B981'; }
+                return true;
+              }
+            }
+          } catch (e) {}
+          if (badge) { badge.innerText = 'Not on Device'; badge.style.color = 'var(--text-muted)'; }
+          return false;
+        }
+        checkTier1Availability();
+
+        async function initTier2TransformersLLM() {
+          if (tier2Generator || tier2Loading) return tier2Generator;
+          tier2Loading = true;
+          const badge = document.getElementById('ai-tier2-badge');
+          const progWrap = document.getElementById('ai-tier2-progress-wrap');
+          const progBar = document.getElementById('ai-tier2-progress-bar');
+          const statusTxt = document.getElementById('ai-tier2-status-text');
+          const dlBtn = document.getElementById('btn-download-tier2');
+
+          if (progWrap) progWrap.style.display = 'block';
+          if (dlBtn) { dlBtn.disabled = true; dlBtn.innerText = '⏳ Loading Offline AI Model...'; }
+
+          try {
+            const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2');
+            env.allowLocalModels = false;
+            env.useBrowserCache = true;
+
+            const hasWebGPU = !!navigator.gpu;
+            tier2Generator = await pipeline(
+              'text-generation',
+              'onnx-community/Qwen2.5-0.5B-Instruct',
+              {
+                dtype: 'q4',
+                device: hasWebGPU ? 'webgpu' : 'wasm',
+                progress_callback: (info) => {
+                  if (info.status === 'progress' && typeof info.progress === 'number') {
+                    const pct = Math.round(info.progress);
+                    if (progBar) progBar.style.width = `${pct}%`;
+                    if (statusTxt) statusTxt.innerText = `Caching ${info.file || 'model'}: ${pct}%`;
+                  } else if (info.status === 'ready') {
+                    if (progBar) progBar.style.width = '100%';
+                    if (statusTxt) statusTxt.innerText = 'Offline AI Brain Cached & Ready!';
+                  }
+                }
+              }
+            );
+
+            localStorage.setItem('sylva_offline_llm_enabled', 'true');
+            if (badge) { badge.innerText = 'Cached & Ready'; badge.style.color = '#10B981'; }
+            if (dlBtn) { dlBtn.innerText = '✅ Offline AI Brain Active'; }
+            tier2Loading = false;
+            return tier2Generator;
+          } catch (err) {
+            tier2Loading = false;
+            if (statusTxt) statusTxt.innerText = 'Could not load WebGPU/WASM model on this browser.';
+            if (dlBtn) { dlBtn.disabled = false; dlBtn.innerText = 'Retry Download'; }
+            return null;
+          }
+        }
+
+        if (localStorage.getItem('sylva_offline_llm_enabled') === 'true') {
+          setTimeout(() => initTier2TransformersLLM(), 1500);
+        }
+
+        aiBtn.addEventListener('click', () => {
+          checkTier1Availability();
+          aiModal.classList.add('open');
+        });
+        document.getElementById('btn-close-voice-ai').addEventListener('click', () => aiModal.classList.remove('open'));
+        document.getElementById('btn-download-tier2').addEventListener('click', () => initTier2TransformersLLM());
+
+        // Ask Tier 1 or Tier 2 LLM to turn freeform natural speech into a structured Sylva Tree JSON
+        async function generateTreeViaLocalLLM(userPrompt) {
+          const sysPrompt = `You convert spoken user requests into a JSON object for a visual project tree app.
+Respond ONLY with valid JSON in this exact format:
+{"title":"Project Name","species":"Larch","budget":0,"branches":[{"title":"Phase 1","tasks":["Task A","Task B"]},{"title":"Phase 2","tasks":["Task C","Task D"]}]}`;
+
+          // Try Tier 1: Built-in Browser AI (window.ai)
+          if (tier1Available) {
+            try {
+              const session = window.ai?.languageModel
+                ? await window.ai.languageModel.create({ systemPrompt: sysPrompt })
+                : await window.LanguageModel.create({ systemPrompt: sysPrompt });
+              const rawOut = await session.prompt(`Create a project tree for: ${userPrompt}`);
+              const jsonMatch = rawOut.match(/\{[\s\S]*\}/);
+              if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            } catch (e) {}
+          }
+
+          // Try Tier 2: Transformers.js Local Micro-LLM
+          if (tier2Generator) {
+            try {
+              const messages = [
+                { role: 'system', content: sysPrompt },
+                { role: 'user', content: `Create a project tree for: ${userPrompt}` }
+              ];
+              const out = await tier2Generator(messages, { max_new_tokens: 220, temperature: 0.2, do_sample: false });
+              const generatedText = Array.isArray(out) && out[0]?.generated_text
+                ? (Array.isArray(out[0].generated_text) ? out[0].generated_text.slice(-1)[0].content : out[0].generated_text)
+                : '';
+              const jsonMatch = String(generatedText).match(/\{[\s\S]*\}/);
+              if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            } catch (e) {}
+          }
+          return null;
+        }
+
+        // Build a complete multi-branch tree from an LLM JSON object or NLP structure
+        function buildStructuredTreeFromAI(spec) {
+          if (!spec || !Array.isArray(spec.branches)) return false;
+          const f = getForest();
+          const now = Date.now();
+          const cleanTitle = (spec.title || 'AI Generated Tree').trim();
+          const species = ['Pine', 'Oak', 'Willow', 'Apple', 'Larch', 'Squirrel'].includes(spec.species) ? spec.species : 'Larch';
+          const rootId = 'n_root_' + now;
+          const nodes = [{ id: rootId, title: cleanTitle, desc: 'Generated via Offline Voice AI', type: 'trunk', parentId: null, x: 4905, y: 5000, pinned: false }];
+          const itemType = species === 'Pine' ? 'pinecone' : 'fruit';
+
+          let counter = 1;
+          spec.branches.forEach((br, bIdx) => {
+            const bId = `n_br_${now}_${bIdx}`;
+            nodes.push({ id: bId, title: br.title || `Phase ${bIdx + 1}`, desc: '', type: 'branch', parentId: rootId, x: 5000, y: 5160, pinned: false });
+            (br.tasks || []).forEach((tkTitle) => {
+              nodes.push({
+                id: `n_tk_${now}_${counter++}`,
+                title: String(tkTitle).trim(),
+                desc: '',
+                type: itemType,
+                parentId: bId,
+                x: 5000,
+                y: 5320,
+                estHours: 8,
+                budget: spec.budget ? Math.round(spec.budget / 8) : 0,
+                ripe: false,
+                harvested: false
+              });
+            });
+          });
+
+          const safePos = findUnoccupiedSpot(5000, 5000, f.trees, 140, 140, 36);
+          const newTree = { id: 't_' + now, title: cleanTitle, type: species, season: 'Spring', pinned: false, x: safePos.x, y: safePos.y, nodes };
+          f.trees.push(newTree);
+          state.activeTreeId = newTree.id;
+          state.viewMode = 'tree';
+          autoTidyNodes();
+          saveData();
+          render();
+          return true;
+        }
+
+        // --------------------------------------------------------------------
+        // MASTER VOICE EXECUTION PIPELINE (TIER 1 + TIER 2 + TIER 3 COMPROMISE)
+        // --------------------------------------------------------------------
+        async function executeVoiceCommand(transcript) {
+          const raw = transcript.trim();
+          const lower = raw.toLowerCase().replace(/[.!?]+$/, '').trim();
+          if (!lower) return;
+
+          const f = getForest();
+          const t = getTree();
+          const activeNodes = (t && Array.isArray(t.nodes)) ? t.nodes.filter(n => !n.harvested) : [];
+
+          // Helper: Fuzzy-find a node in the current tree by spoken name
+          const findNodeByName = (query) => {
+            if (!query) return null;
+            const q = query.toLowerCase().replace(/^(the|a|an|node|task|fruit|branch|leaf|note|pinecone|pine cone)\s+/i, '').trim();
+            if (!q || q === 'this' || q === 'it' || q === 'selected' || q === 'current') {
+              return activeNodes.find(n => n.id === state.selectedId) || activeNodes[0] || null;
+            }
+            return (
+              activeNodes.find(n => (n.title || '').toLowerCase() === q) ||
+              activeNodes.find(n => (n.title || '').toLowerCase().includes(q)) ||
+              activeNodes.find(n => q.includes((n.title || '').toLowerCase()) && (n.title || '').length > 2) ||
+              null
+            );
+          };
+
+          // Helper: Fuzzy-find a tree in the current forest by spoken name
+          const findTreeByName = (query) => {
+            if (!query || !f || !Array.isArray(f.trees)) return null;
+            const q = query.toLowerCase().replace(/^(the|a|an|tree|project)\s+/i, '').trim();
+            return (
+              f.trees.find(tr => (tr.title || '').toLowerCase() === q) ||
+              f.trees.find(tr => (tr.title || '').toLowerCase().includes(q)) ||
+              null
+            );
+          };
+
+          const resolveNodeType = (word, fallbackTree = t) => {
+            const w = (word || '').toLowerCase();
+            if (/branch|group|phase|category|section/.test(w)) return 'branch';
+            if (/pine\s*cone|pinecone|recurring|checklist\s*item|habit|sop/.test(w)) return 'pinecone';
+            if (/leaf|note|doc|document|idea|detail|info/.test(w)) return 'leaf';
+            if (/seed|portal|sub\s*tree|linked\s*tree/.test(w)) return 'seed';
+            if (/fruit|apple|task|to\s*do|todo|deliverable|action|item|goal/.test(w)) return 'fruit';
+            return (fallbackTree && fallbackTree.type === 'Pine') ? 'pinecone' : 'fruit';
+          };
+
+          const splitSpokenItems = (str) => {
+            return str
+              .split(/,|;|\band\s+then\b|\band\s+also\b|\band\b|\bthen\b|\balso\b/i)
+              .map(s => s.replace(/^[\s•\-\*\d\.\)]+/, '').trim())
+              .filter(Boolean);
+          };
+
+          // ------------------------------------------------------------------
+          // 1. INSTANT UI, NAVIGATION & VIEW COMMANDS
+          // ------------------------------------------------------------------
+          if (/\b(ai\s+settings|offline\s+ai|voice\s+settings|download\s+ai|enable\s+ai)\b/.test(lower)) {
+            checkTier1Availability();
+            aiModal.classList.add('open');
+            return;
+          }
+          if (/^(go\s+to\s+|switch\s+to\s+|show\s+|open\s+)?(forest|forest\s+view|main\s+view|workspace|home)$/.test(lower) || lower === 'go back to forest') {
+            state.viewMode = 'forest'; render(); return;
+          }
+          if (/^(go\s+up|up|go\s+back|back|exit\s+tree)$/.test(lower)) {
+            document.getElementById('btn-switch-context').click(); return;
+          }
+          if (/(document\s+view|executive\s+view|executive\s+spread|spreadsheet\s+view|timeline\s+view|table\s+view)/.test(lower)) {
+            if (state.viewMode !== 'timeline') document.getElementById('btn-toggle-timeline').click();
+            return;
+          }
+          if (/(tree\s+view|canvas\s+view|visual\s+view|back\s+to\s+tree)/.test(lower)) {
+            state.viewMode = 'tree'; render(); return;
+          }
+          if (/\b(unlock|enable\s+drag|rearrange\s+mode)\b/.test(lower)) {
+            state.isLocked = false; render(); return;
+          }
+          if (/\b(lock|disable\s+drag|lock\s+canvas)\b/.test(lower)) {
+            state.isLocked = true; render(); return;
+          }
+          if (/\b(auto\s*tidy|tidy\s*up|tidy|organize|clean\s*up|arrange|format\s*tree)\b/.test(lower)) {
+            autoTidyNodes(); return;
+          }
+          if (/\b(zoom\s+to\s+fit|fit\s+to\s+screen|center\s+tree|center\s+view|reset\s+camera|reset\s+view|focus)\b/.test(lower)) {
+            if (state.viewMode === 'tree' && t) smoothFocusOnTree(t);
+            else window.initialFocus();
+            return;
+          }
+          if (/\b(critical\s+path|bottlenecks?|show\s+critical)\b/.test(lower)) {
+            document.getElementById('btn-critical-path').click(); return;
+          }
+          if (/\b(inspect\s+basket|open\s+basket|harvest\s+basket|show\s+harvested)\b/.test(lower)) {
+            document.getElementById('modal-basket').classList.add('open'); return;
+          }
+          if (/\b(prune\s+tree|prune\s+inactive|clean\s+inactive)\b/.test(lower)) {
+            document.getElementById('btn-action-prune').click(); return;
+          }
+          if (/\b(open\s+seasons?|season\s+menu|life\s+cycle)\b/.test(lower)) {
+            openSeasonModal(); return;
+          }
+          if (/\b(harvest|collect\s+ripe|pick\s+fruit)\b/.test(lower)) {
+            document.getElementById('btn-harvest-main').click(); return;
+          }
+          if (/\b(squirrel|dad\s+joke|tell\s+me\s+a\s+joke|shake\s+tree|easter\s+egg)\b/.test(lower)) {
+            if (t) {
+              const prevType = t.type;
+              t.type = 'Squirrel';
+              triggerWhimseySquirrelHarvest();
+              setTimeout(() => { t.type = prevType; }, 100);
+            }
+            return;
+          }
+          if (/\b(auto\s*grow|auto\s*tree|project\s*wizard|quick\s*list|import\s*list)\b/.test(lower)) {
+            switchAutoGrowTab(lower.includes('list') ? 'list' : 'wizard');
+            agModal.classList.add('open');
+            return;
+          }
+          if (/\b(template\s+library|open\s+templates|browse\s+templates|show\s+templates)\b/.test(lower)) {
+            document.getElementById('btn-open-templates').click(); return;
+          }
+          if (/\b(open\s+nursery|nursery|sync\s+menu)\b/.test(lower)) {
+            document.getElementById('drawer-right').classList.add('open'); return;
+          }
+          if (/\b(open\s+directory|directory|node\s+list|tree\s+list)\b/.test(lower)) {
+            document.getElementById('drawer-left').classList.add('open'); return;
+          }
+
+          // ------------------------------------------------------------------
+          // 2. PREVIEW OR EXPORT PM ARTIFACTS
+          // ------------------------------------------------------------------
+          if (/\b(export|download|preview|show|open|generate)\b/.test(lower) && /\b(gantt|raci|charter|wbs|work\s*breakdown|work\s*plan|project\s*plan|spreadsheet|excel|pdf|report|image|png)\b/.test(lower)) {
+            const data = compileProjectArtifactData();
+            const artType = lower.includes('gantt') ? 'gantt' : (lower.includes('raci') ? 'raci' : (lower.includes('charter') ? 'charter' : (lower.includes('wbs') || lower.includes('breakdown') ? 'wbs' : 'plan')));
+            if (/\b(preview|show|open|view)\b/.test(lower) && !/\b(export|download)\b/.test(lower)) {
+              const fmt = /sheet|excel|table/.test(lower) ? 'sheet' : 'pdf';
+              openArtifactStudio(artType, fmt);
+              return;
+            }
+            if (/spreadsheet|excel|xls/.test(lower)) { downloadStyledExcel(artType, data); return; }
+            if (/image|png|picture/.test(lower)) { downloadVisualPNG(artType, data); return; }
+            downloadVisualPDF(artType, data);
+            return;
+          }
+
+          // ------------------------------------------------------------------
+          // 3. TIER 1 & TIER 2 GENERATIVE AI BRAIN (FREEFORM TREE GENERATION)
+          // ------------------------------------------------------------------
+          // Triggered when user says "Generate/Brainstorm/Build/Plan a project/tree for [Topic]..."
+          const generativeMatch = raw.match(/^(?:generate|brainstorm|design|architect|plan\s+out|build\s+me|create\s+a\s+full|make\s+a\s+project)\s+(?:a\s+)?(?:project\s+|tree\s+|plan\s+|roadmap\s+|workflow\s+)*(?:for|about|on|called|named)?\s*(.+)$/i);
+          if (generativeMatch) {
+            const topic = generativeMatch[1].trim();
+            voicePill.style.display = 'block';
+            voicePill.innerText = `🧠 Generating tree for "${topic}"...`;
+
+            const llmSpec = await generateTreeViaLocalLLM(raw);
+            voicePill.style.display = 'none';
+
+            if (llmSpec && buildStructuredTreeFromAI(llmSpec)) return;
+
+            // Instant Heuristic Project Decomposer if LLM isn't downloaded yet
+            const fallbackSpec = {
+              title: topic.charAt(0).toUpperCase() + topic.slice(1),
+              species: 'Larch',
+              budget: 0,
+              branches: [
+                { title: 'Phase 1: Planning & Scope', tasks: [`Define ${topic} goals`, 'Confirm budget & timeline', 'Gather resources'] },
+                { title: 'Phase 2: Core Execution', tasks: [`Build core ${topic} deliverables`, 'Review progress milestone', 'Resolve bottlenecks'] },
+                { title: 'Phase 3: Final Review & Launch', tasks: ['Quality assurance check', 'Final sign-off & delivery'] }
+              ]
+            };
+            buildStructuredTreeFromAI(fallbackSpec);
+            return;
+          }
+
+          // ------------------------------------------------------------------
+          // 4. CREATE A NEW FOREST OR TREE BY VOICE
+          // ------------------------------------------------------------------
+          const newForestMatch = raw.match(/^(?:create|make|start|new|grow)\s+(?:a\s+)?(?:new\s+)?forest\s*(?:called|named|for)?\s+(.+)$/i);
+          if (newForestMatch) {
+            const fTitle = newForestMatch[1].trim();
+            const newF = { id: 'forest-' + Date.now(), title: fTitle, pinned: false, trees: [] };
+            state.forests.push(newF);
+            state.activeForestId = newF.id;
+            state.activeTreeId = null;
+            state.viewMode = 'forest';
+            saveData(); render();
+            return;
+          }
+
+          const newTreeMatch = raw.match(/^(?:create|make|start|new|grow|plant)\s+(?:a\s+)?(?:new\s+)?(?:(pine|oak|willow|apple|larch|squirrel)\s+)?tree\s*(?:called|named|for)?\s+(.+)$/i);
+          if (newTreeMatch) {
+            const rawSpecies = (newTreeMatch[1] || 'Pine').toLowerCase();
+            const species = rawSpecies.charAt(0).toUpperCase() + rawSpecies.slice(1);
+            const tTitle = newTreeMatch[2].trim();
+            const now = Date.now();
+            const safePos = findUnoccupiedSpot(5000, 5000, f.trees, 140, 140, 36);
+            const newTree = {
+              id: 't_' + now, title: tTitle, type: species, season: 'Spring', pinned: false,
+              x: safePos.x, y: safePos.y,
+              nodes: [{ id: 'r_' + now, title: tTitle, desc: '', type: 'trunk', parentId: null, x: 4905, y: 5000, pinned: false }]
+            };
+            f.trees.push(newTree);
+            state.activeTreeId = newTree.id;
+            state.viewMode = 'tree';
+            state.selectedId = newTree.nodes[0].id;
+            saveData(); render();
+            centerOn(4905, 5000);
+            return;
+          }
+
+          // ------------------------------------------------------------------
+          // 5. MAKE A LIST / CHECKLIST TREE FROM DICTATION
+          // ------------------------------------------------------------------
+          if (/(make|create|build|start)\s+(me\s+)?(a\s+)?(to-?do\s*list|checklist|grocery\s*list|packing\s*list|shopping\s*list|list)/i.test(lower)) {
+            const isChecklist = /checklist|grocery|packing|shopping|pine/i.test(lower);
             const itemType = isChecklist ? 'pinecone' : 'fruit';
             let listTitle = isChecklist ? 'Voice Checklist' : 'Voice To-Do List';
             let itemsPart = raw;
@@ -5976,78 +6438,306 @@ function tryUnlockTemplate(templateId) {
               if (headerMatch) listTitle = headerMatch[1].trim();
               itemsPart = parts.slice(1).join(':');
             } else {
-              itemsPart = raw.replace(/^.*?(to-?do\s*list|checklist|grocery\s*list|list)\s*/i, '');
+              const headerMatch = raw.match(/(?:list|checklist)\s+(?:called|named|for)\s+([^,:]+?)(?:\s+with\s+|\s*,\s*|$)/i);
+              if (headerMatch) listTitle = headerMatch[1].trim();
+              itemsPart = raw.replace(/^.*?(to-?do\s*list|checklist|grocery\s*list|packing\s*list|shopping\s*list|list)(?:\s+(?:called|named|for)\s+[^,:]+)?(?:\s+with)?\s*/i, '');
             }
 
-            const items = itemsPart.split(/,|;|\band\b|\bthen\b/i).map(s => s.trim()).filter(Boolean);
+            const items = splitSpokenItems(itemsPart);
             if (items.length > 0) {
               buildTreeFromQuickList(listTitle, items, itemType);
               return;
             }
           }
 
-          // Pattern 2: Export commands
-          if (lower.includes('export') || lower.includes('download')) {
-            const data = compileProjectArtifactData();
-            const artType = lower.includes('gantt') ? 'gantt' : (lower.includes('raci') ? 'raci' : (lower.includes('charter') ? 'charter' : (lower.includes('wbs') ? 'wbs' : 'plan')));
-            if (lower.includes('spreadsheet') || lower.includes('excel') || lower.includes('xls')) {
-              downloadStyledExcel(artType, data);
+          // ------------------------------------------------------------------
+          // 6. OPEN / FIND / COMPLETE / UNCHECK / DELETE NODES BY NAME
+          // ------------------------------------------------------------------
+          const navMatch = raw.match(/^(?:open|find|select|go\s+to|focus\s+on|zoom\s+to|jump\s+to|inspect)\s+(.+)$/i);
+          if (navMatch) {
+            const targetName = navMatch[1].trim();
+            const matchedNode = findNodeByName(targetName);
+            if (matchedNode && state.viewMode === 'tree') {
+              state.selectedId = matchedNode.id;
+              centerOn(matchedNode.x, matchedNode.y);
+              render();
+              if (/^(open|inspect)/i.test(raw)) openInspector(matchedNode);
               return;
             }
-            if (lower.includes('image') || lower.includes('png')) {
-              downloadVisualPNG(artType, data);
+            const matchedTree = findTreeByName(targetName);
+            if (matchedTree) {
+              state.activeTreeId = matchedTree.id;
+              state.viewMode = 'tree';
+              const root = (matchedTree.nodes || []).find(n => n.type === 'trunk') || matchedTree.nodes[0];
+              if (root) { state.selectedId = root.id; centerOn(root.x, root.y); }
+              render();
               return;
             }
-            downloadVisualPDF(artType, data);
-            return;
           }
 
-          // Pattern 3: Canvas & Tree commands
-          if (lower.includes('auto tidy') || lower.includes('tidy') || lower.includes('organize')) {
-            autoTidyNodes();
-            return;
-          }
-          if (lower.includes('critical path')) {
-            document.getElementById('btn-critical-path').click();
-            return;
-          }
-          if (lower.includes('harvest')) {
-            document.getElementById('btn-harvest-main').click();
-            return;
-          }
-          if (lower.includes('auto grow') || lower.includes('wizard')) {
-            agModal.classList.add('open');
-            return;
+          if (/\b(complete\s+all|mark\s+all\s+(?:done|complete|ripe)|check\s+off\s+everything)\b/.test(lower) && t) {
+            activeNodes.forEach(n => { if (n.type === 'fruit' || n.type === 'pinecone') n.ripe = true; });
+            saveData(); render(); return;
           }
 
-          // Pattern 4: "Add / Grow a [branch/fruit/pinecone/leaf] called [Title]"
-          const addMatch = raw.match(/(?:add|grow|create)\s+(?:a\s+)?(branch|fruit|pine\s*cone|pinecone|leaf|task|note)\s+(?:called|named)?\s*(.+)$/i);
-          if (addMatch && state.viewMode === 'tree') {
-            const kind = addMatch[1].toLowerCase();
-            const nTitle = addMatch[2].trim();
-            const nType = kind.includes('branch') ? 'branch' : (kind.includes('pine') ? 'pinecone' : (kind.includes('leaf') || kind.includes('note') ? 'leaf' : 'fruit'));
-            const t = getTree();
-            const parent = (t.nodes || []).find(n => n.id === state.selectedId) || t.nodes[0];
-            const safeSpot = findUnoccupiedSpot(parent.x, parent.y + 150, t.nodes, 195, 86, 28);
-            const newNode = { id: 'n_' + Date.now(), title: nTitle, desc: '', type: nType, parentId: parent.id, x: safeSpot.x, y: safeSpot.y, pinned: false, ripe: false, harvested: false };
-            t.nodes.push(newNode);
-            state.selectedId = newNode.id;
+          const uncheckMatch = raw.match(/^(?:uncheck|mark\s+incomplete|reopen|unmark)\s+(.+)$/i);
+          if (uncheckMatch && t) {
+            const target = findNodeByName(uncheckMatch[1]);
+            if (target) { target.ripe = false; saveData(); render(); return; }
+          }
+
+          const completeMatch = raw.match(/^(?:check\s+off|complete|finish|mark\s+complete|mark\s+done|mark\s+ripe)\s+(.+)$/i) ||
+                                raw.match(/^mark\s+(.+?)\s+(?:as\s+)?(?:complete|completed|done|ripe|finished)$/i);
+          if (completeMatch && t) {
+            const target = findNodeByName(completeMatch[1]);
+            if (target) { target.ripe = true; state.selectedId = target.id; saveData(); render(); return; }
+          }
+
+          const deleteMatch = raw.match(/^(?:delete|remove|trash)\s+(.+)$/i);
+          if (deleteMatch && t) {
+            const target = findNodeByName(deleteMatch[1]);
+            if (target && target.type !== 'trunk') {
+              const idsToDelete = new Set([target.id]);
+              let added = true;
+              while (added) {
+                added = false;
+                t.nodes.forEach(n => {
+                  if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) {
+                    idsToDelete.add(n.id); added = true;
+                  }
+                });
+              }
+              t.nodes = t.nodes.filter(n => !idsToDelete.has(n.id));
+              if (state.selectedId === target.id) state.selectedId = t.nodes[0]?.id || null;
+              saveData(); render();
+              return;
+            }
+          }
+
+          // ------------------------------------------------------------------
+          // 7. METADATA, RENAME, NOTES, BUDGET, HOURS, RACI & SEASON
+          // ------------------------------------------------------------------
+          const selNode = findNodeByName('this');
+
+          const renameMatch = raw.match(/^rename\s+(.+?)\s+to\s+(.+)$/i);
+          if (renameMatch && t) {
+            const target = findNodeByName(renameMatch[1]) || selNode;
+            if (target) { target.title = renameMatch[2].trim(); saveData(); render(); return; }
+          }
+
+          const noteMatch = raw.match(/^(?:add\s+note|note|set\s+description|description|details|write)\s*(?:on\s+(.+?))?(?:\s+to|\s*:)\s*(.+)$/i);
+          if (noteMatch && t) {
+            const target = (noteMatch[1] ? findNodeByName(noteMatch[1]) : selNode) || selNode;
+            if (target) {
+              const newText = noteMatch[2].trim();
+              target.desc = target.desc ? `${target.desc}\n${newText}` : newText;
+              saveData(); render(); return;
+            }
+          }
+
+          const budgetMatch = lower.match(/(?:set\s+)?budget\s+(?:to\s+|for\s+|at\s+)?\$?(\d+(?:\.\d+)?)/);
+          if (budgetMatch && selNode) {
+            selNode.budget = parseFloat(budgetMatch[1]); saveData(); render(); return;
+          }
+          const spentMatch = lower.match(/(?:spent|cost|total\s+spent)\s+(?:to\s+|at\s+|is\s+)?\$?(\d+(?:\.\d+)?)/);
+          if (spentMatch && selNode) {
+            selNode.totalSpent = parseFloat(spentMatch[1]); saveData(); render(); return;
+          }
+          const estHoursMatch = lower.match(/(?:estimate|estimated\s+hours|set\s+hours|hours)\s+(?:to\s+|at\s+)?(\d+(?:\.\d+)?)/);
+          if (estHoursMatch && selNode) {
+            selNode.estHours = parseFloat(estHoursMatch[1]); saveData(); render(); return;
+          }
+          const loggedHoursMatch = lower.match(/(?:logged|time\s+spent|worked)\s+(\d+(?:\.\d+)?)\s*(?:hours|hrs)?/);
+          if (loggedHoursMatch && selNode) {
+            selNode.timeSpent = parseFloat(loggedHoursMatch[1]); saveData(); render(); return;
+          }
+          const prioMatch = lower.match(/(?:priority|risk)\s+(?:to\s+|is\s+)?(low|medium|high|critical)/);
+          if (prioMatch && selNode) {
+            selNode.priority = prioMatch[1].charAt(0).toUpperCase() + prioMatch[1].slice(1);
+            saveData(); render(); return;
+          }
+          const seasonMatch = lower.match(/(?:season|stage)\s+(?:to\s+|is\s+)?(spring|summer|autumn|fall|winter)/);
+          if (seasonMatch) {
+            const rawS = seasonMatch[1] === 'fall' ? 'autumn' : seasonMatch[1];
+            const sCap = rawS.charAt(0).toUpperCase() + rawS.slice(1);
+            if (lower.includes('tree') && t) {
+              t.season = sCap;
+              (t.nodes || []).forEach(n => n.season = sCap);
+            } else if (selNode) {
+              selNode.season = sCap;
+            }
+            saveData(); render(); return;
+          }
+          const assignMatch = raw.match(/^assign\s+(?:this\s+|it\s+)?to\s+([a-zA-Z0-9\s]+?)(?:\s+as\s+([RACI]))?$/i);
+          if (assignMatch && selNode) {
+            const person = assignMatch[1].trim();
+            const role = (assignMatch[2] || 'R').toUpperCase();
+            if (!Array.isArray(selNode.assignees)) selNode.assignees = [];
+            selNode.assignees.push({ name: person, role });
+            selNode.assignee = selNode.assignees.map(a => a.name).join(', ');
+            saveData(); render(); return;
+          }
+
+          // ------------------------------------------------------------------
+          // 8. EXPLICIT NODE & HIERARCHY CREATION IN TREE VIEW
+          // ------------------------------------------------------------------
+          if (t) {
+            const branchWithKids = raw.match(/^(?:add|create|grow|new)\s+(?:a\s+)?(?:branch|group|phase|category)\s+(?:called\s+|named\s+)?(.+?)\s+with\s+(?:(tasks|fruits|pine\s*cones|pinecones|leaves|notes|items)\s+)?(.+)$/i);
+            if (branchWithKids) {
+              const brTitle = branchWithKids[1].trim();
+              const childType = resolveNodeType(branchWithKids[2] || 'fruit', t);
+              const childItems = splitSpokenItems(branchWithKids[3]);
+              const root = activeNodes.find(n => n.type === 'trunk') || activeNodes[0];
+              const brSpot = findUnoccupiedSpot(root.x, root.y + 150, t.nodes, 195, 86, 28);
+              const brNode = { id: 'n_br_' + Date.now(), title: brTitle, desc: '', type: 'branch', parentId: root.id, x: brSpot.x, y: brSpot.y, pinned: false };
+              t.nodes.push(brNode);
+
+              childItems.forEach((cTitle, idx) => {
+                const cSpot = findUnoccupiedSpot(brNode.x + (idx - 1) * 120, brNode.y + 150, t.nodes, 195, 86, 28);
+                t.nodes.push({ id: `n_ch_${Date.now()}_${idx}`, title: cTitle, desc: '', type: childType, parentId: brNode.id, x: cSpot.x, y: cSpot.y, pinned: false, ripe: false, harvested: false });
+              });
+              state.selectedId = brNode.id;
+              state.viewMode = 'tree';
+              autoTidyNodes(); saveData(); render();
+              return;
+            }
+
+            const underParentMatch = raw.match(/^(?:under|in|inside|on)\s+(.+?)\s*,?\s*(?:add|create|grow|put)\s+(?:(branches|branch|fruits|fruit|tasks|task|pine\s*cones|pinecone|leaves|leaf|notes|note)\s+)?(?:called\s+|named\s+)?(.+)$/i);
+            if (underParentMatch) {
+              const parentNode = findNodeByName(underParentMatch[1]) || selNode || activeNodes[0];
+              const nType = resolveNodeType(underParentMatch[2], t);
+              const items = splitSpokenItems(underParentMatch[3]);
+              items.forEach((itemTitle, idx) => {
+                const spot = findUnoccupiedSpot(parentNode.x + (idx * 80), parentNode.y + 150, t.nodes, 195, 86, 28);
+                const created = { id: `n_${Date.now()}_${idx}`, title: itemTitle, desc: '', type: nType, parentId: parentNode.id, x: spot.x, y: spot.y, pinned: false, ripe: false, harvested: false };
+                t.nodes.push(created);
+                state.selectedId = created.id;
+              });
+              state.viewMode = 'tree';
+              saveData(); render();
+              return;
+            }
+
+            const flexAddMatch = raw.match(/^(?:add|grow|create|new|make)\s+(?:a\s+|an\s+)?(?:new\s+)?(branches|branch|group|phase|fruits|fruit|tasks|task|to-?do|deliverable|pine\s*cones|pine\s*cone|pinecones|pinecone|checklist\s*item|leaves|leaf|notes|note|seed|item|node)s?\s*(?:called|named|for|:)?\s*(.+)$/i);
+            if (flexAddMatch) {
+              const nType = resolveNodeType(flexAddMatch[1], t);
+              let remainder = flexAddMatch[2].trim();
+              let parentNode = selNode || activeNodes[0];
+
+              const trailingParent = remainder.match(/^(.+?)\s+(?:under|inside|in|to)\s+(.+)$/i);
+              if (trailingParent) {
+                const foundP = findNodeByName(trailingParent[2]);
+                if (foundP) { parentNode = foundP; remainder = trailingParent[1].trim(); }
+              }
+              if (nType === 'branch' && parentNode && parentNode.type !== 'trunk' && parentNode.type !== 'branch') {
+                parentNode = activeNodes.find(n => n.type === 'trunk') || parentNode;
+              }
+
+              const items = remainder.includes(',') || /\band\b/i.test(remainder) ? splitSpokenItems(remainder) : [remainder];
+              items.forEach((itemTitle, idx) => {
+                const spot = findUnoccupiedSpot(parentNode.x + (idx * 70), parentNode.y + 150, t.nodes, 195, 86, 28);
+                const created = { id: `n_${Date.now()}_${idx}`, title: itemTitle, desc: '', type: nType, parentId: parentNode.id, x: spot.x, y: spot.y, pinned: false, ripe: false, harvested: false };
+                t.nodes.push(created);
+                state.selectedId = created.id;
+              });
+              state.viewMode = 'tree';
+              saveData(); render();
+              return;
+            }
+          }
+
+          // ------------------------------------------------------------------
+          // 9. TIER 3 COMPROMISE.JS NATURAL SPEECH & CLAUSE EXTRACTOR
+          // ------------------------------------------------------------------
+          // Understands natural rambling sentences like:
+          // "We need to order the concrete for $1200, then frame the walls with Mike, and inspect the roof"
+          if (window.nlp) {
+            try {
+              const doc = window.nlp(raw);
+
+              // Extract any dollar amount spoken in the sentence
+              let extractedBudget = 0;
+              const moneyMatch = raw.match(/\$(\d+(?:,\d{3})*(?:\.\d+)?)|(\d+(?:,\d{3})*)\s*(?:dollars|bucks|usd)/i);
+              if (moneyMatch) {
+                extractedBudget = parseFloat((moneyMatch[1] || moneyMatch[2]).replace(/,/g, '')) || 0;
+              }
+
+              // Extract any hours spoken in the sentence
+              let extractedHours = 0;
+              const hrMatch = raw.match(/(\d+(?:\.\d+)?)\s*(?:hours|hrs|hr)/i);
+              if (hrMatch) extractedHours = parseFloat(hrMatch[1]) || 0;
+
+              // Extract any person names via Compromise People tagger
+              const people = doc.people().out('array').map(p => p.trim()).filter(Boolean);
+
+              // Break natural speech into clauses/action items
+              let clauses = doc.clauses().out('array');
+              if (clauses.length <= 1 && (raw.includes(',') || /\band\b|\bthen\b/i.test(raw))) {
+                clauses = splitSpokenItems(raw);
+              }
+
+              const cleanedActions = clauses
+                .map(c => c.replace(/^(?:i\s+need\s+to|we\s+need\s+to|we\s+should|i\s+should|let's|lets|please|also|and\s+then|then|and|remind\s+me\s+to|don't\s+forget\s+to|make\s+sure\s+to)\s+/i, '').trim())
+                .filter(c => c.length > 2);
+
+              if (cleanedActions.length > 0) {
+                if (state.viewMode === 'tree' && t) {
+                  const parentNode = selNode || activeNodes[0];
+                  const defType = t.type === 'Pine' ? 'pinecone' : 'fruit';
+                  cleanedActions.forEach((actTitle, idx) => {
+                    const spot = findUnoccupiedSpot(parentNode.x + (idx * 70), parentNode.y + 150, t.nodes, 195, 86, 28);
+                    const created = {
+                      id: `n_nlp_${Date.now()}_${idx}`,
+                      title: actTitle.charAt(0).toUpperCase() + actTitle.slice(1),
+                      desc: '',
+                      type: defType,
+                      parentId: parentNode.id,
+                      x: spot.x,
+                      y: spot.y,
+                      budget: idx === 0 && extractedBudget > 0 ? extractedBudget : 0,
+                      estHours: extractedHours > 0 ? extractedHours : 8,
+                      assignees: people.map(p => ({ name: p, role: 'R' })),
+                      assignee: people.join(', '),
+                      pinned: false,
+                      ripe: false,
+                      harvested: false
+                    };
+                    t.nodes.push(created);
+                    state.selectedId = created.id;
+                  });
+                  saveData(); render();
+                  return;
+                } else {
+                  buildTreeFromQuickList('Voice Notes', cleanedActions, 'fruit');
+                  return;
+                }
+              }
+            } catch (e) {}
+          }
+
+          // Final Fallback: If nothing matched, try LLM generation or create a single node
+          if (tier1Available || tier2Generator) {
+            const spec = await generateTreeViaLocalLLM(raw);
+            if (spec && buildStructuredTreeFromAI(spec)) return;
+          }
+
+          if (t) {
+            const parentNode = selNode || activeNodes[0];
+            const defType = t.type === 'Pine' ? 'pinecone' : 'fruit';
+            const spot = findUnoccupiedSpot(parentNode.x, parentNode.y + 150, t.nodes, 195, 86, 28);
+            const created = { id: 'n_' + Date.now(), title: raw.charAt(0).toUpperCase() + raw.slice(1), desc: '', type: defType, parentId: parentNode.id, x: spot.x, y: spot.y, pinned: false, ripe: false, harvested: false };
+            t.nodes.push(created);
+            state.selectedId = created.id;
             saveData(); render();
-            return;
-          }
-
-          // Fallback: if user dictated a comma-separated list directly, build a checklist tree
-          if (raw.includes(',')) {
-            buildTreeFromQuickList('Voice List', raw.split(',').map(s => s.trim()).filter(Boolean), 'pinecone');
           } else {
-            showAppAlert(`Heard: "${raw}"\n\nTry saying:\n• "Make me a to do list: Clean garage, pack decorations, put boxes away"\n• "Export this tree as a spreadsheet"\n• "Add a fruit called Final Review"\n• "Auto tidy"`, "🎙️ Voice Command");
+            buildTreeFromQuickList(raw, [raw], 'fruit');
           }
         }
 
         if (voiceBtn) {
           voiceBtn.addEventListener('click', () => {
             if (!SpeechRec) {
-              const fallbackCmd = prompt('Voice Command (or type your command below):\nExample: "Make me a to do list: Clean garage, take down xmas tree, pack decorations"');
+              const fallbackCmd = prompt('Speak or type anything naturally:\n• "Generate a project tree for remodeling my kitchen"\n• "We need to call the vendor for $500 and then schedule inspection"\n• "Check off Organic Apples"');
               if (fallbackCmd) executeVoiceCommand(fallbackCmd);
               return;
             }
@@ -6058,7 +6748,7 @@ function tryUnlockTemplate(templateId) {
 
             voiceBtn.classList.add('listening');
             voicePill.style.display = 'block';
-            voicePill.innerText = '🎙️ Listening... Speak your command';
+            voicePill.innerText = '🎙️ Listening... Speak naturally';
 
             rec.onresult = (event) => {
               const transcript = event.results[0][0].transcript;
@@ -6067,7 +6757,7 @@ function tryUnlockTemplate(templateId) {
                 voiceBtn.classList.remove('listening');
                 voicePill.style.display = 'none';
                 executeVoiceCommand(transcript);
-              }, 500);
+              }, 450);
             };
             rec.onerror = () => {
               voiceBtn.classList.remove('listening');
